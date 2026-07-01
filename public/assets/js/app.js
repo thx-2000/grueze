@@ -125,62 +125,44 @@ document.querySelectorAll('[data-add-row]').forEach((button) => {
 attachRemoveHandlers();
 updateSelectionUI();
 
-const composeForm = document.getElementById('mailComposeForm');
-if (composeForm) {
-    composeForm.addEventListener('submit', async (event) => {
-        if (event.submitter && event.submitter.formAction && !event.submitter.formAction.endsWith('/mail/start')) {
-            return;
-        }
+const statusPage = document.querySelector('[data-mail-status-page]');
+if (statusPage) {
+    const progressBar = document.getElementById('mailProgressBar');
+    const progressText = document.getElementById('mailProgressText');
+    const results = document.getElementById('mailResults');
+    const statusBadge = document.getElementById('mailStatusBadge');
 
-        event.preventDefault();
-        const formData = new FormData(composeForm);
-        const progressPanel = document.getElementById('mailProgress');
-        const progressBar = document.getElementById('mailProgressBar');
-        const progressText = document.getElementById('mailProgressText');
-        const results = document.getElementById('mailResults');
-
-        progressPanel.hidden = false;
-        results.innerHTML = '';
-
-        const startResponse = await fetch(composeForm.action, {
+    async function runBatch() {
+        const response = await fetch(window.APP.batchUrl, {
             method: 'POST',
-            body: formData,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            },
+            body: new URLSearchParams({ _csrf: window.APP.csrfToken }),
         });
-        const startData = await startResponse.json();
-        if (!startData.ok) {
-            showToast(startData.message || 'Versand konnte nicht gestartet werden.');
+        const data = await response.json();
+
+        if (!data.ok) {
+            showToast(data.message || 'Batch-Versand fehlgeschlagen.');
             return;
         }
 
-        async function runBatch() {
-            const response = await fetch(window.APP.batchUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                },
-                body: new URLSearchParams({ _csrf: window.APP.csrfToken }),
-            });
-            const data = await response.json();
-
-            if (!data.ok) {
-                showToast(data.message || 'Batch-Versand fehlgeschlagen.');
-                return;
-            }
-
-            const percent = data.total > 0 ? (data.processed / data.total) * 100 : 0;
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = `${data.processed} von ${data.total} gesendet`;
-            results.innerHTML = data.results.map((entry) => `
-                <div>${entry.ok ? 'OK' : 'Fehler'}: ${entry.name}${entry.error ? ` (${entry.error})` : ''}</div>
-            `).join('');
-
-            if (!data.done) {
-                await runBatch();
-            } else {
-                showToast('Versand abgeschlossen.');
-            }
+        const percent = data.total > 0 ? (data.processed / data.total) * 100 : 0;
+        progressBar.style.width = `${percent}%`;
+        progressText.textContent = `${data.processed} von ${data.total} gesendet`;
+        if (statusBadge) {
+            statusBadge.textContent = `${data.processed} / ${data.total} verarbeitet`;
         }
+        results.innerHTML = data.results.map((entry) => `
+            <div>${entry.ok ? 'OK' : 'Fehler'}: ${entry.name}${entry.error ? ` (${entry.error})` : ''}</div>
+        `).join('');
 
-        await runBatch();
-    });
+        if (!data.done) {
+            await runBatch();
+        } else {
+            showToast('Versand abgeschlossen.');
+        }
+    }
+
+    runBatch();
 }

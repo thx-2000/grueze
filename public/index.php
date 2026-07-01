@@ -131,11 +131,12 @@ try {
     $router->get('/users', [UserController::class, 'index']);
     $router->post('/users/store', [UserController::class, 'store']);
 
-    $router->post('/mail/compose', [MailController::class, 'compose']);
-    $router->get('/mail/compose', [MailController::class, 'compose']);
-    $router->post('/mail/test', [MailController::class, 'test']);
-    $router->post('/mail/start', [MailController::class, 'start']);
-    $router->post('/mail/batch', [MailController::class, 'batch']);
+$router->post('/mail/compose', [MailController::class, 'compose']);
+$router->get('/mail/compose', [MailController::class, 'compose']);
+$router->post('/mail/test', [MailController::class, 'test']);
+$router->post('/mail/start', [MailController::class, 'start']);
+$router->get('/mail/status', [MailController::class, 'status']);
+$router->post('/mail/batch', [MailController::class, 'batch']);
 
     $router->get('/logs/audit', [LogController::class, 'audit']);
     $router->get('/logs/mail', [LogController::class, 'mail']);

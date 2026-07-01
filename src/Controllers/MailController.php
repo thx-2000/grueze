@@ -94,9 +94,26 @@ final class MailController extends BaseController
             'sender_key' => $_SESSION['mail_job']['sender_key'],
             'reply_to_key' => $_SESSION['mail_job']['reply_to_key'],
         ];
+        Redirect::to('/mail/status');
+    }
 
-        header('Content-Type: application/json; charset=UTF-8');
-        echo json_encode(['ok' => true]);
+    public function status(): void
+    {
+        $this->requirePermission('mail.send');
+        $job = $_SESSION['mail_job'] ?? null;
+
+        if (!$job) {
+            flash('error', 'Es ist kein aktiver Versandauftrag vorhanden.');
+            Redirect::to('/');
+        }
+
+        $contacts = $this->contacts->findManyByIds($job['contacts']);
+
+        $this->render('mail/status', [
+            'job' => $job,
+            'contacts' => $contacts,
+            'canViewLog' => $this->auth->can('mail.view_log'),
+        ]);
     }
 
     public function batch(): void

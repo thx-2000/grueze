@@ -1,0 +1,57 @@
+<?php
+$total = count($contacts);
+$processed = (int) ($job['offset'] ?? 0);
+?>
+<section class="hero-card">
+    <div class="hero-row">
+        <div>
+            <p class="eyebrow">Versand läuft</p>
+            <h2>Mailing wird verschickt</h2>
+            <p class="muted">Der Versand erfolgt einzeln und personalisiert. Du kannst auf dieser Seite den Fortschritt verfolgen.</p>
+        </div>
+        <div class="selection-status" id="mailStatusBadge"><?= e((string) $processed) ?> / <?= e((string) $total) ?> verarbeitet</div>
+    </div>
+</section>
+
+<section class="panel" data-mail-status-page>
+    <div class="panel-head">
+        <div>
+            <h3>Versandfortschritt</h3>
+            <p class="muted">Bitte die Seite offen lassen, bis alle Empfänger abgearbeitet sind.</p>
+        </div>
+    </div>
+
+    <div id="mailProgress" class="progress-panel">
+        <div class="progress-track"><div id="mailProgressBar" class="progress-bar" style="width: <?= $total > 0 ? e((string) round(($processed / $total) * 100, 2)) : '0' ?>%"></div></div>
+        <p id="mailProgressText"><?= e((string) $processed) ?> von <?= e((string) $total) ?> gesendet</p>
+        <div id="mailResults" class="results-list">
+            <?php foreach (($job['results'] ?? []) as $entry): ?>
+                <div><?= e(($entry['ok'] ? 'OK' : 'Fehler') . ': ' . $entry['name'] . ($entry['error'] ? ' (' . $entry['error'] . ')' : '')) ?></div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <div class="form-actions top-gap">
+        <a class="ghost-button" href="<?= e(url('/')) ?>">Zur Kontaktübersicht</a>
+        <?php if ($canViewLog): ?>
+            <a class="button-link" id="mailLogLink" href="<?= e(url('/logs/mail')) ?>">Versandprotokoll öffnen</a>
+        <?php endif; ?>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h3>Empfänger dieses Mailings</h3>
+            <p class="muted">Die Liste dient hier nur als Übersicht.</p>
+        </div>
+    </div>
+    <div class="recipient-grid">
+        <?php foreach ($contacts as $contact): ?>
+            <article class="recipient-chip">
+                <strong><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?></strong>
+                <span><?= e($contact['emails'][0]['email'] ?? 'Keine Adresse') ?></span>
+            </article>
+        <?php endforeach; ?>
+    </div>
+</section>

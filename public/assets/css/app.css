@@ -575,6 +575,10 @@ td {
     margin-top: 0.8rem;
 }
 
+.top-gap {
+    margin-top: 1rem;
+}
+
 .recipient-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
