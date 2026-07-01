@@ -23,7 +23,9 @@ final class AuthController extends BaseController
 
     public function showLogin(): void
     {
-        $this->render('auth/login');
+        $this->render('auth/login', [
+            'adminExists' => \App\Core\Container::get(\App\Repositories\UserRepository::class)->adminExists(),
+        ]);
     }
 
     public function login(Request $request): void
@@ -111,4 +113,3 @@ final class AuthController extends BaseController
         Redirect::to('/login');
     }
 }
-

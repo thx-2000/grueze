@@ -38,6 +38,7 @@ final class MailController extends BaseController
         $this->render('mail/compose', [
             'contacts' => $contacts,
             'identities' => config('mail.identities', []),
+            'replyToOptions' => $this->replyToOptions(),
         ]);
     }
 
@@ -48,7 +49,7 @@ final class MailController extends BaseController
         $contactIds = array_map('intval', (array) ($request->input('contact_ids', []) ?: ($_SESSION['mail_draft_contact_ids'] ?? [])));
         $contacts = $this->contacts->findManyByIds($contactIds);
         $identity = $this->identityByKey((string) $request->input('sender_key'));
-        $replyTo = $this->identityByKey((string) $request->input('reply_to_key'));
+        $replyTo = $this->replyToByKey((string) $request->input('reply_to_key'));
         $user = $this->auth->user();
 
         if (!$identity || !$replyTo || !$user) {
@@ -113,7 +114,7 @@ final class MailController extends BaseController
         $contacts = $this->contacts->findManyByIds($job['contacts']);
         $slice = array_slice($contacts, (int) $job['offset'], (int) config('mail.batch_size', 3));
         $identity = $this->identityByKey($job['sender_key']);
-        $replyTo = $this->identityByKey($job['reply_to_key']);
+        $replyTo = $this->replyToByKey($job['reply_to_key']);
         $userId = (int) $this->auth->user()['id'];
 
         foreach ($slice as $contact) {
@@ -154,5 +155,27 @@ final class MailController extends BaseController
         }
 
         return config('mail.identities.0');
+    }
+
+    private function replyToByKey(string $key): ?array
+    {
+        foreach ($this->replyToOptions() as $option) {
+            if (($option['key'] ?? '') === $key) {
+                return $option;
+            }
+        }
+
+        return $this->replyToOptions()[0] ?? null;
+    }
+
+    private function replyToOptions(): array
+    {
+        $options = config('mail.reply_to_options', []);
+
+        if ($options !== []) {
+            return $options;
+        }
+
+        return config('mail.identities', []);
     }
 }

@@ -36,7 +36,7 @@ final class UploadService
 
         $filename = bin2hex(random_bytes(16)) . '.' . $extension;
         $relativePath = 'assets/uploads/' . $filename;
-        $target = dirname(__DIR__, 2) . '/' . $relativePath;
+        $target = dirname(__DIR__, 2) . '/public/' . $relativePath;
 
         if (!move_uploaded_file($file['tmp_name'], $target)) {
             throw new RuntimeException('Das Profilbild konnte nicht gespeichert werden.');
@@ -101,4 +101,3 @@ final class UploadService
         }
     }
 }
-

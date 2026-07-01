@@ -2,11 +2,12 @@
 
 return [
     'app' => [
-        'name' => 'Abi Adress Zentrale',
-        'base_url' => 'https://example.com',
+        'name' => 'Adress-Zentrale',
+        'base_url' => 'https://example.org',
         'session_name' => 'abi_adress_zentrale',
         'session_timeout' => 1800,
         'force_https' => true,
+        'debug' => true,
     ],
     'database' => [
         'dsn' => 'mysql:host=localhost;dbname=abi_adress_zentrale;charset=utf8mb4',
@@ -23,6 +24,8 @@ return [
         'batch_size' => 3,
         'send_delay_seconds' => 1,
         'max_attachment_size_total' => 10485760,
+        'default_sender_key' => 'orga',
+        'default_reply_to_key' => 'orga_reply',
         'allowed_attachment_types' => [
             'application/pdf',
             'image/jpeg',
@@ -33,13 +36,25 @@ return [
         'identities' => [
             [
                 'key' => 'orga',
-                'name' => 'Abi Orga',
-                'email' => 'orga@example.com',
-                'smtp_host' => 'smtp.example.com',
+                'name' => 'Mailer',
+                'email' => 'mailer@example.org',
+                'smtp_host' => 'smtp.example.org',
                 'smtp_port' => 587,
                 'smtp_encryption' => 'tls',
-                'smtp_username' => 'orga@example.com',
+                'smtp_username' => 'smtp_username',
                 'smtp_password' => 'smtp_password',
+            ],
+        ],
+        'reply_to_options' => [
+            [
+                'key' => 'orga_reply',
+                'name' => 'Orga-Team',
+                'email' => 'kontakt@example.org',
+            ],
+            [
+                'key' => 'orga',
+                'name' => 'Mailer',
+                'email' => 'mailer@example.org',
             ],
         ],
     ],
@@ -71,4 +86,3 @@ return [
         ],
     ],
 ];
-

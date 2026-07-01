@@ -1,8 +1,17 @@
 <?php $draft = $_SESSION['mail_draft'] ?? []; ?>
+<?php
+$defaultSenderKey = config('mail.default_sender_key', $identities[0]['key'] ?? '');
+$defaultReplyToKey = config('mail.default_reply_to_key', $replyToOptions[0]['key'] ?? $defaultSenderKey);
+?>
 <section class="hero-card">
-    <p class="eyebrow">Mailing</p>
-    <h2>Personalisierte E-Mail verfassen</h2>
-    <p class="muted"><?= count($contacts) ?> ausgewählte Kontakte. Platzhalter: <code>{Vorname}</code> und <code>{Nachname}</code>.</p>
+    <div class="hero-row">
+        <div>
+            <p class="eyebrow">Mailing</p>
+            <h2>Personalisierte E-Mail verfassen</h2>
+            <p class="muted"><?= count($contacts) ?> ausgewählte Kontakte. Platzhalter: <code>{Vorname}</code> und <code>{Nachname}</code>.</p>
+        </div>
+        <div class="selection-status"><?= count($contacts) ?> Empfänger ausgewählt</div>
+    </div>
 </section>
 
 <section class="panel">
@@ -17,7 +26,7 @@
                 <span>Absenderadresse</span>
                 <select name="sender_key" required>
                     <?php foreach ($identities as $identity): ?>
-                        <option value="<?= e($identity['key']) ?>" <?= ($draft['sender_key'] ?? $identities[0]['key']) === $identity['key'] ? 'selected' : '' ?>>
+                        <option value="<?= e($identity['key']) ?>" <?= ($draft['sender_key'] ?? $defaultSenderKey) === $identity['key'] ? 'selected' : '' ?>>
                             <?= e($identity['name'] . ' <' . $identity['email'] . '>') ?>
                         </option>
                     <?php endforeach; ?>
@@ -26,9 +35,9 @@
             <label>
                 <span>Antwort-an</span>
                 <select name="reply_to_key" required>
-                    <?php foreach ($identities as $identity): ?>
-                        <option value="<?= e($identity['key']) ?>" <?= ($draft['reply_to_key'] ?? $identities[0]['key']) === $identity['key'] ? 'selected' : '' ?>>
-                            <?= e($identity['name'] . ' <' . $identity['email'] . '>') ?>
+                    <?php foreach ($replyToOptions as $replyTo): ?>
+                        <option value="<?= e($replyTo['key']) ?>" <?= ($draft['reply_to_key'] ?? $defaultReplyToKey) === $replyTo['key'] ? 'selected' : '' ?>>
+                            <?= e($replyTo['name'] . ' <' . $replyTo['email'] . '>') ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -40,10 +49,12 @@
             <label class="full-width">
                 <span>Nachricht</span>
                 <textarea name="message" rows="10" required><?= e($draft['message'] ?? "Hallo {Vorname},\n\n") ?></textarea>
+                <small class="field-hint">Die Nachricht wird pro Person personalisiert und einzeln versendet.</small>
             </label>
             <label class="full-width">
                 <span>Dateianhänge</span>
                 <input type="file" name="attachments[]" multiple>
+                <small class="field-hint">Gesamtlimit aktuell 10 MB.</small>
             </label>
         </div>
 
@@ -62,11 +73,18 @@
 </section>
 
 <section class="panel">
-    <h3>Empfängerliste</h3>
-    <ul class="mini-list">
+    <div class="panel-head">
+        <div>
+            <h3>Empfängerliste</h3>
+            <p class="muted">Verwendet wird jeweils die erste hinterlegte E-Mail-Adresse.</p>
+        </div>
+    </div>
+    <div class="recipient-grid">
         <?php foreach ($contacts as $contact): ?>
-            <li><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?>: <?= e($contact['emails'][0]['email'] ?? 'Keine Adresse') ?></li>
+            <article class="recipient-chip">
+                <strong><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?></strong>
+                <span><?= e($contact['emails'][0]['email'] ?? 'Keine Adresse') ?></span>
+            </article>
         <?php endforeach; ?>
-    </ul>
+    </div>
 </section>
-

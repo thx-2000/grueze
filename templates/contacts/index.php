@@ -1,3 +1,12 @@
+<?php
+$contactCount = count($contacts);
+$emailCount = 0;
+$phoneCount = 0;
+foreach ($contacts as $contact) {
+    $emailCount += count($contact['emails']);
+    $phoneCount += count($contact['phones']);
+}
+?>
 <section class="hero-card">
     <div class="hero-row">
         <div>
@@ -6,8 +15,26 @@
             <p class="muted">Schnell filtern, markieren, exportieren oder für Mailings verwenden.</p>
         </div>
         <?php if (can('contacts.manage')): ?>
-            <a class="button-link" href="<?= e(url('/contacts/create')) ?>">Neuen Kontakt anlegen</a>
+            <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Neuen Kontakt anlegen</span></a>
         <?php endif; ?>
+    </div>
+
+    <div class="stats-grid">
+        <article class="stat-card">
+            <?= icon('contacts') ?>
+            <span class="stat-label">Kontakte</span>
+            <strong><?= e((string) $contactCount) ?></strong>
+        </article>
+        <article class="stat-card">
+            <?= icon('mail') ?>
+            <span class="stat-label">E-Mail-Adressen</span>
+            <strong><?= e((string) $emailCount) ?></strong>
+        </article>
+        <article class="stat-card">
+            <?= icon('user') ?>
+            <span class="stat-label">Telefonnummern</span>
+            <strong><?= e((string) $phoneCount) ?></strong>
+        </article>
     </div>
 
     <form method="get" action="<?= e(url('/')) ?>" class="filter-grid">
@@ -50,25 +77,44 @@
 </section>
 
 <section class="panel">
-    <div class="toolbar">
-        <div class="toolbar-actions">
-            <button type="button" data-select="all">Alle auswählen</button>
-            <?php foreach ($categories as $category): ?>
-                <button type="button" class="ghost-button" data-select-category="<?= e((string) $category['id']) ?>"><?= e($category['name']) ?> auswählen</button>
-            <?php endforeach; ?>
+        <div class="panel-head">
+        <div>
+            <h3>Kontaktliste</h3>
+            <p class="muted">Auswahl, Kopieren und Mailing starten direkt aus der Übersicht.</p>
         </div>
-        <div class="toolbar-actions">
-            <?php if (can('contacts.copy_emails')): ?>
-                <button type="button" id="copyEmailsButton">E-Mail-Adressen kopieren</button>
-            <?php endif; ?>
-        </div>
+        <div class="selection-status" id="selectionStatus">Noch nichts ausgewählt</div>
     </div>
 
     <form id="contactSelectionForm" method="post" action="<?= e(url('/mail/compose')) ?>">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <?php if (can('mail.send')): ?>
-            <button type="submit" class="button-link inline-submit">E-Mail verfassen</button>
-        <?php endif; ?>
+        <div class="bulk-layout">
+            <div class="bulk-card">
+                <span class="bulk-title">Schnellauswahl</span>
+                <div class="toolbar-actions">
+                    <button type="button" data-select="all"><?= icon('check-double') ?><span>Alle auswählen</span></button>
+                    <button type="button" class="ghost-button" data-select="none"><?= icon('reset') ?><span>Auswahl löschen</span></button>
+                </div>
+                <?php if ($categories !== []): ?>
+                    <div class="quick-category-list">
+                        <?php foreach ($categories as $category): ?>
+                            <button type="button" class="ghost-button" data-select-category="<?= e((string) $category['id']) ?>"><?= e($category['name']) ?> auswählen</button>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="bulk-card accent">
+                <span class="bulk-title">Aktionen für Auswahl</span>
+                <div class="toolbar-actions">
+                    <?php if (can('contacts.copy_emails')): ?>
+                        <button type="button" id="copyEmailsButton"><?= icon('copy') ?><span>E-Mail-Adressen kopieren</span></button>
+                    <?php endif; ?>
+                    <?php if (can('mail.send')): ?>
+                        <button type="submit" class="button-link"><?= icon('edit') ?><span>E-Mail verfassen</span></button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
 
         <div class="contacts-grid">
             <?php foreach ($contacts as $contact): ?>
@@ -86,15 +132,17 @@
                     </div>
 
                     <div class="contact-body">
-                        <p><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></p>
-                        <p><?= e($contact['land'] ?: 'Deutschland') ?></p>
-                        <p class="muted"><?= e($contact['geburtstag'] ?: 'Kein Geburtstag hinterlegt') ?></p>
+                        <div class="contact-meta-list">
+                            <p><?= icon('location') ?><span><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span></p>
+                            <p><?= icon('globe') ?><span><?= e($contact['land'] ?: 'Deutschland') ?></span></p>
+                            <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ?: 'Kein Geburtstag hinterlegt') ?></span></p>
+                        </div>
 
                         <div>
                             <strong>E-Mail-Adressen</strong>
                             <ul class="mini-list">
                                 <?php foreach ($contact['emails'] as $email): ?>
-                                    <li data-email="<?= e($email['email']) ?>"><?= e(($email['label'] ? $email['label'] . ': ' : '') . $email['email']) ?></li>
+                                    <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e(($email['label'] ? $email['label'] . ': ' : '') . $email['email']) ?></a></li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>
@@ -103,7 +151,7 @@
                             <strong>Telefonnummern</strong>
                             <ul class="mini-list">
                                 <?php foreach ($contact['phones'] as $phone): ?>
-                                    <li><?= e($phone['label'] . ': ' . $phone['phone']) ?></li>
+                                    <li><a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['label'] . ': ' . $phone['phone']) ?></a></li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>
@@ -113,12 +161,12 @@
 
                     <?php if (can('contacts.manage')): ?>
                         <div class="card-actions">
-                            <a class="ghost-button" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>">Bearbeiten</a>
+                            <a class="ghost-button" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span>Bearbeiten</span></a>
                             <?php if (can('contacts.delete')): ?>
                                 <form method="post" action="<?= e(url('/contacts/delete')) ?>" onsubmit="return confirm('Kontakt wirklich löschen?');">
                                     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                                     <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
-                                    <button type="submit" class="danger-button">Löschen</button>
+                                    <button type="submit" class="danger-button"><?= icon('trash') ?><span>Löschen</span></button>
                                 </form>
                             <?php endif; ?>
                         </div>
@@ -139,4 +187,3 @@
         </form>
     </section>
 <?php endif; ?>
-

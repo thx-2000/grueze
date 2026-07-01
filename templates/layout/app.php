@@ -4,6 +4,7 @@ $flashes = [
     'error' => flash('error'),
 ];
 $pageErrors = errors();
+$currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 ?>
 <!doctype html>
 <html lang="de">
@@ -17,20 +18,26 @@ $pageErrors = errors();
 <body>
     <div class="page-shell">
         <aside class="sidebar">
-            <div>
-                <p class="eyebrow">Abi-Stufe</p>
-                <h1><?= e(config('app.name', 'Abi Adress Zentrale')) ?></h1>
-                <p class="muted">Platzhalter für Logo oder Abi-Motto</p>
+            <div class="sidebar-brand">
+                <div class="brand-mark">95</div>
+                <div>
+                    <p class="eyebrow">Abi-Stufe</p>
+                    <h1><?= e(config('app.name', 'Abi Adress Zentrale')) ?></h1>
+                    <p class="muted sidebar-copy">Kontakte, Mailings und Organisation an einem Ort.</p>
+                </div>
             </div>
             <?php if (!empty($currentUser)): ?>
                 <nav class="nav">
-                    <a href="<?= e(url('/')) ?>">Kontakte</a>
-                    <?php if (can('users.manage')): ?><a href="<?= e(url('/users')) ?>">Benutzer</a><?php endif; ?>
-                    <?php if (can('audit.view')): ?><a href="<?= e(url('/logs/audit')) ?>">Audit-Log</a><?php endif; ?>
-                    <?php if (can('mail.view_log')): ?><a href="<?= e(url('/logs/mail')) ?>">Versandprotokoll</a><?php endif; ?>
+                    <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('contacts') ?><span>Kontakte</span></a>
+                    <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/users') ? 'is-active' : '' ?>" href="<?= e(url('/users')) ?>"><?= icon('user') ?><span>Benutzer</span></a><?php endif; ?>
+                    <?php if (can('audit.view')): ?><a class="<?= str_starts_with($currentPath, '/logs/audit') ? 'is-active' : '' ?>" href="<?= e(url('/logs/audit')) ?>"><?= icon('history') ?><span>Audit-Log</span></a><?php endif; ?>
+                    <?php if (can('mail.view_log')): ?><a class="<?= str_starts_with($currentPath, '/logs/mail') ? 'is-active' : '' ?>" href="<?= e(url('/logs/mail')) ?>"><?= icon('mail') ?><span>Versandprotokoll</span></a><?php endif; ?>
                 </nav>
                 <div class="sidebar-footer">
-                    <p>Angemeldet als <?= e($currentUser['name']) ?></p>
+                    <div class="profile-chip">
+                        <strong><?= e($currentUser['name']) ?></strong>
+                        <span><?= e($currentUser['role_name'] ?? '') ?></span>
+                    </div>
                     <form method="post" action="<?= e(url('/logout')) ?>">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <button type="submit" class="ghost-button">Abmelden</button>
@@ -40,6 +47,18 @@ $pageErrors = errors();
         </aside>
 
         <main class="content">
+            <header class="content-topbar">
+                <div>
+                    <p class="eyebrow">Arbeitsbereich</p>
+                    <h2 class="topbar-title"><?= e(config('app.name', 'Abi Adress Zentrale')) ?></h2>
+                </div>
+                <?php if (!empty($currentUser)): ?>
+                    <div class="topbar-meta">
+                        <?= icon('sparkles') ?>
+                        <span>Angemeldet als <?= e($currentUser['name']) ?></span>
+                    </div>
+                <?php endif; ?>
+            </header>
             <?php foreach ($flashes as $type => $message): ?>
                 <?php if ($message): ?>
                     <div class="flash flash-<?= e($type) ?>"><?= e($message) ?></div>

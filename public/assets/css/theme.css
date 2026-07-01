@@ -1,6 +1,6 @@
 :root {
-    --font-display: "Manrope", "Avenir Next", sans-serif;
-    --font-body: "Manrope", "Helvetica Neue", sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
     --color-bg: #eef4ff;
     --color-bg-alt: #fdf8ff;
     --color-surface: rgba(255, 255, 255, 0.82);

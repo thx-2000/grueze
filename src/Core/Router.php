@@ -22,9 +22,18 @@ final class Router
 
     private function map(string $method, string $path, callable|array $handler): void
     {
-        $this->routes[$method][$path] = Closure::fromCallable(is_array($handler)
-            ? [Container::get($handler[0]), $handler[1]]
-            : $handler);
+        if (is_array($handler)) {
+            $this->routes[$method][$path] = function (...$args) use ($handler): mixed {
+                [$class, $action] = $handler;
+                $instance = Container::get($class);
+
+                return $instance->{$action}(...$args);
+            };
+
+            return;
+        }
+
+        $this->routes[$method][$path] = Closure::fromCallable($handler);
     }
 
     public function dispatch(Request $request): void
@@ -40,4 +49,3 @@ final class Router
         $handler($request);
     }
 }
-

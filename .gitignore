@@ -2,6 +2,9 @@
 **/.DS_Store
 /config/config.php
 /vendor/
+/public/assets/uploads/*
+!/public/assets/uploads/.htaccess
+!/public/assets/uploads/.gitkeep
 /assets/uploads/*
 !/assets/uploads/.htaccess
 !/assets/uploads/.gitkeep
