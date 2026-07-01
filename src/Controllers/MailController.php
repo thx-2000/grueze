@@ -1,0 +1,158 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controllers;
+
+use App\Core\Csrf;
+use App\Core\Request;
+use App\Repositories\ContactRepository;
+use App\Services\MailService;
+use App\Services\UploadService;
+use App\Support\Redirect;
+
+final class MailController extends BaseController
+{
+    public function __construct(
+        \App\Core\Auth $auth,
+        private ContactRepository $contacts,
+        private MailService $mailer,
+        private UploadService $uploads
+    ) {
+        parent::__construct($auth);
+    }
+
+    public function compose(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        $ids = array_map('intval', (array) ($request->input('selected_contacts', []) ?: $request->input('contact_ids', [])));
+        $contacts = $this->contacts->findManyByIds($ids);
+
+        if ($contacts === []) {
+            flash('error', 'Bitte zuerst Kontakte auswählen.');
+            Redirect::to('/');
+        }
+
+        $_SESSION['mail_draft_contact_ids'] = $ids;
+
+        $this->render('mail/compose', [
+            'contacts' => $contacts,
+            'identities' => config('mail.identities', []),
+        ]);
+    }
+
+    public function test(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+        $contactIds = array_map('intval', (array) ($request->input('contact_ids', []) ?: ($_SESSION['mail_draft_contact_ids'] ?? [])));
+        $contacts = $this->contacts->findManyByIds($contactIds);
+        $identity = $this->identityByKey((string) $request->input('sender_key'));
+        $replyTo = $this->identityByKey((string) $request->input('reply_to_key'));
+        $user = $this->auth->user();
+
+        if (!$identity || !$replyTo || !$user) {
+            flash('error', 'Absender oder Nutzer konnte nicht geladen werden.');
+            Redirect::to('/');
+        }
+
+        $sample = $contacts[0] ?? ['vorname' => 'Max', 'nachname' => 'Mustermann'];
+        $message = str_replace(['{Vorname}', '{Nachname}'], [$sample['vorname'], $sample['nachname']], (string) $request->input('message'));
+        $this->mailer->sendSystemMail($identity, $user['email'], '[Testmail] ' . (string) $request->input('subject'), $message);
+        flash('success', 'Testmail wurde an dein Konto gesendet.');
+        $_SESSION['mail_draft'] = [
+            'contact_ids' => $contactIds,
+            'subject' => (string) $request->input('subject'),
+            'message' => (string) $request->input('message'),
+            'sender_key' => (string) $request->input('sender_key'),
+            'reply_to_key' => (string) $request->input('reply_to_key'),
+        ];
+        Redirect::to('/mail/compose?contact_ids[]=' . implode('&contact_ids[]=', array_map('urlencode', array_map('strval', $contactIds))));
+    }
+
+    public function start(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        $attachments = $this->uploads->storeAttachments($request->file('attachments'));
+        $_SESSION['mail_job'] = [
+            'contacts' => array_map('intval', (array) $request->input('contact_ids', [])),
+            'subject' => trim((string) $request->input('subject')),
+            'message' => trim((string) $request->input('message')),
+            'sender_key' => (string) $request->input('sender_key'),
+            'reply_to_key' => (string) $request->input('reply_to_key'),
+            'attachments' => $attachments,
+            'offset' => 0,
+            'results' => [],
+        ];
+        $_SESSION['mail_draft'] = [
+            'contact_ids' => $_SESSION['mail_job']['contacts'],
+            'subject' => $_SESSION['mail_job']['subject'],
+            'message' => $_SESSION['mail_job']['message'],
+            'sender_key' => $_SESSION['mail_job']['sender_key'],
+            'reply_to_key' => $_SESSION['mail_job']['reply_to_key'],
+        ];
+
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['ok' => true]);
+    }
+
+    public function batch(): void
+    {
+        $this->requirePermission('mail.send');
+        \App\Core\Csrf::validate($_POST['_csrf'] ?? null);
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $job = $_SESSION['mail_job'] ?? null;
+        if (!$job) {
+            echo json_encode(['ok' => false, 'message' => 'Kein Versandauftrag aktiv.']);
+            return;
+        }
+
+        $contacts = $this->contacts->findManyByIds($job['contacts']);
+        $slice = array_slice($contacts, (int) $job['offset'], (int) config('mail.batch_size', 3));
+        $identity = $this->identityByKey($job['sender_key']);
+        $replyTo = $this->identityByKey($job['reply_to_key']);
+        $userId = (int) $this->auth->user()['id'];
+
+        foreach ($slice as $contact) {
+            $result = $this->mailer->sendMergedMail($identity, $replyTo, $contact, $job['subject'], $job['message'], $job['attachments'], $userId);
+            $job['results'][] = [
+                'name' => $contact['vorname'] . ' ' . $contact['nachname'],
+                'ok' => $result['ok'],
+                'error' => $result['error'] ?? null,
+            ];
+
+            sleep((int) config('mail.send_delay_seconds', 1));
+        }
+
+        $job['offset'] += count($slice);
+        $_SESSION['mail_job'] = $job;
+        $done = $job['offset'] >= count($contacts);
+
+        if ($done) {
+            $this->uploads->cleanupAttachments($job['attachments']);
+            unset($_SESSION['mail_job']);
+        }
+
+        echo json_encode([
+            'ok' => true,
+            'done' => $done,
+            'processed' => $job['offset'],
+            'total' => count($contacts),
+            'results' => $job['results'],
+        ]);
+    }
+
+    private function identityByKey(string $key): ?array
+    {
+        foreach (config('mail.identities', []) as $identity) {
+            if (($identity['key'] ?? '') === $key) {
+                return $identity;
+            }
+        }
+
+        return config('mail.identities.0');
+    }
+}

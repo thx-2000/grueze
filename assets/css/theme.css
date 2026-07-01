@@ -1,0 +1,22 @@
+:root {
+    --font-display: "Avenir Next", "Trebuchet MS", sans-serif;
+    --font-body: "Source Sans 3", "Helvetica Neue", sans-serif;
+    --color-bg: #f6f1e8;
+    --color-surface: #fffdf8;
+    --color-surface-strong: #fff7eb;
+    --color-text: #21312b;
+    --color-muted: #5a6b63;
+    --color-primary: #0f766e;
+    --color-primary-strong: #115e59;
+    --color-secondary: #d97706;
+    --color-accent: #f0c36a;
+    --color-border: #d9d0c2;
+    --color-danger: #b42318;
+    --color-success: #157347;
+    --radius-sm: 0.8rem;
+    --radius-md: 1.2rem;
+    --radius-lg: 1.8rem;
+    --shadow-soft: 0 18px 38px rgba(33, 49, 43, 0.08);
+    --shadow-card: 0 10px 24px rgba(33, 49, 43, 0.12);
+}
+
