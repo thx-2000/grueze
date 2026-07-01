@@ -19,6 +19,30 @@ Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufr
 - Ohne Composer fällt der Mailversand auf `mail()` zurück. Anhänge sind dann bewusst nicht verfügbar.
 - `.htaccess` in `public/` leitet HTTP auf HTTPS um und schickt alle nicht vorhandenen Pfade auf `public/index.php`.
 
+## Deploy per rsync
+
+Für den Upload auf den all-inkl-Webspace liegt ein Skript unter `scripts/deploy.sh` bereit.
+
+Voraussetzungen:
+
+- SSH-Zugang ist lokal eingerichtet
+- Zielserver: `example.org`
+- SSH-User: `ssh-user`
+- Zielpfad: `/pfad/zum/webroot`
+
+Aufruf:
+
+```bash
+bash scripts/deploy.sh
+```
+
+Das Skript synchronisiert das Projekt per `rsync` auf den Server und schließt sensible oder serverlokale Dateien über `.rsyncignore` aus, insbesondere:
+
+- `config/config.php`
+- Upload-Inhalte
+- temporäre Dateien
+- Git-Metadaten
+
 ## Wichtige Ordner
 
 - `public/`: Einstiegspunkt und Rewrite-Regeln
