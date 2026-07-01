@@ -7,7 +7,7 @@ Eine mobile-first PHP-Web-App für die Verwaltung von Kontaktdaten einer Abi-Stu
 1. Webspace so konfigurieren, dass `public/` der Webroot ist.
 2. `config/config.example.php` oder `config/config.production-template.php` nach `config/config.php` kopieren und Datenbank, Basis-URL sowie SMTP-Zugangsdaten eintragen.
 3. `database/schema.sql` in die MySQL- oder MariaDB-Datenbank importieren.
-4. Optional per Composer `phpmailer/phpmailer` installieren, wenn SMTP mit Anhängen und robusterem Versand genutzt werden soll.
+4. Per Composer `phpmailer/phpmailer` installieren, wenn SMTP-Versand genutzt werden soll. Ohne PHPMailer fällt die App auf `mail()` zurück.
 5. Sicherstellen, dass `assets/uploads/` und `storage/tmp/` beschreibbar sind.
 6. Einen ersten Admin-Datensatz in `users` anlegen. Die zugehörige `role_id` ist die `admin`-Rolle aus `roles`.
 
@@ -16,6 +16,7 @@ Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufr
 ## Hinweise für all-inkl
 
 - Die Anwendung ist für Shared Hosting mit klassischem PHP ohne Build-Prozess aufgebaut.
+- Für SMTP über PHPMailer muss auf dem Server `vendor/autoload.php` vorhanden sein. Die App bindet diese Datei automatisch ein, sobald Composer-Dependencies installiert wurden.
 - Ohne Composer fällt der Mailversand auf `mail()` zurück. Anhänge sind dann bewusst nicht verfügbar.
 - `.htaccess` in `public/` leitet HTTP auf HTTPS um und schickt alle nicht vorhandenen Pfade auf `public/index.php`.
 

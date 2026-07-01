@@ -46,6 +46,12 @@ register_shutdown_function(static function (): void {
 require dirname(__DIR__) . '/src/Core/Autoloader.php';
 require dirname(__DIR__) . '/src/Support/helpers.php';
 require dirname(__DIR__) . '/src/Support/Redirect.php';
+
+$composerAutoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (is_file($composerAutoload)) {
+    require $composerAutoload;
+}
+
 try {
     Autoloader::register();
     Config::load(dirname(__DIR__));
