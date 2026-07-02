@@ -1,7 +1,7 @@
 <section class="hero-card">
     <p class="eyebrow">Benutzerverwaltung</p>
     <h2>Accounts für euer Team</h2>
-    <p class="muted">Neue Accounts erhalten ein einmalig angezeigtes Erstpasswort. Fuer Kontakte ist der bequemere Weg jetzt direkt im Kontaktformular.</p>
+    <p class="muted">Neue Accounts erhalten ein einmalig angezeigtes Erstpasswort. Für Kontakte ist der bequemere Weg jetzt direkt im Kontaktformular.</p>
 
     <form method="post" action="<?= e(url('/users/store')) ?>" class="form-grid">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
@@ -43,7 +43,7 @@
                         <td><?= e($user['email']) ?></td>
                         <td><?= e($user['role_name']) ?></td>
                         <td><?= (int) $user['is_active'] === 1 ? 'Aktiv' : 'Inaktiv' ?></td>
-                        <td><?= e($user['last_login_at'] ?: 'Noch nie') ?></td>
+                        <td><?= e($user['last_login_at'] ? format_datetime($user['last_login_at']) : 'Noch nie') ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

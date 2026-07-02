@@ -172,17 +172,17 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                 <div class="account-panel">
                     <label class="toggle-row">
                         <input type="checkbox" name="login_enabled" value="1" <?= $loginEnabled ? 'checked' : '' ?>>
-                        <span>Diesen Kontakt mit Login freischalten</span>
-                    </label>
+                            <span>Diesen Kontakt mit Login freischalten</span>
+                        </label>
                     <div class="form-grid">
                         <label>
                             <span>Login-E-Mail</span>
-                            <input type="email" name="login_email" value="<?= e($loginEmail) ?>" placeholder="wird auch fuer Passwort-Reset verwendet">
+                            <input type="email" name="login_email" value="<?= e($loginEmail) ?>" placeholder="wird auch für Passwort-Reset verwendet">
                         </label>
                         <label>
                             <span>Rolle</span>
                             <select name="role_id">
-                                <option value="">Rolle waehlen</option>
+                                <option value="">Rolle wählen</option>
                                 <?php foreach ($roles as $role): ?>
                                     <option value="<?= e((string) $role['id']) ?>" <?= $roleId === (string) $role['id'] ? 'selected' : '' ?>>
                                         <?= e($role['name']) ?>
@@ -193,7 +193,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                     </div>
                     <p class="field-hint">Beim ersten Anlegen wird automatisch ein Erstpasswort erzeugt und nach dem Speichern eingeblendet.</p>
                     <?php if ($linkedUser): ?>
-                        <p class="field-hint">Aktuell verknuepft: <?= e($linkedUser['email']) ?> als <?= e($linkedUser['role_name']) ?>.</p>
+                        <p class="field-hint">Aktuell verknüpft: <?= e($linkedUser['email']) ?> als <?= e($linkedUser['role_name']) ?>.</p>
                     <?php endif; ?>
                 </div>
             </section>

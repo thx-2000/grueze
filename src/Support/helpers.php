@@ -59,6 +59,32 @@ function can(string $permission): bool
     return auth()->can($permission);
 }
 
+function format_date(?string $value): string
+{
+    if ($value === null || trim($value) === '') {
+        return '';
+    }
+
+    try {
+        return (new DateTimeImmutable($value))->format('d.m.Y');
+    } catch (Throwable) {
+        return (string) $value;
+    }
+}
+
+function format_datetime(?string $value): string
+{
+    if ($value === null || trim($value) === '') {
+        return '';
+    }
+
+    try {
+        return (new DateTimeImmutable($value))->format('d.m.Y H:i');
+    } catch (Throwable) {
+        return (string) $value;
+    }
+}
+
 function icon(string $name): string
 {
     $icons = [

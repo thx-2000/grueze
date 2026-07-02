@@ -283,7 +283,7 @@ final class ContactController extends BaseController
                 'contact_id' => $contactId,
             ]);
 
-            return 'Bestehendes Benutzerkonto wurde mit diesem Kontakt verknuepft.';
+            return 'Bestehendes Benutzerkonto wurde mit diesem Kontakt verknüpft.';
         }
 
         $password = $this->generatePassword();

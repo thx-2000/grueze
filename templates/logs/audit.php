@@ -19,7 +19,7 @@
             <tbody>
                 <?php foreach ($entries as $entry): ?>
                     <tr>
-                        <td><?= e($entry['created_at']) ?></td>
+                        <td><?= e(format_datetime($entry['created_at'])) ?></td>
                         <td><?= e($entry['user_name']) ?></td>
                         <td><?= e(trim(($entry['vorname'] ?? '') . ' ' . ($entry['nachname'] ?? '')) ?: 'Gelöschter Kontakt') ?></td>
                         <td><?= e($entry['action']) ?></td>
@@ -30,4 +30,3 @@
         </table>
     </div>
 </section>
-

@@ -21,7 +21,7 @@
             <tbody>
                 <?php foreach ($entries as $entry): ?>
                     <tr>
-                        <td><?= e($entry['gesendet_am']) ?></td>
+                        <td><?= e(format_datetime($entry['gesendet_am'])) ?></td>
                         <td><?= e($entry['user_name']) ?></td>
                         <td><?= e(trim(($entry['vorname'] ?? '') . ' ' . ($entry['nachname'] ?? '')) ?: '-') ?></td>
                         <td><?= e($entry['empfaenger_email']) ?></td>
@@ -34,4 +34,3 @@
         </table>
     </div>
 </section>
-

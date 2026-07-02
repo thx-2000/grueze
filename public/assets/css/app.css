@@ -53,6 +53,19 @@ button,
     color: var(--color-text);
 }
 
+.sidebar-footer .ghost-button,
+.bulk-card .ghost-button {
+    background: linear-gradient(135deg, #8f4525, #6b3120);
+    color: #fff;
+    border-color: rgba(107, 49, 32, 0.32);
+    box-shadow: 0 10px 18px rgba(107, 49, 32, 0.18);
+}
+
+.sidebar-footer .ghost-button .icon,
+.bulk-card .ghost-button .icon {
+    color: currentColor;
+}
+
 .danger-button {
     background: rgba(198, 79, 94, 0.12);
     color: var(--color-danger);

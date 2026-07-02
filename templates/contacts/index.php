@@ -168,7 +168,7 @@ foreach ($contacts as $contact) {
                         <div class="contact-meta-list">
                             <p><?= icon('location') ?><span><strong>Adresse</strong><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span></p>
                             <p><?= icon('globe') ?><span><?= e($contact['land'] ?: 'Deutschland') ?></span></p>
-                            <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ?: 'Kein Geburtstag hinterlegt') ?></span></p>
+                            <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : 'Kein Geburtstag hinterlegt') ?></span></p>
                         </div>
 
                         <div>
