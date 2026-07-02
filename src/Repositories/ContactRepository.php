@@ -21,8 +21,11 @@ final class ContactRepository
         $params = [];
 
         if (!empty($filters['q'])) {
-            $sql .= ' AND (contacts.vorname LIKE :q OR contacts.nachname LIKE :q OR contacts.geburtsname LIKE :q)';
-            $params['q'] = '%' . $filters['q'] . '%';
+            $sql .= ' AND (contacts.vorname LIKE :q_vorname OR contacts.nachname LIKE :q_nachname OR contacts.geburtsname LIKE :q_geburtsname)';
+            $query = '%' . $filters['q'] . '%';
+            $params['q_vorname'] = $query;
+            $params['q_nachname'] = $query;
+            $params['q_geburtsname'] = $query;
         }
 
         if (!empty($filters['category_id'])) {

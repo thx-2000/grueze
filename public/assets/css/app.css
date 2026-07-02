@@ -392,6 +392,10 @@ label span {
     justify-content: flex-end;
 }
 
+.selection-tools > * {
+    flex: 0 0 auto;
+}
+
 .bulk-layout {
     display: grid;
     grid-template-columns: 1.3fr 1fr;
@@ -442,6 +446,8 @@ label span {
     border: 1px solid rgba(38, 42, 32, 0.08);
     display: grid;
     gap: 0.8rem;
+    align-content: start;
+    align-items: start;
 }
 
 .bulk-card.accent {
@@ -474,6 +480,12 @@ label span {
     display: flex;
     gap: 0.55rem;
     flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.toolbar-actions > * {
+    flex: 0 0 auto;
+    align-self: flex-start;
 }
 
 .quick-category-list {
@@ -493,6 +505,7 @@ label span {
 .selection-tools .ghost-button {
     background: rgba(250, 252, 244, 0.98);
     border-color: rgba(38, 42, 32, 0.1);
+    color: var(--color-primary-strong) !important;
 }
 
 .contacts-grid {
