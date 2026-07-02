@@ -32,7 +32,7 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
                         <a href="https://example.org" target="_blank" rel="noopener noreferrer"><?= icon('globe') ?><span>Startseite</span></a>
                     <?php endif; ?>
                     <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('contacts') ?><span>Kontakte</span></a>
-                    <?php if (can('settings.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/mail-footer') ? 'is-active' : '' ?>" href="<?= e(url('/settings/mail-footer')) ?>"><?= icon('sliders') ?><span>Mail-Fuß</span></a><?php endif; ?>
+                    <?php if (can('settings.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/mail-footer') ? 'is-active' : '' ?>" href="<?= e(url('/settings/mail-footer')) ?>"><?= icon('sliders') ?><span>Mail-Einstellungen</span></a><?php endif; ?>
                     <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/users') ? 'is-active' : '' ?>" href="<?= e(url('/users')) ?>"><?= icon('user') ?><span>Benutzer</span></a><?php endif; ?>
                     <?php if (can('audit.view')): ?><a class="<?= str_starts_with($currentPath, '/logs/audit') ? 'is-active' : '' ?>" href="<?= e(url('/logs/audit')) ?>"><?= icon('history') ?><span>Audit-Log</span></a><?php endif; ?>
                     <?php if (can('mail.view_log')): ?><a class="<?= str_starts_with($currentPath, '/logs/mail') ? 'is-active' : '' ?>" href="<?= e(url('/logs/mail')) ?>"><?= icon('mail') ?><span>Versandprotokoll</span></a><?php endif; ?>

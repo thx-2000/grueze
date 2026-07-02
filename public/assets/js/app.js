@@ -272,3 +272,19 @@ if (statusPage) {
 
     runBatch();
 }
+
+const subjectField = document.getElementById('subjectField');
+const subjectPrefixField = document.getElementById('subjectPrefixField');
+const subjectPreview = document.getElementById('subjectPreview');
+
+if (subjectPreview && subjectField && subjectPrefixField) {
+    const updateSubjectPreview = () => {
+        const prefix = subjectPrefixField.value.trim();
+        const subject = subjectField.value.trim() || 'Dein Betreff';
+        subjectPreview.textContent = prefix ? `${prefix} ${subject}` : subject;
+    };
+
+    subjectField.addEventListener('input', updateSubjectPreview);
+    subjectPrefixField.addEventListener('change', updateSubjectPreview);
+    updateSubjectPreview();
+}

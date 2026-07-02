@@ -2,6 +2,8 @@
 <?php
 $defaultSenderKey = config('mail.default_sender_key', $identities[0]['key'] ?? '');
 $defaultReplyToKey = config('mail.default_reply_to_key', $replyToOptions[0]['key'] ?? $defaultSenderKey);
+$activeSubjectPrefix = $draft['subject_prefix'] ?? $defaultSubjectPrefix;
+$subjectPreview = trim(($activeSubjectPrefix ? $activeSubjectPrefix . ' ' : '') . ($draft['subject'] ?? 'Dein Betreff'));
 ?>
 <section class="hero-card">
     <div class="hero-row">
@@ -43,9 +45,22 @@ $defaultReplyToKey = config('mail.default_reply_to_key', $replyToOptions[0]['key
                 </select>
             </label>
             <label class="full-width">
-                <span>Betreff</span>
-                <input type="text" name="subject" value="<?= e($draft['subject'] ?? '') ?>" required>
+                <span>Betreff-Präfix</span>
+                <select name="subject_prefix" id="subjectPrefixField" required>
+                    <?php foreach ($subjectPrefixOptions as $prefix): ?>
+                        <option value="<?= e($prefix) ?>" <?= $activeSubjectPrefix === $prefix ? 'selected' : '' ?>><?= e($prefix) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <small class="field-hint">Weitere Präfixe kannst du in den Mail-Einstellungen pflegen. Das erste ist der Standard.</small>
             </label>
+            <label class="full-width">
+                <span>Betreff</span>
+                <input type="text" name="subject" id="subjectField" value="<?= e($draft['subject'] ?? '') ?>" required>
+            </label>
+            <div class="subsection-card full-width">
+                <strong>Betreff-Vorschau</strong>
+                <div class="mail-footer-preview" id="subjectPreview"><?= e($subjectPreview) ?></div>
+            </div>
             <label class="full-width">
                 <span>Nachricht</span>
                 <textarea name="message" rows="10" required><?= e($draft['message'] ?? "Hallo {Vorname},\n\n") ?></textarea>

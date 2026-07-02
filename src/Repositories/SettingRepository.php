@@ -63,6 +63,58 @@ Wenn du keine weiteren Nachrichten erhalten möchtest, schreibe bitte an kontakt
 TEXT);
     }
 
+    public function subjectPrefixOptions(): array
+    {
+        $stored = trim((string) $this->get('subject_prefixes', ''));
+        $candidates = $stored !== ''
+            ? preg_split('/\R+/', $stored) ?: []
+            : $this->defaultSubjectPrefixOptions();
+
+        $options = [];
+        foreach ($candidates as $candidate) {
+            $prefix = trim((string) $candidate);
+            if ($prefix === '') {
+                continue;
+            }
+
+            $options[] = $prefix;
+        }
+
+        return $options !== [] ? array_values(array_unique($options)) : ['[Verteiler]'];
+    }
+
+    public function defaultSubjectPrefixOptions(): array
+    {
+        $candidates = (array) config('defaults.subject_prefixes', ['[Verteiler]']);
+        $options = [];
+
+        foreach ($candidates as $candidate) {
+            $prefix = trim((string) $candidate);
+            if ($prefix === '') {
+                continue;
+            }
+
+            $options[] = $prefix;
+        }
+
+        return $options !== [] ? array_values(array_unique($options)) : ['[Verteiler]'];
+    }
+
+    public function subjectPrefixesText(): string
+    {
+        return implode("\n", $this->subjectPrefixOptions());
+    }
+
+    public function defaultSubjectPrefixesText(): string
+    {
+        return implode("\n", $this->defaultSubjectPrefixOptions());
+    }
+
+    public function defaultSubjectPrefix(): string
+    {
+        return $this->subjectPrefixOptions()[0] ?? '[Verteiler]';
+    }
+
     private function ensureTable(): bool
     {
         if ($this->tableReady !== null) {

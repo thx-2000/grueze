@@ -44,6 +44,8 @@ final class MailController extends BaseController
             'identities' => config('mail.identities', []),
             'replyToOptions' => $this->replyToOptions(),
             'mailFooter' => $this->settings->mailFooter(),
+            'subjectPrefixOptions' => $this->settings->subjectPrefixOptions(),
+            'defaultSubjectPrefix' => $this->settings->defaultSubjectPrefix(),
         ]);
     }
 
@@ -63,6 +65,7 @@ final class MailController extends BaseController
         }
 
         $sample = $contacts[0] ?? ['vorname' => 'Max', 'nachname' => 'Mustermann'];
+        $subject = $this->composeSubject((string) $request->input('subject'), (string) $request->input('subject_prefix'));
         $message = str_replace(
             ['{Vorname}', '{Nachname}'],
             [$sample['vorname'], $sample['nachname']],
@@ -71,7 +74,7 @@ final class MailController extends BaseController
         $this->mailer->sendSystemMail(
             $identity,
             $user['email'],
-            '[Testmail] ' . (string) $request->input('subject'),
+            '[Testmail] ' . $subject,
             $message,
             $replyTo['email']
         );
@@ -79,7 +82,7 @@ final class MailController extends BaseController
             'user_id' => $user['id'],
             'contact_id' => null,
             'empfaenger_email' => $user['email'],
-            'betreff' => '[Testmail] ' . (string) $request->input('subject'),
+            'betreff' => '[Testmail] ' . $subject,
             'status' => 'gesendet',
             'fehlermeldung' => null,
         ]);
@@ -90,6 +93,7 @@ final class MailController extends BaseController
             'message' => (string) $request->input('message'),
             'sender_key' => (string) $request->input('sender_key'),
             'reply_to_key' => (string) $request->input('reply_to_key'),
+            'subject_prefix' => (string) $request->input('subject_prefix'),
         ];
         Redirect::to('/mail/compose?contact_ids[]=' . implode('&contact_ids[]=', array_map('urlencode', array_map('strval', $contactIds))));
     }
@@ -101,9 +105,10 @@ final class MailController extends BaseController
 
         $attachments = $this->uploads->storeAttachments($request->file('attachments'));
         $rawMessage = trim((string) $request->input('message'));
+        $subjectPrefix = (string) $request->input('subject_prefix');
         $_SESSION['mail_job'] = [
             'contacts' => array_map('intval', (array) $request->input('contact_ids', [])),
-            'subject' => trim((string) $request->input('subject')),
+            'subject' => $this->composeSubject((string) $request->input('subject'), $subjectPrefix),
             'message' => $this->composeMailBody($rawMessage),
             'sender_key' => (string) $request->input('sender_key'),
             'reply_to_key' => (string) $request->input('reply_to_key'),
@@ -117,6 +122,7 @@ final class MailController extends BaseController
             'message' => $rawMessage,
             'sender_key' => $_SESSION['mail_job']['sender_key'],
             'reply_to_key' => $_SESSION['mail_job']['reply_to_key'],
+            'subject_prefix' => $subjectPrefix,
         ];
         Redirect::to('/mail/status');
     }
@@ -226,5 +232,18 @@ final class MailController extends BaseController
         $footer = trim($this->settings->mailFooter());
 
         return $footer === '' ? $message : $message . "\n\n" . $footer;
+    }
+
+    private function composeSubject(string $subject, string $selectedPrefix): string
+    {
+        $subject = trim($subject);
+        $options = $this->settings->subjectPrefixOptions();
+        $prefix = in_array($selectedPrefix, $options, true)
+            ? $selectedPrefix
+            : $this->settings->defaultSubjectPrefix();
+
+        $normalizedPrefix = trim($prefix);
+
+        return $normalizedPrefix === '' ? $subject : $normalizedPrefix . ' ' . $subject;
     }
 }
