@@ -8,6 +8,7 @@ use App\Controllers\ContactController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
 use App\Controllers\SetupController;
+use App\Controllers\TagController;
 use App\Controllers\UserController;
 use App\Core\Auth;
 use App\Core\Autoloader;
@@ -20,6 +21,7 @@ use App\Core\Session;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
 use App\Repositories\LogRepository;
+use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
 use App\Services\CsvExportService;
 use App\Services\MailService;
@@ -60,6 +62,7 @@ try {
     Container::factory(PDO::class, static fn () => Database::connect());
     Container::factory(UserRepository::class, static fn () => new UserRepository(Container::get(PDO::class)));
     Container::factory(CategoryRepository::class, static fn () => new CategoryRepository(Container::get(PDO::class)));
+    Container::factory(TagRepository::class, static fn () => new TagRepository(Container::get(PDO::class)));
     Container::factory(ContactRepository::class, static fn () => new ContactRepository(Container::get(PDO::class)));
     Container::factory(LogRepository::class, static fn () => new LogRepository(Container::get(PDO::class)));
     Container::factory(Auth::class, static fn () => new Auth(Container::get(UserRepository::class)));
@@ -81,6 +84,8 @@ try {
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
         Container::get(CategoryRepository::class),
+        Container::get(TagRepository::class),
+        Container::get(UserRepository::class),
         Container::get(LogRepository::class),
         Container::get(UploadService::class),
         Container::get(CsvExportService::class)
@@ -96,6 +101,10 @@ try {
     Container::factory(CategoryController::class, static fn () => new CategoryController(
         Container::get(Auth::class),
         Container::get(CategoryRepository::class)
+    ));
+    Container::factory(TagController::class, static fn () => new TagController(
+        Container::get(Auth::class),
+        Container::get(TagRepository::class)
     ));
     Container::factory(LogController::class, static fn () => new LogController(
         Container::get(Auth::class),
@@ -129,6 +138,7 @@ try {
     $router->get('/contacts/export', [ContactController::class, 'export']);
 
     $router->post('/categories/store', [CategoryController::class, 'store']);
+    $router->post('/tags/store', [TagController::class, 'store']);
     $router->get('/users', [UserController::class, 'index']);
     $router->post('/users/store', [UserController::class, 'store']);
 

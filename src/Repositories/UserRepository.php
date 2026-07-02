@@ -15,8 +15,10 @@ final class UserRepository
     public function findByEmail(string $email): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT users.*, roles.name AS role_name FROM users
+            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname
+             FROM users
              JOIN roles ON roles.id = users.role_id
+             LEFT JOIN contacts ON contacts.id = users.contact_id
              WHERE users.email = :email LIMIT 1'
         );
         $stmt->execute(['email' => $email]);
@@ -27,8 +29,10 @@ final class UserRepository
     public function findById(int $id): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT users.*, roles.name AS role_name FROM users
+            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname
+             FROM users
              JOIN roles ON roles.id = users.role_id
+             LEFT JOIN contacts ON contacts.id = users.contact_id
              WHERE users.id = :id LIMIT 1'
         );
         $stmt->execute(['id' => $id]);
@@ -39,8 +43,10 @@ final class UserRepository
     public function all(): array
     {
         return $this->pdo->query(
-            'SELECT users.*, roles.name AS role_name FROM users
+            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname
+             FROM users
              JOIN roles ON roles.id = users.role_id
+             LEFT JOIN contacts ON contacts.id = users.contact_id
              ORDER BY users.created_at DESC'
         )->fetchAll();
     }
@@ -53,8 +59,8 @@ final class UserRepository
     public function create(array $data): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO users (name, email, password_hash, role_id, is_active)
-             VALUES (:name, :email, :password_hash, :role_id, :is_active)'
+            'INSERT INTO users (name, email, password_hash, role_id, is_active, contact_id)
+             VALUES (:name, :email, :password_hash, :role_id, :is_active, :contact_id)'
         );
         $stmt->execute([
             'name' => $data['name'],
@@ -62,9 +68,53 @@ final class UserRepository
             'password_hash' => $data['password_hash'],
             'role_id' => $data['role_id'],
             'is_active' => $data['is_active'] ?? 1,
+            'contact_id' => $data['contact_id'] ?? null,
         ]);
 
         return (int) $this->pdo->lastInsertId();
+    }
+
+    public function findByContactId(int $contactId): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT users.*, roles.name AS role_name
+             FROM users
+             JOIN roles ON roles.id = users.role_id
+             WHERE users.contact_id = :contact_id
+             LIMIT 1'
+        );
+        $stmt->execute(['contact_id' => $contactId]);
+
+        return $stmt->fetch() ?: null;
+    }
+
+    public function updateLinkedAccount(int $userId, array $data): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE users SET
+             name = :name,
+             email = :email,
+             role_id = :role_id,
+             is_active = :is_active,
+             contact_id = :contact_id
+             WHERE id = :id'
+        );
+        $stmt->execute([
+            'id' => $userId,
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'role_id' => $data['role_id'],
+            'is_active' => $data['is_active'] ?? 1,
+            'contact_id' => $data['contact_id'] ?? null,
+        ]);
+    }
+
+    public function deactivateByContactId(int $contactId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE users SET is_active = 0 WHERE contact_id = :contact_id'
+        );
+        $stmt->execute(['contact_id' => $contactId]);
     }
 
     public function adminExists(): bool

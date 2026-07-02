@@ -11,6 +11,6 @@ final class View
         extract($data, EXTR_SKIP);
         $templatePath = dirname(__DIR__, 2) . '/templates/' . $template . '.php';
         require dirname(__DIR__, 2) . '/templates/layout/app.php';
+        unset($_SESSION['_old']);
     }
 }
-

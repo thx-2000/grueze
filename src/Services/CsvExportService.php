@@ -15,7 +15,7 @@ final class CsvExportService
         fwrite($out, "\xEF\xBB\xBF");
 
         fputcsv($out, [
-            'Vorname', 'Nachname', 'Geburtsname', 'Kategorie', 'Geburtstag',
+            'Vorname', 'Nachname', 'Geburtsname', 'Kategorie', 'Tags', 'Geburtstag',
             'Straße', 'PLZ', 'Ort', 'Land', 'E-Mails', 'Telefonnummern', 'Notizen'
         ], ';');
 
@@ -28,12 +28,17 @@ final class CsvExportService
                 static fn (array $phone): string => $phone['label'] . ': ' . $phone['phone'],
                 $contact['phones']
             ));
+            $tags = implode(' | ', array_map(
+                static fn (array $tag): string => $tag['name'],
+                $contact['tags'] ?? []
+            ));
 
             fputcsv($out, [
                 $contact['vorname'],
                 $contact['nachname'],
                 $contact['geburtsname'],
                 $contact['category_name'],
+                $tags,
                 $contact['geburtstag'],
                 $contact['strasse'],
                 $contact['plz'],
@@ -49,4 +54,3 @@ final class CsvExportService
         exit;
     }
 }
-

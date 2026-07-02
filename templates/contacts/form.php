@@ -1,6 +1,8 @@
 <?php
 $editing = $contact !== null;
-$values = $contact ?? [
+$oldInput = $_SESSION['_old'] ?? [];
+$hasOld = $oldInput !== [];
+$defaults = [
     'vorname' => old('vorname'),
     'nachname' => old('nachname'),
     'geburtsname' => old('geburtsname'),
@@ -11,9 +13,30 @@ $values = $contact ?? [
     'ort' => old('ort'),
     'land' => old('land', config('defaults.country', 'Deutschland')),
     'notizen' => old('notizen'),
+    'tag_ids' => old('tag_ids', []),
     'emails' => old('emails', [['email' => '', 'label' => '']]),
     'phones' => old('phones', [['phone' => '', 'label' => 'Mobil']]),
 ];
+$values = $editing ? $contact : $defaults;
+if ($editing) {
+    if ($hasOld) {
+        foreach (['vorname', 'nachname', 'geburtsname', 'category_id', 'geburtstag', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
+            $values[$field] = $defaults[$field];
+        }
+    }
+    $values['emails'] = old('emails', $contact['emails'] ?: [['email' => '', 'label' => '']]);
+    $values['phones'] = old('phones', $contact['phones'] ?: [['phone' => '', 'label' => 'Mobil']]);
+    $values['tag_ids'] = $hasOld
+        ? (array) ($oldInput['tag_ids'] ?? [])
+        : array_map(static fn (array $tag): int => (int) $tag['id'], $contact['tags'] ?? []);
+}
+
+$linkedUser = $editing ? ($contact['linked_user'] ?? null) : null;
+$loginEnabled = can('users.manage') && ($hasOld ? array_key_exists('login_enabled', $oldInput) : $linkedUser !== null);
+$loginEmail = $hasOld
+    ? (string) ($oldInput['login_email'] ?? '')
+    : (string) ($linkedUser['email'] ?? ($values['emails'][0]['email'] ?? ''));
+$roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUser['role_id'] ?? '');
 ?>
 <section class="hero-card">
     <div class="hero-row">
@@ -51,6 +74,21 @@ $values = $contact ?? [
                 </label>
                 <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($values['geburtstag'] ?? '') ?>"></label>
                 <label><span>Land</span><input type="text" name="land" value="<?= e($values['land'] ?? '') ?>"></label>
+                <div class="full-width">
+                    <span>Tags</span>
+                    <div class="tag-picker">
+                        <?php foreach ($tags as $tag): ?>
+                            <?php $selected = in_array((int) $tag['id'], array_map('intval', (array) ($values['tag_ids'] ?? [])), true); ?>
+                            <label class="tag-option<?= $selected ? ' is-selected' : '' ?>">
+                                <input type="checkbox" name="tag_ids[]" value="<?= e((string) $tag['id']) ?>" <?= $selected ? 'checked' : '' ?>>
+                                <span><?= e($tag['name']) ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                        <?php if ($tags === []): ?>
+                            <p class="field-hint">Noch keine Tags angelegt.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -117,6 +155,49 @@ $values = $contact ?? [
                 </div>
             </section>
         </div>
+
+        <?php if (can('users.manage')): ?>
+            <section class="subsection-card">
+                <div class="section-head">
+                    <div>
+                        <h3>Login und Rolle</h3>
+                        <p class="muted">Ein Kontakt kann optional einen eigenen Zugang bekommen.</p>
+                    </div>
+                    <?php if ($linkedUser): ?>
+                        <div class="account-badge<?= (int) $linkedUser['is_active'] === 1 ? ' is-active' : '' ?>">
+                            <?= (int) $linkedUser['is_active'] === 1 ? 'Login aktiv' : 'Login deaktiviert' ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <div class="account-panel">
+                    <label class="toggle-row">
+                        <input type="checkbox" name="login_enabled" value="1" <?= $loginEnabled ? 'checked' : '' ?>>
+                        <span>Diesen Kontakt mit Login freischalten</span>
+                    </label>
+                    <div class="form-grid">
+                        <label>
+                            <span>Login-E-Mail</span>
+                            <input type="email" name="login_email" value="<?= e($loginEmail) ?>" placeholder="wird auch fuer Passwort-Reset verwendet">
+                        </label>
+                        <label>
+                            <span>Rolle</span>
+                            <select name="role_id">
+                                <option value="">Rolle waehlen</option>
+                                <?php foreach ($roles as $role): ?>
+                                    <option value="<?= e((string) $role['id']) ?>" <?= $roleId === (string) $role['id'] ? 'selected' : '' ?>>
+                                        <?= e($role['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                    </div>
+                    <p class="field-hint">Beim ersten Anlegen wird automatisch ein Erstpasswort erzeugt und nach dem Speichern eingeblendet.</p>
+                    <?php if ($linkedUser): ?>
+                        <p class="field-hint">Aktuell verknuepft: <?= e($linkedUser['email']) ?> als <?= e($linkedUser['role_name']) ?>.</p>
+                    <?php endif; ?>
+                </div>
+            </section>
+        <?php endif; ?>
 
         <div class="form-actions">
             <button type="submit"><?= $editing ? 'Änderungen speichern' : 'Kontakt speichern' ?></button>

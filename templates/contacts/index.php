@@ -2,6 +2,7 @@
 $contactCount = count($contacts);
 $emailCount = 0;
 $phoneCount = 0;
+$activeTagIds = array_map('intval', (array) ($filters['tag_ids'] ?? []));
 foreach ($contacts as $contact) {
     $emailCount += count($contact['emails']);
     $phoneCount += count($contact['phones']);
@@ -67,6 +68,21 @@ foreach ($contacts as $contact) {
                 <option value="desc" <?= ($filters['direction'] ?? '') === 'desc' ? 'selected' : '' ?>>Z bis A</option>
             </select>
         </label>
+        <div class="filter-tags">
+            <span>Tags</span>
+            <div class="tag-picker">
+                <?php foreach ($tags as $tag): ?>
+                    <?php $selected = in_array((int) $tag['id'], $activeTagIds, true); ?>
+                    <label class="tag-option<?= $selected ? ' is-selected' : '' ?>">
+                        <input type="checkbox" name="tag_ids[]" value="<?= e((string) $tag['id']) ?>" <?= $selected ? 'checked' : '' ?>>
+                        <span><?= e($tag['name']) ?></span>
+                    </label>
+                <?php endforeach; ?>
+                <?php if ($tags === []): ?>
+                    <p class="field-hint">Noch keine Tags angelegt.</p>
+                <?php endif; ?>
+            </div>
+        </div>
         <div class="filter-actions">
             <button type="submit">Filtern</button>
             <?php if (can('contacts.export')): ?>
@@ -101,6 +117,13 @@ foreach ($contacts as $contact) {
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
+                <?php if ($tags !== []): ?>
+                    <div class="quick-category-list">
+                        <?php foreach ($tags as $tag): ?>
+                            <button type="button" class="ghost-button" data-select-tag="<?= e((string) $tag['id']) ?>"><?= e($tag['name']) ?> markieren</button>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="bulk-card accent">
@@ -118,7 +141,7 @@ foreach ($contacts as $contact) {
 
         <div class="contacts-grid">
             <?php foreach ($contacts as $contact): ?>
-                <article class="contact-card" data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>">
+                <article class="contact-card" data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
                     <label class="contact-select">
                         <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox>
                         <span>Auswählen</span>
@@ -130,10 +153,20 @@ foreach ($contacts as $contact) {
                         </div>
                         <span class="tag"><?= e($contact['category_name'] ?: 'Ohne Kategorie') ?></span>
                     </div>
+                    <div class="tag-cluster">
+                        <?php foreach ($contact['tags'] as $tag): ?>
+                            <span class="tag tag-secondary"><?= e($tag['name']) ?></span>
+                        <?php endforeach; ?>
+                        <?php if (!empty($contact['linked_user'])): ?>
+                            <span class="tag tag-account<?= (int) $contact['linked_user']['is_active'] === 1 ? ' is-active' : '' ?>">
+                                <?= e($contact['linked_user']['role_name']) ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
 
                     <div class="contact-body">
                         <div class="contact-meta-list">
-                            <p><?= icon('location') ?><span><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span></p>
+                            <p><?= icon('location') ?><span><strong>Adresse</strong><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span></p>
                             <p><?= icon('globe') ?><span><?= e($contact['land'] ?: 'Deutschland') ?></span></p>
                             <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ?: 'Kein Geburtstag hinterlegt') ?></span></p>
                         </div>
@@ -155,6 +188,13 @@ foreach ($contacts as $contact) {
                                 <?php endforeach; ?>
                             </ul>
                         </div>
+
+                        <?php if (!empty($contact['linked_user'])): ?>
+                            <div class="account-summary">
+                                <strong>Login</strong>
+                                <p><?= e($contact['linked_user']['email']) ?></p>
+                            </div>
+                        <?php endif; ?>
 
                         <?php if (!empty($contact['notizen'])): ?><p class="note"><?= e($contact['notizen']) ?></p><?php endif; ?>
                     </div>
@@ -178,12 +218,22 @@ foreach ($contacts as $contact) {
 </section>
 
 <?php if (can('categories.manage')): ?>
-    <section class="panel narrow">
-        <h3>Kategorie ergänzen</h3>
-        <form method="post" action="<?= e(url('/categories/store')) ?>" class="inline-form">
-            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-            <input type="text" name="name" placeholder="Neue Kategorie" required>
-            <button type="submit">Speichern</button>
-        </form>
+    <section class="panel narrow stack">
+        <div>
+            <h3>Kategorie ergänzen</h3>
+            <form method="post" action="<?= e(url('/categories/store')) ?>" class="inline-form">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="text" name="name" placeholder="Neue Kategorie" required>
+                <button type="submit">Speichern</button>
+            </form>
+        </div>
+        <div>
+            <h3>Tag ergänzen</h3>
+            <form method="post" action="<?= e(url('/tags/store')) ?>" class="inline-form">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="text" name="name" placeholder="Neuer Tag" required>
+                <button type="submit">Speichern</button>
+            </form>
+        </div>
     </section>
 <?php endif; ?>

@@ -9,6 +9,8 @@ use App\Core\Request;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
 use App\Repositories\LogRepository;
+use App\Repositories\TagRepository;
+use App\Repositories\UserRepository;
 use App\Services\CsvExportService;
 use App\Services\UploadService;
 use App\Services\Validator;
@@ -20,6 +22,8 @@ final class ContactController extends BaseController
         \App\Core\Auth $auth,
         private ContactRepository $contacts,
         private CategoryRepository $categories,
+        private TagRepository $tags,
+        private UserRepository $users,
         private LogRepository $logs,
         private UploadService $uploads,
         private CsvExportService $csv
@@ -33,6 +37,7 @@ final class ContactController extends BaseController
         $filters = [
             'q' => trim((string) $request->input('q', '')),
             'category_id' => (string) $request->input('category_id', ''),
+            'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
             'sort' => (string) $request->input('sort', ''),
             'direction' => (string) $request->input('direction', 'asc'),
         ];
@@ -40,6 +45,7 @@ final class ContactController extends BaseController
         $this->render('contacts/index', [
             'contacts' => $this->contacts->search($filters),
             'categories' => $this->categories->all(),
+            'tags' => $this->tags->all(),
             'filters' => $filters,
             'phoneLabels' => config('defaults.phone_labels', []),
         ]);
@@ -51,6 +57,8 @@ final class ContactController extends BaseController
         $this->render('contacts/form', [
             'contact' => null,
             'categories' => $this->categories->all(),
+            'tags' => $this->tags->all(),
+            'roles' => $this->users->roles(),
             'phoneLabels' => config('defaults.phone_labels', []),
         ]);
     }
@@ -68,6 +76,16 @@ final class ContactController extends BaseController
             'plz' => ['required'],
             'ort' => ['required'],
         ]);
+        if (can('users.manage') && $data['login_enabled']) {
+            $errors = array_merge($errors, Validator::validate([
+                'login_email' => $data['login_email'],
+                'role_id' => (string) $data['role_id'],
+            ], [
+                'login_email' => ['required', 'email'],
+                'role_id' => ['required'],
+            ]));
+            $errors = array_merge($errors, $this->validateLinkedAccountUniqueness($data, null));
+        }
 
         if ($errors !== []) {
             $_SESSION['_errors'] = $errors;
@@ -77,8 +95,9 @@ final class ContactController extends BaseController
 
         $data['photo_path'] = $this->uploads->storePhoto($request->file('photo'));
         $contactId = $this->contacts->create($data, (int) $this->auth->user()['id']);
+        $accountMessage = $this->syncLinkedAccount($contactId, $data);
         $this->logs->addAudit((int) $this->auth->user()['id'], $contactId, 'created', 'Kontakt wurde angelegt.');
-        flash('success', 'Der Kontakt wurde angelegt.');
+        flash('success', trim('Der Kontakt wurde angelegt. ' . $accountMessage));
         Redirect::to('/');
     }
 
@@ -94,6 +113,8 @@ final class ContactController extends BaseController
         $this->render('contacts/form', [
             'contact' => $contact,
             'categories' => $this->categories->all(),
+            'tags' => $this->tags->all(),
+            'roles' => $this->users->roles(),
             'phoneLabels' => config('defaults.phone_labels', []),
         ]);
     }
@@ -110,10 +131,33 @@ final class ContactController extends BaseController
         }
 
         $data = $this->sanitizePayload($request);
+        $errors = Validator::validate($data, [
+            'vorname' => ['required'],
+            'nachname' => ['required'],
+            'strasse' => ['required'],
+            'plz' => ['required'],
+            'ort' => ['required'],
+        ]);
+        if (can('users.manage') && $data['login_enabled']) {
+            $errors = array_merge($errors, Validator::validate([
+                'login_email' => $data['login_email'],
+                'role_id' => (string) $data['role_id'],
+            ], [
+                'login_email' => ['required', 'email'],
+                'role_id' => ['required'],
+            ]));
+            $errors = array_merge($errors, $this->validateLinkedAccountUniqueness($data, $id));
+        }
+        if ($errors !== []) {
+            $_SESSION['_errors'] = $errors;
+            $_SESSION['_old'] = $request->all();
+            Redirect::to('/contacts/edit?id=' . $id);
+        }
         $data['photo_path'] = $this->uploads->storePhoto($request->file('photo'), $existing['photo_path']);
         $this->contacts->update($id, $data, (int) $this->auth->user()['id']);
+        $accountMessage = $this->syncLinkedAccount($id, $data);
         $this->logs->addAudit((int) $this->auth->user()['id'], $id, 'updated', 'Kontaktdaten wurden aktualisiert.');
-        flash('success', 'Der Kontakt wurde gespeichert.');
+        flash('success', trim('Der Kontakt wurde gespeichert. ' . $accountMessage));
         Redirect::to('/');
     }
 
@@ -122,8 +166,13 @@ final class ContactController extends BaseController
         $this->requirePermission('contacts.delete');
         Csrf::validate($request->input('_csrf'));
         $id = (int) $request->input('id');
+        $contact = $this->contacts->find($id);
+        $this->users->deactivateByContactId($id);
         $this->contacts->delete($id);
-        $this->logs->addAudit((int) $this->auth->user()['id'], $id, 'deleted', 'Kontakt wurde gelöscht.');
+        $details = $contact
+            ? 'Kontakt wurde gelöscht: ' . $contact['vorname'] . ' ' . $contact['nachname'] . '.'
+            : 'Kontakt wurde gelöscht.';
+        $this->logs->addAudit((int) $this->auth->user()['id'], null, 'deleted', $details);
         flash('success', 'Der Kontakt wurde gelöscht.');
         Redirect::to('/');
     }
@@ -134,6 +183,7 @@ final class ContactController extends BaseController
         $filters = [
             'q' => trim((string) $request->input('q', '')),
             'category_id' => (string) $request->input('category_id', ''),
+            'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
             'sort' => (string) $request->input('sort', ''),
             'direction' => (string) $request->input('direction', 'asc'),
         ];
@@ -160,6 +210,12 @@ final class ContactController extends BaseController
             }
         }
 
+        $loginEnabled = can('users.manage') && $request->input('login_enabled') !== null;
+        $loginEmail = trim((string) $request->input('login_email'));
+        if ($loginEmail === '' && isset($emails[0]['email'])) {
+            $loginEmail = $emails[0]['email'];
+        }
+
         return [
             'vorname' => trim((string) $request->input('vorname')),
             'nachname' => trim((string) $request->input('nachname')),
@@ -171,9 +227,100 @@ final class ContactController extends BaseController
             'ort' => trim((string) $request->input('ort')),
             'land' => trim((string) $request->input('land', (string) config('defaults.country', 'Deutschland'))),
             'notizen' => trim((string) $request->input('notizen')),
+            'tag_ids' => array_values(array_filter(array_map('intval', (array) $request->input('tag_ids', [])))),
             'emails' => $emails,
             'phones' => $phones,
+            'login_enabled' => $loginEnabled,
+            'login_email' => $loginEmail,
+            'role_id' => (int) $request->input('role_id'),
+        ];
+    }
+
+    private function syncLinkedAccount(int $contactId, array $data): string
+    {
+        if (!can('users.manage')) {
+            return '';
+        }
+
+        $fullName = trim($data['vorname'] . ' ' . $data['nachname']);
+        $linkedUser = $this->users->findByContactId($contactId);
+
+        if (!$data['login_enabled']) {
+            if ($linkedUser) {
+                $this->users->updateLinkedAccount((int) $linkedUser['id'], [
+                    'name' => $fullName,
+                    'email' => $data['login_email'] ?: $linkedUser['email'],
+                    'role_id' => $data['role_id'] ?: (int) $linkedUser['role_id'],
+                    'is_active' => 0,
+                    'contact_id' => $contactId,
+                ]);
+
+                return 'Der verknüpfte Login wurde deaktiviert.';
+            }
+
+            return '';
+        }
+
+        if ($linkedUser) {
+            $this->users->updateLinkedAccount((int) $linkedUser['id'], [
+                'name' => $fullName,
+                'email' => $data['login_email'],
+                'role_id' => $data['role_id'],
+                'is_active' => 1,
+                'contact_id' => $contactId,
+            ]);
+
+            return 'Login und Rolle wurden aktualisiert.';
+        }
+
+        $existingUser = $this->users->findByEmail($data['login_email']);
+        if ($existingUser && empty($existingUser['contact_id'])) {
+            $this->users->updateLinkedAccount((int) $existingUser['id'], [
+                'name' => $fullName,
+                'email' => $data['login_email'],
+                'role_id' => $data['role_id'],
+                'is_active' => 1,
+                'contact_id' => $contactId,
+            ]);
+
+            return 'Bestehendes Benutzerkonto wurde mit diesem Kontakt verknuepft.';
+        }
+
+        $password = $this->generatePassword();
+        $this->users->create([
+            'name' => $fullName,
+            'email' => $data['login_email'],
+            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'role_id' => $data['role_id'],
+            'is_active' => 1,
+            'contact_id' => $contactId,
+        ]);
+
+        return 'Login angelegt. Erstpasswort: ' . $password;
+    }
+
+    private function generatePassword(): string
+    {
+        return substr(strtr(base64_encode(random_bytes(12)), '+/', 'AZ'), 0, 16);
+    }
+
+    private function validateLinkedAccountUniqueness(array $data, ?int $contactId): array
+    {
+        if (($data['login_email'] ?? '') === '') {
+            return [];
+        }
+
+        $existingUser = $this->users->findByEmail($data['login_email']);
+        if (!$existingUser) {
+            return [];
+        }
+
+        if ((int) ($existingUser['contact_id'] ?? 0) === (int) ($contactId ?? 0) || empty($existingUser['contact_id'])) {
+            return [];
+        }
+
+        return [
+            'login_email' => 'Diese Login-E-Mail wird bereits von einem anderen Benutzerkonto verwendet.',
         ];
     }
 }
-

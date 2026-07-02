@@ -30,6 +30,25 @@ final class ContactRepository
             $params['category_id'] = (int) $filters['category_id'];
         }
 
+        $tagIds = array_values(array_filter(
+            array_map('intval', (array) ($filters['tag_ids'] ?? [])),
+            static fn (int $id): bool => $id > 0
+        ));
+        if ($tagIds !== []) {
+            $placeholders = [];
+            foreach ($tagIds as $index => $tagId) {
+                $placeholder = 'tag_id_' . $index;
+                $placeholders[] = ':' . $placeholder;
+                $params[$placeholder] = $tagId;
+            }
+            $sql .= ' AND EXISTS (
+                SELECT 1
+                FROM contact_tags
+                WHERE contact_tags.contact_id = contacts.id
+                AND contact_tags.tag_id IN (' . implode(', ', $placeholders) . ')
+            )';
+        }
+
         $allowedSorts = ['nachname', 'category_name'];
         $sort = in_array($filters['sort'] ?? '', $allowedSorts, true) ? $filters['sort'] : 'nachname';
         $direction = strtolower((string) ($filters['direction'] ?? 'asc')) === 'desc' ? 'DESC' : 'ASC';
@@ -42,8 +61,7 @@ final class ContactRepository
         $contacts = $stmt->fetchAll();
 
         foreach ($contacts as &$contact) {
-            $contact['emails'] = $this->emailsForContact((int) $contact['id']);
-            $contact['phones'] = $this->phonesForContact((int) $contact['id']);
+            $this->hydrateContact($contact);
         }
 
         return $contacts;
@@ -64,8 +82,7 @@ final class ContactRepository
             return null;
         }
 
-        $contact['emails'] = $this->emailsForContact($id);
-        $contact['phones'] = $this->phonesForContact($id);
+        $this->hydrateContact($contact);
 
         return $contact;
     }
@@ -97,6 +114,7 @@ final class ContactRepository
         $contactId = (int) $this->pdo->lastInsertId();
         $this->syncEmails($contactId, $data['emails'] ?? []);
         $this->syncPhones($contactId, $data['phones'] ?? []);
+        $this->syncTags($contactId, $data['tag_ids'] ?? []);
 
         return $contactId;
     }
@@ -137,6 +155,7 @@ final class ContactRepository
 
         $this->syncEmails($id, $data['emails'] ?? []);
         $this->syncPhones($id, $data['phones'] ?? []);
+        $this->syncTags($id, $data['tag_ids'] ?? []);
     }
 
     public function delete(int $id): void
@@ -163,11 +182,19 @@ final class ContactRepository
         $contacts = $stmt->fetchAll();
 
         foreach ($contacts as &$contact) {
-            $contact['emails'] = $this->emailsForContact((int) $contact['id']);
-            $contact['phones'] = $this->phonesForContact((int) $contact['id']);
+            $this->hydrateContact($contact);
         }
 
         return $contacts;
+    }
+
+    private function hydrateContact(array &$contact): void
+    {
+        $contactId = (int) $contact['id'];
+        $contact['emails'] = $this->emailsForContact($contactId);
+        $contact['phones'] = $this->phonesForContact($contactId);
+        $contact['tags'] = $this->tagsForContact($contactId);
+        $contact['linked_user'] = $this->linkedUserForContact($contactId);
     }
 
     private function emailsForContact(int $contactId): array
@@ -182,6 +209,34 @@ final class ContactRepository
         $stmt = $this->pdo->prepare('SELECT * FROM contact_phones WHERE contact_id = :contact_id ORDER BY id');
         $stmt->execute(['contact_id' => $contactId]);
         return $stmt->fetchAll();
+    }
+
+    private function tagsForContact(int $contactId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT tags.*
+             FROM tags
+             JOIN contact_tags ON contact_tags.tag_id = tags.id
+             WHERE contact_tags.contact_id = :contact_id
+             ORDER BY tags.name'
+        );
+        $stmt->execute(['contact_id' => $contactId]);
+
+        return $stmt->fetchAll();
+    }
+
+    private function linkedUserForContact(int $contactId): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT users.id, users.email, users.role_id, users.is_active, roles.name AS role_name
+             FROM users
+             JOIN roles ON roles.id = users.role_id
+             WHERE users.contact_id = :contact_id
+             LIMIT 1'
+        );
+        $stmt->execute(['contact_id' => $contactId]);
+
+        return $stmt->fetch() ?: null;
     }
 
     private function syncEmails(int $contactId, array $emails): void
@@ -217,5 +272,18 @@ final class ContactRepository
             ]);
         }
     }
-}
 
+    private function syncTags(int $contactId, array $tagIds): void
+    {
+        $this->pdo->prepare('DELETE FROM contact_tags WHERE contact_id = :contact_id')->execute(['contact_id' => $contactId]);
+        $stmt = $this->pdo->prepare('INSERT INTO contact_tags (contact_id, tag_id) VALUES (:contact_id, :tag_id)');
+
+        $tagIds = array_unique(array_filter(array_map('intval', $tagIds), static fn (int $id): bool => $id > 0));
+        foreach ($tagIds as $tagId) {
+            $stmt->execute([
+                'contact_id' => $contactId,
+                'tag_id' => $tagId,
+            ]);
+        }
+    }
+}

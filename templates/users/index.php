@@ -1,7 +1,7 @@
 <section class="hero-card">
     <p class="eyebrow">Benutzerverwaltung</p>
     <h2>Accounts für euer Team</h2>
-    <p class="muted">Neue Accounts erhalten ein einmalig angezeigtes Erstpasswort.</p>
+    <p class="muted">Neue Accounts erhalten ein einmalig angezeigtes Erstpasswort. Fuer Kontakte ist der bequemere Weg jetzt direkt im Kontaktformular.</p>
 
     <form method="post" action="<?= e(url('/users/store')) ?>" class="form-grid">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
@@ -28,6 +28,7 @@
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Verknüpfter Kontakt</th>
                     <th>E-Mail</th>
                     <th>Rolle</th>
                     <th>Status</th>
@@ -38,6 +39,7 @@
                 <?php foreach ($users as $user): ?>
                     <tr>
                         <td><?= e($user['name']) ?></td>
+                        <td><?= e(trim(($user['vorname'] ?? '') . ' ' . ($user['nachname'] ?? '')) ?: 'Keiner') ?></td>
                         <td><?= e($user['email']) ?></td>
                         <td><?= e($user['role_name']) ?></td>
                         <td><?= (int) $user['is_active'] === 1 ? 'Aktiv' : 'Inaktiv' ?></td>
@@ -48,4 +50,3 @@
         </table>
     </div>
 </section>
-

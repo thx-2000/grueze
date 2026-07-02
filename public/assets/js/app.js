@@ -94,6 +94,18 @@ document.querySelectorAll('[data-select-category]').forEach((button) => {
     });
 });
 
+document.querySelectorAll('[data-select-tag]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const tagId = button.dataset.selectTag;
+        document.querySelectorAll('.contact-card').forEach((card) => {
+            const checkbox = card.querySelector('[data-contact-checkbox]');
+            const tagIds = (card.dataset.tagIds || '').split(',').filter(Boolean);
+            checkbox.checked = tagIds.includes(tagId);
+        });
+        updateSelectionUI();
+    });
+});
+
 document.querySelectorAll('[data-contact-checkbox]').forEach((checkbox) => {
     checkbox.addEventListener('change', updateSelectionUI);
 });
