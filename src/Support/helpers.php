@@ -17,6 +17,15 @@ function url(string $path = ''): string
     return $base . ($path === '/' ? '' : $path);
 }
 
+function asset_url(string $path): string
+{
+    $normalizedPath = '/' . ltrim($path, '/');
+    $absolutePath = dirname(__DIR__, 2) . '/public' . $normalizedPath;
+    $version = is_file($absolutePath) ? (string) filemtime($absolutePath) : '1';
+
+    return url($normalizedPath . '?v=' . rawurlencode($version));
+}
+
 function config(string $key, mixed $default = null): mixed
 {
     return App\Core\Config::get($key, $default);

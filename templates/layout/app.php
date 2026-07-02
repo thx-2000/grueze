@@ -12,8 +12,8 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e(config('app.name', 'Abi Adress Zentrale')) ?></title>
-    <link rel="stylesheet" href="<?= e(url('/assets/css/theme.css')) ?>">
-    <link rel="stylesheet" href="<?= e(url('/assets/css/app.css')) ?>">
+    <link rel="stylesheet" href="<?= e(asset_url('/assets/css/theme.css')) ?>">
+    <link rel="stylesheet" href="<?= e(asset_url('/assets/css/app.css')) ?>">
 </head>
 <body>
     <div class="page-shell">
@@ -87,6 +87,6 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
             batchUrl: <?= json_encode(url('/mail/batch'), JSON_THROW_ON_ERROR) ?>
         };
     </script>
-    <script src="<?= e(url('/assets/js/app.js')) ?>" defer></script>
+    <script src="<?= e(asset_url('/assets/js/app.js')) ?>" defer></script>
 </body>
 </html>
