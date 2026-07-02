@@ -61,6 +61,7 @@ final class Auth
         $matrix = [
             'contacts.manage' => ['admin', 'orga', 'stufenmitglied'],
             'contacts.delete' => ['admin', 'orga'],
+            'contacts.view_private_details' => (array) config('security.private_contact_detail_roles', ['admin', 'orga', 'stufenmitglied']),
             'categories.manage' => ['admin', 'orga'],
             'contacts.export' => ['admin', 'orga'],
             'contacts.copy_emails' => ['admin', 'orga', 'stufenmitglied', 'betrachter'],
@@ -73,4 +74,3 @@ final class Auth
         return in_array($user['role_name'], $matrix[$permission] ?? [], true);
     }
 }
-

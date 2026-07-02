@@ -10,6 +10,7 @@ Eine mobile-first PHP-Web-App für die Verwaltung von Kontaktdaten einer Abi-Stu
 4. Per Composer `phpmailer/phpmailer` installieren, wenn SMTP-Versand genutzt werden soll. Ohne PHPMailer fällt die App auf `mail()` zurück.
 5. Sicherstellen, dass `assets/uploads/` und `storage/tmp/` beschreibbar sind.
 6. Einen ersten Admin-Datensatz in `users` anlegen. Die zugehörige `role_id` ist die `admin`-Rolle aus `roles`.
+7. Über `security.private_contact_detail_roles` kann gesteuert werden, welche Rollen volle Kontaktangaben sehen dürfen. Alle anderen sehen nur die reduzierte Ansicht.
 
 Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufrufen. Dort laesst sich genau ein erstes Admin-Konto ueber die Anwendung anlegen, solange noch kein Admin existiert.
 

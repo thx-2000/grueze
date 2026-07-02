@@ -5,6 +5,7 @@ $phoneCount = 0;
 $activeTagIds = array_map('intval', (array) ($filters['tag_ids'] ?? []));
 $currentSort = (string) ($filters['sort'] ?? 'nachname');
 $currentDirection = (string) ($filters['direction'] ?? 'asc');
+$canViewPrivateDetails = can('contacts.view_private_details');
 foreach ($contacts as $contact) {
     $emailCount += count($contact['emails']);
     $phoneCount += count($contact['phones']);
@@ -152,7 +153,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
             <div class="bulk-card accent">
                 <span class="bulk-title">Aktionen für Auswahl</span>
                 <div class="toolbar-actions">
-                    <?php if (can('contacts.copy_emails')): ?>
+                    <?php if ($canViewPrivateDetails && can('contacts.copy_emails')): ?>
                         <button type="button" id="copyEmailsButton"><?= icon('copy') ?><span>E-Mail-Adressen kopieren</span></button>
                     <?php endif; ?>
                     <?php if (can('mail.send')): ?>
@@ -165,16 +166,20 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         <div class="table-options">
             <div>
                 <strong>Ansicht</strong>
-                <p class="muted">Auf größeren Bildschirmen ist die Tabelle kompakter und besser sortierbar.</p>
+                <p class="muted">
+                    <?= $canViewPrivateDetails ? 'Auf größeren Bildschirmen ist die Tabelle kompakter und besser sortierbar.' : 'Diese Rolle sieht bewusst nur Namen, Kategorie und Tags.' ?>
+                </p>
             </div>
             <div class="column-toggle-list">
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="category" checked><span>Kategorie</span></label>
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="tags" checked><span>Tags</span></label>
-                <label class="column-toggle"><input type="checkbox" data-column-toggle="adresse" checked><span>Adresse</span></label>
-                <label class="column-toggle"><input type="checkbox" data-column-toggle="geburtstag" checked><span>Geburtstag</span></label>
-                <label class="column-toggle"><input type="checkbox" data-column-toggle="emails" checked><span>E-Mail</span></label>
-                <label class="column-toggle"><input type="checkbox" data-column-toggle="phones" checked><span>Telefon</span></label>
-                <label class="column-toggle"><input type="checkbox" data-column-toggle="login" checked><span>Login</span></label>
+                <?php if ($canViewPrivateDetails): ?>
+                    <label class="column-toggle"><input type="checkbox" data-column-toggle="adresse" checked><span>Adresse</span></label>
+                    <label class="column-toggle"><input type="checkbox" data-column-toggle="geburtstag" checked><span>Geburtstag</span></label>
+                    <label class="column-toggle"><input type="checkbox" data-column-toggle="emails" checked><span>E-Mail</span></label>
+                    <label class="column-toggle"><input type="checkbox" data-column-toggle="phones" checked><span>Telefon</span></label>
+                    <label class="column-toggle"><input type="checkbox" data-column-toggle="login" checked><span>Login</span></label>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -187,11 +192,13 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         <th><a class="sort-link" href="<?= e($buildSortUrl('vorname')) ?>"><?= e($sortLabel('vorname', 'Vorname')) ?></a></th>
                         <th data-col="category"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>"><?= e($sortLabel('category_name', 'Kategorie')) ?></a></th>
                         <th data-col="tags">Tags</th>
-                        <th data-col="adresse"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>"><?= e($sortLabel('ort', 'Adresse')) ?></a></th>
-                        <th data-col="geburtstag"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>"><?= e($sortLabel('geburtstag', 'Geburtstag')) ?></a></th>
-                        <th data-col="emails">E-Mail</th>
-                        <th data-col="phones">Telefon</th>
-                        <th data-col="login">Login / Rolle</th>
+                        <?php if ($canViewPrivateDetails): ?>
+                            <th data-col="adresse"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>"><?= e($sortLabel('ort', 'Adresse')) ?></a></th>
+                            <th data-col="geburtstag"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>"><?= e($sortLabel('geburtstag', 'Geburtstag')) ?></a></th>
+                            <th data-col="emails">E-Mail</th>
+                            <th data-col="phones">Telefon</th>
+                            <th data-col="login">Login / Rolle</th>
+                        <?php endif; ?>
                         <?php if (can('contacts.manage')): ?>
                             <th class="col-actions">Aktionen</th>
                         <?php endif; ?>
@@ -215,38 +222,40 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                     <?php endforeach; ?>
                                 </div>
                             </td>
-                            <td data-col="adresse">
-                                <div class="table-stack">
-                                    <span><?= e($contact['strasse']) ?></span>
-                                    <span><?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span>
-                                    <span class="muted"><?= e($contact['land'] ?: 'Deutschland') ?></span>
-                                </div>
-                            </td>
-                            <td data-col="geburtstag"><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : '—') ?></td>
-                            <td data-col="emails">
-                                <div class="table-stack">
-                                    <?php foreach ($contact['emails'] as $email): ?>
-                                        <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e($email['email']) ?></a>
-                                    <?php endforeach; ?>
-                                </div>
-                            </td>
-                            <td data-col="phones">
-                                <div class="table-stack">
-                                    <?php foreach ($contact['phones'] as $phone): ?>
-                                        <a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['phone']) ?></a>
-                                    <?php endforeach; ?>
-                                </div>
-                            </td>
-                            <td data-col="login">
-                                <?php if (!empty($contact['linked_user'])): ?>
+                            <?php if ($canViewPrivateDetails): ?>
+                                <td data-col="adresse">
                                     <div class="table-stack">
-                                        <span><?= e($contact['linked_user']['email']) ?></span>
-                                        <span class="muted"><?= e($contact['linked_user']['role_name']) ?></span>
+                                        <span><?= e($contact['strasse']) ?></span>
+                                        <span><?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span>
+                                        <span class="muted"><?= e($contact['land'] ?: 'Deutschland') ?></span>
                                     </div>
-                                <?php else: ?>
-                                    <span class="muted">Kein Login</span>
-                                <?php endif; ?>
-                            </td>
+                                </td>
+                                <td data-col="geburtstag"><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : '—') ?></td>
+                                <td data-col="emails">
+                                    <div class="table-stack">
+                                        <?php foreach ($contact['emails'] as $email): ?>
+                                            <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e($email['email']) ?></a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </td>
+                                <td data-col="phones">
+                                    <div class="table-stack">
+                                        <?php foreach ($contact['phones'] as $phone): ?>
+                                            <a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['phone']) ?></a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </td>
+                                <td data-col="login">
+                                    <?php if (!empty($contact['linked_user'])): ?>
+                                        <div class="table-stack">
+                                            <span><?= e($contact['linked_user']['email']) ?></span>
+                                            <span class="muted"><?= e($contact['linked_user']['role_name']) ?></span>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="muted">Kein Login</span>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
                             <?php if (can('contacts.manage')): ?>
                                 <td class="col-actions">
                                     <div class="table-actions">
@@ -286,43 +295,45 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     </div>
 
                     <div class="contact-body">
-                        <div class="contact-meta-list">
-                            <p><?= icon('location') ?><span><strong>Adresse</strong><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span></p>
-                            <p><?= icon('globe') ?><span><?= e($contact['land'] ?: 'Deutschland') ?></span></p>
-                            <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : 'Kein Geburtstag hinterlegt') ?></span></p>
-                        </div>
-
-                        <div>
-                            <strong>E-Mail-Adressen</strong>
-                            <ul class="mini-list">
-                                <?php foreach ($contact['emails'] as $email): ?>
-                                    <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e(($email['label'] ? $email['label'] . ': ' : '') . $email['email']) ?></a></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <strong>Telefonnummern</strong>
-                            <ul class="mini-list">
-                                <?php foreach ($contact['phones'] as $phone): ?>
-                                    <li><a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['label'] . ': ' . $phone['phone']) ?></a></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-
-                        <?php if (!empty($contact['linked_user'])): ?>
-                            <div class="account-summary">
-                                <strong>Login</strong>
-                                <p><?= e($contact['linked_user']['email']) ?></p>
+                        <?php if ($canViewPrivateDetails): ?>
+                            <div class="contact-meta-list">
+                                <p><?= icon('location') ?><span><strong>Adresse</strong><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span></p>
+                                <p><?= icon('globe') ?><span><?= e($contact['land'] ?: 'Deutschland') ?></span></p>
+                                <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : 'Kein Geburtstag hinterlegt') ?></span></p>
                             </div>
-                        <?php endif; ?>
 
-                        <?php if (!empty($contact['notizen'])): ?><p class="note"><?= e($contact['notizen']) ?></p><?php endif; ?>
+                            <div>
+                                <strong>E-Mail-Adressen</strong>
+                                <ul class="mini-list">
+                                    <?php foreach ($contact['emails'] as $email): ?>
+                                        <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e(($email['label'] ? $email['label'] . ': ' : '') . $email['email']) ?></a></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <strong>Telefonnummern</strong>
+                                <ul class="mini-list">
+                                    <?php foreach ($contact['phones'] as $phone): ?>
+                                        <li><a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['label'] . ': ' . $phone['phone']) ?></a></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+
+                            <?php if (!empty($contact['linked_user'])): ?>
+                                <div class="account-summary">
+                                    <strong>Login</strong>
+                                    <p><?= e($contact['linked_user']['email']) ?></p>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (!empty($contact['notizen'])): ?><p class="note"><?= e($contact['notizen']) ?></p><?php endif; ?>
+                        <?php endif; ?>
                     </div>
 
                     <?php if (can('contacts.manage')): ?>
                         <div class="card-actions">
-                            <a class="ghost-button" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span>Bearbeiten</span></a>
+                            <a class="ghost-button icon-button" title="Kontakt bearbeiten" aria-label="Kontakt bearbeiten" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span class="visually-hidden">Bearbeiten</span></a>
                         </div>
                     <?php endif; ?>
                 </article>

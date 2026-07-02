@@ -62,6 +62,7 @@ return [
         'login_max_attempts' => 5,
         'login_lock_minutes' => 10,
         'password_reset_expires_minutes' => 60,
+        'private_contact_detail_roles' => ['admin', 'orga', 'stufenmitglied'],
         'photo_max_size' => 2097152,
         'allowed_photo_types' => [
             'image/jpeg',
@@ -82,7 +83,7 @@ return [
             'admin' => 'Vollzugriff inklusive Benutzerverwaltung',
             'orga' => 'Organisationsteam mit Verwaltungsrechten',
             'stufenmitglied' => 'Kann Kontakte pflegen und E-Mails kopieren',
-            'betrachter' => 'Kann Kontakte ansehen und E-Mails kopieren',
+            'betrachter' => 'Kann Kontakte in reduzierter Ansicht sehen',
         ],
     ],
 ];
