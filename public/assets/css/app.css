@@ -1165,6 +1165,10 @@ code {
         display: grid;
     }
 
+    .selection-tools {
+        justify-items: end;
+    }
+
     .filter-grid,
     .form-grid,
     .repeater-row {
