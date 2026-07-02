@@ -30,6 +30,20 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
                 <input type="hidden" name="sender_key" value="<?= e($draft['sender_key'] ?? $defaultSenderKey) ?>">
                 <input type="hidden" name="reply_to_key" value="<?= e($draft['reply_to_key'] ?? ($replyToOptions[0]['key'] ?? $defaultReplyToKey)) ?>">
                 <input type="hidden" name="subject_prefix" id="subjectPrefixField" value="<?= e($activeSubjectPrefix) ?>">
+                <div class="subsection-card full-width workflow-card">
+                    <div class="workflow-card-head">
+                        <span class="workflow-icon"><?= icon('mail-open') ?></span>
+                        <div>
+                            <strong>So läuft diese Kontaktaufnahme ab</strong>
+                            <p class="detail-hint">Du schreibst genau einer Person. Die eigentliche Zieladresse bleibt verborgen, Antworten kommen direkt zu deiner Login-Mailadresse zurück.</p>
+                        </div>
+                    </div>
+                    <ol class="workflow-list">
+                        <li>Formuliere deine Nachricht wie gewohnt.</li>
+                        <li>Das System verschickt sie technisch über den Mailer, aber Antworten landen bei dir.</li>
+                        <li>Falls dir zu einem Kontakt noch eine fehlende Mailadresse bekannt ist, schicke sie bitte zusätzlich an <a href="mailto:kontakt@example.org">kontakt@example.org</a>.</li>
+                    </ol>
+                </div>
                 <div class="subsection-card full-width">
                     <strong>Absender und Antwortweg</strong>
                     <div class="mail-footer-preview">Die Nachricht wird über den Mailer verschickt. Antworten gehen automatisch direkt an deine eigene Login-Mailadresse.</div>

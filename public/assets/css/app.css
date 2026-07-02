@@ -767,6 +767,7 @@ label span {
 }
 
 .status-icon,
+.missing-email-badge,
 .missing-contact-value {
     display: inline-flex;
     align-items: center;
@@ -783,7 +784,20 @@ label span {
     background: rgba(255, 179, 0, 0.14);
 }
 
+.missing-email-badge {
+    align-self: center;
+    padding: 0.22rem 0.52rem;
+    border-radius: 999px;
+    background: rgba(229, 255, 58, 0.16);
+    border: 1px solid rgba(167, 186, 31, 0.22);
+    color: var(--color-primary-strong);
+    font-size: 0.78rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
 .status-icon .icon,
+.missing-email-badge .icon,
 .missing-contact-value .icon {
     color: currentColor;
 }
@@ -894,6 +908,50 @@ label span {
     margin: 0;
     color: var(--color-muted);
     line-height: 1.5;
+}
+
+.workflow-card {
+    display: grid;
+    gap: 0.85rem;
+    padding: 0.92rem 0.98rem;
+    border-radius: var(--radius-md);
+    background: rgba(238, 240, 233, 0.98);
+    border: 1px solid rgba(38, 42, 32, 0.08);
+    margin-bottom: 0.95rem;
+}
+
+.workflow-card-head {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+}
+
+.workflow-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(229, 255, 58, 0.18);
+    color: var(--color-primary-strong);
+    flex: 0 0 2rem;
+}
+
+.workflow-icon .icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.workflow-list {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--color-text);
+    line-height: 1.55;
+}
+
+.workflow-list li + li {
+    margin-top: 0.35rem;
 }
 
 .tag-picker {

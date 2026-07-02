@@ -31,9 +31,16 @@ foreach ($detailFieldLabels as $fieldKey => $fieldLabel) {
 $canCopyVisibleEmails = $visibleContactFields['emails'] && can('contacts.copy_emails');
 $canSendRegularMail = can('mail.send');
 $canSendSingleContactMail = can('mail.contact_single');
+$contactWithEmailCount = 0;
+$contactWithoutEmailCount = 0;
 foreach ($contacts as $contact) {
     $emailCount += count($contact['emails']);
     $phoneCount += count($contact['phones']);
+    if (($contact['emails'] ?? []) === []) {
+        $contactWithoutEmailCount++;
+    } else {
+        $contactWithEmailCount++;
+    }
 }
 
 $buildSortUrl = static function (string $sortKey) use ($filters, $currentSort, $currentDirection): string {
@@ -58,7 +65,11 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         <div>
             <p class="eyebrow">Kontaktverwaltung</p>
             <h2>Alle Kontakte an einem Ort</h2>
-            <p class="muted">Schnell filtern, markieren, exportieren oder für Mailings verwenden.</p>
+            <p class="muted">
+                <?= $canSendSingleContactMail
+                    ? 'Fehlende Mailadressen erkennen und einzelne Personen diskret kontaktieren.'
+                    : 'Schnell filtern, markieren, exportieren oder für Mailings verwenden.' ?>
+            </p>
         </div>
         <?php if (can('contacts.manage')): ?>
             <div class="hero-actions">
@@ -75,13 +86,13 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         </article>
         <article class="stat-card">
             <?= icon('mail') ?>
-            <span class="stat-label">E-Mail-Adressen</span>
-            <strong><?= e((string) $emailCount) ?></strong>
+            <span class="stat-label"><?= $canSendSingleContactMail ? 'Mit Mailadresse' : 'E-Mail-Adressen' ?></span>
+            <strong><?= e((string) ($canSendSingleContactMail ? $contactWithEmailCount : $emailCount)) ?></strong>
         </article>
         <article class="stat-card">
-            <?= icon('user') ?>
-            <span class="stat-label">Telefonnummern</span>
-            <strong><?= e((string) $phoneCount) ?></strong>
+            <?= $canSendSingleContactMail ? icon('mail-off') : icon('user') ?>
+            <span class="stat-label"><?= $canSendSingleContactMail ? 'Mailadresse fehlt' : 'Telefonnummern' ?></span>
+            <strong><?= e((string) ($canSendSingleContactMail ? $contactWithoutEmailCount : $phoneCount)) ?></strong>
         </article>
     </div>
 
@@ -189,11 +200,11 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     <?php if ($canSendRegularMail): ?>
                         <button type="submit" class="button-link"><?= icon('edit') ?><span>E-Mail verfassen</span></button>
                     <?php elseif ($canSendSingleContactMail): ?>
-                        <button type="submit" class="button-link"><?= icon('edit') ?><span>Kontakt aufnehmen</span></button>
+                        <button type="submit" class="button-link"><?= icon('mail-open') ?><span>Person kontaktieren</span></button>
                     <?php endif; ?>
                 </div>
                 <?php if ($canSendSingleContactMail): ?>
-                    <p class="detail-hint">Stufenmitglieder können hier einzelne Personen kontaktieren. Die Zieladresse bleibt verborgen, Antworten gehen direkt an die absendende Person.</p>
+                    <p class="detail-hint">Je Auswahl ist genau eine Person erlaubt. Die Zieladresse bleibt verborgen, Antworten gehen direkt an deine eigene Login-Mailadresse.</p>
                 <?php endif; ?>
                 <?php if (can('contacts.manage')): ?>
                     <div class="bulk-editor">
@@ -253,6 +264,23 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
             </div>
         </div>
 
+        <?php if ($canSendSingleContactMail): ?>
+            <aside class="workflow-card" aria-label="Hinweise zur Kontaktaufnahme">
+                <div class="workflow-card-head">
+                    <span class="workflow-icon"><?= icon('mail-open') ?></span>
+                    <div>
+                        <strong>So funktioniert die Kontaktaufnahme</strong>
+                        <p class="detail-hint">Diese Ansicht ist bewusst auf zwei Aufgaben reduziert: fehlende Mailadressen erkennen und genau eine Person kontaktieren.</p>
+                    </div>
+                </div>
+                <ol class="workflow-list">
+                    <li>Wenn neben einem Namen <strong>Mail fehlt</strong> steht, liegt uns noch keine Adresse vor.</li>
+                    <li>Wenn du die fehlende Adresse kennst, schicke sie bitte an <a href="mailto:kontakt@example.org">kontakt@example.org</a>.</li>
+                    <li>Für eine Kontaktaufnahme genau eine Person auswählen und <strong>Person kontaktieren</strong> klicken. Die Zieladresse bleibt verborgen, Antworten gehen an dich.</li>
+                </ol>
+            </aside>
+        <?php endif; ?>
+
         <div class="table-options">
             <div>
                 <strong>Ansicht</strong>
@@ -263,7 +291,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             Sichtbar sind aktuell: <?= e(implode(', ', $visibleDetailLabels)) ?>.
                         <?php endif; ?>
                     <?php else: ?>
-                        Diese Rolle sieht bewusst nur Namen, Kategorie und Tags.
+                        Diese Rolle sieht bewusst nur Namen, Kategorie und Tags. <strong>Mail fehlt</strong> markiert Kontakte ohne hinterlegte Adresse.
                     <?php endif; ?>
                 </p>
             </div>
@@ -336,7 +364,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                         <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
                                     <?php endif; ?>
                                     <?php if (($contact['emails'] ?? []) === []): ?>
-                                        <span class="status-icon" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?></span>
+                                        <span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -419,7 +447,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                     <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
                                 <?php endif; ?>
                                 <?php if (($contact['emails'] ?? []) === []): ?>
-                                    <span class="status-icon" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?></span>
+                                    <span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span>
                                 <?php endif; ?>
                             </div>
                         </div>
