@@ -32,6 +32,7 @@ $canCopyVisibleEmails = $visibleContactFields['emails'] && can('contacts.copy_em
 $canSendRegularMail = can('mail.send');
 $canSendSingleContactMail = can('mail.contact_single');
 $isMemberCompactView = $canSendSingleContactMail && !can('contacts.manage');
+$isStaffCompactView = !$isMemberCompactView;
 $contactWithEmailCount = 0;
 $contactWithoutEmailCount = 0;
 foreach ($contacts as $contact) {
@@ -61,7 +62,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
     return $label . ' ' . ($currentDirection === 'asc' ? '↑' : '↓');
 };
 ?>
-<section class="hero-card<?= $isMemberCompactView ? ' is-member-compact' : '' ?>">
+<section class="hero-card<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
     <div class="hero-row">
         <div>
             <p class="eyebrow">Kontaktverwaltung</p>
@@ -79,7 +80,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         <?php endif; ?>
     </div>
 
-    <div class="stats-grid<?= $isMemberCompactView ? ' is-member-compact' : '' ?>">
+    <div class="stats-grid<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
         <article class="stat-card">
             <?= icon('contacts') ?>
             <span class="stat-label">Kontakte</span>
@@ -97,7 +98,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         </article>
     </div>
 
-    <form method="get" action="<?= e(url('/')) ?>" class="filter-grid<?= $isMemberCompactView ? ' is-member-compact' : '' ?>">
+    <form method="get" action="<?= e(url('/')) ?>" class="filter-grid<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
         <label>
             <span>Suche</span>
             <input type="search" name="q" value="<?= e($filters['q'] ?? '') ?>" placeholder="Name oder Geburtsname">
@@ -155,7 +156,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
     </form>
 </section>
 
-<section class="panel contacts-view-root is-table<?= $isMemberCompactView ? ' is-member-compact' : '' ?>" data-contacts-view-root>
+<section class="panel contacts-view-root is-table<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>" data-contacts-view-root>
         <div class="panel-head">
         <div>
             <h3>Kontaktliste</h3>
@@ -169,8 +170,8 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
 
     <form id="contactSelectionForm" method="post" action="<?= e(url('/mail/compose')) ?>">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <div class="bulk-layout<?= $isMemberCompactView ? ' is-member-compact' : '' ?>">
-            <div class="bulk-card<?= $isMemberCompactView ? ' is-member-compact' : '' ?>">
+        <div class="bulk-layout<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
+            <div class="bulk-card<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
                 <span class="bulk-title">Schnellauswahl</span>
                 <div class="toolbar-actions">
                     <button type="button" class="compact-action" data-select="all"><?= icon('check-double') ?><span>Alle auswählen</span></button>
@@ -192,7 +193,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                 <?php endif; ?>
             </div>
 
-            <div class="bulk-card accent<?= $isMemberCompactView ? ' is-member-compact' : '' ?>">
+            <div class="bulk-card accent<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
                 <span class="bulk-title">Aktionen für Auswahl</span>
                 <div class="toolbar-actions">
                     <?php if ($canCopyVisibleEmails): ?>

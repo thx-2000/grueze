@@ -335,9 +335,19 @@ label span {
     padding-bottom: 1rem;
 }
 
+.hero-card.is-staff-compact,
+.contacts-view-root.is-staff-compact {
+    padding-top: 1.08rem;
+    padding-bottom: 1.08rem;
+}
+
 .filter-grid.is-member-compact {
     gap: 0.68rem;
     grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 0.8fr));
+}
+
+.filter-grid.is-staff-compact {
+    gap: 0.72rem;
 }
 
 .filter-tags {
@@ -378,6 +388,20 @@ label span {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.55rem;
     margin-top: 0.8rem;
+}
+
+.stats-grid.is-staff-compact {
+    gap: 0.62rem;
+    margin-top: 0.85rem;
+}
+
+.stats-grid.is-staff-compact .stat-card {
+    padding: 0.76rem 0.82rem;
+    gap: 0.22rem;
+}
+
+.stats-grid.is-staff-compact .stat-card strong {
+    font-size: 1.48rem;
 }
 
 .stats-grid.is-member-compact .stat-card {
@@ -437,6 +461,12 @@ label span {
     grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.9fr);
     gap: 0.7rem;
     margin: 0.65rem 0 0.75rem;
+}
+
+.bulk-layout.is-staff-compact {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 0.72rem;
+    margin: 0.72rem 0 0.82rem;
 }
 
 .table-options {
@@ -527,6 +557,11 @@ label span {
 .bulk-card.is-member-compact {
     padding: 0.72rem 0.8rem;
     gap: 0.65rem;
+}
+
+.bulk-card.is-staff-compact {
+    padding: 0.78rem 0.84rem;
+    gap: 0.68rem;
 }
 
 .bulk-title {
@@ -624,37 +659,41 @@ label span {
     overflow-x: auto;
     border-radius: var(--radius-md);
     border: 1px solid rgba(38, 42, 32, 0.08);
-    background: rgba(245, 248, 237, 0.96);
+    background: rgba(243, 246, 236, 0.98);
 }
 
 .contacts-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    min-width: 1120px;
+    min-width: 1080px;
 }
 
 .contacts-table th,
 .contacts-table td {
-    padding: 0.72rem 0.7rem;
-    vertical-align: top;
-    border-bottom: 1px solid rgba(38, 42, 32, 0.08);
-    background: rgba(245, 248, 237, 0.96);
+    padding: 0.62rem 0.64rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(38, 42, 32, 0.07);
+    background: rgba(243, 246, 236, 0.98);
 }
 
 .contacts-table thead th {
     position: sticky;
     top: 0;
     z-index: 1;
-    background: rgba(232, 237, 221, 0.96);
-    font-size: 0.82rem;
+    background: rgba(229, 234, 220, 0.98);
+    font-size: 0.78rem;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
+}
+
+.contacts-table tbody tr:nth-child(even) td {
+    background: rgba(239, 243, 231, 0.94);
 }
 
 .contacts-table tbody tr:hover td,
 .contacts-table tbody tr.has-selection td {
-    background: rgba(237, 242, 227, 0.98);
+    background: rgba(233, 239, 223, 0.98);
 }
 
 .contacts-table .col-select {
@@ -690,7 +729,8 @@ label span {
 
 .table-stack {
     display: grid;
-    gap: 0.18rem;
+    gap: 0.12rem;
+    line-height: 1.35;
 }
 
 .contact-name-cell,
@@ -710,11 +750,12 @@ label span {
     display: inline-flex;
     align-items: center;
     width: fit-content;
-    padding: 0.28rem 0.62rem;
+    padding: 0.22rem 0.52rem;
     border-radius: 999px;
     background: rgba(45, 49, 40, 0.08);
     color: var(--color-primary-strong);
     font-weight: 700;
+    font-size: 0.82rem;
 }
 
 .birth-name-inline {
@@ -728,7 +769,7 @@ label span {
 
 .table-actions {
     display: grid;
-    gap: 0.45rem;
+    gap: 0.3rem;
     justify-items: center;
 }
 
@@ -797,15 +838,15 @@ label span {
     background: rgba(45, 49, 40, 0.08);
     color: var(--color-primary-strong);
     border-radius: 999px;
-    padding: 0.34rem 0.68rem;
+    padding: 0.24rem 0.52rem;
     height: fit-content;
-    font-size: 0.82rem;
+    font-size: 0.76rem;
     font-weight: 700;
 }
 
 .tag-cluster {
     display: flex;
-    gap: 0.45rem;
+    gap: 0.35rem;
     flex-wrap: wrap;
 }
 
@@ -1034,6 +1075,20 @@ label span {
 .contacts-view-root.is-member-compact .contacts-table th,
 .contacts-view-root.is-member-compact .contacts-table td {
     padding: 0.58rem 0.6rem;
+}
+
+.contacts-view-root.is-staff-compact .panel-head {
+    gap: 0.75rem;
+}
+
+.contacts-view-root.is-staff-compact .selection-status {
+    padding: 0.56rem 0.8rem;
+    font-size: 0.94rem;
+}
+
+.contacts-view-root.is-staff-compact .table-options {
+    margin-top: 0.1rem;
+    margin-bottom: 0.72rem;
 }
 
 .tag-picker {
