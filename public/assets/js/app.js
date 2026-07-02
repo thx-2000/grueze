@@ -27,6 +27,7 @@ function selectedContactItems() {
 
 const copyButton = document.getElementById('copyEmailsButton');
 const selectionStatus = document.getElementById('selectionStatus');
+const bulkSelectionHint = document.getElementById('bulkSelectionHint');
 
 function updateSelectionUI() {
     const items = document.querySelectorAll('[data-contact-selectable]');
@@ -47,6 +48,12 @@ function updateSelectionUI() {
         selectionStatus.textContent = selectedCount === 0
             ? 'Noch nichts ausgewählt'
             : `${selectedCount} Kontakt${selectedCount === 1 ? '' : 'e'} ausgewählt`;
+    }
+
+    if (bulkSelectionHint) {
+        bulkSelectionHint.textContent = selectedCount === 0
+            ? 'Keine Kontakte ausgewählt.'
+            : `${selectedCount} Kontakt${selectedCount === 1 ? '' : 'e'} werden für die Sammeländerung verwendet.`;
     }
 }
 

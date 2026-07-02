@@ -246,12 +246,17 @@ final class ContactController extends BaseController
         $categoryInput = trim((string) $request->input('bulk_category_id', ''));
         $changeCategory = $categoryInput !== '';
         $categoryId = $categoryInput === '__none__' ? null : ($changeCategory ? (int) $categoryInput : null);
-        $tagIds = array_values(array_unique(array_filter(
-            array_map('intval', (array) $request->input('bulk_tag_ids', [])),
+        $categoryOnlyIfEmpty = $request->input('bulk_category_only_if_empty') !== null;
+        $tagIdsToAdd = array_values(array_unique(array_filter(
+            array_map('intval', (array) $request->input('bulk_tag_ids_add', [])),
+            static fn (int $id): bool => $id > 0
+        )));
+        $tagIdsToRemove = array_values(array_unique(array_filter(
+            array_map('intval', (array) $request->input('bulk_tag_ids_remove', [])),
             static fn (int $id): bool => $id > 0
         )));
 
-        if (!$changeCategory && $tagIds === []) {
+        if (!$changeCategory && $tagIdsToAdd === [] && $tagIdsToRemove === []) {
             flash('error', 'Bitte mindestens eine Kategorie oder einen Tag für die Sammeländerung wählen.');
             Redirect::to('/');
         }
@@ -260,16 +265,23 @@ final class ContactController extends BaseController
             $contactIds,
             $changeCategory,
             $categoryId,
-            $tagIds,
+            $categoryOnlyIfEmpty,
+            $tagIdsToAdd,
+            $tagIdsToRemove,
             (int) $this->auth->user()['id']
         );
 
         $details = [];
         if ($changeCategory) {
-            $details[] = $categoryId === null ? 'Kategorie entfernt' : 'Kategorie gesetzt';
+            $details[] = $categoryId === null
+                ? 'Kategorie entfernt'
+                : ($categoryOnlyIfEmpty ? 'Kategorie nur bei leeren Kontakten gesetzt' : 'Kategorie gesetzt');
         }
-        if ($tagIds !== []) {
-            $details[] = count($tagIds) . ' Tag(s) ergänzt';
+        if ($tagIdsToAdd !== []) {
+            $details[] = count($tagIdsToAdd) . ' Tag(s) ergänzt';
+        }
+        if ($tagIdsToRemove !== []) {
+            $details[] = count($tagIdsToRemove) . ' Tag(s) entfernt';
         }
 
         $message = sprintf(

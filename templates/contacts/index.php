@@ -149,7 +149,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         </div>
         <div class="selection-tools">
             <div class="selection-status" id="selectionStatus">Noch nichts ausgewählt</div>
-            <button type="button" class="ghost-button" data-select="none"><?= icon('reset') ?><span>Auswahl aufheben</span></button>
+            <button type="button" class="ghost-button compact-action" data-select="none"><?= icon('reset') ?><span>Auswahl aufheben</span></button>
         </div>
     </div>
 
@@ -159,20 +159,20 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
             <div class="bulk-card">
                 <span class="bulk-title">Schnellauswahl</span>
                 <div class="toolbar-actions">
-                    <button type="button" data-select="all"><?= icon('check-double') ?><span>Alle auswählen</span></button>
-                    <button type="button" class="ghost-button" data-select="none"><?= icon('reset') ?><span>Auswahl aufheben</span></button>
+                    <button type="button" class="compact-action" data-select="all"><?= icon('check-double') ?><span>Alle auswählen</span></button>
+                    <button type="button" class="ghost-button compact-action" data-select="none"><?= icon('reset') ?><span>Auswahl aufheben</span></button>
                 </div>
                 <?php if ($categories !== []): ?>
                     <div class="quick-category-list">
                         <?php foreach ($categories as $category): ?>
-                            <button type="button" class="ghost-button" data-select-category="<?= e((string) $category['id']) ?>"><?= e($category['name']) ?> auswählen</button>
+                            <button type="button" class="ghost-button compact-action" data-select-category="<?= e((string) $category['id']) ?>"><?= e($category['name']) ?> auswählen</button>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
                 <?php if ($tags !== []): ?>
                     <div class="quick-category-list">
                         <?php foreach ($tags as $tag): ?>
-                            <button type="button" class="ghost-button" data-select-tag="<?= e((string) $tag['id']) ?>"><?= e($tag['name']) ?> markieren</button>
+                            <button type="button" class="ghost-button compact-action" data-select-tag="<?= e((string) $tag['id']) ?>"><?= e($tag['name']) ?> markieren</button>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
@@ -200,12 +200,16 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                 <?php endforeach; ?>
                             </select>
                         </label>
+                        <label class="inline-toggle">
+                            <input type="checkbox" name="bulk_category_only_if_empty" value="1">
+                            <span>Nur setzen, wenn noch keine Kategorie gepflegt ist</span>
+                        </label>
                         <div>
                             <span>Tags ergänzen</span>
                             <div class="tag-picker compact-picker">
                                 <?php foreach ($tags as $tag): ?>
                                     <label class="tag-option">
-                                        <input type="checkbox" name="bulk_tag_ids[]" value="<?= e((string) $tag['id']) ?>">
+                                        <input type="checkbox" name="bulk_tag_ids_add[]" value="<?= e((string) $tag['id']) ?>">
                                         <span><?= e($tag['name']) ?></span>
                                     </label>
                                 <?php endforeach; ?>
@@ -214,6 +218,21 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                 <?php endif; ?>
                             </div>
                         </div>
+                        <div>
+                            <span>Tags entfernen</span>
+                            <div class="tag-picker compact-picker">
+                                <?php foreach ($tags as $tag): ?>
+                                    <label class="tag-option">
+                                        <input type="checkbox" name="bulk_tag_ids_remove[]" value="<?= e((string) $tag['id']) ?>">
+                                        <span><?= e($tag['name']) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                                <?php if ($tags === []): ?>
+                                    <p class="field-hint">Noch keine Tags angelegt.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <p class="field-hint" id="bulkSelectionHint">Keine Kontakte ausgewählt.</p>
                         <div class="toolbar-actions">
                             <button type="submit" formaction="<?= e(url('/contacts/bulk-update')) ?>" formmethod="post">
                                 <?= icon('edit') ?><span>Auf Auswahl anwenden</span>
@@ -311,7 +330,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                 </div>
                             </td>
                             <td><?= e($contact['vorname']) ?></td>
-                            <td data-col="category"><span class="table-pill"><?= e($contact['category_name'] ?: 'Ohne Kategorie') ?></span></td>
+                            <td data-col="category"><span class="table-pill"><?= e($contact['category_name'] ?: '—') ?></span></td>
                             <td data-col="tags">
                                 <div class="tag-cluster">
                                     <?php foreach ($contact['tags'] as $tag): ?>
@@ -393,7 +412,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <span class="tag"><?= e($contact['category_name'] ?: 'Ohne Kategorie') ?></span>
+                        <span class="tag"><?= e($contact['category_name'] ?: '—') ?></span>
                     </div>
                     <div class="tag-cluster">
                         <?php foreach ($contact['tags'] as $tag): ?>

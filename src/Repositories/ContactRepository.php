@@ -242,46 +242,75 @@ final class ContactRepository
         return $contacts;
     }
 
-    public function applyBulkUpdate(array $contactIds, bool $changeCategory, ?int $categoryId, array $tagIds, int $userId): int
+    public function applyBulkUpdate(
+        array $contactIds,
+        bool $changeCategory,
+        ?int $categoryId,
+        bool $categoryOnlyIfEmpty,
+        array $tagIdsToAdd,
+        array $tagIdsToRemove,
+        int $userId
+    ): int
     {
         $contactIds = array_values(array_unique(array_filter(array_map('intval', $contactIds), static fn (int $id): bool => $id > 0)));
-        $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds), static fn (int $id): bool => $id > 0)));
+        $tagIdsToAdd = array_values(array_unique(array_filter(array_map('intval', $tagIdsToAdd), static fn (int $id): bool => $id > 0)));
+        $tagIdsToRemove = array_values(array_unique(array_filter(array_map('intval', $tagIdsToRemove), static fn (int $id): bool => $id > 0)));
 
         if ($contactIds === []) {
             return 0;
         }
 
         $placeholders = implode(',', array_fill(0, count($contactIds), '?'));
+        $touched = false;
 
         $this->pdo->beginTransaction();
         try {
             if ($changeCategory) {
-                $stmt = $this->pdo->prepare(
-                    "UPDATE contacts
-                     SET category_id = ?, updated_by = ?
-                     WHERE id IN ({$placeholders})"
-                );
-                $stmt->execute([
-                    $categoryId,
-                    $userId,
-                    ...$contactIds,
-                ]);
+                $sql = "UPDATE contacts
+                        SET category_id = ?, updated_by = ?
+                        WHERE id IN ({$placeholders})";
+                $params = [$categoryId, $userId, ...$contactIds];
+
+                if ($categoryOnlyIfEmpty && $categoryId !== null) {
+                    $sql .= ' AND category_id IS NULL';
+                }
+
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute($params);
+                $touched = true;
             }
 
-            if ($tagIds !== []) {
+            if ($tagIdsToAdd !== []) {
                 $tagStmt = $this->pdo->prepare(
                     'INSERT IGNORE INTO contact_tags (contact_id, tag_id) VALUES (:contact_id, :tag_id)'
                 );
 
                 foreach ($contactIds as $contactId) {
-                    foreach ($tagIds as $tagId) {
+                    foreach ($tagIdsToAdd as $tagId) {
                         $tagStmt->execute([
                             'contact_id' => $contactId,
                             'tag_id' => $tagId,
                         ]);
                     }
                 }
+                $touched = true;
+            }
 
+            if ($tagIdsToRemove !== []) {
+                $tagPlaceholders = implode(',', array_fill(0, count($tagIdsToRemove), '?'));
+                $deleteStmt = $this->pdo->prepare(
+                    "DELETE FROM contact_tags
+                     WHERE contact_id IN ({$placeholders})
+                     AND tag_id IN ({$tagPlaceholders})"
+                );
+                $deleteStmt->execute([
+                    ...$contactIds,
+                    ...$tagIdsToRemove,
+                ]);
+                $touched = true;
+            }
+
+            if ($touched) {
                 $touchStmt = $this->pdo->prepare(
                     "UPDATE contacts
                      SET updated_by = ?
