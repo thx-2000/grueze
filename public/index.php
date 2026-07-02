@@ -104,6 +104,7 @@ try {
     Container::factory(MailController::class, static fn () => new MailController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
+        Container::get(LogRepository::class),
         Container::get(MailService::class),
         Container::get(UploadService::class)
     ));

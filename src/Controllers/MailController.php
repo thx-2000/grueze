@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\ContactRepository;
+use App\Repositories\LogRepository;
 use App\Services\MailService;
 use App\Services\UploadService;
 use App\Support\Redirect;
@@ -16,6 +17,7 @@ final class MailController extends BaseController
     public function __construct(
         \App\Core\Auth $auth,
         private ContactRepository $contacts,
+        private LogRepository $logs,
         private MailService $mailer,
         private UploadService $uploads
     ) {
@@ -60,6 +62,14 @@ final class MailController extends BaseController
         $sample = $contacts[0] ?? ['vorname' => 'Max', 'nachname' => 'Mustermann'];
         $message = str_replace(['{Vorname}', '{Nachname}'], [$sample['vorname'], $sample['nachname']], (string) $request->input('message'));
         $this->mailer->sendSystemMail($identity, $user['email'], '[Testmail] ' . (string) $request->input('subject'), $message);
+        $this->logs->addMailLog([
+            'user_id' => $user['id'],
+            'contact_id' => null,
+            'empfaenger_email' => $user['email'],
+            'betreff' => '[Testmail] ' . (string) $request->input('subject'),
+            'status' => 'gesendet',
+            'fehlermeldung' => null,
+        ]);
         flash('success', 'Testmail wurde an dein Konto gesendet.');
         $_SESSION['mail_draft'] = [
             'contact_ids' => $contactIds,
