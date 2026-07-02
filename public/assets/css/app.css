@@ -141,14 +141,15 @@ label span {
 }
 
 .brand-mark {
-    width: 3.4rem;
+    min-width: 4.7rem;
     height: 3.4rem;
-    border-radius: 1.2rem;
-    background: linear-gradient(135deg, #22352f, #a8522d);
+    padding: 0 0.88rem;
+    border-radius: 1rem;
+    background: #5e3a28;
     display: grid;
     place-items: center;
     font-family: var(--font-display);
-    font-size: 1.35rem;
+    font-size: 0.98rem;
     font-weight: 800;
     color: #fff;
     box-shadow: 0 10px 18px rgba(36, 31, 26, 0.18);
@@ -412,7 +413,7 @@ label span {
 .bulk-card {
     padding: 0.88rem 0.95rem;
     border-radius: var(--radius-md);
-    background: rgba(255,255,255,0.9);
+    background: rgba(247, 242, 235, 0.96);
     border: 1px solid rgba(67, 55, 42, 0.08);
     display: grid;
     gap: 0.8rem;
@@ -453,7 +454,7 @@ label span {
     overflow-x: auto;
     border-radius: var(--radius-md);
     border: 1px solid rgba(67, 55, 42, 0.08);
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(247, 242, 235, 0.96);
 }
 
 .contacts-table {
@@ -468,7 +469,7 @@ label span {
     padding: 0.72rem 0.7rem;
     vertical-align: top;
     border-bottom: 1px solid rgba(67, 55, 42, 0.08);
-    background: rgba(255, 255, 255, 0.68);
+    background: rgba(247, 242, 235, 0.96);
 }
 
 .contacts-table thead th {
@@ -483,7 +484,7 @@ label span {
 
 .contacts-table tbody tr:hover td,
 .contacts-table tbody tr.has-selection td {
-    background: rgba(246, 241, 234, 0.96);
+    background: rgba(241, 235, 227, 0.98);
 }
 
 .contacts-table .col-select {
@@ -536,11 +537,31 @@ label span {
 .table-actions {
     display: grid;
     gap: 0.45rem;
+    justify-items: start;
 }
 
-.table-actions .ghost-button,
-.table-actions .danger-button {
-    width: 100%;
+.icon-button {
+    width: 2.35rem;
+    height: 2.35rem;
+    padding: 0;
+    justify-content: center;
+}
+
+.icon-button .icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .contacts-table [data-col].is-hidden-column {
@@ -672,7 +693,7 @@ label span {
 .subsection-card,
 .repeater-block {
     padding: 0.9rem;
-    background: rgba(255,255,255,0.88);
+    background: rgba(247,242,235,0.96);
     border-radius: var(--radius-md);
     border: 1px solid rgba(67, 55, 42, 0.08);
 }
@@ -767,7 +788,7 @@ label span {
 .account-summary {
     padding: 0.72rem 0.82rem;
     border-radius: var(--radius-sm);
-    background: rgba(242, 235, 226, 0.72);
+    background: rgba(236, 229, 219, 0.92);
 }
 
 .account-summary p {
@@ -776,11 +797,15 @@ label span {
 
 .table-wrap {
     overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(67, 55, 42, 0.08);
+    background: rgba(247, 242, 235, 0.96);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    background: transparent;
 }
 
 th,
@@ -788,6 +813,7 @@ td {
     text-align: left;
     padding: 0.75rem 0.62rem;
     border-bottom: 1px solid var(--color-border);
+    background: rgba(247, 242, 235, 0.82);
 }
 
 .flash {
@@ -914,10 +940,11 @@ code {
     }
 
     .brand-mark {
-        width: 3rem;
+        min-width: 4rem;
         height: 3rem;
-        font-size: 1.2rem;
+        font-size: 0.86rem;
         border-radius: 1rem;
+        padding: 0 0.7rem;
     }
 
     .sidebar h1 {

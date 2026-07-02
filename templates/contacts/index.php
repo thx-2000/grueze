@@ -170,7 +170,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
             <div class="column-toggle-list">
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="category" checked><span>Kategorie</span></label>
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="tags" checked><span>Tags</span></label>
-                <label class="column-toggle"><input type="checkbox" data-column-toggle="ort" checked><span>Ort</span></label>
+                <label class="column-toggle"><input type="checkbox" data-column-toggle="adresse" checked><span>Adresse</span></label>
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="geburtstag" checked><span>Geburtstag</span></label>
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="emails" checked><span>E-Mail</span></label>
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="phones" checked><span>Telefon</span></label>
@@ -187,7 +187,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         <th><a class="sort-link" href="<?= e($buildSortUrl('vorname')) ?>"><?= e($sortLabel('vorname', 'Vorname')) ?></a></th>
                         <th data-col="category"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>"><?= e($sortLabel('category_name', 'Kategorie')) ?></a></th>
                         <th data-col="tags">Tags</th>
-                        <th data-col="ort"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>"><?= e($sortLabel('ort', 'Ort')) ?></a></th>
+                        <th data-col="adresse"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>"><?= e($sortLabel('ort', 'Adresse')) ?></a></th>
                         <th data-col="geburtstag"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>"><?= e($sortLabel('geburtstag', 'Geburtstag')) ?></a></th>
                         <th data-col="emails">E-Mail</th>
                         <th data-col="phones">Telefon</th>
@@ -211,12 +211,13 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             <td data-col="tags">
                                 <div class="tag-cluster">
                                     <?php foreach ($contact['tags'] as $tag): ?>
-                                        <span class="tag tag-secondary"><?= e($tag['name']) ?></span>
+                                        <span class="tag tag-secondary" style="<?= e(tag_style($tag['name'])) ?>"><?= e($tag['name']) ?></span>
                                     <?php endforeach; ?>
                                 </div>
                             </td>
-                            <td data-col="ort">
+                            <td data-col="adresse">
                                 <div class="table-stack">
+                                    <span><?= e($contact['strasse']) ?></span>
                                     <span><?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span>
                                     <span class="muted"><?= e($contact['land'] ?: 'Deutschland') ?></span>
                                 </div>
@@ -225,14 +226,14 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             <td data-col="emails">
                                 <div class="table-stack">
                                     <?php foreach ($contact['emails'] as $email): ?>
-                                        <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e(($email['label'] ? $email['label'] . ': ' : '') . $email['email']) ?></a>
+                                        <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e($email['email']) ?></a>
                                     <?php endforeach; ?>
                                 </div>
                             </td>
                             <td data-col="phones">
                                 <div class="table-stack">
                                     <?php foreach ($contact['phones'] as $phone): ?>
-                                        <a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['label'] . ': ' . $phone['phone']) ?></a>
+                                        <a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['phone']) ?></a>
                                     <?php endforeach; ?>
                                 </div>
                             </td>
@@ -249,14 +250,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             <?php if (can('contacts.manage')): ?>
                                 <td class="col-actions">
                                     <div class="table-actions">
-                                        <a class="ghost-button" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span>Bearbeiten</span></a>
-                                        <?php if (can('contacts.delete')): ?>
-                                            <form method="post" action="<?= e(url('/contacts/delete')) ?>" onsubmit="return confirm('Kontakt wirklich löschen?');">
-                                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                                <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
-                                                <button type="submit" class="danger-button"><?= icon('trash') ?><span>Löschen</span></button>
-                                            </form>
-                                        <?php endif; ?>
+                                        <a class="ghost-button icon-button" title="Kontakt bearbeiten" aria-label="Kontakt bearbeiten" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span class="visually-hidden">Bearbeiten</span></a>
                                     </div>
                                 </td>
                             <?php endif; ?>
@@ -282,7 +276,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     </div>
                     <div class="tag-cluster">
                         <?php foreach ($contact['tags'] as $tag): ?>
-                            <span class="tag tag-secondary"><?= e($tag['name']) ?></span>
+                            <span class="tag tag-secondary" style="<?= e(tag_style($tag['name'])) ?>"><?= e($tag['name']) ?></span>
                         <?php endforeach; ?>
                         <?php if (!empty($contact['linked_user'])): ?>
                             <span class="tag tag-account<?= (int) $contact['linked_user']['is_active'] === 1 ? ' is-active' : '' ?>">
@@ -329,13 +323,6 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     <?php if (can('contacts.manage')): ?>
                         <div class="card-actions">
                             <a class="ghost-button" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span>Bearbeiten</span></a>
-                            <?php if (can('contacts.delete')): ?>
-                                <form method="post" action="<?= e(url('/contacts/delete')) ?>" onsubmit="return confirm('Kontakt wirklich löschen?');">
-                                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                    <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
-                                    <button type="submit" class="danger-button"><?= icon('trash') ?><span>Löschen</span></button>
-                                </form>
-                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
                 </article>

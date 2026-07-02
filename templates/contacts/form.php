@@ -201,6 +201,15 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
 
         <div class="form-actions">
             <button type="submit"><?= $editing ? 'Änderungen speichern' : 'Kontakt speichern' ?></button>
+            <?php if ($editing && can('contacts.delete')): ?>
+                <button
+                    type="submit"
+                    class="danger-button"
+                    formaction="<?= e(url('/contacts/delete')) ?>"
+                    formmethod="post"
+                    onclick="return confirm('Kontakt wirklich löschen?');"
+                ><?= icon('trash') ?><span>Kontakt löschen</span></button>
+            <?php endif; ?>
             <a class="ghost-button" href="<?= e(url('/')) ?>">Zurück</a>
         </div>
     </form>

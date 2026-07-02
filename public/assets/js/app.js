@@ -169,7 +169,7 @@ if (selectionForm) {
 const contactsTable = document.querySelector('.contacts-table');
 if (contactsTable) {
     const storageKey = 'grueze_visible_contact_columns';
-    const defaultColumns = ['category', 'tags', 'ort', 'geburtstag', 'emails', 'phones', 'login'];
+    const defaultColumns = ['category', 'tags', 'adresse', 'geburtstag', 'emails', 'phones', 'login'];
     const savedColumns = (() => {
         try {
             return JSON.parse(window.localStorage.getItem(storageKey) || 'null');
@@ -178,7 +178,9 @@ if (contactsTable) {
         }
     })();
 
-    const visibleColumns = Array.isArray(savedColumns) && savedColumns.length > 0 ? savedColumns : defaultColumns;
+    const visibleColumns = Array.isArray(savedColumns) && savedColumns.length > 0
+        ? savedColumns.map((column) => column === 'ort' ? 'adresse' : column)
+        : defaultColumns;
 
     function applyVisibleColumns() {
         document.querySelectorAll('[data-column-toggle]').forEach((toggle) => {

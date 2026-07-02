@@ -19,7 +19,7 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     <div class="page-shell">
         <aside class="sidebar">
             <div class="sidebar-brand">
-                <div class="brand-mark">95</div>
+                <div class="brand-mark">GRUEZE</div>
                 <div>
                     <p class="eyebrow">Abi-Stufe</p>
                     <h1><?= e(config('app.name', 'Abi Adress Zentrale')) ?></h1>

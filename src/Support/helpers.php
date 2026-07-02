@@ -85,6 +85,30 @@ function format_datetime(?string $value): string
     }
 }
 
+function tag_style(string $seed): string
+{
+    $palette = [
+        ['bg' => '#b85a47', 'text' => '#fff5f1'],
+        ['bg' => '#355f52', 'text' => '#f3fbf8'],
+        ['bg' => '#be8c3a', 'text' => '#261d11'],
+        ['bg' => '#57768d', 'text' => '#f4f9fd'],
+        ['bg' => '#7a6a3d', 'text' => '#fff9ec'],
+        ['bg' => '#8e5b4c', 'text' => '#fff7f4'],
+        ['bg' => '#4d7268', 'text' => '#f4fbfa'],
+        ['bg' => '#a46837', 'text' => '#fff6f0'],
+    ];
+
+    $index = abs(crc32($seed)) % count($palette);
+    $colors = $palette[$index];
+
+    return sprintf(
+        'background:%s;color:%s;border-color:%s;',
+        $colors['bg'],
+        $colors['text'],
+        $colors['bg']
+    );
+}
+
 function icon(string $name): string
 {
     $icons = [
