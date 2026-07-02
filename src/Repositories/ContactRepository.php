@@ -242,6 +242,66 @@ final class ContactRepository
         return $contacts;
     }
 
+    public function applyBulkUpdate(array $contactIds, bool $changeCategory, ?int $categoryId, array $tagIds, int $userId): int
+    {
+        $contactIds = array_values(array_unique(array_filter(array_map('intval', $contactIds), static fn (int $id): bool => $id > 0)));
+        $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds), static fn (int $id): bool => $id > 0)));
+
+        if ($contactIds === []) {
+            return 0;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($contactIds), '?'));
+
+        $this->pdo->beginTransaction();
+        try {
+            if ($changeCategory) {
+                $stmt = $this->pdo->prepare(
+                    "UPDATE contacts
+                     SET category_id = ?, updated_by = ?
+                     WHERE id IN ({$placeholders})"
+                );
+                $stmt->execute([
+                    $categoryId,
+                    $userId,
+                    ...$contactIds,
+                ]);
+            }
+
+            if ($tagIds !== []) {
+                $tagStmt = $this->pdo->prepare(
+                    'INSERT IGNORE INTO contact_tags (contact_id, tag_id) VALUES (:contact_id, :tag_id)'
+                );
+
+                foreach ($contactIds as $contactId) {
+                    foreach ($tagIds as $tagId) {
+                        $tagStmt->execute([
+                            'contact_id' => $contactId,
+                            'tag_id' => $tagId,
+                        ]);
+                    }
+                }
+
+                $touchStmt = $this->pdo->prepare(
+                    "UPDATE contacts
+                     SET updated_by = ?
+                     WHERE id IN ({$placeholders})"
+                );
+                $touchStmt->execute([
+                    $userId,
+                    ...$contactIds,
+                ]);
+            }
+
+            $this->pdo->commit();
+        } catch (\Throwable $exception) {
+            $this->pdo->rollBack();
+            throw $exception;
+        }
+
+        return count($contactIds);
+    }
+
     private function hydrateContact(array &$contact): void
     {
         $contactId = (int) $contact['id'];

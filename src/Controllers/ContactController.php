@@ -229,6 +229,59 @@ final class ContactController extends BaseController
         $this->csv->stream($this->contacts->search($filters));
     }
 
+    public function bulkUpdate(Request $request): void
+    {
+        $this->requirePermission('contacts.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $contactIds = array_values(array_unique(array_filter(
+            array_map('intval', (array) $request->input('selected_contacts', [])),
+            static fn (int $id): bool => $id > 0
+        )));
+        if ($contactIds === []) {
+            flash('error', 'Bitte zuerst Kontakte auswählen.');
+            Redirect::to('/');
+        }
+
+        $categoryInput = trim((string) $request->input('bulk_category_id', ''));
+        $changeCategory = $categoryInput !== '';
+        $categoryId = $categoryInput === '__none__' ? null : ($changeCategory ? (int) $categoryInput : null);
+        $tagIds = array_values(array_unique(array_filter(
+            array_map('intval', (array) $request->input('bulk_tag_ids', [])),
+            static fn (int $id): bool => $id > 0
+        )));
+
+        if (!$changeCategory && $tagIds === []) {
+            flash('error', 'Bitte mindestens eine Kategorie oder einen Tag für die Sammeländerung wählen.');
+            Redirect::to('/');
+        }
+
+        $updatedContacts = $this->contacts->applyBulkUpdate(
+            $contactIds,
+            $changeCategory,
+            $categoryId,
+            $tagIds,
+            (int) $this->auth->user()['id']
+        );
+
+        $details = [];
+        if ($changeCategory) {
+            $details[] = $categoryId === null ? 'Kategorie entfernt' : 'Kategorie gesetzt';
+        }
+        if ($tagIds !== []) {
+            $details[] = count($tagIds) . ' Tag(s) ergänzt';
+        }
+
+        $message = sprintf(
+            'Sammeländerung gespeichert: %d Kontakte aktualisiert%s.',
+            $updatedContacts,
+            $details !== [] ? ' (' . implode(', ', $details) . ')' : ''
+        );
+        $this->logs->addAudit((int) $this->auth->user()['id'], null, 'updated', $message);
+        flash('success', $message);
+        Redirect::to('/');
+    }
+
     private function sanitizePayload(Request $request): array
     {
         $emails = [];

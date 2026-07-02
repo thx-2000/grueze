@@ -60,7 +60,6 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         </div>
         <?php if (can('contacts.manage')): ?>
             <div class="hero-actions">
-                <a class="ghost-button" href="<?= e(url('/contacts/import')) ?>"><?= icon('upload') ?><span>XLSX importieren</span></a>
                 <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Neuen Kontakt anlegen</span></a>
             </div>
         <?php endif; ?>
@@ -148,7 +147,10 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
             <h3>Kontaktliste</h3>
             <p class="muted">Auswahl, Kopieren und Mailing starten direkt aus der Übersicht.</p>
         </div>
-        <div class="selection-status" id="selectionStatus">Noch nichts ausgewählt</div>
+        <div class="selection-tools">
+            <div class="selection-status" id="selectionStatus">Noch nichts ausgewählt</div>
+            <button type="button" class="ghost-button" data-select="none"><?= icon('reset') ?><span>Auswahl aufheben</span></button>
+        </div>
     </div>
 
     <form id="contactSelectionForm" method="post" action="<?= e(url('/mail/compose')) ?>">
@@ -158,7 +160,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                 <span class="bulk-title">Schnellauswahl</span>
                 <div class="toolbar-actions">
                     <button type="button" data-select="all"><?= icon('check-double') ?><span>Alle auswählen</span></button>
-                    <button type="button" class="ghost-button" data-select="none"><?= icon('reset') ?><span>Auswahl löschen</span></button>
+                    <button type="button" class="ghost-button" data-select="none"><?= icon('reset') ?><span>Auswahl aufheben</span></button>
                 </div>
                 <?php if ($categories !== []): ?>
                     <div class="quick-category-list">
@@ -186,6 +188,39 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         <button type="submit" class="button-link"><?= icon('edit') ?><span>E-Mail verfassen</span></button>
                     <?php endif; ?>
                 </div>
+                <?php if (can('contacts.manage')): ?>
+                    <div class="bulk-editor">
+                        <label>
+                            <span>Kategorie für Auswahl</span>
+                            <select name="bulk_category_id">
+                                <option value="">Kategorie unverändert</option>
+                                <option value="__none__">Kategorie entfernen</option>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?= e((string) $category['id']) ?>"><?= e($category['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <div>
+                            <span>Tags ergänzen</span>
+                            <div class="tag-picker compact-picker">
+                                <?php foreach ($tags as $tag): ?>
+                                    <label class="tag-option">
+                                        <input type="checkbox" name="bulk_tag_ids[]" value="<?= e((string) $tag['id']) ?>">
+                                        <span><?= e($tag['name']) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                                <?php if ($tags === []): ?>
+                                    <p class="field-hint">Noch keine Tags angelegt.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="toolbar-actions">
+                            <button type="submit" formaction="<?= e(url('/contacts/bulk-update')) ?>" formmethod="post">
+                                <?= icon('edit') ?><span>Auf Auswahl anwenden</span>
+                            </button>
+                        </div>
+                    </div>
+                <?php endif; ?>
                 <?php if (!$canCopyVisibleEmails && !can('mail.send')): ?>
                     <p class="detail-hint">Für diese Rolle sind hier gerade keine Sammelaktionen freigeschaltet.</p>
                 <?php endif; ?>

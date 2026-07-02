@@ -147,6 +147,7 @@ try {
     $router->get('/contacts/edit', [ContactController::class, 'edit']);
     $router->post('/contacts/update', [ContactController::class, 'update']);
     $router->post('/contacts/delete', [ContactController::class, 'delete']);
+    $router->post('/contacts/bulk-update', [ContactController::class, 'bulkUpdate']);
     $router->get('/contacts/export', [ContactController::class, 'export']);
 
     $router->post('/categories/store', [CategoryController::class, 'store']);
