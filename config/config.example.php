@@ -63,6 +63,14 @@ return [
         'login_lock_minutes' => 10,
         'password_reset_expires_minutes' => 60,
         'private_contact_detail_roles' => ['admin', 'orga', 'stufenmitglied'],
+        'contact_detail_visibility' => [
+            'address' => ['admin', 'orga', 'stufenmitglied'],
+            'birthday' => ['admin', 'orga', 'stufenmitglied'],
+            'emails' => ['admin', 'orga', 'stufenmitglied'],
+            'phones' => ['admin', 'orga', 'stufenmitglied'],
+            'notes' => ['admin', 'orga', 'stufenmitglied'],
+            'login' => ['admin', 'orga', 'stufenmitglied'],
+        ],
         'photo_max_size' => 2097152,
         'allowed_photo_types' => [
             'image/jpeg',

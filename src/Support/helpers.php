@@ -59,6 +59,11 @@ function can(string $permission): bool
     return auth()->can($permission);
 }
 
+function can_view_contact_field(string $field): bool
+{
+    return auth()->canViewContactField($field);
+}
+
 function format_date(?string $value): string
 {
     if ($value === null || trim($value) === '') {

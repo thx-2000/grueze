@@ -5,7 +5,30 @@ $phoneCount = 0;
 $activeTagIds = array_map('intval', (array) ($filters['tag_ids'] ?? []));
 $currentSort = (string) ($filters['sort'] ?? 'nachname');
 $currentDirection = (string) ($filters['direction'] ?? 'asc');
-$canViewPrivateDetails = can('contacts.view_private_details');
+$visibleContactFields = [
+    'address' => can_view_contact_field('address'),
+    'birthday' => can_view_contact_field('birthday'),
+    'emails' => can_view_contact_field('emails'),
+    'phones' => can_view_contact_field('phones'),
+    'notes' => can_view_contact_field('notes'),
+    'login' => can_view_contact_field('login'),
+];
+$canViewPrivateDetails = in_array(true, $visibleContactFields, true);
+$detailFieldLabels = [
+    'address' => 'Adresse',
+    'birthday' => 'Geburtstag',
+    'emails' => 'E-Mail',
+    'phones' => 'Telefon',
+    'notes' => 'Notizen',
+    'login' => 'Login',
+];
+$visibleDetailLabels = [];
+foreach ($detailFieldLabels as $fieldKey => $fieldLabel) {
+    if ($visibleContactFields[$fieldKey]) {
+        $visibleDetailLabels[] = $fieldLabel;
+    }
+}
+$canCopyVisibleEmails = $visibleContactFields['emails'] && can('contacts.copy_emails');
 foreach ($contacts as $contact) {
     $emailCount += count($contact['emails']);
     $phoneCount += count($contact['phones']);
@@ -153,13 +176,16 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
             <div class="bulk-card accent">
                 <span class="bulk-title">Aktionen für Auswahl</span>
                 <div class="toolbar-actions">
-                    <?php if ($canViewPrivateDetails && can('contacts.copy_emails')): ?>
+                    <?php if ($canCopyVisibleEmails): ?>
                         <button type="button" id="copyEmailsButton"><?= icon('copy') ?><span>E-Mail-Adressen kopieren</span></button>
                     <?php endif; ?>
                     <?php if (can('mail.send')): ?>
                         <button type="submit" class="button-link"><?= icon('edit') ?><span>E-Mail verfassen</span></button>
                     <?php endif; ?>
                 </div>
+                <?php if (!$canCopyVisibleEmails && !can('mail.send')): ?>
+                    <p class="detail-hint">Für diese Rolle sind hier gerade keine Sammelaktionen freigeschaltet.</p>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -167,17 +193,32 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
             <div>
                 <strong>Ansicht</strong>
                 <p class="muted">
-                    <?= $canViewPrivateDetails ? 'Auf größeren Bildschirmen ist die Tabelle kompakter und besser sortierbar.' : 'Diese Rolle sieht bewusst nur Namen, Kategorie und Tags.' ?>
+                    <?php if ($canViewPrivateDetails): ?>
+                        Auf größeren Bildschirmen ist die Tabelle kompakter und besser sortierbar.
+                        <?php if ($visibleDetailLabels !== []): ?>
+                            Sichtbar sind aktuell: <?= e(implode(', ', $visibleDetailLabels)) ?>.
+                        <?php endif; ?>
+                    <?php else: ?>
+                        Diese Rolle sieht bewusst nur Namen, Kategorie und Tags.
+                    <?php endif; ?>
                 </p>
             </div>
             <div class="column-toggle-list">
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="category" checked><span>Kategorie</span></label>
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="tags" checked><span>Tags</span></label>
-                <?php if ($canViewPrivateDetails): ?>
+                <?php if ($visibleContactFields['address']): ?>
                     <label class="column-toggle"><input type="checkbox" data-column-toggle="adresse" checked><span>Adresse</span></label>
+                <?php endif; ?>
+                <?php if ($visibleContactFields['birthday']): ?>
                     <label class="column-toggle"><input type="checkbox" data-column-toggle="geburtstag" checked><span>Geburtstag</span></label>
+                <?php endif; ?>
+                <?php if ($visibleContactFields['emails']): ?>
                     <label class="column-toggle"><input type="checkbox" data-column-toggle="emails" checked><span>E-Mail</span></label>
+                <?php endif; ?>
+                <?php if ($visibleContactFields['phones']): ?>
                     <label class="column-toggle"><input type="checkbox" data-column-toggle="phones" checked><span>Telefon</span></label>
+                <?php endif; ?>
+                <?php if ($visibleContactFields['login']): ?>
                     <label class="column-toggle"><input type="checkbox" data-column-toggle="login" checked><span>Login</span></label>
                 <?php endif; ?>
             </div>
@@ -192,11 +233,19 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         <th><a class="sort-link" href="<?= e($buildSortUrl('vorname')) ?>"><?= e($sortLabel('vorname', 'Vorname')) ?></a></th>
                         <th data-col="category"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>"><?= e($sortLabel('category_name', 'Kategorie')) ?></a></th>
                         <th data-col="tags">Tags</th>
-                        <?php if ($canViewPrivateDetails): ?>
+                        <?php if ($visibleContactFields['address']): ?>
                             <th data-col="adresse"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>"><?= e($sortLabel('ort', 'Adresse')) ?></a></th>
+                        <?php endif; ?>
+                        <?php if ($visibleContactFields['birthday']): ?>
                             <th data-col="geburtstag"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>"><?= e($sortLabel('geburtstag', 'Geburtstag')) ?></a></th>
+                        <?php endif; ?>
+                        <?php if ($visibleContactFields['emails']): ?>
                             <th data-col="emails">E-Mail</th>
+                        <?php endif; ?>
+                        <?php if ($visibleContactFields['phones']): ?>
                             <th data-col="phones">Telefon</th>
+                        <?php endif; ?>
+                        <?php if ($visibleContactFields['login']): ?>
                             <th data-col="login">Login / Rolle</th>
                         <?php endif; ?>
                         <?php if (can('contacts.manage')): ?>
@@ -222,7 +271,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                     <?php endforeach; ?>
                                 </div>
                             </td>
-                            <?php if ($canViewPrivateDetails): ?>
+                            <?php if ($visibleContactFields['address']): ?>
                                 <td data-col="adresse">
                                     <div class="table-stack">
                                         <span><?= e($contact['strasse']) ?></span>
@@ -230,7 +279,11 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                         <span class="muted"><?= e($contact['land'] ?: 'Deutschland') ?></span>
                                     </div>
                                 </td>
+                            <?php endif; ?>
+                            <?php if ($visibleContactFields['birthday']): ?>
                                 <td data-col="geburtstag"><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : '—') ?></td>
+                            <?php endif; ?>
+                            <?php if ($visibleContactFields['emails']): ?>
                                 <td data-col="emails">
                                     <div class="table-stack">
                                         <?php foreach ($contact['emails'] as $email): ?>
@@ -238,6 +291,8 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                         <?php endforeach; ?>
                                     </div>
                                 </td>
+                            <?php endif; ?>
+                            <?php if ($visibleContactFields['phones']): ?>
                                 <td data-col="phones">
                                     <div class="table-stack">
                                         <?php foreach ($contact['phones'] as $phone): ?>
@@ -245,6 +300,8 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                         <?php endforeach; ?>
                                     </div>
                                 </td>
+                            <?php endif; ?>
+                            <?php if ($visibleContactFields['login']): ?>
                                 <td data-col="login">
                                     <?php if (!empty($contact['linked_user'])): ?>
                                         <div class="table-stack">
@@ -287,7 +344,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         <?php foreach ($contact['tags'] as $tag): ?>
                             <span class="tag tag-secondary" style="<?= e(tag_style($tag['name'])) ?>"><?= e($tag['name']) ?></span>
                         <?php endforeach; ?>
-                        <?php if (!empty($contact['linked_user'])): ?>
+                        <?php if ($visibleContactFields['login'] && !empty($contact['linked_user'])): ?>
                             <span class="tag tag-account<?= (int) $contact['linked_user']['is_active'] === 1 ? ' is-active' : '' ?>">
                                 <?= e($contact['linked_user']['role_name']) ?>
                             </span>
@@ -295,13 +352,19 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     </div>
 
                     <div class="contact-body">
-                        <?php if ($canViewPrivateDetails): ?>
+                        <?php if ($visibleContactFields['address'] || $visibleContactFields['birthday']): ?>
                             <div class="contact-meta-list">
-                                <p><?= icon('location') ?><span><strong>Adresse</strong><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span></p>
-                                <p><?= icon('globe') ?><span><?= e($contact['land'] ?: 'Deutschland') ?></span></p>
-                                <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : 'Kein Geburtstag hinterlegt') ?></span></p>
+                                <?php if ($visibleContactFields['address']): ?>
+                                    <p><?= icon('location') ?><span><strong>Adresse</strong><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span></p>
+                                    <p><?= icon('globe') ?><span><?= e($contact['land'] ?: 'Deutschland') ?></span></p>
+                                <?php endif; ?>
+                                <?php if ($visibleContactFields['birthday']): ?>
+                                    <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : 'Kein Geburtstag hinterlegt') ?></span></p>
+                                <?php endif; ?>
                             </div>
+                        <?php endif; ?>
 
+                        <?php if ($visibleContactFields['emails']): ?>
                             <div>
                                 <strong>E-Mail-Adressen</strong>
                                 <ul class="mini-list">
@@ -310,7 +373,9 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                     <?php endforeach; ?>
                                 </ul>
                             </div>
+                        <?php endif; ?>
 
+                        <?php if ($visibleContactFields['phones']): ?>
                             <div>
                                 <strong>Telefonnummern</strong>
                                 <ul class="mini-list">
@@ -319,15 +384,19 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                     <?php endforeach; ?>
                                 </ul>
                             </div>
+                        <?php endif; ?>
 
-                            <?php if (!empty($contact['linked_user'])): ?>
-                                <div class="account-summary">
-                                    <strong>Login</strong>
-                                    <p><?= e($contact['linked_user']['email']) ?></p>
-                                </div>
-                            <?php endif; ?>
+                        <?php if ($visibleContactFields['login'] && !empty($contact['linked_user'])): ?>
+                            <div class="account-summary">
+                                <strong>Login</strong>
+                                <p><?= e($contact['linked_user']['email']) ?></p>
+                            </div>
+                        <?php endif; ?>
 
-                            <?php if (!empty($contact['notizen'])): ?><p class="note"><?= e($contact['notizen']) ?></p><?php endif; ?>
+                        <?php if ($visibleContactFields['notes'] && !empty($contact['notizen'])): ?><p class="note"><?= e($contact['notizen']) ?></p><?php endif; ?>
+
+                        <?php if (!$canViewPrivateDetails): ?>
+                            <p class="detail-hint">Weitere Kontaktdaten sind für diese Rolle ausgeblendet.</p>
                         <?php endif; ?>
                     </div>
 

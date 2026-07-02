@@ -8,6 +8,8 @@ use App\Repositories\UserRepository;
 
 final class Auth
 {
+    private const CONTACT_DETAIL_FIELDS = ['address', 'birthday', 'emails', 'phones', 'notes', 'login'];
+
     public function __construct(private UserRepository $users)
     {
     }
@@ -58,10 +60,19 @@ final class Auth
             return false;
         }
 
+        if ($permission === 'contacts.view_private_details') {
+            foreach (self::CONTACT_DETAIL_FIELDS as $field) {
+                if ($this->canViewContactField($field)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         $matrix = [
             'contacts.manage' => ['admin', 'orga', 'stufenmitglied'],
             'contacts.delete' => ['admin', 'orga'],
-            'contacts.view_private_details' => (array) config('security.private_contact_detail_roles', ['admin', 'orga', 'stufenmitglied']),
             'categories.manage' => ['admin', 'orga'],
             'contacts.export' => ['admin', 'orga'],
             'contacts.copy_emails' => ['admin', 'orga', 'stufenmitglied', 'betrachter'],
@@ -72,5 +83,20 @@ final class Auth
         ];
 
         return in_array($user['role_name'], $matrix[$permission] ?? [], true);
+    }
+
+    public function canViewContactField(string $field): bool
+    {
+        $user = $this->user();
+        if (!$user) {
+            return false;
+        }
+
+        $legacyRoles = (array) config('security.private_contact_detail_roles', ['admin', 'orga', 'stufenmitglied']);
+        $defaultVisibility = array_fill_keys(self::CONTACT_DETAIL_FIELDS, $legacyRoles);
+        $configuredVisibility = (array) config('security.contact_detail_visibility', []);
+        $allowedRoles = (array) ($configuredVisibility[$field] ?? $defaultVisibility[$field] ?? []);
+
+        return in_array((string) $user['role_name'], $allowedRoles, true);
     }
 }
