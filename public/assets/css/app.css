@@ -412,6 +412,33 @@ label span {
     flex-wrap: wrap;
 }
 
+.view-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.24rem;
+    border-radius: 999px;
+    background: rgba(240, 243, 237, 0.98);
+    border: 1px solid rgba(38, 42, 32, 0.08);
+}
+
+.view-toggle-button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--color-primary-strong);
+    font: inherit;
+    font-weight: 700;
+    padding: 0.42rem 0.8rem;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.view-toggle-button.is-active {
+    background: rgba(45, 49, 40, 0.96);
+    color: #f6f8f2;
+}
+
 .column-toggle-list {
     display: flex;
     flex-wrap: wrap;
@@ -517,6 +544,22 @@ label span {
 
 .contacts-mobile {
     display: none;
+}
+
+.contacts-view-root.is-table .contacts-table-wrap {
+    display: block;
+}
+
+.contacts-view-root.is-table .contacts-mobile {
+    display: none;
+}
+
+.contacts-view-root.is-cards .contacts-table-wrap {
+    display: none;
+}
+
+.contacts-view-root.is-cards .contacts-mobile {
+    display: grid;
 }
 
 .contacts-table-wrap {
@@ -1209,17 +1252,18 @@ code {
         display: grid;
     }
 
-    .table-options,
-    .contacts-table-wrap {
-        display: none;
-    }
-
-    .contacts-mobile {
-        display: grid;
-    }
-
     .hero-card,
     .panel {
         padding: 1.05rem;
+    }
+
+    .view-toggle {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .view-toggle-button {
+        flex: 1 1 0;
+        text-align: center;
     }
 }

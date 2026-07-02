@@ -141,7 +141,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
     </form>
 </section>
 
-<section class="panel">
+<section class="panel contacts-view-root is-table" data-contacts-view-root>
         <div class="panel-head">
         <div>
             <h3>Kontaktliste</h3>
@@ -259,6 +259,10 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         Diese Rolle sieht bewusst nur Namen, Kategorie und Tags.
                     <?php endif; ?>
                 </p>
+            </div>
+            <div class="view-toggle" role="group" aria-label="Ansicht umschalten">
+                <button type="button" class="view-toggle-button is-active" data-view-toggle="desktop">Tabelle</button>
+                <button type="button" class="view-toggle-button" data-view-toggle="mobile">Karten</button>
             </div>
             <div class="column-toggle-list">
                 <label class="column-toggle"><input type="checkbox" data-column-toggle="category" checked><span>Kategorie</span></label>

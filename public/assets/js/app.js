@@ -1,5 +1,7 @@
 const toast = document.getElementById('toast');
 const mobileContactsLayout = window.matchMedia('(max-width: 900px)');
+const contactsViewRoot = document.querySelector('[data-contacts-view-root]');
+const contactsViewStorageKey = 'grueze_contacts_view_mode';
 
 function showToast(message) {
     if (!toast) return;
@@ -12,7 +14,11 @@ function showToast(message) {
 }
 
 function activeView() {
-    return mobileContactsLayout.matches ? 'mobile' : 'desktop';
+    if (!contactsViewRoot) {
+        return mobileContactsLayout.matches ? 'mobile' : 'desktop';
+    }
+
+    return contactsViewRoot.dataset.activeView || 'desktop';
 }
 
 function selectableItemsForCurrentView() {
@@ -56,6 +62,35 @@ function updateSelectionUI() {
             : `${selectedCount} Kontakt${selectedCount === 1 ? '' : 'e'} werden für die Sammeländerung verwendet.`;
     }
 }
+
+function applyContactsView(view) {
+    if (!contactsViewRoot) {
+        return;
+    }
+
+    const normalizedView = view === 'mobile' ? 'mobile' : 'desktop';
+    contactsViewRoot.dataset.activeView = normalizedView;
+    contactsViewRoot.classList.toggle('is-table', normalizedView === 'desktop');
+    contactsViewRoot.classList.toggle('is-cards', normalizedView === 'mobile');
+
+    document.querySelectorAll('[data-view-toggle]').forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.viewToggle === normalizedView);
+    });
+
+    try {
+        window.localStorage.setItem(contactsViewStorageKey, normalizedView);
+    } catch (error) {
+        // Ignore storage failures and keep the current in-memory state.
+    }
+
+    updateSelectionUI();
+}
+
+document.querySelectorAll('[data-view-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+        applyContactsView(button.dataset.viewToggle);
+    });
+});
 
 if (copyButton) {
     copyButton.addEventListener('click', async () => {
@@ -159,7 +194,19 @@ document.querySelectorAll('[data-add-row]').forEach((button) => {
 });
 
 attachRemoveHandlers();
-updateSelectionUI();
+
+if (contactsViewRoot) {
+    let savedView = null;
+    try {
+        savedView = window.localStorage.getItem(contactsViewStorageKey);
+    } catch (error) {
+        savedView = null;
+    }
+
+    applyContactsView(savedView === 'mobile' ? 'mobile' : 'desktop');
+} else {
+    updateSelectionUI();
+}
 
 const selectionForm = document.getElementById('contactSelectionForm');
 if (selectionForm) {
