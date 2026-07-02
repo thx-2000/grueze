@@ -49,12 +49,18 @@ final class ContactRepository
             )';
         }
 
-        $allowedSorts = ['nachname', 'category_name'];
+        $allowedSorts = ['nachname', 'vorname', 'category_name', 'ort', 'geburtstag', 'created_at'];
         $sort = in_array($filters['sort'] ?? '', $allowedSorts, true) ? $filters['sort'] : 'nachname';
         $direction = strtolower((string) ($filters['direction'] ?? 'asc')) === 'desc' ? 'DESC' : 'ASC';
-        $sql .= $sort === 'category_name'
-            ? " ORDER BY categories.name {$direction}, contacts.nachname ASC, contacts.vorname ASC"
-            : " ORDER BY contacts.nachname {$direction}, contacts.vorname ASC";
+        $sortSql = match ($sort) {
+            'vorname' => "contacts.vorname {$direction}, contacts.nachname ASC",
+            'category_name' => "categories.name {$direction}, contacts.nachname ASC, contacts.vorname ASC",
+            'ort' => "contacts.ort {$direction}, contacts.nachname ASC, contacts.vorname ASC",
+            'geburtstag' => "contacts.geburtstag {$direction}, contacts.nachname ASC, contacts.vorname ASC",
+            'created_at' => "contacts.created_at {$direction}, contacts.nachname ASC, contacts.vorname ASC",
+            default => "contacts.nachname {$direction}, contacts.vorname ASC",
+        };
+        $sql .= " ORDER BY {$sortSql}";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);

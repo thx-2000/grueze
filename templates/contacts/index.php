@@ -3,10 +3,29 @@ $contactCount = count($contacts);
 $emailCount = 0;
 $phoneCount = 0;
 $activeTagIds = array_map('intval', (array) ($filters['tag_ids'] ?? []));
+$currentSort = (string) ($filters['sort'] ?? 'nachname');
+$currentDirection = (string) ($filters['direction'] ?? 'asc');
 foreach ($contacts as $contact) {
     $emailCount += count($contact['emails']);
     $phoneCount += count($contact['phones']);
 }
+
+$buildSortUrl = static function (string $sortKey) use ($filters, $currentSort, $currentDirection): string {
+    $nextDirection = $currentSort === $sortKey && $currentDirection === 'asc' ? 'desc' : 'asc';
+    $query = $filters;
+    $query['sort'] = $sortKey;
+    $query['direction'] = $nextDirection;
+
+    return url('/?' . http_build_query($query));
+};
+
+$sortLabel = static function (string $sortKey, string $label) use ($currentSort, $currentDirection): string {
+    if ($currentSort !== $sortKey) {
+        return $label;
+    }
+
+    return $label . ' ' . ($currentDirection === 'asc' ? '↑' : '↓');
+};
 ?>
 <section class="hero-card">
     <div class="hero-row">
@@ -58,7 +77,11 @@ foreach ($contacts as $contact) {
             <span>Sortierung</span>
             <select name="sort">
                 <option value="nachname" <?= ($filters['sort'] ?? 'nachname') === 'nachname' ? 'selected' : '' ?>>Name</option>
+                <option value="vorname" <?= ($filters['sort'] ?? '') === 'vorname' ? 'selected' : '' ?>>Vorname</option>
                 <option value="category_name" <?= ($filters['sort'] ?? '') === 'category_name' ? 'selected' : '' ?>>Kategorie</option>
+                <option value="ort" <?= ($filters['sort'] ?? '') === 'ort' ? 'selected' : '' ?>>Ort</option>
+                <option value="geburtstag" <?= ($filters['sort'] ?? '') === 'geburtstag' ? 'selected' : '' ?>>Geburtstag</option>
+                <option value="created_at" <?= ($filters['sort'] ?? '') === 'created_at' ? 'selected' : '' ?>>Angelegt</option>
             </select>
         </label>
         <label>
@@ -139,9 +162,113 @@ foreach ($contacts as $contact) {
             </div>
         </div>
 
-        <div class="contacts-grid">
+        <div class="table-options">
+            <div>
+                <strong>Ansicht</strong>
+                <p class="muted">Auf größeren Bildschirmen ist die Tabelle kompakter und besser sortierbar.</p>
+            </div>
+            <div class="column-toggle-list">
+                <label class="column-toggle"><input type="checkbox" data-column-toggle="category" checked><span>Kategorie</span></label>
+                <label class="column-toggle"><input type="checkbox" data-column-toggle="tags" checked><span>Tags</span></label>
+                <label class="column-toggle"><input type="checkbox" data-column-toggle="ort" checked><span>Ort</span></label>
+                <label class="column-toggle"><input type="checkbox" data-column-toggle="geburtstag" checked><span>Geburtstag</span></label>
+                <label class="column-toggle"><input type="checkbox" data-column-toggle="emails" checked><span>E-Mail</span></label>
+                <label class="column-toggle"><input type="checkbox" data-column-toggle="phones" checked><span>Telefon</span></label>
+                <label class="column-toggle"><input type="checkbox" data-column-toggle="login" checked><span>Login</span></label>
+            </div>
+        </div>
+
+        <div class="contacts-table-wrap">
+            <table class="contacts-table">
+                <thead>
+                    <tr>
+                        <th class="col-select">Auswahl</th>
+                        <th><a class="sort-link" href="<?= e($buildSortUrl('nachname')) ?>"><?= e($sortLabel('nachname', 'Name')) ?></a></th>
+                        <th><a class="sort-link" href="<?= e($buildSortUrl('vorname')) ?>"><?= e($sortLabel('vorname', 'Vorname')) ?></a></th>
+                        <th data-col="category"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>"><?= e($sortLabel('category_name', 'Kategorie')) ?></a></th>
+                        <th data-col="tags">Tags</th>
+                        <th data-col="ort"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>"><?= e($sortLabel('ort', 'Ort')) ?></a></th>
+                        <th data-col="geburtstag"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>"><?= e($sortLabel('geburtstag', 'Geburtstag')) ?></a></th>
+                        <th data-col="emails">E-Mail</th>
+                        <th data-col="phones">Telefon</th>
+                        <th data-col="login">Login / Rolle</th>
+                        <?php if (can('contacts.manage')): ?>
+                            <th class="col-actions">Aktionen</th>
+                        <?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($contacts as $contact): ?>
+                        <tr class="contact-row" data-contact-selectable data-view="desktop" data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
+                            <td class="col-select">
+                                <label class="table-check">
+                                    <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox>
+                                </label>
+                            </td>
+                            <td><strong><?= e($contact['nachname']) ?></strong></td>
+                            <td><?= e($contact['vorname']) ?></td>
+                            <td data-col="category"><span class="table-pill"><?= e($contact['category_name'] ?: 'Ohne Kategorie') ?></span></td>
+                            <td data-col="tags">
+                                <div class="tag-cluster">
+                                    <?php foreach ($contact['tags'] as $tag): ?>
+                                        <span class="tag tag-secondary"><?= e($tag['name']) ?></span>
+                                    <?php endforeach; ?>
+                                </div>
+                            </td>
+                            <td data-col="ort">
+                                <div class="table-stack">
+                                    <span><?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span>
+                                    <span class="muted"><?= e($contact['land'] ?: 'Deutschland') ?></span>
+                                </div>
+                            </td>
+                            <td data-col="geburtstag"><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : '—') ?></td>
+                            <td data-col="emails">
+                                <div class="table-stack">
+                                    <?php foreach ($contact['emails'] as $email): ?>
+                                        <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e(($email['label'] ? $email['label'] . ': ' : '') . $email['email']) ?></a>
+                                    <?php endforeach; ?>
+                                </div>
+                            </td>
+                            <td data-col="phones">
+                                <div class="table-stack">
+                                    <?php foreach ($contact['phones'] as $phone): ?>
+                                        <a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['label'] . ': ' . $phone['phone']) ?></a>
+                                    <?php endforeach; ?>
+                                </div>
+                            </td>
+                            <td data-col="login">
+                                <?php if (!empty($contact['linked_user'])): ?>
+                                    <div class="table-stack">
+                                        <span><?= e($contact['linked_user']['email']) ?></span>
+                                        <span class="muted"><?= e($contact['linked_user']['role_name']) ?></span>
+                                    </div>
+                                <?php else: ?>
+                                    <span class="muted">Kein Login</span>
+                                <?php endif; ?>
+                            </td>
+                            <?php if (can('contacts.manage')): ?>
+                                <td class="col-actions">
+                                    <div class="table-actions">
+                                        <a class="ghost-button" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span>Bearbeiten</span></a>
+                                        <?php if (can('contacts.delete')): ?>
+                                            <form method="post" action="<?= e(url('/contacts/delete')) ?>" onsubmit="return confirm('Kontakt wirklich löschen?');">
+                                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                                <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+                                                <button type="submit" class="danger-button"><?= icon('trash') ?><span>Löschen</span></button>
+                                            </form>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="contacts-grid contacts-mobile">
             <?php foreach ($contacts as $contact): ?>
-                <article class="contact-card" data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
+                <article class="contact-card" data-contact-selectable data-view="mobile" data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
                     <label class="contact-select">
                         <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox>
                         <span>Auswählen</span>

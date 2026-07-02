@@ -1,4 +1,5 @@
 const toast = document.getElementById('toast');
+const mobileContactsLayout = window.matchMedia('(max-width: 900px)');
 
 function showToast(message) {
     if (!toast) return;
@@ -10,22 +11,34 @@ function showToast(message) {
     }, 2400);
 }
 
-function selectedContactCards() {
-    return [...document.querySelectorAll('[data-contact-checkbox]:checked')].map((checkbox) => checkbox.closest('.contact-card'));
+function activeView() {
+    return mobileContactsLayout.matches ? 'mobile' : 'desktop';
+}
+
+function selectableItemsForCurrentView() {
+    return [...document.querySelectorAll(`[data-contact-selectable][data-view="${activeView()}"]`)];
+}
+
+function selectedContactItems() {
+    return [...document.querySelectorAll(`[data-contact-selectable][data-view="${activeView()}"] [data-contact-checkbox]:checked`)]
+        .map((checkbox) => checkbox.closest('[data-contact-selectable]'))
+        .filter(Boolean);
 }
 
 const copyButton = document.getElementById('copyEmailsButton');
 const selectionStatus = document.getElementById('selectionStatus');
 
 function updateSelectionUI() {
-    const cards = document.querySelectorAll('.contact-card');
+    const items = document.querySelectorAll('[data-contact-selectable]');
+    const currentView = activeView();
     let selectedCount = 0;
 
-    cards.forEach((card) => {
-        const checkbox = card.querySelector('[data-contact-checkbox]');
+    items.forEach((item) => {
+        const checkbox = item.querySelector('[data-contact-checkbox]');
+        const isActiveView = item.dataset.view === currentView;
         const isSelected = Boolean(checkbox?.checked);
-        card.classList.toggle('has-selection', isSelected);
-        if (isSelected) {
+        item.classList.toggle('has-selection', isActiveView && isSelected);
+        if (isActiveView && isSelected) {
             selectedCount += 1;
         }
     });
@@ -39,8 +52,8 @@ function updateSelectionUI() {
 
 if (copyButton) {
     copyButton.addEventListener('click', async () => {
-        const emails = selectedContactCards()
-            .flatMap((card) => [...card.querySelectorAll('[data-email]')].map((item) => item.dataset.email))
+        const emails = selectedContactItems()
+            .flatMap((item) => [...item.querySelectorAll('[data-email]')].map((entry) => entry.dataset.email))
             .filter(Boolean);
 
         if (emails.length === 0) {
@@ -67,7 +80,8 @@ if (copyButton) {
 
 document.querySelectorAll('[data-select="all"]').forEach((button) => {
     button.addEventListener('click', () => {
-        document.querySelectorAll('[data-contact-checkbox]').forEach((checkbox) => {
+        selectableItemsForCurrentView().forEach((item) => {
+            const checkbox = item.querySelector('[data-contact-checkbox]');
             checkbox.checked = true;
         });
         updateSelectionUI();
@@ -76,7 +90,8 @@ document.querySelectorAll('[data-select="all"]').forEach((button) => {
 
 document.querySelectorAll('[data-select="none"]').forEach((button) => {
     button.addEventListener('click', () => {
-        document.querySelectorAll('[data-contact-checkbox]').forEach((checkbox) => {
+        selectableItemsForCurrentView().forEach((item) => {
+            const checkbox = item.querySelector('[data-contact-checkbox]');
             checkbox.checked = false;
         });
         updateSelectionUI();
@@ -86,9 +101,9 @@ document.querySelectorAll('[data-select="none"]').forEach((button) => {
 document.querySelectorAll('[data-select-category]').forEach((button) => {
     button.addEventListener('click', () => {
         const categoryId = button.dataset.selectCategory;
-        document.querySelectorAll('.contact-card').forEach((card) => {
-            const checkbox = card.querySelector('[data-contact-checkbox]');
-            checkbox.checked = card.dataset.categoryId === categoryId;
+        selectableItemsForCurrentView().forEach((item) => {
+            const checkbox = item.querySelector('[data-contact-checkbox]');
+            checkbox.checked = item.dataset.categoryId === categoryId;
         });
         updateSelectionUI();
     });
@@ -97,9 +112,9 @@ document.querySelectorAll('[data-select-category]').forEach((button) => {
 document.querySelectorAll('[data-select-tag]').forEach((button) => {
     button.addEventListener('click', () => {
         const tagId = button.dataset.selectTag;
-        document.querySelectorAll('.contact-card').forEach((card) => {
-            const checkbox = card.querySelector('[data-contact-checkbox]');
-            const tagIds = (card.dataset.tagIds || '').split(',').filter(Boolean);
+        selectableItemsForCurrentView().forEach((item) => {
+            const checkbox = item.querySelector('[data-contact-checkbox]');
+            const tagIds = (item.dataset.tagIds || '').split(',').filter(Boolean);
             checkbox.checked = tagIds.includes(tagId);
         });
         updateSelectionUI();
@@ -109,6 +124,8 @@ document.querySelectorAll('[data-select-tag]').forEach((button) => {
 document.querySelectorAll('[data-contact-checkbox]').forEach((checkbox) => {
     checkbox.addEventListener('change', updateSelectionUI);
 });
+
+mobileContactsLayout.addEventListener('change', updateSelectionUI);
 
 function attachRemoveHandlers(scope = document) {
     scope.querySelectorAll('[data-remove-row]').forEach((button) => {
@@ -136,6 +153,65 @@ document.querySelectorAll('[data-add-row]').forEach((button) => {
 
 attachRemoveHandlers();
 updateSelectionUI();
+
+const selectionForm = document.getElementById('contactSelectionForm');
+if (selectionForm) {
+    selectionForm.addEventListener('submit', () => {
+        const currentView = activeView();
+        document.querySelectorAll('[data-contact-selectable]').forEach((item) => {
+            const checkbox = item.querySelector('[data-contact-checkbox]');
+            if (!checkbox) return;
+            checkbox.disabled = item.dataset.view !== currentView;
+        });
+    });
+}
+
+const contactsTable = document.querySelector('.contacts-table');
+if (contactsTable) {
+    const storageKey = 'grueze_visible_contact_columns';
+    const defaultColumns = ['category', 'tags', 'ort', 'geburtstag', 'emails', 'phones', 'login'];
+    const savedColumns = (() => {
+        try {
+            return JSON.parse(window.localStorage.getItem(storageKey) || 'null');
+        } catch (error) {
+            return null;
+        }
+    })();
+
+    const visibleColumns = Array.isArray(savedColumns) && savedColumns.length > 0 ? savedColumns : defaultColumns;
+
+    function applyVisibleColumns() {
+        document.querySelectorAll('[data-column-toggle]').forEach((toggle) => {
+            toggle.checked = visibleColumns.includes(toggle.dataset.columnToggle);
+        });
+
+        document.querySelectorAll('.contacts-table [data-col]').forEach((cell) => {
+            const shouldShow = visibleColumns.includes(cell.dataset.col);
+            cell.classList.toggle('is-hidden-column', !shouldShow);
+        });
+    }
+
+    document.querySelectorAll('[data-column-toggle]').forEach((toggle) => {
+        toggle.addEventListener('change', () => {
+            const column = toggle.dataset.columnToggle;
+            if (toggle.checked) {
+                if (!visibleColumns.includes(column)) {
+                    visibleColumns.push(column);
+                }
+            } else {
+                const index = visibleColumns.indexOf(column);
+                if (index >= 0) {
+                    visibleColumns.splice(index, 1);
+                }
+            }
+
+            window.localStorage.setItem(storageKey, JSON.stringify(visibleColumns));
+            applyVisibleColumns();
+        });
+    });
+
+    applyVisibleColumns();
+}
 
 const statusPage = document.querySelector('[data-mail-status-page]');
 if (statusPage) {
