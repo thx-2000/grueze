@@ -46,19 +46,18 @@ button,
 .ghost-button {
     background: rgba(244, 247, 235, 0.9);
     border: 1px solid rgba(38, 42, 32, 0.12);
-    color: var(--color-text);
+    color: var(--color-text) !important;
+    box-shadow: none;
 }
 
-.sidebar-footer .ghost-button,
-.bulk-card .ghost-button {
+.sidebar-footer .ghost-button {
     background: #3c4037;
-    color: #f8fbef;
+    color: #f8fbef !important;
     border-color: rgba(45, 49, 40, 0.3);
     box-shadow: 0 10px 18px rgba(24, 26, 21, 0.18);
 }
 
-.sidebar-footer .ghost-button .icon,
-.bulk-card .ghost-button .icon {
+.sidebar-footer .ghost-button .icon {
     color: currentColor;
 }
 
@@ -390,6 +389,7 @@ label span {
     gap: 0.7rem;
     align-items: center;
     flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .bulk-layout {
@@ -460,10 +460,14 @@ label span {
 }
 
 .compact-action {
-    padding: 0.48rem 0.72rem;
-    font-size: 0.9rem;
+    padding: 0.4rem 0.62rem;
+    font-size: 0.84rem;
     font-weight: 700;
     box-shadow: none;
+    width: auto;
+    min-height: 0;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .toolbar-actions {
@@ -476,12 +480,19 @@ label span {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+    align-items: flex-start;
 }
 
 .quick-category-list .compact-action,
 .selection-tools .compact-action,
 .bulk-editor .compact-action {
     min-height: 0;
+}
+
+.quick-category-list .ghost-button,
+.selection-tools .ghost-button {
+    background: rgba(250, 252, 244, 0.98);
+    border-color: rgba(38, 42, 32, 0.1);
 }
 
 .contacts-grid {
