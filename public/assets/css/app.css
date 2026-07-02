@@ -6,11 +6,7 @@ body {
     margin: 0;
     font-family: var(--font-body);
     color: var(--color-text);
-    background:
-        radial-gradient(circle at top left, rgba(229, 255, 58, 0.24), transparent 26%),
-        radial-gradient(circle at top right, rgba(255, 159, 10, 0.14), transparent 28%),
-        radial-gradient(circle at bottom left, rgba(45, 49, 40, 0.1), transparent 24%),
-        linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-alt) 100%);
+    background: var(--color-bg);
     min-height: 100vh;
 }
 
@@ -38,13 +34,13 @@ button,
 
 button,
 .button-link {
-    background: linear-gradient(135deg, var(--color-accent), var(--color-secondary));
-    color: var(--color-primary-strong) !important;
+    background: #33372f;
+    color: #f6f7f3 !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.55rem;
-    box-shadow: 0 10px 18px rgba(255, 159, 10, 0.2);
+    box-shadow: 0 10px 18px rgba(24, 26, 21, 0.12);
 }
 
 .ghost-button {
@@ -55,7 +51,7 @@ button,
 
 .sidebar-footer .ghost-button,
 .bulk-card .ghost-button {
-    background: linear-gradient(135deg, #2d3128, #474d40);
+    background: #3c4037;
     color: #f8fbef;
     border-color: rgba(45, 49, 40, 0.3);
     box-shadow: 0 10px 18px rgba(24, 26, 21, 0.18);
@@ -74,7 +70,7 @@ button,
 }
 
 .form-actions .danger-button {
-    background: linear-gradient(135deg, #d45a2f, #b64521);
+    background: #b64521;
     color: #fff !important;
     border-color: rgba(182, 69, 33, 0.38);
     box-shadow: 0 10px 18px rgba(182, 69, 33, 0.18);
@@ -132,7 +128,7 @@ label span {
 
 .sidebar {
     padding: 1.25rem;
-    background: linear-gradient(180deg, rgba(248, 251, 239, 0.94), rgba(228, 233, 218, 0.9));
+    background: rgba(240, 243, 237, 0.94);
     border: 1px solid rgba(255,255,255,0.52);
     backdrop-filter: blur(14px);
     color: var(--color-text);
@@ -157,7 +153,7 @@ label span {
     height: 3.4rem;
     padding: 0 0.88rem;
     border-radius: 1rem;
-    background: linear-gradient(135deg, #e5ff3a, #ffb300);
+    background: var(--color-accent);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -168,7 +164,7 @@ label span {
     letter-spacing: -0.02em;
     white-space: nowrap;
     color: #181a15;
-    box-shadow: 0 10px 18px rgba(255, 179, 0, 0.22);
+    box-shadow: 0 10px 18px rgba(24, 26, 21, 0.08);
 }
 
 .sidebar-copy {
@@ -205,8 +201,8 @@ label span {
 }
 
 .nav a.is-active {
-    background: linear-gradient(135deg, rgba(229, 255, 58, 0.18), rgba(255, 159, 10, 0.14));
-    border-color: rgba(255, 159, 10, 0.18);
+    background: rgba(224, 228, 218, 0.92);
+    border-color: rgba(216, 239, 84, 0.28);
     color: var(--color-primary-strong);
 }
 
@@ -289,9 +285,7 @@ label span {
 }
 
 .hero-card {
-    background:
-        linear-gradient(135deg, rgba(251, 255, 241, 0.92), rgba(239, 244, 228, 0.94)),
-        var(--color-surface);
+    background: rgba(248, 249, 245, 0.94);
 }
 
 .hero-row,
@@ -443,7 +437,8 @@ label span {
 }
 
 .bulk-card.accent {
-    background: linear-gradient(135deg, rgba(229, 255, 58, 0.2), rgba(255, 159, 10, 0.12));
+    background: rgba(240, 243, 237, 0.98);
+    border-color: rgba(216, 239, 84, 0.22);
 }
 
 .bulk-title {
@@ -612,7 +607,7 @@ label span {
 }
 
 .contact-card {
-    background: linear-gradient(180deg, rgba(252, 254, 248, 0.98), rgba(240, 245, 231, 0.98));
+    background: rgba(250, 251, 248, 0.98);
     border-radius: var(--radius-md);
     padding: 0.96rem;
     box-shadow: var(--shadow-card);
@@ -654,8 +649,8 @@ label span {
 }
 
 .tag-secondary {
-    background: rgba(255, 159, 10, 0.14);
-    color: #5c3b00;
+    background: rgba(240, 163, 23, 0.12);
+    color: #53411e;
 }
 
 .tag-account {
@@ -817,8 +812,8 @@ label span {
 }
 
 .tag-option.is-selected {
-    background: rgba(229, 255, 58, 0.2);
-    border-color: rgba(255, 159, 10, 0.28);
+    background: rgba(216, 239, 84, 0.14);
+    border-color: rgba(216, 239, 84, 0.28);
 }
 
 .account-panel {
@@ -978,7 +973,7 @@ td {
 .progress-bar {
     width: 0;
     height: 100%;
-    background: linear-gradient(90deg, var(--color-secondary), var(--color-primary));
+    background: var(--color-secondary);
     transition: width 0.3s ease;
 }
 
@@ -1017,7 +1012,8 @@ td {
     border-radius: 1.35rem;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, rgba(229, 255, 58, 0.18), rgba(255, 159, 10, 0.16));
+    background: rgba(240, 243, 237, 0.98);
+    border: 1px solid rgba(216, 239, 84, 0.22);
     color: var(--color-primary-strong);
     font-size: 1.35rem;
 }

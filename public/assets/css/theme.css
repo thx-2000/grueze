@@ -1,18 +1,18 @@
 :root {
     --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
     --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-    --color-bg: #eef0e8;
-    --color-bg-alt: #dfe3d6;
+    --color-bg: #e8ebe5;
+    --color-bg-alt: #dde1da;
     --color-surface: rgba(255, 255, 255, 0.82);
     --color-surface-strong: rgba(255, 255, 255, 0.92);
-    --color-surface-soft: rgba(247, 249, 241, 0.9);
+    --color-surface-soft: rgba(243, 245, 240, 0.92);
     --color-text: #181a15;
     --color-muted: #5d6258;
     --color-primary: #2d3128;
     --color-primary-strong: #141610;
-    --color-secondary: #ff9f0a;
-    --color-accent: #e5ff3a;
-    --color-highlight: #f2ff80;
+    --color-secondary: #f0a317;
+    --color-accent: #d8ef54;
+    --color-highlight: #eef4c5;
     --color-border: rgba(38, 42, 32, 0.12);
     --color-danger: #b64521;
     --color-success: #3f7558;
