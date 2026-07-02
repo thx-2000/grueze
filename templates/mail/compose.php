@@ -32,7 +32,7 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
                 <input type="hidden" name="subject_prefix" id="subjectPrefixField" value="<?= e($activeSubjectPrefix) ?>">
                 <div class="subsection-card full-width workflow-card">
                     <div class="workflow-card-head">
-                        <span class="workflow-icon"><?= icon('mail-open') ?></span>
+                        <span class="workflow-icon"><?= icon('message-send') ?></span>
                         <div>
                             <strong>So läuft diese Kontaktaufnahme ab</strong>
                             <p class="detail-hint">Du schreibst genau einer Person. Die eigentliche Zieladresse bleibt verborgen, Antworten kommen direkt zu deiner Login-Mailadresse zurück.</p>

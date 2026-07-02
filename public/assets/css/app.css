@@ -424,9 +424,9 @@ label span {
 
 .view-toggle-button {
     appearance: none;
-    border: 0;
-    background: transparent;
-    color: var(--color-primary-strong);
+    border: 1px solid rgba(38, 42, 32, 0.12);
+    background: rgba(248, 250, 244, 0.96);
+    color: #394034;
     font: inherit;
     font-weight: 700;
     padding: 0.42rem 0.8rem;
@@ -434,9 +434,14 @@ label span {
     cursor: pointer;
 }
 
+.view-toggle-button:hover {
+    background: rgba(236, 240, 229, 0.98);
+}
+
 .view-toggle-button.is-active {
     background: rgba(45, 49, 40, 0.96);
     color: #f6f8f2;
+    border-color: rgba(45, 49, 40, 0.96);
 }
 
 .column-toggle-list {

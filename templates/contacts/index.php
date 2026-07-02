@@ -200,7 +200,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     <?php if ($canSendRegularMail): ?>
                         <button type="submit" class="button-link"><?= icon('edit') ?><span>E-Mail verfassen</span></button>
                     <?php elseif ($canSendSingleContactMail): ?>
-                        <button type="submit" class="button-link"><?= icon('mail-open') ?><span>Person kontaktieren</span></button>
+                        <button type="submit" class="button-link"><?= icon('message-send') ?><span>Person kontaktieren</span></button>
                     <?php endif; ?>
                 </div>
                 <?php if ($canSendSingleContactMail): ?>
@@ -267,7 +267,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         <?php if ($canSendSingleContactMail): ?>
             <aside class="workflow-card" aria-label="Hinweise zur Kontaktaufnahme">
                 <div class="workflow-card-head">
-                    <span class="workflow-icon"><?= icon('mail-open') ?></span>
+                    <span class="workflow-icon"><?= icon('message-send') ?></span>
                     <div>
                         <strong>So funktioniert die Kontaktaufnahme</strong>
                         <p class="detail-hint">Diese Ansicht ist bewusst auf zwei Aufgaben reduziert: fehlende Mailadressen erkennen und genau eine Person kontaktieren.</p>
