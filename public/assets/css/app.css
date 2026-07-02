@@ -7,9 +7,9 @@ body {
     font-family: var(--font-body);
     color: var(--color-text);
     background:
-        radial-gradient(circle at top left, rgba(162, 139, 98, 0.22), transparent 26%),
-        radial-gradient(circle at top right, rgba(168, 82, 45, 0.12), transparent 26%),
-        radial-gradient(circle at bottom left, rgba(34, 53, 47, 0.12), transparent 24%),
+        radial-gradient(circle at top left, rgba(229, 255, 58, 0.24), transparent 26%),
+        radial-gradient(circle at top right, rgba(255, 159, 10, 0.14), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(45, 49, 40, 0.1), transparent 24%),
         linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-alt) 100%);
     min-height: 100vh;
 }
@@ -38,27 +38,27 @@ button,
 
 button,
 .button-link {
-    background: linear-gradient(135deg, var(--color-primary), #314b42);
-    color: #fff !important;
+    background: linear-gradient(135deg, var(--color-accent), var(--color-secondary));
+    color: var(--color-primary-strong) !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.55rem;
-    box-shadow: 0 10px 18px rgba(34, 53, 47, 0.18);
+    box-shadow: 0 10px 18px rgba(255, 159, 10, 0.2);
 }
 
 .ghost-button {
-    background: rgba(245, 238, 228, 0.88);
-    border: 1px solid rgba(67, 55, 42, 0.12);
+    background: rgba(244, 247, 235, 0.9);
+    border: 1px solid rgba(38, 42, 32, 0.12);
     color: var(--color-text);
 }
 
 .sidebar-footer .ghost-button,
 .bulk-card .ghost-button {
-    background: linear-gradient(135deg, #8f4525, #6b3120);
-    color: #fff;
-    border-color: rgba(107, 49, 32, 0.32);
-    box-shadow: 0 10px 18px rgba(107, 49, 32, 0.18);
+    background: linear-gradient(135deg, #2d3128, #474d40);
+    color: #f8fbef;
+    border-color: rgba(45, 49, 40, 0.3);
+    box-shadow: 0 10px 18px rgba(24, 26, 21, 0.18);
 }
 
 .sidebar-footer .ghost-button .icon,
@@ -67,17 +67,17 @@ button,
 }
 
 .danger-button {
-    background: rgba(198, 79, 94, 0.12);
+    background: rgba(182, 69, 33, 0.12);
     color: var(--color-danger) !important;
-    border-color: rgba(198, 79, 94, 0.12);
+    border-color: rgba(182, 69, 33, 0.12);
     box-shadow: none;
 }
 
 .form-actions .danger-button {
-    background: linear-gradient(135deg, #b44d59, #8d3a46);
+    background: linear-gradient(135deg, #d45a2f, #b64521);
     color: #fff !important;
-    border-color: rgba(141, 58, 70, 0.38);
-    box-shadow: 0 10px 18px rgba(141, 58, 70, 0.18);
+    border-color: rgba(182, 69, 33, 0.38);
+    box-shadow: 0 10px 18px rgba(182, 69, 33, 0.18);
 }
 
 .form-actions .danger-button .icon {
@@ -98,7 +98,7 @@ textarea {
     padding: 0.82rem 0.92rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    background: rgba(250, 246, 239, 0.98);
+    background: rgba(250, 252, 244, 0.98);
     font: inherit;
     color: var(--color-text);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.38);
@@ -108,8 +108,8 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: rgba(34, 53, 47, 0.35);
-    box-shadow: 0 0 0 4px rgba(34, 53, 47, 0.10);
+    border-color: rgba(255, 159, 10, 0.45);
+    box-shadow: 0 0 0 4px rgba(229, 255, 58, 0.18);
 }
 
 label span,
@@ -119,7 +119,7 @@ strong {
 }
 
 label span {
-    color: #43372a;
+    color: #34382f;
     font-weight: 700;
 }
 
@@ -132,7 +132,7 @@ label span {
 
 .sidebar {
     padding: 1.25rem;
-    background: linear-gradient(180deg, rgba(255, 250, 244, 0.92), rgba(242, 234, 222, 0.88));
+    background: linear-gradient(180deg, rgba(248, 251, 239, 0.94), rgba(228, 233, 218, 0.9));
     border: 1px solid rgba(255,255,255,0.52);
     backdrop-filter: blur(14px);
     color: var(--color-text);
@@ -157,7 +157,7 @@ label span {
     height: 3.4rem;
     padding: 0 0.88rem;
     border-radius: 1rem;
-    background: #5e3a28;
+    background: linear-gradient(135deg, #e5ff3a, #ffb300);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -167,8 +167,8 @@ label span {
     line-height: 1;
     letter-spacing: -0.02em;
     white-space: nowrap;
-    color: #fff;
-    box-shadow: 0 10px 18px rgba(36, 31, 26, 0.18);
+    color: #181a15;
+    box-shadow: 0 10px 18px rgba(255, 179, 0, 0.22);
 }
 
 .sidebar-copy {
@@ -205,8 +205,8 @@ label span {
 }
 
 .nav a.is-active {
-    background: linear-gradient(135deg, rgba(34, 53, 47, 0.12), rgba(168, 82, 45, 0.12));
-    border-color: rgba(34, 53, 47, 0.12);
+    background: linear-gradient(135deg, rgba(229, 255, 58, 0.18), rgba(255, 159, 10, 0.14));
+    border-color: rgba(255, 159, 10, 0.18);
     color: var(--color-primary-strong);
 }
 
@@ -290,7 +290,7 @@ label span {
 
 .hero-card {
     background:
-        linear-gradient(135deg, rgba(255, 251, 246, 0.88), rgba(244, 236, 226, 0.92)),
+        linear-gradient(135deg, rgba(251, 255, 241, 0.92), rgba(239, 244, 228, 0.94)),
         var(--color-surface);
 }
 
@@ -419,7 +419,7 @@ label span {
     padding: 0.48rem 0.65rem;
     border-radius: var(--radius-sm);
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(67, 55, 42, 0.08);
+    border: 1px solid rgba(38, 42, 32, 0.08);
     font-weight: 600;
 }
 
@@ -436,14 +436,14 @@ label span {
 .bulk-card {
     padding: 0.88rem 0.95rem;
     border-radius: var(--radius-md);
-    background: rgba(247, 242, 235, 0.96);
-    border: 1px solid rgba(67, 55, 42, 0.08);
+    background: rgba(245, 248, 237, 0.96);
+    border: 1px solid rgba(38, 42, 32, 0.08);
     display: grid;
     gap: 0.8rem;
 }
 
 .bulk-card.accent {
-    background: linear-gradient(135deg, rgba(168, 82, 45, 0.11), rgba(162, 139, 98, 0.14));
+    background: linear-gradient(135deg, rgba(229, 255, 58, 0.2), rgba(255, 159, 10, 0.12));
 }
 
 .bulk-title {
@@ -476,8 +476,8 @@ label span {
 .contacts-table-wrap {
     overflow-x: auto;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(67, 55, 42, 0.08);
-    background: rgba(247, 242, 235, 0.96);
+    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: rgba(245, 248, 237, 0.96);
 }
 
 .contacts-table {
@@ -491,15 +491,15 @@ label span {
 .contacts-table td {
     padding: 0.72rem 0.7rem;
     vertical-align: top;
-    border-bottom: 1px solid rgba(67, 55, 42, 0.08);
-    background: rgba(247, 242, 235, 0.96);
+    border-bottom: 1px solid rgba(38, 42, 32, 0.08);
+    background: rgba(245, 248, 237, 0.96);
 }
 
 .contacts-table thead th {
     position: sticky;
     top: 0;
     z-index: 1;
-    background: rgba(244, 236, 226, 0.94);
+    background: rgba(232, 237, 221, 0.96);
     font-size: 0.82rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -507,7 +507,7 @@ label span {
 
 .contacts-table tbody tr:hover td,
 .contacts-table tbody tr.has-selection td {
-    background: rgba(241, 235, 227, 0.98);
+    background: rgba(237, 242, 227, 0.98);
 }
 
 .contacts-table .col-select {
@@ -560,9 +560,15 @@ label span {
     width: fit-content;
     padding: 0.28rem 0.62rem;
     border-radius: 999px;
-    background: rgba(34, 53, 47, 0.08);
+    background: rgba(45, 49, 40, 0.08);
     color: var(--color-primary-strong);
     font-weight: 700;
+}
+
+.birth-name-inline {
+    color: var(--color-muted);
+    font-size: 0.92em;
+    font-weight: 600;
 }
 
 .table-actions {
@@ -606,18 +612,18 @@ label span {
 }
 
 .contact-card {
-    background: linear-gradient(180deg, rgba(255,253,249,0.98), rgba(244,238,230,0.98));
+    background: linear-gradient(180deg, rgba(252, 254, 248, 0.98), rgba(240, 245, 231, 0.98));
     border-radius: var(--radius-md);
     padding: 0.96rem;
     box-shadow: var(--shadow-card);
     display: grid;
     gap: 0.9rem;
-    border: 1px solid rgba(67, 55, 42, 0.08);
+    border: 1px solid rgba(38, 42, 32, 0.08);
 }
 
 .contact-card.has-selection {
-    border-color: rgba(34, 53, 47, 0.24);
-    box-shadow: 0 18px 36px rgba(34, 53, 47, 0.12);
+    border-color: rgba(255, 159, 10, 0.24);
+    box-shadow: 0 18px 36px rgba(255, 159, 10, 0.12);
 }
 
 .contact-head {
@@ -632,7 +638,7 @@ label span {
 }
 
 .tag {
-    background: rgba(34, 53, 47, 0.08);
+    background: rgba(45, 49, 40, 0.08);
     color: var(--color-primary-strong);
     border-radius: 999px;
     padding: 0.34rem 0.68rem;
@@ -648,13 +654,13 @@ label span {
 }
 
 .tag-secondary {
-    background: rgba(168, 82, 45, 0.12);
-    color: #7c3e22;
+    background: rgba(255, 159, 10, 0.14);
+    color: #5c3b00;
 }
 
 .tag-account {
-    background: rgba(67, 55, 42, 0.08);
-    color: #43372a;
+    background: rgba(45, 49, 40, 0.08);
+    color: #2d3128;
 }
 
 .tag-account.is-active {
@@ -667,7 +673,7 @@ label span {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: #9b6a32;
+    color: #a06000;
 }
 
 .status-icon {
@@ -675,7 +681,7 @@ label span {
     height: 1.8rem;
     justify-content: center;
     border-radius: 999px;
-    background: rgba(191, 127, 48, 0.12);
+    background: rgba(255, 179, 0, 0.14);
 }
 
 .status-icon .icon,
@@ -734,7 +740,7 @@ label span {
 
 .note {
     padding: 0.78rem 0.84rem;
-    background: rgba(229, 220, 209, 0.94);
+    background: rgba(237, 241, 227, 0.94);
     border-radius: var(--radius-sm);
 }
 
@@ -755,9 +761,9 @@ label span {
 .subsection-card,
 .repeater-block {
     padding: 0.9rem;
-    background: rgba(247,242,235,0.96);
+    background: rgba(245, 248, 237, 0.96);
     border-radius: var(--radius-md);
-    border: 1px solid rgba(67, 55, 42, 0.08);
+    border: 1px solid rgba(38, 42, 32, 0.08);
 }
 
 .repeater-row {
@@ -767,7 +773,7 @@ label span {
     margin-top: 0.65rem;
     padding: 0.72rem;
     border-radius: var(--radius-sm);
-    background: rgba(236, 228, 217, 0.92);
+    background: rgba(234, 239, 224, 0.94);
 }
 
 .field-hint {
@@ -793,8 +799,8 @@ label span {
     gap: 0.5rem;
     padding: 0.52rem 0.72rem;
     border-radius: var(--radius-sm);
-    border: 1px solid rgba(67, 55, 42, 0.12);
-    background: rgba(243, 236, 227, 0.92);
+    border: 1px solid rgba(38, 42, 32, 0.12);
+    background: rgba(241, 245, 231, 0.94);
     color: var(--color-text);
     font-weight: 600;
 }
@@ -811,8 +817,8 @@ label span {
 }
 
 .tag-option.is-selected {
-    background: rgba(168, 82, 45, 0.12);
-    border-color: rgba(168, 82, 45, 0.28);
+    background: rgba(229, 255, 58, 0.2);
+    border-color: rgba(255, 159, 10, 0.28);
 }
 
 .account-panel {
@@ -820,8 +826,8 @@ label span {
     gap: 1rem;
     padding: 0.88rem;
     border-radius: var(--radius-sm);
-    background: rgba(239, 231, 220, 0.88);
-    border: 1px solid rgba(67, 55, 42, 0.08);
+    background: rgba(239, 244, 229, 0.9);
+    border: 1px solid rgba(38, 42, 32, 0.08);
 }
 
 .toggle-row {
@@ -830,7 +836,7 @@ label span {
     gap: 0.75rem;
     padding: 0.72rem 0.92rem;
     border-radius: var(--radius-sm);
-    background: rgba(232, 223, 211, 0.96);
+    background: rgba(233, 239, 223, 0.96);
     width: fit-content;
 }
 
@@ -847,8 +853,8 @@ label span {
 .account-badge {
     padding: 0.42rem 0.72rem;
     border-radius: 999px;
-    background: rgba(67, 55, 42, 0.08);
-    color: #43372a;
+    background: rgba(45, 49, 40, 0.08);
+    color: #2d3128;
     font-weight: 700;
 }
 
@@ -860,7 +866,7 @@ label span {
 .account-summary {
     padding: 0.72rem 0.82rem;
     border-radius: var(--radius-sm);
-    background: rgba(231, 223, 212, 0.96);
+    background: rgba(234, 239, 224, 0.96);
 }
 
 .subsection-card input,
@@ -872,19 +878,19 @@ label span {
 .account-panel input,
 .account-panel select,
 .account-panel textarea {
-    background: rgba(250, 244, 236, 0.98);
-    border-color: rgba(67, 55, 42, 0.14);
+    background: rgba(250, 252, 244, 0.98);
+    border-color: rgba(38, 42, 32, 0.14);
 }
 
 .subsection-card input[type="file"] {
     padding: 0.72rem 0.8rem;
-    background: rgba(241, 233, 223, 0.96);
+    background: rgba(239, 244, 229, 0.96);
 }
 
 .subsection-card .ghost-button,
 .repeater-block .ghost-button,
 .form-actions .ghost-button {
-    background: rgba(238, 229, 217, 0.94);
+    background: rgba(240, 245, 231, 0.94);
 }
 
 .icon-button.danger-button {
@@ -904,8 +910,8 @@ label span {
 .table-wrap {
     overflow-x: auto;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(67, 55, 42, 0.08);
-    background: rgba(247, 242, 235, 0.96);
+    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: rgba(245, 248, 237, 0.96);
 }
 
 table {
@@ -919,7 +925,7 @@ td {
     text-align: left;
     padding: 0.75rem 0.62rem;
     border-bottom: 1px solid var(--color-border);
-    background: rgba(247, 242, 235, 0.82);
+    background: rgba(245, 248, 237, 0.82);
 }
 
 .flash {
@@ -933,7 +939,7 @@ td {
 }
 
 .flash-error {
-    background: rgba(198, 79, 94, 0.12);
+    background: rgba(182, 69, 33, 0.12);
     color: var(--color-danger);
 }
 
@@ -964,7 +970,7 @@ td {
 .progress-track {
     width: 100%;
     height: 14px;
-    background: rgba(34, 53, 47, 0.10);
+    background: rgba(45, 49, 40, 0.1);
     border-radius: 999px;
     overflow: hidden;
 }
@@ -1011,7 +1017,7 @@ td {
     border-radius: 1.35rem;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, rgba(34, 53, 47, 0.10), rgba(168, 82, 45, 0.12));
+    background: linear-gradient(135deg, rgba(229, 255, 58, 0.18), rgba(255, 159, 10, 0.16));
     color: var(--color-primary-strong);
     font-size: 1.35rem;
 }
@@ -1023,7 +1029,7 @@ td {
 }
 
 code {
-    background: rgba(162, 139, 98, 0.14);
+    background: rgba(229, 255, 58, 0.16);
     padding: 0.15rem 0.4rem;
     border-radius: 0.4rem;
 }

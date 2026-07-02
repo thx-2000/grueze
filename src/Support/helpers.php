@@ -93,14 +93,14 @@ function format_datetime(?string $value): string
 function tag_style(string $seed): string
 {
     $palette = [
-        ['bg' => '#b85a47', 'text' => '#fff5f1'],
-        ['bg' => '#355f52', 'text' => '#f3fbf8'],
-        ['bg' => '#be8c3a', 'text' => '#261d11'],
-        ['bg' => '#57768d', 'text' => '#f4f9fd'],
-        ['bg' => '#7a6a3d', 'text' => '#fff9ec'],
-        ['bg' => '#8e5b4c', 'text' => '#fff7f4'],
-        ['bg' => '#4d7268', 'text' => '#f4fbfa'],
-        ['bg' => '#a46837', 'text' => '#fff6f0'],
+        ['bg' => '#e5ff3a', 'text' => '#181a15'],
+        ['bg' => '#ffb300', 'text' => '#18140a'],
+        ['bg' => '#ff8c1a', 'text' => '#22170b'],
+        ['bg' => '#d9dde1', 'text' => '#161816'],
+        ['bg' => '#b9c0b4', 'text' => '#151710'],
+        ['bg' => '#ffc84a', 'text' => '#1a1407'],
+        ['bg' => '#c6ff56', 'text' => '#171a10'],
+        ['bg' => '#aab1bb', 'text' => '#111315'],
     ];
 
     $index = abs(crc32($seed)) % count($palette);

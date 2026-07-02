@@ -267,6 +267,9 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             <td>
                                 <div class="contact-name-cell">
                                     <strong><?= e($contact['nachname']) ?></strong>
+                                    <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
+                                        <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
+                                    <?php endif; ?>
                                     <?php if (($contact['emails'] ?? []) === []): ?>
                                         <span class="status-icon" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?></span>
                                     <?php endif; ?>
@@ -347,11 +350,13 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         <div>
                             <div class="contact-title-row">
                                 <h3><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?></h3>
+                                <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
+                                    <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
+                                <?php endif; ?>
                                 <?php if (($contact['emails'] ?? []) === []): ?>
                                     <span class="status-icon" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?></span>
                                 <?php endif; ?>
                             </div>
-                            <?php if (!empty($contact['geburtsname'])): ?><p class="muted">Geburtsname: <?= e($contact['geburtsname']) ?></p><?php endif; ?>
                         </div>
                         <span class="tag"><?= e($contact['category_name'] ?: 'Ohne Kategorie') ?></span>
                     </div>
