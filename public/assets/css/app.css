@@ -424,18 +424,19 @@ label span {
 
 .view-toggle-button {
     appearance: none;
-    border: 1px solid rgba(38, 42, 32, 0.12);
-    background: rgba(248, 250, 244, 0.96);
-    color: #394034;
+    border: 1px solid rgba(45, 49, 40, 0.26);
+    background: #dde1d7;
+    color: #21251e;
     font: inherit;
     font-weight: 700;
     padding: 0.42rem 0.8rem;
     border-radius: 999px;
     cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .view-toggle-button:hover {
-    background: rgba(236, 240, 229, 0.98);
+    background: #d3d9cd;
 }
 
 .view-toggle-button.is-active {
