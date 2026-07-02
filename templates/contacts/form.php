@@ -6,6 +6,7 @@ $defaults = [
     'vorname' => old('vorname'),
     'nachname' => old('nachname'),
     'geburtsname' => old('geburtsname'),
+    'geschlecht' => old('geschlecht'),
     'category_id' => old('category_id'),
     'geburtstag' => old('geburtstag'),
     'strasse' => old('strasse'),
@@ -20,7 +21,7 @@ $defaults = [
 $values = $editing ? $contact : $defaults;
 if ($editing) {
     if ($hasOld) {
-        foreach (['vorname', 'nachname', 'geburtsname', 'category_id', 'geburtstag', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
+        foreach (['vorname', 'nachname', 'geburtsname', 'geschlecht', 'category_id', 'geburtstag', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
             $values[$field] = $defaults[$field];
         }
     }
@@ -63,6 +64,14 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                 <label><span>Vorname</span><input type="text" name="vorname" value="<?= e($values['vorname'] ?? '') ?>" required></label>
                 <label><span>Nachname</span><input type="text" name="nachname" value="<?= e($values['nachname'] ?? '') ?>" required></label>
                 <label><span>Geburtsname</span><input type="text" name="geburtsname" value="<?= e($values['geburtsname'] ?? '') ?>"></label>
+                <label>
+                    <span>Geschlecht</span>
+                    <select name="geschlecht">
+                        <option value="">Nicht gesetzt</option>
+                        <option value="m" <?= ($values['geschlecht'] ?? '') === 'm' ? 'selected' : '' ?>>Männlich (Lieber)</option>
+                        <option value="w" <?= ($values['geschlecht'] ?? '') === 'w' ? 'selected' : '' ?>>Weiblich (Liebe)</option>
+                    </select>
+                </label>
                 <label>
                     <span>Kategorie</span>
                     <select name="category_id">

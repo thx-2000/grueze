@@ -3,6 +3,7 @@
 $defaultSenderKey = config('mail.default_sender_key', $identities[0]['key'] ?? '');
 $defaultReplyToKey = config('mail.default_reply_to_key', $replyToOptions[0]['key'] ?? $defaultSenderKey);
 $activeSubjectPrefix = $draft['subject_prefix'] ?? $defaultSubjectPrefix;
+$activeSalutationMode = $draft['salutation_mode'] ?? ($defaultSalutationMode ?? 'auto');
 $subjectPreview = trim(($activeSubjectPrefix ? $activeSubjectPrefix . ' ' : '') . ($draft['subject'] ?? 'Dein Betreff'));
 ?>
 <section class="hero-card">
@@ -10,7 +11,7 @@ $subjectPreview = trim(($activeSubjectPrefix ? $activeSubjectPrefix . ' ' : '') 
         <div>
             <p class="eyebrow">Mailing</p>
             <h2>Personalisierte E-Mail verfassen</h2>
-            <p class="muted"><?= count($contacts) ?> ausgewählte Kontakte. Platzhalter: <code>{Vorname}</code> und <code>{Nachname}</code>.</p>
+            <p class="muted"><?= count($contacts) ?> ausgewählte Kontakte. Platzhalter: <code>{Anrede}</code>, <code>{Vorname}</code> und <code>{Nachname}</code>.</p>
         </div>
         <div class="selection-status"><?= count($contacts) ?> Empfänger ausgewählt</div>
     </div>
@@ -57,13 +58,23 @@ $subjectPreview = trim(($activeSubjectPrefix ? $activeSubjectPrefix . ' ' : '') 
                 <span>Betreff</span>
                 <input type="text" name="subject" id="subjectField" value="<?= e($draft['subject'] ?? '') ?>" required>
             </label>
+            <label class="full-width">
+                <span>Anrede</span>
+                <select name="salutation_mode">
+                    <option value="auto" <?= $activeSalutationMode === 'auto' ? 'selected' : '' ?>>Automatisch aus dem Kontakt</option>
+                    <option value="hallo" <?= $activeSalutationMode === 'hallo' ? 'selected' : '' ?>>Immer Hallo</option>
+                    <option value="liebe" <?= $activeSalutationMode === 'liebe' ? 'selected' : '' ?>>Immer Liebe</option>
+                    <option value="lieber" <?= $activeSalutationMode === 'lieber' ? 'selected' : '' ?>>Immer Lieber</option>
+                </select>
+                <small class="field-hint">Bei Automatik wird aus dem Kontaktfeld <code>m/w</code> automatisch <code>Lieber</code> oder <code>Liebe</code>. Ohne Angabe fällt die Anrede auf <code>Hallo</code> zurück.</small>
+            </label>
             <div class="subsection-card full-width">
                 <strong>Betreff-Vorschau</strong>
                 <div class="mail-footer-preview" id="subjectPreview"><?= e($subjectPreview) ?></div>
             </div>
             <label class="full-width">
                 <span>Nachricht</span>
-                <textarea name="message" rows="10" required><?= e($draft['message'] ?? "Hallo {Vorname},\n\n") ?></textarea>
+                <textarea name="message" rows="10" required><?= e($draft['message'] ?? "{Anrede} {Vorname},\n\n") ?></textarea>
                 <small class="field-hint">Die Nachricht wird pro Person personalisiert und einzeln versendet.</small>
             </label>
             <div class="subsection-card full-width">

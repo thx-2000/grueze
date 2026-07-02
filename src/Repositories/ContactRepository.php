@@ -148,14 +148,15 @@ final class ContactRepository
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO contacts
-            (vorname, nachname, geburtsname, category_id, geburtstag, strasse, plz, ort, land, notizen, photo_path, created_by, updated_by)
+            (vorname, nachname, geburtsname, geschlecht, category_id, geburtstag, strasse, plz, ort, land, notizen, photo_path, created_by, updated_by)
             VALUES
-            (:vorname, :nachname, :geburtsname, :category_id, :geburtstag, :strasse, :plz, :ort, :land, :notizen, :photo_path, :created_by, :updated_by)'
+            (:vorname, :nachname, :geburtsname, :geschlecht, :category_id, :geburtstag, :strasse, :plz, :ort, :land, :notizen, :photo_path, :created_by, :updated_by)'
         );
         $stmt->execute([
             'vorname' => $data['vorname'],
             'nachname' => $data['nachname'],
             'geburtsname' => $data['geburtsname'] ?: null,
+            'geschlecht' => $data['geschlecht'] ?: null,
             'category_id' => $data['category_id'] ?: null,
             'geburtstag' => $data['geburtstag'] ?: null,
             'strasse' => $data['strasse'],
@@ -183,6 +184,7 @@ final class ContactRepository
              vorname = :vorname,
              nachname = :nachname,
              geburtsname = :geburtsname,
+             geschlecht = :geschlecht,
              category_id = :category_id,
              geburtstag = :geburtstag,
              strasse = :strasse,
@@ -199,6 +201,7 @@ final class ContactRepository
             'vorname' => $data['vorname'],
             'nachname' => $data['nachname'],
             'geburtsname' => $data['geburtsname'] ?: null,
+            'geschlecht' => $data['geschlecht'] ?: null,
             'category_id' => $data['category_id'] ?: null,
             'geburtstag' => $data['geburtstag'] ?: null,
             'strasse' => $data['strasse'],

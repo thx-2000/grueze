@@ -46,6 +46,7 @@ final class MailController extends BaseController
             'mailFooter' => $this->settings->mailFooter(),
             'subjectPrefixOptions' => $this->settings->subjectPrefixOptions(),
             'defaultSubjectPrefix' => $this->settings->defaultSubjectPrefix(),
+            'defaultSalutationMode' => 'auto',
         ]);
     }
 
@@ -65,11 +66,12 @@ final class MailController extends BaseController
         }
 
         $sample = $contacts[0] ?? ['vorname' => 'Max', 'nachname' => 'Mustermann'];
+        $salutationMode = $this->normalizeSalutationMode((string) $request->input('salutation_mode', 'auto'));
         $subject = $this->composeSubject((string) $request->input('subject'), (string) $request->input('subject_prefix'));
-        $message = str_replace(
-            ['{Vorname}', '{Nachname}'],
-            [$sample['vorname'], $sample['nachname']],
-            $this->composeMailBody((string) $request->input('message'))
+        $message = $this->mailer->renderMessageTemplate(
+            $sample,
+            $this->composeMailBody((string) $request->input('message')),
+            $salutationMode
         );
         $this->mailer->sendSystemMail(
             $identity,
@@ -94,6 +96,7 @@ final class MailController extends BaseController
             'sender_key' => (string) $request->input('sender_key'),
             'reply_to_key' => (string) $request->input('reply_to_key'),
             'subject_prefix' => (string) $request->input('subject_prefix'),
+            'salutation_mode' => $salutationMode,
         ];
         Redirect::to('/mail/compose?contact_ids[]=' . implode('&contact_ids[]=', array_map('urlencode', array_map('strval', $contactIds))));
     }
@@ -106,12 +109,14 @@ final class MailController extends BaseController
         $attachments = $this->uploads->storeAttachments($request->file('attachments'));
         $rawMessage = trim((string) $request->input('message'));
         $subjectPrefix = (string) $request->input('subject_prefix');
+        $salutationMode = $this->normalizeSalutationMode((string) $request->input('salutation_mode', 'auto'));
         $_SESSION['mail_job'] = [
             'contacts' => array_map('intval', (array) $request->input('contact_ids', [])),
             'subject' => $this->composeSubject((string) $request->input('subject'), $subjectPrefix),
             'message' => $this->composeMailBody($rawMessage),
             'sender_key' => (string) $request->input('sender_key'),
             'reply_to_key' => (string) $request->input('reply_to_key'),
+            'salutation_mode' => $salutationMode,
             'attachments' => $attachments,
             'offset' => 0,
             'results' => [],
@@ -123,6 +128,7 @@ final class MailController extends BaseController
             'sender_key' => $_SESSION['mail_job']['sender_key'],
             'reply_to_key' => $_SESSION['mail_job']['reply_to_key'],
             'subject_prefix' => $subjectPrefix,
+            'salutation_mode' => $salutationMode,
         ];
         Redirect::to('/mail/status');
     }
@@ -165,7 +171,16 @@ final class MailController extends BaseController
         $userId = (int) $this->auth->user()['id'];
 
         foreach ($slice as $contact) {
-            $result = $this->mailer->sendMergedMail($identity, $replyTo, $contact, $job['subject'], $job['message'], $job['attachments'], $userId);
+            $result = $this->mailer->sendMergedMail(
+                $identity,
+                $replyTo,
+                $contact,
+                $job['subject'],
+                $job['message'],
+                (string) ($job['salutation_mode'] ?? 'auto'),
+                $job['attachments'],
+                $userId
+            );
             $job['results'][] = [
                 'name' => $contact['vorname'] . ' ' . $contact['nachname'],
                 'ok' => $result['ok'],
@@ -245,5 +260,10 @@ final class MailController extends BaseController
         $normalizedPrefix = trim($prefix);
 
         return $normalizedPrefix === '' ? $subject : $normalizedPrefix . ' ' . $subject;
+    }
+
+    private function normalizeSalutationMode(string $salutationMode): string
+    {
+        return in_array($salutationMode, ['auto', 'hallo', 'liebe', 'lieber'], true) ? $salutationMode : 'auto';
     }
 }

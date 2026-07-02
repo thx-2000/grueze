@@ -18,18 +18,14 @@ final class MailService
         $this->sendRaw($identity, $to, $subject, $body, $replyTo ?: $identity['email'], []);
     }
 
-    public function sendMergedMail(array $identity, array $replyTo, array $contact, string $subject, string $message, array $attachments, int $userId): array
+    public function sendMergedMail(array $identity, array $replyTo, array $contact, string $subject, string $message, string $salutationMode, array $attachments, int $userId): array
     {
         $to = $contact['emails'][0]['email'] ?? null;
         if (!$to) {
             return ['ok' => false, 'error' => 'Kein Empfänger vorhanden.'];
         }
 
-        $personalized = str_replace(
-            ['{Vorname}', '{Nachname}'],
-            [$contact['vorname'], $contact['nachname']],
-            $message
-        );
+        $personalized = $this->renderMessageTemplate($contact, $message, $salutationMode);
 
         try {
             $this->sendRaw($identity, $to, $subject, $personalized, $replyTo['email'], $attachments);
@@ -55,6 +51,19 @@ final class MailService
 
             return ['ok' => false, 'error' => $exception->getMessage()];
         }
+    }
+
+    public function renderMessageTemplate(array $contact, string $message, string $salutationMode = 'auto'): string
+    {
+        return str_replace(
+            ['{Anrede}', '{Vorname}', '{Nachname}'],
+            [
+                $this->resolveSalutation($contact, $salutationMode),
+                $contact['vorname'] ?? '',
+                $contact['nachname'] ?? '',
+            ],
+            $message
+        );
     }
 
     private function sendRaw(array $identity, string $to, string $subject, string $body, string $replyTo, array $attachments): void
@@ -284,5 +293,19 @@ final class MailService
     private function normalizeMime(string $value): string
     {
         return str_replace("\n", "\r\n", str_replace(["\r\n", "\r"], "\n", $value));
+    }
+
+    private function resolveSalutation(array $contact, string $salutationMode): string
+    {
+        return match ($salutationMode) {
+            'liebe' => 'Liebe',
+            'lieber' => 'Lieber',
+            'hallo' => 'Hallo',
+            default => match (strtolower((string) ($contact['geschlecht'] ?? ''))) {
+                'm' => 'Lieber',
+                'w' => 'Liebe',
+                default => 'Hallo',
+            },
+        };
     }
 }

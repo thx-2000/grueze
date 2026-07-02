@@ -324,6 +324,7 @@ final class ContactController extends BaseController
             'vorname' => trim((string) $request->input('vorname')),
             'nachname' => trim((string) $request->input('nachname')),
             'geburtsname' => trim((string) $request->input('geburtsname')),
+            'geschlecht' => $this->normalizeGeschlecht((string) $request->input('geschlecht')),
             'category_id' => (string) $request->input('category_id'),
             'geburtstag' => (string) $request->input('geburtstag'),
             'strasse' => trim((string) $request->input('strasse')),
@@ -338,6 +339,13 @@ final class ContactController extends BaseController
             'login_email' => $loginEmail,
             'role_id' => (int) $request->input('role_id'),
         ];
+    }
+
+    private function normalizeGeschlecht(string $geschlecht): string
+    {
+        $normalized = strtolower(trim($geschlecht));
+
+        return in_array($normalized, ['m', 'w'], true) ? $normalized : '';
     }
 
     private function syncLinkedAccount(int $contactId, array $data): string
