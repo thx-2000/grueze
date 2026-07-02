@@ -100,9 +100,9 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                 </div>
             </div>
             <div class="form-grid">
-                <label class="full-width"><span>Straße</span><input type="text" name="strasse" value="<?= e($values['strasse'] ?? '') ?>" required></label>
-                <label><span>PLZ</span><input type="text" name="plz" value="<?= e($values['plz'] ?? '') ?>" required></label>
-                <label><span>Ort</span><input type="text" name="ort" value="<?= e($values['ort'] ?? '') ?>" required></label>
+                <label class="full-width"><span>Straße</span><input type="text" name="strasse" value="<?= e($values['strasse'] ?? '') ?>"></label>
+                <label><span>PLZ</span><input type="text" name="plz" value="<?= e($values['plz'] ?? '') ?>"></label>
+                <label><span>Ort</span><input type="text" name="ort" value="<?= e($values['ort'] ?? '') ?>"></label>
                 <label class="full-width">
                     <span>Profilbild</span>
                     <input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp">

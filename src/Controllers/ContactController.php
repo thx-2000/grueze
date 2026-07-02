@@ -117,9 +117,6 @@ final class ContactController extends BaseController
         $errors = Validator::validate($data, [
             'vorname' => ['required'],
             'nachname' => ['required'],
-            'strasse' => ['required'],
-            'plz' => ['required'],
-            'ort' => ['required'],
         ]);
         if (can('users.manage') && $data['login_enabled']) {
             $errors = array_merge($errors, Validator::validate([
@@ -179,9 +176,6 @@ final class ContactController extends BaseController
         $errors = Validator::validate($data, [
             'vorname' => ['required'],
             'nachname' => ['required'],
-            'strasse' => ['required'],
-            'plz' => ['required'],
-            'ort' => ['required'],
         ]);
         if (can('users.manage') && $data['login_enabled']) {
             $errors = array_merge($errors, Validator::validate([
