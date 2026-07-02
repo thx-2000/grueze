@@ -8,6 +8,7 @@ use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\ContactRepository;
 use App\Repositories\LogRepository;
+use App\Repositories\SettingRepository;
 use App\Services\MailService;
 use App\Services\UploadService;
 use App\Support\Redirect;
@@ -18,6 +19,7 @@ final class MailController extends BaseController
         \App\Core\Auth $auth,
         private ContactRepository $contacts,
         private LogRepository $logs,
+        private SettingRepository $settings,
         private MailService $mailer,
         private UploadService $uploads
     ) {
@@ -41,6 +43,7 @@ final class MailController extends BaseController
             'contacts' => $contacts,
             'identities' => config('mail.identities', []),
             'replyToOptions' => $this->replyToOptions(),
+            'mailFooter' => $this->settings->mailFooter(),
         ]);
     }
 
@@ -60,8 +63,18 @@ final class MailController extends BaseController
         }
 
         $sample = $contacts[0] ?? ['vorname' => 'Max', 'nachname' => 'Mustermann'];
-        $message = str_replace(['{Vorname}', '{Nachname}'], [$sample['vorname'], $sample['nachname']], (string) $request->input('message'));
-        $this->mailer->sendSystemMail($identity, $user['email'], '[Testmail] ' . (string) $request->input('subject'), $message);
+        $message = str_replace(
+            ['{Vorname}', '{Nachname}'],
+            [$sample['vorname'], $sample['nachname']],
+            $this->composeMailBody((string) $request->input('message'))
+        );
+        $this->mailer->sendSystemMail(
+            $identity,
+            $user['email'],
+            '[Testmail] ' . (string) $request->input('subject'),
+            $message,
+            $replyTo['email']
+        );
         $this->logs->addMailLog([
             'user_id' => $user['id'],
             'contact_id' => null,
@@ -87,10 +100,11 @@ final class MailController extends BaseController
         Csrf::validate($request->input('_csrf'));
 
         $attachments = $this->uploads->storeAttachments($request->file('attachments'));
+        $rawMessage = trim((string) $request->input('message'));
         $_SESSION['mail_job'] = [
             'contacts' => array_map('intval', (array) $request->input('contact_ids', [])),
             'subject' => trim((string) $request->input('subject')),
-            'message' => trim((string) $request->input('message')),
+            'message' => $this->composeMailBody($rawMessage),
             'sender_key' => (string) $request->input('sender_key'),
             'reply_to_key' => (string) $request->input('reply_to_key'),
             'attachments' => $attachments,
@@ -100,7 +114,7 @@ final class MailController extends BaseController
         $_SESSION['mail_draft'] = [
             'contact_ids' => $_SESSION['mail_job']['contacts'],
             'subject' => $_SESSION['mail_job']['subject'],
-            'message' => $_SESSION['mail_job']['message'],
+            'message' => $rawMessage,
             'sender_key' => $_SESSION['mail_job']['sender_key'],
             'reply_to_key' => $_SESSION['mail_job']['reply_to_key'],
         ];
@@ -204,5 +218,13 @@ final class MailController extends BaseController
         }
 
         return config('mail.identities', []);
+    }
+
+    private function composeMailBody(string $message): string
+    {
+        $message = trim($message);
+        $footer = trim($this->settings->mailFooter());
+
+        return $footer === '' ? $message : $message . "\n\n" . $footer;
     }
 }

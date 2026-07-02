@@ -7,6 +7,7 @@ use App\Controllers\CategoryController;
 use App\Controllers\ContactController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
+use App\Controllers\SettingsController;
 use App\Controllers\SetupController;
 use App\Controllers\TagController;
 use App\Controllers\UserController;
@@ -21,6 +22,7 @@ use App\Core\Session;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
 use App\Repositories\LogRepository;
+use App\Repositories\SettingRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
 use App\Services\CsvExportService;
@@ -67,6 +69,7 @@ try {
     Container::factory(TagRepository::class, static fn () => new TagRepository(Container::get(PDO::class)));
     Container::factory(ContactRepository::class, static fn () => new ContactRepository(Container::get(PDO::class)));
     Container::factory(LogRepository::class, static fn () => new LogRepository(Container::get(PDO::class)));
+    Container::factory(SettingRepository::class, static fn () => new SettingRepository(Container::get(PDO::class)));
     Container::factory(Auth::class, static fn () => new Auth(Container::get(UserRepository::class)));
     Container::factory(UploadService::class, static fn () => new UploadService());
     Container::factory(CsvExportService::class, static fn () => new CsvExportService());
@@ -124,8 +127,13 @@ try {
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
         Container::get(LogRepository::class),
+        Container::get(SettingRepository::class),
         Container::get(MailService::class),
         Container::get(UploadService::class)
+    ));
+    Container::factory(SettingsController::class, static fn () => new SettingsController(
+        Container::get(Auth::class),
+        Container::get(SettingRepository::class)
     ));
 
     $router = new Router();
@@ -164,6 +172,8 @@ try {
 
     $router->get('/logs/audit', [LogController::class, 'audit']);
     $router->get('/logs/mail', [LogController::class, 'mail']);
+    $router->get('/settings/mail-footer', [SettingsController::class, 'mailFooter']);
+    $router->post('/settings/mail-footer', [SettingsController::class, 'updateMailFooter']);
 
     $router->dispatch(new Request());
 } catch (Throwable $exception) {

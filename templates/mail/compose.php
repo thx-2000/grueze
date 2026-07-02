@@ -51,6 +51,16 @@ $defaultReplyToKey = config('mail.default_reply_to_key', $replyToOptions[0]['key
                 <textarea name="message" rows="10" required><?= e($draft['message'] ?? "Hallo {Vorname},\n\n") ?></textarea>
                 <small class="field-hint">Die Nachricht wird pro Person personalisiert und einzeln versendet.</small>
             </label>
+            <div class="subsection-card full-width">
+                <strong>Automatisch ergänzter Mail-Fuß</strong>
+                <div class="mail-footer-preview"><?= e($mailFooter) ?></div>
+                <small class="field-hint">Dieser Abschnitt wird bei Testmails und beim Versand automatisch unter deine Nachricht gesetzt.</small>
+                <?php if (can('settings.manage')): ?>
+                    <div class="card-actions">
+                        <a class="ghost-button compact-action" href="<?= e(url('/settings/mail-footer')) ?>"><?= icon('sliders') ?><span>Mail-Fuß anpassen</span></a>
+                    </div>
+                <?php endif; ?>
+            </div>
             <label class="full-width">
                 <span>Dateianhänge</span>
                 <input type="file" name="attachments[]" multiple>

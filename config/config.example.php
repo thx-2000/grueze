@@ -80,6 +80,7 @@ return [
     ],
     'defaults' => [
         'country' => 'Deutschland',
+        'mail_footer' => "Du erhältst diese Nachricht, weil du auf dem Verteiler eingetragen bist.\nWir möchten den Mailverkehr möglichst gering halten und schreiben daher nur, wenn es wirklich etwas Relevantes gibt.\nAntworten auf diese Nachricht gehen an das Orga-Team.\nFalls unsere Nachrichten fälschlich als Spam erkannt werden, nimm bitte kontakt@example.org und mailer@example.org in dein Adressbuch auf.\nWenn du keine weiteren Nachrichten erhalten möchtest, schreibe bitte an kontakt@example.org. Wir nehmen dich dann aus dem Verteiler.",
         'phone_labels' => [
             'Mobil',
             'Mobil 2',

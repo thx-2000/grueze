@@ -13,9 +13,9 @@ final class MailService
     {
     }
 
-    public function sendSystemMail(array $identity, string $to, string $subject, string $body): void
+    public function sendSystemMail(array $identity, string $to, string $subject, string $body, ?string $replyTo = null): void
     {
-        $this->sendRaw($identity, $to, $subject, $body, $identity['email'], []);
+        $this->sendRaw($identity, $to, $subject, $body, $replyTo ?: $identity['email'], []);
     }
 
     public function sendMergedMail(array $identity, array $replyTo, array $contact, string $subject, string $message, array $attachments, int $userId): array

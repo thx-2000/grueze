@@ -80,6 +80,7 @@ final class Auth
             'users.manage' => ['admin'],
             'mail.send' => ['admin', 'orga'],
             'mail.view_log' => ['admin', 'orga'],
+            'settings.manage' => ['admin', 'orga'],
         ];
 
         return in_array($user['role_name'], $matrix[$permission] ?? [], true);

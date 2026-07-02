@@ -119,6 +119,12 @@ CREATE TABLE mail_log (
     CONSTRAINT fk_mail_log_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE app_settings (
+    setting_key VARCHAR(120) NOT NULL PRIMARY KEY,
+    setting_value MEDIUMTEXT NOT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO roles (name, description) VALUES
 ('admin', 'Vollzugriff inklusive Benutzerverwaltung'),
 ('orga', 'Organisationsteam mit Verwaltungsrechten'),
