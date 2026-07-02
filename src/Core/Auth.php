@@ -71,14 +71,15 @@ final class Auth
         }
 
         $matrix = [
-            'contacts.manage' => ['admin', 'orga', 'stufenmitglied'],
+            'contacts.manage' => ['admin', 'orga'],
             'contacts.delete' => ['admin', 'orga'],
             'categories.manage' => ['admin', 'orga'],
             'contacts.export' => ['admin', 'orga'],
-            'contacts.copy_emails' => ['admin', 'orga', 'stufenmitglied', 'betrachter'],
+            'contacts.copy_emails' => ['admin', 'orga'],
             'audit.view' => ['admin', 'orga'],
             'users.manage' => ['admin'],
             'mail.send' => ['admin', 'orga'],
+            'mail.contact_single' => ['stufenmitglied'],
             'mail.view_log' => ['admin', 'orga'],
             'settings.manage' => ['admin', 'orga'],
         ];
@@ -93,7 +94,7 @@ final class Auth
             return false;
         }
 
-        $legacyRoles = (array) config('security.private_contact_detail_roles', ['admin', 'orga', 'stufenmitglied']);
+        $legacyRoles = (array) config('security.private_contact_detail_roles', ['admin', 'orga']);
         $defaultVisibility = array_fill_keys(self::CONTACT_DETAIL_FIELDS, $legacyRoles);
         $configuredVisibility = (array) config('security.contact_detail_visibility', []);
         $allowedRoles = (array) ($configuredVisibility[$field] ?? $defaultVisibility[$field] ?? []);

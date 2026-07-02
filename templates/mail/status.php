@@ -1,12 +1,13 @@
 <?php
 $total = count($contacts);
 $processed = (int) ($job['offset'] ?? 0);
+$memberContactMode = (bool) ($memberContactMode ?? false);
 ?>
 <section class="hero-card">
     <div class="hero-row">
         <div>
-            <p class="eyebrow">Versand läuft</p>
-            <h2>Mailing wird verschickt</h2>
+            <p class="eyebrow"><?= $memberContactMode ? 'Kontaktaufnahme läuft' : 'Versand läuft' ?></p>
+            <h2><?= $memberContactMode ? 'Nachricht wird verschickt' : 'Mailing wird verschickt' ?></h2>
             <p class="muted">Der Versand erfolgt einzeln und personalisiert. Du kannst auf dieser Seite den Fortschritt verfolgen.</p>
         </div>
         <div class="selection-status" id="mailStatusBadge"><?= e((string) $processed) ?> / <?= e((string) $total) ?> verarbeitet</div>
@@ -42,15 +43,15 @@ $processed = (int) ($job['offset'] ?? 0);
 <section class="panel">
     <div class="panel-head">
         <div>
-            <h3>Empfänger dieses Mailings</h3>
-            <p class="muted">Die Liste dient hier nur als Übersicht.</p>
+            <h3><?= $memberContactMode ? 'Kontaktierte Person' : 'Empfänger dieses Mailings' ?></h3>
+            <p class="muted"><?= $memberContactMode ? 'Die Zieladresse bleibt in diesem Modus bewusst verborgen.' : 'Die Liste dient hier nur als Übersicht.' ?></p>
         </div>
     </div>
     <div class="recipient-grid">
         <?php foreach ($contacts as $contact): ?>
             <article class="recipient-chip">
                 <strong><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?></strong>
-                <span><?= e($contact['emails'][0]['email'] ?? 'Keine Adresse') ?></span>
+                <span><?= e($memberContactMode ? 'Adresse verborgen' : ($contact['emails'][0]['email'] ?? 'Keine Adresse')) ?></span>
             </article>
         <?php endforeach; ?>
     </div>

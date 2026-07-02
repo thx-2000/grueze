@@ -29,6 +29,8 @@ foreach ($detailFieldLabels as $fieldKey => $fieldLabel) {
     }
 }
 $canCopyVisibleEmails = $visibleContactFields['emails'] && can('contacts.copy_emails');
+$canSendRegularMail = can('mail.send');
+$canSendSingleContactMail = can('mail.contact_single');
 foreach ($contacts as $contact) {
     $emailCount += count($contact['emails']);
     $phoneCount += count($contact['phones']);
@@ -184,10 +186,15 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     <?php if ($canCopyVisibleEmails): ?>
                         <button type="button" id="copyEmailsButton"><?= icon('copy') ?><span>E-Mail-Adressen kopieren</span></button>
                     <?php endif; ?>
-                    <?php if (can('mail.send')): ?>
+                    <?php if ($canSendRegularMail): ?>
                         <button type="submit" class="button-link"><?= icon('edit') ?><span>E-Mail verfassen</span></button>
+                    <?php elseif ($canSendSingleContactMail): ?>
+                        <button type="submit" class="button-link"><?= icon('edit') ?><span>Kontakt aufnehmen</span></button>
                     <?php endif; ?>
                 </div>
+                <?php if ($canSendSingleContactMail): ?>
+                    <p class="detail-hint">Stufenmitglieder können hier einzelne Personen kontaktieren. Die Zieladresse bleibt verborgen, Antworten gehen direkt an die absendende Person.</p>
+                <?php endif; ?>
                 <?php if (can('contacts.manage')): ?>
                     <div class="bulk-editor">
                         <label>
@@ -240,7 +247,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         </div>
                     </div>
                 <?php endif; ?>
-                <?php if (!$canCopyVisibleEmails && !can('mail.send')): ?>
+                <?php if (!$canCopyVisibleEmails && !$canSendRegularMail && !$canSendSingleContactMail): ?>
                     <p class="detail-hint">Für diese Rolle sind hier gerade keine Sammelaktionen freigeschaltet.</p>
                 <?php endif; ?>
             </div>

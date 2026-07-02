@@ -73,14 +73,14 @@ return [
         'login_max_attempts' => 5,
         'login_lock_minutes' => 10,
         'password_reset_expires_minutes' => 60,
-        'private_contact_detail_roles' => ['admin', 'orga', 'stufenmitglied'],
+        'private_contact_detail_roles' => ['admin', 'orga'],
         'contact_detail_visibility' => [
-            'address' => ['admin', 'orga', 'stufenmitglied'],
-            'birthday' => ['admin', 'orga', 'stufenmitglied'],
-            'emails' => ['admin', 'orga', 'stufenmitglied'],
-            'phones' => ['admin', 'orga', 'stufenmitglied'],
-            'notes' => ['admin', 'orga', 'stufenmitglied'],
-            'login' => ['admin', 'orga', 'stufenmitglied'],
+            'address' => ['admin', 'orga'],
+            'birthday' => ['admin', 'orga'],
+            'emails' => ['admin', 'orga'],
+            'phones' => ['admin', 'orga'],
+            'notes' => ['admin', 'orga'],
+            'login' => ['admin', 'orga'],
         ],
         'photo_max_size' => 2097152,
         'allowed_photo_types' => [
@@ -92,7 +92,9 @@ return [
     'defaults' => [
         'country' => 'Deutschland',
         'mail_footer' => "Du erhältst diese Nachricht, weil du auf dem Verteiler eingetragen bist.\nWir möchten den Mailverkehr möglichst gering halten und schreiben daher nur, wenn es wirklich etwas Relevantes gibt.\nAntworten auf diese Nachricht gehen an das Orga-Team.\nFalls unsere Nachrichten fälschlich als Spam erkannt werden, nimm bitte kontakt@example.org und mailer@example.org in dein Adressbuch auf.\nWenn du keine weiteren Nachrichten erhalten möchtest, schreibe bitte an kontakt@example.org. Wir nehmen dich dann aus dem Verteiler.",
+        'member_contact_footer' => "Diese Nachricht wurde von einem Stufenmitglied über die interne Kontaktfunktion versendet und stammt nicht vom Orga-Team.\nDu erhältst sie, weil deine Kontaktdaten in der Adress-Zentrale hinterlegt sind.\nAntworten auf diese Nachricht gehen direkt an die absendende Person.\nFalls unsere Nachrichten fälschlich als Spam erkannt werden, nimm bitte kontakt@example.org und mailer@example.org in dein Adressbuch auf.\nWenn du keine weiteren Kontaktanfragen über dieses System erhalten möchtest, schreibe bitte an kontakt@example.org. Wir prüfen das dann mit dir.",
         'subject_prefixes' => ['[Verteiler]'],
+        'member_contact_subject_prefix' => '[Kontakt]',
         'phone_labels' => [
             'Mobil',
             'Mobil 2',
@@ -103,7 +105,7 @@ return [
         'role_descriptions' => [
             'admin' => 'Vollzugriff inklusive Benutzerverwaltung',
             'orga' => 'Organisationsteam mit Verwaltungsrechten',
-            'stufenmitglied' => 'Kann Kontakte pflegen und E-Mails kopieren',
+            'stufenmitglied' => 'Kann Namen und Gruppen sehen und einzelne Kontaktanfragen senden',
             'betrachter' => 'Kann Kontakte in reduzierter Ansicht sehen',
         ],
     ],

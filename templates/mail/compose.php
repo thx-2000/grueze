@@ -5,12 +5,13 @@ $defaultReplyToKey = config('mail.default_reply_to_key', $replyToOptions[0]['key
 $activeSubjectPrefix = $draft['subject_prefix'] ?? $defaultSubjectPrefix;
 $activeSalutationMode = $draft['salutation_mode'] ?? ($defaultSalutationMode ?? 'auto');
 $subjectPreview = trim(($activeSubjectPrefix ? $activeSubjectPrefix . ' ' : '') . ($draft['subject'] ?? 'Dein Betreff'));
+$memberContactMode = (bool) ($memberContactMode ?? false);
 ?>
 <section class="hero-card">
     <div class="hero-row">
         <div>
-            <p class="eyebrow">Mailing</p>
-            <h2>Personalisierte E-Mail verfassen</h2>
+            <p class="eyebrow"><?= $memberContactMode ? 'Kontaktaufnahme' : 'Mailing' ?></p>
+            <h2><?= $memberContactMode ? 'Einzelkontakt über das System' : 'Personalisierte E-Mail verfassen' ?></h2>
             <p class="muted"><?= count($contacts) ?> ausgewählte Kontakte. Platzhalter: <code>{Anrede}</code>, <code>{Vorname}</code> und <code>{Nachname}</code>.</p>
         </div>
         <div class="selection-status"><?= count($contacts) ?> Empfänger ausgewählt</div>
@@ -25,35 +26,45 @@ $subjectPreview = trim(($activeSubjectPrefix ? $activeSubjectPrefix . ' ' : '') 
         <?php endforeach; ?>
 
         <div class="form-grid">
-            <label>
-                <span>Absenderadresse</span>
-                <select name="sender_key" required>
-                    <?php foreach ($identities as $identity): ?>
-                        <option value="<?= e($identity['key']) ?>" <?= ($draft['sender_key'] ?? $defaultSenderKey) === $identity['key'] ? 'selected' : '' ?>>
-                            <?= e($identity['name'] . ' <' . $identity['email'] . '>') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label>
-                <span>Antwort-an</span>
-                <select name="reply_to_key" required>
-                    <?php foreach ($replyToOptions as $replyTo): ?>
-                        <option value="<?= e($replyTo['key']) ?>" <?= ($draft['reply_to_key'] ?? $defaultReplyToKey) === $replyTo['key'] ? 'selected' : '' ?>>
-                            <?= e($replyTo['name'] . ' <' . $replyTo['email'] . '>') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label class="full-width">
-                <span>Betreff-Präfix</span>
-                <select name="subject_prefix" id="subjectPrefixField" required>
-                    <?php foreach ($subjectPrefixOptions as $prefix): ?>
-                        <option value="<?= e($prefix) ?>" <?= $activeSubjectPrefix === $prefix ? 'selected' : '' ?>><?= e($prefix) ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <small class="field-hint">Weitere Präfixe kannst du in den Mail-Einstellungen pflegen. Das erste ist der Standard.</small>
-            </label>
+            <?php if ($memberContactMode): ?>
+                <input type="hidden" name="sender_key" value="<?= e($draft['sender_key'] ?? $defaultSenderKey) ?>">
+                <input type="hidden" name="reply_to_key" value="<?= e($draft['reply_to_key'] ?? ($replyToOptions[0]['key'] ?? $defaultReplyToKey)) ?>">
+                <input type="hidden" name="subject_prefix" id="subjectPrefixField" value="<?= e($activeSubjectPrefix) ?>">
+                <div class="subsection-card full-width">
+                    <strong>Absender und Antwortweg</strong>
+                    <div class="mail-footer-preview">Die Nachricht wird über den Mailer verschickt. Antworten gehen automatisch direkt an deine eigene Login-Mailadresse.</div>
+                </div>
+            <?php else: ?>
+                <label>
+                    <span>Absenderadresse</span>
+                    <select name="sender_key" required>
+                        <?php foreach ($identities as $identity): ?>
+                            <option value="<?= e($identity['key']) ?>" <?= ($draft['sender_key'] ?? $defaultSenderKey) === $identity['key'] ? 'selected' : '' ?>>
+                                <?= e($identity['name'] . ' <' . $identity['email'] . '>') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>
+                    <span>Antwort-an</span>
+                    <select name="reply_to_key" required>
+                        <?php foreach ($replyToOptions as $replyTo): ?>
+                            <option value="<?= e($replyTo['key']) ?>" <?= ($draft['reply_to_key'] ?? $defaultReplyToKey) === $replyTo['key'] ? 'selected' : '' ?>>
+                                <?= e($replyTo['name'] . ' <' . $replyTo['email'] . '>') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label class="full-width">
+                    <span>Betreff-Präfix</span>
+                    <select name="subject_prefix" id="subjectPrefixField" required>
+                        <?php foreach ($subjectPrefixOptions as $prefix): ?>
+                            <option value="<?= e($prefix) ?>" <?= $activeSubjectPrefix === $prefix ? 'selected' : '' ?>><?= e($prefix) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="field-hint">Weitere Präfixe kannst du in den Mail-Einstellungen pflegen. Das erste ist der Standard.</small>
+                </label>
+            <?php endif; ?>
             <label class="full-width">
                 <span>Betreff</span>
                 <input type="text" name="subject" id="subjectField" value="<?= e($draft['subject'] ?? '') ?>" required>
@@ -112,14 +123,14 @@ $subjectPreview = trim(($activeSubjectPrefix ? $activeSubjectPrefix . ' ' : '') 
     <div class="panel-head">
         <div>
             <h3>Empfängerliste</h3>
-            <p class="muted">Verwendet wird jeweils die erste hinterlegte E-Mail-Adresse.</p>
+            <p class="muted"><?= $memberContactMode ? 'Die Zieladresse bleibt in diesem Modus bewusst verborgen.' : 'Verwendet wird jeweils die erste hinterlegte E-Mail-Adresse.' ?></p>
         </div>
     </div>
     <div class="recipient-grid">
         <?php foreach ($contacts as $contact): ?>
             <article class="recipient-chip">
                 <strong><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?></strong>
-                <span><?= e($contact['emails'][0]['email'] ?? 'Keine Adresse') ?></span>
+                <span><?= e($memberContactMode ? 'Adresse verborgen' : ($contact['emails'][0]['email'] ?? 'Keine Adresse')) ?></span>
             </article>
         <?php endforeach; ?>
     </div>
