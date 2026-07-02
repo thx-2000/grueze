@@ -43,6 +43,17 @@ return [
                 'smtp_encryption' => 'tls',
                 'smtp_username' => 'smtp_username',
                 'smtp_password' => 'smtp_password',
+                'imap_host' => 'imap.example.org',
+                'imap_port' => 993,
+                'imap_encryption' => 'ssl',
+                'imap_username' => 'imap_username',
+                'imap_password' => 'imap_password',
+                'imap_sent_mailboxes' => [
+                    'INBOX.Sent',
+                    'Sent',
+                    'INBOX.Gesendet',
+                    'Gesendet',
+                ],
             ],
         ],
         'reply_to_options' => [

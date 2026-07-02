@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controllers\AuthController;
 use App\Controllers\CategoryController;
 use App\Controllers\ContactController;
+use App\Controllers\LegalController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
 use App\Controllers\SettingsController;
@@ -123,6 +124,9 @@ try {
         Container::get(Auth::class),
         Container::get(LogRepository::class)
     ));
+    Container::factory(LegalController::class, static fn () => new LegalController(
+        Container::get(Auth::class)
+    ));
     Container::factory(MailController::class, static fn () => new MailController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
@@ -145,6 +149,8 @@ try {
     $router->post('/forgot-password', [AuthController::class, 'sendReset']);
     $router->get('/reset-password', [AuthController::class, 'showResetPassword']);
     $router->post('/reset-password', [AuthController::class, 'resetPassword']);
+    $router->get('/impressum', [LegalController::class, 'impressum']);
+    $router->get('/datenschutz', [LegalController::class, 'datenschutz']);
     $router->get('/setup/admin', [SetupController::class, 'showAdminForm']);
     $router->post('/setup/admin', [SetupController::class, 'storeAdmin']);
 

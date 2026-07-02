@@ -2,10 +2,15 @@
     <div class="hero-row">
         <div>
             <p class="eyebrow">Anmeldung</p>
-            <h2>Willkommen zurück</h2>
-            <p class="muted">Schlank, sicher und bereit für eure Jahrgangsorganisation.</p>
+            <h2>Adress-Backend für das Orga-Team</h2>
+            <p class="muted">Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten an einem Ort.</p>
         </div>
         <div class="floating-icon"><?= icon('mail-open') ?></div>
+    </div>
+
+    <div class="subsection-card">
+        <strong>Öffentliche Seite</strong>
+        <p class="detail-hint">Infos zum Treffen und die öffentliche Startseite findet ihr unter <a href="https://example.org" target="_blank" rel="noopener noreferrer">example.org</a>.</p>
     </div>
 
     <form method="post" action="<?= e(url('/login')) ?>" class="stack">
@@ -23,6 +28,7 @@
 
     <div class="link-row">
         <p><a href="<?= e(url('/forgot-password')) ?>">Passwort vergessen?</a></p>
+        <p><a href="https://example.org" target="_blank" rel="noopener noreferrer">Zur Website</a></p>
     </div>
     <?php if (empty($adminExists)): ?>
         <p><a href="<?= e(url('/setup/admin')) ?>">Ersten Admin anlegen</a></p>

@@ -80,7 +80,11 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     </div>
 
     <div class="privacy-note">
-        Datenschutzhinweis-Platzhalter: Bitte vor dem Livegang mit eurem finalen Text ersetzen.
+        <a href="<?= e(url('/impressum')) ?>">Impressum</a>
+        <span>|</span>
+        <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
+        <span>|</span>
+        <a href="https://example.org" target="_blank" rel="noopener noreferrer">example.org</a>
     </div>
 
     <div id="toast" class="toast" hidden></div>
