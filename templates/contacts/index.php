@@ -33,6 +33,9 @@ $canSendRegularMail = can('mail.send');
 $canSendSingleContactMail = can('mail.contact_single');
 $isMemberCompactView = $canSendSingleContactMail && !can('contacts.manage');
 $isStaffCompactView = !$isMemberCompactView;
+$hasAdvancedFiltersActive = $activeTagIds !== []
+    || ($filters['sort'] ?? 'nachname') !== 'nachname'
+    || ($filters['direction'] ?? 'asc') !== 'asc';
 $contactWithEmailCount = 0;
 $contactWithoutEmailCount = 0;
 foreach ($contacts as $contact) {
@@ -114,45 +117,55 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                 <?php endforeach; ?>
             </select>
         </label>
-        <label>
-            <span>Sortierung</span>
-            <select name="sort">
-                <option value="nachname" <?= ($filters['sort'] ?? 'nachname') === 'nachname' ? 'selected' : '' ?>>Name</option>
-                <option value="vorname" <?= ($filters['sort'] ?? '') === 'vorname' ? 'selected' : '' ?>>Vorname</option>
-                <option value="category_name" <?= ($filters['sort'] ?? '') === 'category_name' ? 'selected' : '' ?>>Kategorie</option>
-                <option value="ort" <?= ($filters['sort'] ?? '') === 'ort' ? 'selected' : '' ?>>Ort</option>
-                <option value="geburtstag" <?= ($filters['sort'] ?? '') === 'geburtstag' ? 'selected' : '' ?>>Geburtstag</option>
-                <option value="created_at" <?= ($filters['sort'] ?? '') === 'created_at' ? 'selected' : '' ?>>Angelegt</option>
-            </select>
-        </label>
-        <label>
-            <span>Richtung</span>
-            <select name="direction">
-                <option value="asc" <?= ($filters['direction'] ?? 'asc') === 'asc' ? 'selected' : '' ?>>A bis Z</option>
-                <option value="desc" <?= ($filters['direction'] ?? '') === 'desc' ? 'selected' : '' ?>>Z bis A</option>
-            </select>
-        </label>
-        <div class="filter-tags">
-            <span>Tags</span>
-            <div class="tag-picker">
-                <?php foreach ($tags as $tag): ?>
-                    <?php $selected = in_array((int) $tag['id'], $activeTagIds, true); ?>
-                    <label class="tag-option<?= $selected ? ' is-selected' : '' ?>">
-                        <input type="checkbox" name="tag_ids[]" value="<?= e((string) $tag['id']) ?>" <?= $selected ? 'checked' : '' ?>>
-                        <span><?= e($tag['name']) ?></span>
-                    </label>
-                <?php endforeach; ?>
-                <?php if ($tags === []): ?>
-                    <p class="field-hint">Noch keine Tags angelegt.</p>
-                <?php endif; ?>
-            </div>
-        </div>
         <div class="filter-actions">
             <button type="submit">Filtern</button>
             <?php if (can('contacts.export')): ?>
                 <a class="ghost-button" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>">CSV exportieren</a>
             <?php endif; ?>
         </div>
+        <details class="admin-drawer filter-drawer"<?= $hasAdvancedFiltersActive ? ' open' : '' ?>>
+            <summary>
+                <span><?= icon('sliders') ?></span>
+                <span>Weitere Filter</span>
+            </summary>
+            <div class="admin-drawer-body">
+                <div class="filter-advanced-grid">
+                    <label>
+                        <span>Sortierung</span>
+                        <select name="sort">
+                            <option value="nachname" <?= ($filters['sort'] ?? 'nachname') === 'nachname' ? 'selected' : '' ?>>Name</option>
+                            <option value="vorname" <?= ($filters['sort'] ?? '') === 'vorname' ? 'selected' : '' ?>>Vorname</option>
+                            <option value="category_name" <?= ($filters['sort'] ?? '') === 'category_name' ? 'selected' : '' ?>>Kategorie</option>
+                            <option value="ort" <?= ($filters['sort'] ?? '') === 'ort' ? 'selected' : '' ?>>Ort</option>
+                            <option value="geburtstag" <?= ($filters['sort'] ?? '') === 'geburtstag' ? 'selected' : '' ?>>Geburtstag</option>
+                            <option value="created_at" <?= ($filters['sort'] ?? '') === 'created_at' ? 'selected' : '' ?>>Angelegt</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Richtung</span>
+                        <select name="direction">
+                            <option value="asc" <?= ($filters['direction'] ?? 'asc') === 'asc' ? 'selected' : '' ?>>A bis Z</option>
+                            <option value="desc" <?= ($filters['direction'] ?? '') === 'desc' ? 'selected' : '' ?>>Z bis A</option>
+                        </select>
+                    </label>
+                    <div class="filter-tags">
+                        <span>Tags</span>
+                        <div class="tag-picker">
+                            <?php foreach ($tags as $tag): ?>
+                                <?php $selected = in_array((int) $tag['id'], $activeTagIds, true); ?>
+                                <label class="tag-option<?= $selected ? ' is-selected' : '' ?>">
+                                    <input type="checkbox" name="tag_ids[]" value="<?= e((string) $tag['id']) ?>" <?= $selected ? 'checked' : '' ?>>
+                                    <span><?= e($tag['name']) ?></span>
+                                </label>
+                            <?php endforeach; ?>
+                            <?php if ($tags === []): ?>
+                                <p class="field-hint">Noch keine Tags angelegt.</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </details>
     </form>
 </section>
 

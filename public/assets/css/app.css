@@ -329,6 +329,10 @@ label span {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.filter-grid {
+    align-items: end;
+}
+
 .hero-card.is-member-compact,
 .contacts-view-root.is-member-compact {
     padding-top: 1rem;
@@ -351,6 +355,21 @@ label span {
 }
 
 .filter-tags {
+    grid-column: 1 / -1;
+}
+
+.filter-drawer {
+    grid-column: 1 / -1;
+    margin-top: -0.15rem;
+}
+
+.filter-advanced-grid {
+    display: grid;
+    gap: 0.82rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.filter-advanced-grid .filter-tags {
     grid-column: 1 / -1;
 }
 
@@ -1476,6 +1495,10 @@ code {
 
     .filter-grid.is-member-compact,
     .bulk-layout.is-member-compact {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-advanced-grid {
         grid-template-columns: 1fr;
     }
 
