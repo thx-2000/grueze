@@ -11,8 +11,9 @@ Eine mobile-first PHP-Web-App für die Verwaltung von Kontaktdaten einer Abi-Stu
 5. Sicherstellen, dass `assets/uploads/` und `storage/tmp/` beschreibbar sind.
 6. Einen ersten Admin-Datensatz in `users` anlegen. Die zugehörige `role_id` ist die `admin`-Rolle aus `roles`.
 7. Über `security.contact_detail_visibility` kann pro Datenfeld gesteuert werden, welche Rollen Adresse, E-Mail, Telefon, Geburtstag, Notizen und Login sehen dürfen. Fehlt diese Matrix, greift `security.private_contact_detail_roles` als Rückfall.
+8. Unter `/contacts/import` können Admins eine XLSX-Liste mit den Spalten `Vorname`, `Geburtsname`, `Nachname akt.`, `Mail`, `Ort` und `Handy` importieren.
 
-Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufrufen. Dort laesst sich genau ein erstes Admin-Konto ueber die Anwendung anlegen, solange noch kein Admin existiert.
+Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufrufen. Dort lässt sich genau ein erstes Admin-Konto über die Anwendung anlegen, solange noch kein Admin existiert.
 
 ## Hinweise für all-inkl
 

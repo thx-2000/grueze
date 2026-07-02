@@ -24,9 +24,11 @@ use App\Repositories\LogRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
 use App\Services\CsvExportService;
+use App\Services\ContactImportService;
 use App\Services\MailService;
 use App\Services\PasswordResetService;
 use App\Services\UploadService;
+use App\Services\XlsxReader;
 
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
@@ -68,7 +70,14 @@ try {
     Container::factory(Auth::class, static fn () => new Auth(Container::get(UserRepository::class)));
     Container::factory(UploadService::class, static fn () => new UploadService());
     Container::factory(CsvExportService::class, static fn () => new CsvExportService());
+    Container::factory(XlsxReader::class, static fn () => new XlsxReader());
     Container::factory(MailService::class, static fn () => new MailService(Container::get(LogRepository::class)));
+    Container::factory(ContactImportService::class, static fn () => new ContactImportService(
+        Container::get(PDO::class),
+        Container::get(ContactRepository::class),
+        Container::get(LogRepository::class),
+        Container::get(XlsxReader::class)
+    ));
     Container::factory(PasswordResetService::class, static fn () => new PasswordResetService(
         Container::get(PDO::class),
         Container::get(UserRepository::class),
@@ -88,7 +97,8 @@ try {
         Container::get(UserRepository::class),
         Container::get(LogRepository::class),
         Container::get(UploadService::class),
-        Container::get(CsvExportService::class)
+        Container::get(CsvExportService::class),
+        Container::get(ContactImportService::class)
     ));
     Container::factory(UserController::class, static fn () => new UserController(
         Container::get(Auth::class),
@@ -131,6 +141,8 @@ try {
     $router->post('/setup/admin', [SetupController::class, 'storeAdmin']);
 
     $router->get('/contacts/create', [ContactController::class, 'create']);
+    $router->get('/contacts/import', [ContactController::class, 'importForm']);
+    $router->post('/contacts/import', [ContactController::class, 'importXlsx']);
     $router->post('/contacts/store', [ContactController::class, 'store']);
     $router->get('/contacts/edit', [ContactController::class, 'edit']);
     $router->post('/contacts/update', [ContactController::class, 'update']);
@@ -142,12 +154,12 @@ try {
     $router->get('/users', [UserController::class, 'index']);
     $router->post('/users/store', [UserController::class, 'store']);
 
-$router->post('/mail/compose', [MailController::class, 'compose']);
-$router->get('/mail/compose', [MailController::class, 'compose']);
-$router->post('/mail/test', [MailController::class, 'test']);
-$router->post('/mail/start', [MailController::class, 'start']);
-$router->get('/mail/status', [MailController::class, 'status']);
-$router->post('/mail/batch', [MailController::class, 'batch']);
+    $router->post('/mail/compose', [MailController::class, 'compose']);
+    $router->get('/mail/compose', [MailController::class, 'compose']);
+    $router->post('/mail/test', [MailController::class, 'test']);
+    $router->post('/mail/start', [MailController::class, 'start']);
+    $router->get('/mail/status', [MailController::class, 'status']);
+    $router->post('/mail/batch', [MailController::class, 'batch']);
 
     $router->get('/logs/audit', [LogController::class, 'audit']);
     $router->get('/logs/mail', [LogController::class, 'mail']);

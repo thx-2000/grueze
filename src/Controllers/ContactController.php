@@ -12,6 +12,7 @@ use App\Repositories\LogRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
 use App\Services\CsvExportService;
+use App\Services\ContactImportService;
 use App\Services\UploadService;
 use App\Services\Validator;
 use App\Support\Redirect;
@@ -26,7 +27,8 @@ final class ContactController extends BaseController
         private UserRepository $users,
         private LogRepository $logs,
         private UploadService $uploads,
-        private CsvExportService $csv
+        private CsvExportService $csv,
+        private ContactImportService $imports
     ) {
         parent::__construct($auth);
     }
@@ -61,6 +63,49 @@ final class ContactController extends BaseController
             'roles' => $this->users->roles(),
             'phoneLabels' => config('defaults.phone_labels', []),
         ]);
+    }
+
+    public function importForm(): void
+    {
+        $this->requirePermission('contacts.manage');
+        $this->render('contacts/import');
+    }
+
+    public function importXlsx(Request $request): void
+    {
+        $this->requirePermission('contacts.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $file = $request->file('import_file');
+        if (!$file || (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            flash('error', 'Bitte eine XLSX-Datei auswählen.');
+            Redirect::to('/contacts/import');
+        }
+
+        $filename = (string) ($file['name'] ?? '');
+        if (!str_ends_with(strtolower($filename), '.xlsx')) {
+            flash('error', 'Bitte eine Datei im XLSX-Format hochladen.');
+            Redirect::to('/contacts/import');
+        }
+
+        try {
+            $summary = $this->imports->importRamaWorkbook((string) $file['tmp_name'], (int) $this->auth->user()['id']);
+            flash(
+                'success',
+                sprintf(
+                    'Import abgeschlossen: %d neu, %d aktualisiert, %d übersprungen, %d ohne Mailadresse.',
+                    $summary['created'],
+                    $summary['updated'],
+                    $summary['skipped'],
+                    $summary['without_email']
+                )
+            );
+        } catch (\Throwable $exception) {
+            flash('error', 'Import fehlgeschlagen: ' . $exception->getMessage());
+            Redirect::to('/contacts/import');
+        }
+
+        Redirect::to('/');
     }
 
     public function store(Request $request): void

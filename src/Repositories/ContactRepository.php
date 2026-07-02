@@ -93,6 +93,54 @@ final class ContactRepository
         return $contact;
     }
 
+    public function findImportMatch(string $vorname, string $nachname, string $geburtsname): ?array
+    {
+        $variants = [
+            [
+                'sql' => 'SELECT id FROM contacts
+                          WHERE vorname = :vorname AND nachname = :nachname AND COALESCE(geburtsname, \'\') = :geburtsname
+                          LIMIT 1',
+                'params' => [
+                    'vorname' => $vorname,
+                    'nachname' => $nachname,
+                    'geburtsname' => $geburtsname,
+                ],
+            ],
+            [
+                'sql' => 'SELECT id FROM contacts
+                          WHERE vorname = :vorname AND nachname = :nachname
+                          LIMIT 1',
+                'params' => [
+                    'vorname' => $vorname,
+                    'nachname' => $nachname,
+                ],
+            ],
+        ];
+
+        if ($geburtsname !== '') {
+            $variants[] = [
+                'sql' => 'SELECT id FROM contacts
+                          WHERE vorname = :vorname AND geburtsname = :geburtsname
+                          LIMIT 1',
+                'params' => [
+                    'vorname' => $vorname,
+                    'geburtsname' => $geburtsname,
+                ],
+            ];
+        }
+
+        foreach ($variants as $variant) {
+            $stmt = $this->pdo->prepare($variant['sql']);
+            $stmt->execute($variant['params']);
+            $id = (int) $stmt->fetchColumn();
+            if ($id > 0) {
+                return $this->find($id);
+            }
+        }
+
+        return null;
+    }
+
     public function create(array $data, int $userId): int
     {
         $stmt = $this->pdo->prepare(

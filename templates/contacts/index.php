@@ -59,7 +59,10 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
             <p class="muted">Schnell filtern, markieren, exportieren oder für Mailings verwenden.</p>
         </div>
         <?php if (can('contacts.manage')): ?>
-            <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Neuen Kontakt anlegen</span></a>
+            <div class="hero-actions">
+                <a class="ghost-button" href="<?= e(url('/contacts/import')) ?>"><?= icon('upload') ?><span>XLSX importieren</span></a>
+                <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Neuen Kontakt anlegen</span></a>
+            </div>
         <?php endif; ?>
     </div>
 
@@ -261,7 +264,14 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                     <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox>
                                 </label>
                             </td>
-                            <td><strong><?= e($contact['nachname']) ?></strong></td>
+                            <td>
+                                <div class="contact-name-cell">
+                                    <strong><?= e($contact['nachname']) ?></strong>
+                                    <?php if (($contact['emails'] ?? []) === []): ?>
+                                        <span class="status-icon" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
                             <td><?= e($contact['vorname']) ?></td>
                             <td data-col="category"><span class="table-pill"><?= e($contact['category_name'] ?: 'Ohne Kategorie') ?></span></td>
                             <td data-col="tags">
@@ -335,7 +345,12 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     </label>
                     <div class="contact-head">
                         <div>
-                            <h3><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?></h3>
+                            <div class="contact-title-row">
+                                <h3><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?></h3>
+                                <?php if (($contact['emails'] ?? []) === []): ?>
+                                    <span class="status-icon" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?></span>
+                                <?php endif; ?>
+                            </div>
                             <?php if (!empty($contact['geburtsname'])): ?><p class="muted">Geburtsname: <?= e($contact['geburtsname']) ?></p><?php endif; ?>
                         </div>
                         <span class="tag"><?= e($contact['category_name'] ?: 'Ohne Kategorie') ?></span>
@@ -367,11 +382,15 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         <?php if ($visibleContactFields['emails']): ?>
                             <div>
                                 <strong>E-Mail-Adressen</strong>
-                                <ul class="mini-list">
-                                    <?php foreach ($contact['emails'] as $email): ?>
-                                        <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e(($email['label'] ? $email['label'] . ': ' : '') . $email['email']) ?></a></li>
-                                    <?php endforeach; ?>
-                                </ul>
+                                <?php if ($contact['emails'] !== []): ?>
+                                    <ul class="mini-list">
+                                        <?php foreach ($contact['emails'] as $email): ?>
+                                            <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e(($email['label'] ? $email['label'] . ': ' : '') . $email['email']) ?></a></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php else: ?>
+                                    <p class="missing-contact-value"><?= icon('mail-off') ?><span>Keine Mailadresse</span></p>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
 

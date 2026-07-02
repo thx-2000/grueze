@@ -308,6 +308,13 @@ label span {
     flex-wrap: wrap;
 }
 
+.hero-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 .eyebrow {
     margin: 0 0 0.35rem;
     text-transform: uppercase;
@@ -539,6 +546,14 @@ label span {
     gap: 0.18rem;
 }
 
+.contact-name-cell,
+.contact-title-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
 .table-pill {
     display: inline-flex;
     align-items: center;
@@ -645,6 +660,31 @@ label span {
 .tag-account.is-active {
     background: rgba(47, 106, 82, 0.14);
     color: #214a3a;
+}
+
+.status-icon,
+.missing-contact-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #9b6a32;
+}
+
+.status-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(191, 127, 48, 0.12);
+}
+
+.status-icon .icon,
+.missing-contact-value .icon {
+    color: currentColor;
+}
+
+.missing-contact-value {
+    font-weight: 700;
 }
 
 .contact-select {
