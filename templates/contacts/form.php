@@ -119,14 +119,26 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                         <h3>E-Mail-Adressen</h3>
                         <p class="muted">Mehrere Adressen mit Label pflegen.</p>
                     </div>
-                    <button type="button" class="ghost-button" data-add-row="emails">Weitere Adresse</button>
+                    <button
+                        type="button"
+                        class="ghost-button icon-button"
+                        data-add-row="emails"
+                        title="Weitere E-Mail-Adresse hinzufügen"
+                        aria-label="Weitere E-Mail-Adresse hinzufügen"
+                    ><?= icon('plus') ?><span class="visually-hidden">Weitere E-Mail-Adresse hinzufügen</span></button>
                 </div>
                 <div id="emailsRepeater">
                     <?php foreach (($values['emails'] ?? []) as $index => $email): ?>
                         <div class="repeater-row">
                             <input type="text" name="emails[<?= e((string) $index) ?>][label]" value="<?= e($email['label'] ?? '') ?>" placeholder="Label, z. B. privat">
                             <input type="email" name="emails[<?= e((string) $index) ?>][email]" value="<?= e($email['email'] ?? '') ?>" placeholder="name@example.com">
-                            <button type="button" class="danger-button" data-remove-row>Entfernen</button>
+                            <button
+                                type="button"
+                                class="danger-button icon-button"
+                                data-remove-row
+                                title="E-Mail-Adresse entfernen"
+                                aria-label="E-Mail-Adresse entfernen"
+                            ><?= icon('trash') ?><span class="visually-hidden">E-Mail-Adresse entfernen</span></button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -138,7 +150,13 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                         <h3>Telefonnummern</h3>
                         <p class="muted">Mobil, Festnetz oder weitere Nummern übersichtlich erfassen.</p>
                     </div>
-                    <button type="button" class="ghost-button" data-add-row="phones">Weitere Nummer</button>
+                    <button
+                        type="button"
+                        class="ghost-button icon-button"
+                        data-add-row="phones"
+                        title="Weitere Telefonnummer hinzufügen"
+                        aria-label="Weitere Telefonnummer hinzufügen"
+                    ><?= icon('plus') ?><span class="visually-hidden">Weitere Telefonnummer hinzufügen</span></button>
                 </div>
                 <div id="phonesRepeater">
                     <?php foreach (($values['phones'] ?? []) as $index => $phone): ?>
@@ -149,7 +167,13 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                                 <?php endforeach; ?>
                             </select>
                             <input type="text" name="phones[<?= e((string) $index) ?>][phone]" value="<?= e($phone['phone'] ?? '') ?>" placeholder="+49 ...">
-                            <button type="button" class="danger-button" data-remove-row>Entfernen</button>
+                            <button
+                                type="button"
+                                class="danger-button icon-button"
+                                data-remove-row
+                                title="Telefonnummer entfernen"
+                                aria-label="Telefonnummer entfernen"
+                            ><?= icon('trash') ?><span class="visually-hidden">Telefonnummer entfernen</span></button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -204,13 +228,13 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
             <?php if ($editing && can('contacts.delete')): ?>
                 <button
                     type="submit"
-                    class="danger-button icon-button"
+                    class="danger-button"
                     formaction="<?= e(url('/contacts/delete')) ?>"
                     formmethod="post"
                     onclick="return confirm('Kontakt wirklich löschen?');"
                     title="Kontakt löschen"
                     aria-label="Kontakt löschen"
-                ><?= icon('trash') ?><span class="visually-hidden">Kontakt löschen</span></button>
+                ><?= icon('trash') ?><span>Kontakt löschen</span></button>
             <?php endif; ?>
             <a class="ghost-button" href="<?= e(url('/')) ?>">Zurück</a>
         </div>
@@ -221,7 +245,13 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
     <div class="repeater-row">
         <input type="text" data-name="label" placeholder="Label, z. B. privat">
         <input type="email" data-name="email" placeholder="name@example.com">
-        <button type="button" class="danger-button" data-remove-row>Entfernen</button>
+        <button
+            type="button"
+            class="danger-button icon-button"
+            data-remove-row
+            title="E-Mail-Adresse entfernen"
+            aria-label="E-Mail-Adresse entfernen"
+        ><?= icon('trash') ?><span class="visually-hidden">E-Mail-Adresse entfernen</span></button>
     </div>
 </template>
 
@@ -233,6 +263,12 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
             <?php endforeach; ?>
         </select>
         <input type="text" data-name="phone" placeholder="+49 ...">
-        <button type="button" class="danger-button" data-remove-row>Entfernen</button>
+        <button
+            type="button"
+            class="danger-button icon-button"
+            data-remove-row
+            title="Telefonnummer entfernen"
+            aria-label="Telefonnummer entfernen"
+        ><?= icon('trash') ?><span class="visually-hidden">Telefonnummer entfernen</span></button>
     </div>
 </template>

@@ -834,6 +834,11 @@ label span {
     justify-content: center;
 }
 
+.repeater-block .section-head .icon-button,
+.repeater-row .icon-button {
+    flex: 0 0 auto;
+}
+
 .account-summary p {
     margin: 0;
 }
