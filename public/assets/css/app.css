@@ -574,6 +574,38 @@ label span {
     margin-top: 0.25rem;
 }
 
+.admin-drawer {
+    margin-top: 0.8rem;
+    border: 1px solid rgba(38, 42, 32, 0.08);
+    border-radius: var(--radius-md);
+    background: rgba(241, 244, 235, 0.96);
+    overflow: hidden;
+}
+
+.admin-drawer summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.82rem 0.92rem;
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--color-primary-strong);
+}
+
+.admin-drawer summary::-webkit-details-marker {
+    display: none;
+}
+
+.admin-drawer[open] summary {
+    border-bottom: 1px solid rgba(38, 42, 32, 0.08);
+    background: rgba(236, 240, 228, 0.96);
+}
+
+.admin-drawer-body {
+    padding: 0.88rem 0.92rem;
+}
+
 .compact-action {
     padding: 0.4rem 0.62rem;
     font-size: 0.84rem;

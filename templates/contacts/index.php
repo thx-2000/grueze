@@ -215,58 +215,6 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         </ul>
                     <?php endif; ?>
                 <?php endif; ?>
-                <?php if (can('contacts.manage')): ?>
-                    <div class="bulk-editor">
-                        <label>
-                            <span>Kategorie für Auswahl</span>
-                            <select name="bulk_category_id">
-                                <option value="">Kategorie unverändert</option>
-                                <option value="__none__">Kategorie entfernen</option>
-                                <?php foreach ($categories as $category): ?>
-                                    <option value="<?= e((string) $category['id']) ?>"><?= e($category['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </label>
-                        <label class="inline-toggle">
-                            <input type="checkbox" name="bulk_category_only_if_empty" value="1">
-                            <span>Nur setzen, wenn noch keine Kategorie gepflegt ist</span>
-                        </label>
-                        <div>
-                            <span>Tags ergänzen</span>
-                            <div class="tag-picker compact-picker">
-                                <?php foreach ($tags as $tag): ?>
-                                    <label class="tag-option">
-                                        <input type="checkbox" name="bulk_tag_ids_add[]" value="<?= e((string) $tag['id']) ?>">
-                                        <span><?= e($tag['name']) ?></span>
-                                    </label>
-                                <?php endforeach; ?>
-                                <?php if ($tags === []): ?>
-                                    <p class="field-hint">Noch keine Tags angelegt.</p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div>
-                            <span>Tags entfernen</span>
-                            <div class="tag-picker compact-picker">
-                                <?php foreach ($tags as $tag): ?>
-                                    <label class="tag-option">
-                                        <input type="checkbox" name="bulk_tag_ids_remove[]" value="<?= e((string) $tag['id']) ?>">
-                                        <span><?= e($tag['name']) ?></span>
-                                    </label>
-                                <?php endforeach; ?>
-                                <?php if ($tags === []): ?>
-                                    <p class="field-hint">Noch keine Tags angelegt.</p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <p class="field-hint" id="bulkSelectionHint">Keine Kontakte ausgewählt.</p>
-                        <div class="toolbar-actions">
-                            <button type="submit" formaction="<?= e(url('/contacts/bulk-update')) ?>" formmethod="post">
-                                <?= icon('edit') ?><span>Auf Auswahl anwenden</span>
-                            </button>
-                        </div>
-                    </div>
-                <?php endif; ?>
                 <?php if (!$canCopyVisibleEmails && !$canSendRegularMail && !$canSendSingleContactMail): ?>
                     <p class="detail-hint">Für diese Rolle sind hier gerade keine Sammelaktionen freigeschaltet.</p>
                 <?php endif; ?>
@@ -536,26 +484,95 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                 </article>
             <?php endforeach; ?>
         </div>
+
+        <?php if (can('contacts.manage')): ?>
+            <details class="admin-drawer">
+                <summary>
+                    <span><?= icon('sliders') ?></span>
+                    <span>Massenbearbeitung und Verwaltung</span>
+                </summary>
+                <div class="admin-drawer-body">
+                    <div class="bulk-editor">
+                        <label>
+                            <span>Kategorie für Auswahl</span>
+                            <select name="bulk_category_id">
+                                <option value="">Kategorie unverändert</option>
+                                <option value="__none__">Kategorie entfernen</option>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?= e((string) $category['id']) ?>"><?= e($category['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label class="inline-toggle">
+                            <input type="checkbox" name="bulk_category_only_if_empty" value="1">
+                            <span>Nur setzen, wenn noch keine Kategorie gepflegt ist</span>
+                        </label>
+                        <div>
+                            <span>Tags ergänzen</span>
+                            <div class="tag-picker compact-picker">
+                                <?php foreach ($tags as $tag): ?>
+                                    <label class="tag-option">
+                                        <input type="checkbox" name="bulk_tag_ids_add[]" value="<?= e((string) $tag['id']) ?>">
+                                        <span><?= e($tag['name']) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                                <?php if ($tags === []): ?>
+                                    <p class="field-hint">Noch keine Tags angelegt.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div>
+                            <span>Tags entfernen</span>
+                            <div class="tag-picker compact-picker">
+                                <?php foreach ($tags as $tag): ?>
+                                    <label class="tag-option">
+                                        <input type="checkbox" name="bulk_tag_ids_remove[]" value="<?= e((string) $tag['id']) ?>">
+                                        <span><?= e($tag['name']) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                                <?php if ($tags === []): ?>
+                                    <p class="field-hint">Noch keine Tags angelegt.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <p class="field-hint" id="bulkSelectionHint">Keine Kontakte ausgewählt.</p>
+                        <div class="toolbar-actions">
+                            <button type="submit" formaction="<?= e(url('/contacts/bulk-update')) ?>" formmethod="post">
+                                <?= icon('edit') ?><span>Auf Auswahl anwenden</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        <?php endif; ?>
     </form>
 </section>
 
 <?php if (can('categories.manage')): ?>
     <section class="panel narrow stack">
-        <div>
-            <h3>Kategorie ergänzen</h3>
-            <form method="post" action="<?= e(url('/categories/store')) ?>" class="inline-form">
-                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                <input type="text" name="name" placeholder="Neue Kategorie" required>
-                <button type="submit">Speichern</button>
-            </form>
-        </div>
-        <div>
-            <h3>Tag ergänzen</h3>
-            <form method="post" action="<?= e(url('/tags/store')) ?>" class="inline-form">
-                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                <input type="text" name="name" placeholder="Neuer Tag" required>
-                <button type="submit">Speichern</button>
-            </form>
-        </div>
+        <details class="admin-drawer">
+            <summary>
+                <span><?= icon('plus') ?></span>
+                <span>Kategorien und Tags verwalten</span>
+            </summary>
+            <div class="admin-drawer-body stack">
+                <div>
+                    <h3>Kategorie ergänzen</h3>
+                    <form method="post" action="<?= e(url('/categories/store')) ?>" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <input type="text" name="name" placeholder="Neue Kategorie" required>
+                        <button type="submit">Speichern</button>
+                    </form>
+                </div>
+                <div>
+                    <h3>Tag ergänzen</h3>
+                    <form method="post" action="<?= e(url('/tags/store')) ?>" class="inline-form">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <input type="text" name="name" placeholder="Neuer Tag" required>
+                        <button type="submit">Speichern</button>
+                    </form>
+                </div>
+            </div>
+        </details>
     </section>
 <?php endif; ?>
