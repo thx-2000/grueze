@@ -64,12 +64,6 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
                     <p class="eyebrow">Arbeitsbereich</p>
                     <h2 class="topbar-title"><?= e(config('app.name', 'Abi Adress Zentrale')) ?></h2>
                 </div>
-                <?php if (!empty($currentUser)): ?>
-                    <div class="topbar-meta">
-                        <?= icon('sparkles') ?>
-                        <span>Angemeldet als <?= e($currentUser['name']) ?></span>
-                    </div>
-                <?php endif; ?>
             </header>
             <?php foreach ($flashes as $type => $message): ?>
                 <?php if ($message): ?>
