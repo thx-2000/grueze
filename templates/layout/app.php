@@ -16,6 +16,14 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     <link rel="stylesheet" href="<?= e(asset_url('/assets/css/app.css')) ?>">
 </head>
 <body>
+    <div class="signal-bar">
+        <div class="signal-bar-inner">
+            <span class="signal-bar-label">Zentrale</span>
+            <?php if (!empty($currentUser)): ?>
+                <span class="signal-bar-meta">Angemeldet als <?= e($currentUser['name']) ?></span>
+            <?php endif; ?>
+        </div>
+    </div>
     <div class="page-shell">
         <aside class="sidebar">
             <div class="sidebar-brand">
