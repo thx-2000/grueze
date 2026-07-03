@@ -60,6 +60,21 @@ final class MailController extends BaseController
         ]);
     }
 
+    public function composeAll(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        $ids = $this->contacts->mailingContactIds();
+        if ($ids === []) {
+            flash('error', 'Es sind aktuell keine Kontakte mit Mailadresse vorhanden.');
+            Redirect::to('/');
+        }
+
+        $_GET['contact_ids'] = $ids;
+        $this->compose(new Request());
+    }
+
     public function test(Request $request): void
     {
         $this->requireMailAccess();

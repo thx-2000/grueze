@@ -51,6 +51,31 @@ final class UserRepository
         )->fetchAll();
     }
 
+    public function search(string $query, int $limit = 12): array
+    {
+        $term = '%' . trim($query) . '%';
+        $stmt = $this->pdo->prepare(
+            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname
+             FROM users
+             JOIN roles ON roles.id = users.role_id
+             LEFT JOIN contacts ON contacts.id = users.contact_id
+             WHERE users.name LIKE :term_name
+                OR users.email LIKE :term_email
+                OR contacts.vorname LIKE :term_vorname
+                OR contacts.nachname LIKE :term_nachname
+             ORDER BY users.name ASC
+             LIMIT ' . (int) $limit
+        );
+        $stmt->execute([
+            'term_name' => $term,
+            'term_email' => $term,
+            'term_vorname' => $term,
+            'term_nachname' => $term,
+        ]);
+
+        return $stmt->fetchAll();
+    }
+
     public function roles(): array
     {
         return $this->pdo->query('SELECT * FROM roles ORDER BY id')->fetchAll();

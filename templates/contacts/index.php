@@ -3,7 +3,7 @@ $contactCount = count($contacts);
 $emailCount = 0;
 $phoneCount = 0;
 $activeTagIds = array_map('intval', (array) ($filters['tag_ids'] ?? []));
-$currentSort = (string) ($filters['sort'] ?? 'nachname');
+$currentSort = (string) ($filters['sort'] ?? 'vorname');
 $currentDirection = (string) ($filters['direction'] ?? 'asc');
 $visibleContactFields = [
     'address' => can_view_contact_field('address'),
@@ -130,8 +130,8 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     <label>
                         <span>Sortierung</span>
                         <select name="sort">
-                            <option value="nachname" <?= ($filters['sort'] ?? 'nachname') === 'nachname' ? 'selected' : '' ?>>Name</option>
-                            <option value="vorname" <?= ($filters['sort'] ?? '') === 'vorname' ? 'selected' : '' ?>>Vorname</option>
+                            <option value="vorname" <?= ($filters['sort'] ?? 'vorname') === 'vorname' ? 'selected' : '' ?>>Vorname</option>
+                            <option value="nachname" <?= ($filters['sort'] ?? '') === 'nachname' ? 'selected' : '' ?>>Nachname</option>
                             <option value="category_name" <?= ($filters['sort'] ?? '') === 'category_name' ? 'selected' : '' ?>>Kategorie</option>
                             <option value="ort" <?= ($filters['sort'] ?? '') === 'ort' ? 'selected' : '' ?>>Ort</option>
                             <option value="geburtstag" <?= ($filters['sort'] ?? '') === 'geburtstag' ? 'selected' : '' ?>>Geburtstag</option>
@@ -294,8 +294,8 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                 <thead>
                     <tr>
                         <th class="col-select">Auswahl</th>
-                        <th><a class="sort-link" href="<?= e($buildSortUrl('nachname')) ?>"><?= e($sortLabel('nachname', 'Name')) ?></a></th>
                         <th><a class="sort-link" href="<?= e($buildSortUrl('vorname')) ?>"><?= e($sortLabel('vorname', 'Vorname')) ?></a></th>
+                        <th><a class="sort-link" href="<?= e($buildSortUrl('nachname')) ?>"><?= e($sortLabel('nachname', 'Nachname')) ?></a></th>
                         <th data-col="category"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>"><?= e($sortLabel('category_name', 'Kategorie')) ?></a></th>
                         <th data-col="tags">Tags</th>
                         <?php if ($visibleContactFields['address']): ?>
@@ -328,6 +328,11 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             </td>
                             <td>
                                 <div class="contact-name-cell">
+                                    <strong><?= e($contact['vorname']) ?></strong>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="contact-name-cell">
                                     <strong><?= e($contact['nachname']) ?></strong>
                                     <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
                                         <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
@@ -337,7 +342,6 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                     <?php endif; ?>
                                 </div>
                             </td>
-                            <td><?= e($contact['vorname']) ?></td>
                             <td data-col="category"><span class="table-pill"><?= e($contact['category_name'] ?: '—') ?></span></td>
                             <td data-col="tags">
                                 <div class="tag-cluster">

@@ -21,20 +21,58 @@ body {
 }
 
 .signal-bar-inner {
-    height: 100%;
-    padding: 0 1.15rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    min-height: 100%;
+    padding: 0.35rem 1.15rem;
+    display: grid;
+    gap: 0.35rem;
     color: #181a15;
     font-size: 0.74rem;
     font-weight: 800;
+}
+
+.signal-bar-main,
+.signal-bar-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.signal-bar-label,
+.signal-bar-meta,
+.signal-bar-hint {
+    white-space: nowrap;
+}
+
+.signal-search {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex: 1 1 420px;
+    max-width: 760px;
+}
+
+.signal-search input {
+    min-width: 0;
+    padding: 0.48rem 0.72rem;
+    border-radius: 999px;
+    background: rgba(248, 249, 244, 0.92);
+}
+
+.signal-bar-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .signal-bar-userzone {
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
+    flex-wrap: wrap;
 }
 
 .signal-bar-button {
@@ -45,6 +83,18 @@ body {
     box-shadow: none;
     border-color: rgba(24, 26, 21, 0.1);
     font-size: 0.74rem;
+}
+
+.signal-bar-button .icon {
+    width: 0.88rem;
+    height: 0.88rem;
+    flex: 0 0 0.88rem;
+}
+
+.signal-bar-hint {
+    padding: 0.24rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(24, 26, 21, 0.1);
 }
 
 a {
@@ -159,7 +209,7 @@ label span {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 1.2rem;
-    padding: 3.5rem 1.15rem 1.15rem;
+    padding: 5.2rem 1.15rem 1.15rem;
 }
 
 .sidebar {
@@ -172,10 +222,10 @@ label span {
     flex-direction: column;
     justify-content: flex-start;
     position: fixed;
-    top: 3.5rem;
+    top: 5.2rem;
     left: 1.15rem;
     width: 320px;
-    height: calc(100vh - 4.65rem);
+    height: calc(100vh - 6.35rem);
     overflow-y: auto;
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-soft);
@@ -291,6 +341,40 @@ label span {
     display: grid;
     gap: 1.2rem;
     min-width: 0;
+}
+
+.global-search-panel {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.global-search-panel input {
+    flex: 1 1 360px;
+}
+
+.search-result-grid {
+    display: grid;
+    gap: 0.85rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.search-result-card {
+    padding: 0.9rem 0.95rem;
+    border-radius: var(--radius-md);
+    background: rgba(246, 248, 240, 0.96);
+    border: 1px solid rgba(38, 42, 32, 0.08);
+    display: grid;
+    gap: 0.7rem;
+}
+
+.search-result-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .content-topbar {
@@ -1508,11 +1592,17 @@ code {
 @media (max-width: 900px) {
     .signal-bar {
         position: static;
-        height: 0.36rem;
+        height: auto;
     }
 
     .signal-bar-inner {
-        display: none;
+        display: grid;
+        padding: 0.55rem 0.9rem;
+    }
+
+    .signal-search {
+        flex-basis: 100%;
+        max-width: none;
     }
 
     .page-shell {
@@ -1608,6 +1698,6 @@ code {
 
 @media (min-width: 901px) {
     .signal-bar {
-        height: 2.35rem;
+        min-height: 4rem;
     }
 }

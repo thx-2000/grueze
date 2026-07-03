@@ -53,7 +53,7 @@ final class ContactRepository
         }
 
         $allowedSorts = ['nachname', 'vorname', 'category_name', 'ort', 'geburtstag', 'created_at'];
-        $sort = in_array($filters['sort'] ?? '', $allowedSorts, true) ? $filters['sort'] : 'nachname';
+        $sort = in_array($filters['sort'] ?? '', $allowedSorts, true) ? $filters['sort'] : 'vorname';
         $direction = strtolower((string) ($filters['direction'] ?? 'asc')) === 'desc' ? 'DESC' : 'ASC';
         $sortSql = match ($sort) {
             'vorname' => "contacts.vorname {$direction}, contacts.nachname ASC",
@@ -74,6 +74,48 @@ final class ContactRepository
         }
 
         return $contacts;
+    }
+
+    public function globalSearch(string $query, int $limit = 12): array
+    {
+        $term = '%' . trim($query) . '%';
+        $stmt = $this->pdo->prepare(
+            'SELECT contacts.id, contacts.vorname, contacts.nachname, contacts.geburtsname, contacts.ort,
+                    categories.name AS category_name,
+                    EXISTS(
+                        SELECT 1 FROM contact_emails WHERE contact_emails.contact_id = contacts.id
+                    ) AS has_email
+             FROM contacts
+             LEFT JOIN categories ON categories.id = contacts.category_id
+             WHERE contacts.vorname LIKE :term_vorname
+                OR contacts.nachname LIKE :term_nachname
+                OR contacts.geburtsname LIKE :term_geburtsname
+                OR contacts.ort LIKE :term_ort
+             ORDER BY contacts.vorname ASC, contacts.nachname ASC
+             LIMIT ' . (int) $limit
+        );
+        $stmt->execute([
+            'term_vorname' => $term,
+            'term_nachname' => $term,
+            'term_geburtsname' => $term,
+            'term_ort' => $term,
+        ]);
+
+        return $stmt->fetchAll();
+    }
+
+    public function mailingContactIds(): array
+    {
+        return array_map(
+            'intval',
+            $this->pdo->query(
+                'SELECT DISTINCT contacts.id
+                 FROM contacts
+                 JOIN contact_emails ON contact_emails.contact_id = contacts.id
+                 WHERE contact_emails.email IS NOT NULL AND contact_emails.email <> ""
+                 ORDER BY contacts.vorname ASC, contacts.nachname ASC'
+            )->fetchAll(\PDO::FETCH_COLUMN)
+        );
     }
 
     public function find(int $id): ?array

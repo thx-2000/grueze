@@ -8,6 +8,7 @@ use App\Controllers\ContactController;
 use App\Controllers\LegalController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
+use App\Controllers\SearchController;
 use App\Controllers\SettingsController;
 use App\Controllers\SetupController;
 use App\Controllers\TagController;
@@ -140,9 +141,15 @@ try {
         Container::get(Auth::class),
         Container::get(SettingRepository::class)
     ));
+    Container::factory(SearchController::class, static fn () => new SearchController(
+        Container::get(Auth::class),
+        Container::get(ContactRepository::class),
+        Container::get(UserRepository::class)
+    ));
 
     $router = new Router();
     $router->get('/', [ContactController::class, 'index']);
+    $router->get('/search', [SearchController::class, 'index']);
     $router->get('/login', [AuthController::class, 'showLogin']);
     $router->post('/login', [AuthController::class, 'login']);
     $router->post('/logout', [AuthController::class, 'logout']);
@@ -174,6 +181,7 @@ try {
 
     $router->post('/mail/compose', [MailController::class, 'compose']);
     $router->get('/mail/compose', [MailController::class, 'compose']);
+    $router->post('/mail/compose-all', [MailController::class, 'composeAll']);
     $router->post('/mail/test', [MailController::class, 'test']);
     $router->post('/mail/start', [MailController::class, 'start']);
     $router->get('/mail/status', [MailController::class, 'status']);

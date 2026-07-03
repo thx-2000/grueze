@@ -34,6 +34,9 @@ function selectedContactItems() {
 const copyButton = document.getElementById('copyEmailsButton');
 const selectionStatus = document.getElementById('selectionStatus');
 const bulkSelectionHint = document.getElementById('bulkSelectionHint');
+const signalSelectionStatus = document.getElementById('signalSelectionStatus');
+const signalComposeSelection = document.getElementById('signalComposeSelection');
+const signalClearSelection = document.getElementById('signalClearSelection');
 
 function updateSelectionUI() {
     const items = document.querySelectorAll('[data-contact-selectable]');
@@ -54,6 +57,19 @@ function updateSelectionUI() {
         selectionStatus.textContent = selectedCount === 0
             ? 'Noch nichts ausgewählt'
             : `${selectedCount} Kontakt${selectedCount === 1 ? '' : 'e'} ausgewählt`;
+    }
+
+    if (signalSelectionStatus) {
+        signalSelectionStatus.hidden = selectedCount === 0;
+        signalSelectionStatus.textContent = `${selectedCount} Kontakt${selectedCount === 1 ? '' : 'e'} markiert`;
+    }
+
+    if (signalComposeSelection) {
+        signalComposeSelection.hidden = selectedCount === 0;
+    }
+
+    if (signalClearSelection) {
+        signalClearSelection.hidden = selectedCount === 0;
     }
 
     if (bulkSelectionHint) {

@@ -5,6 +5,7 @@ $flashes = [
 ];
 $pageErrors = errors();
 $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
 ?>
 <!doctype html>
 <html lang="de">
@@ -18,19 +19,43 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 <body>
     <div class="signal-bar">
         <div class="signal-bar-inner">
-            <span class="signal-bar-label">Zentrale</span>
-            <div class="signal-bar-userzone">
+            <div class="signal-bar-main">
+                <span class="signal-bar-label">Zentrale</span>
                 <?php if (!empty($currentUser)): ?>
-                    <?php if (!empty($isImpersonating) && !empty($originalUser)): ?>
-                        <span class="signal-bar-meta">Als <?= e($currentUser['name']) ?> unterwegs</span>
-                        <form method="post" action="<?= e(url('/users/impersonate/stop')) ?>">
-                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                            <button type="submit" class="signal-bar-button">Zurück zu <?= e($originalUser['name']) ?></button>
-                        </form>
-                    <?php else: ?>
-                        <span class="signal-bar-meta">Angemeldet als <?= e($currentUser['name']) ?></span>
-                    <?php endif; ?>
+                    <form method="get" action="<?= e(url('/search')) ?>" class="signal-search">
+                        <input type="search" name="q" value="<?= e($globalSearchQuery) ?>" placeholder="Global suchen: Kontakte, Benutzer ...">
+                        <button type="submit" class="signal-bar-button"><?= icon('search') ?><span>Suchen</span></button>
+                    </form>
+                    <div class="signal-bar-actions">
+                        <?php if (can('mail.send')): ?>
+                            <form method="post" action="<?= e(url('/mail/compose-all')) ?>">
+                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                <button type="submit" class="signal-bar-button"><?= icon('mail') ?><span>Neue Mail an alle</span></button>
+                            </form>
+                        <?php endif; ?>
+                        <button type="submit" id="signalComposeSelection" form="contactSelectionForm" class="signal-bar-button" hidden><?= icon('mail') ?><span>Mail an Auswahl</span></button>
+                        <button type="button" id="signalClearSelection" class="signal-bar-button" data-select="none" hidden><?= icon('reset') ?><span>Auswahl aufheben</span></button>
+                    </div>
                 <?php endif; ?>
+            </div>
+            <div class="signal-bar-secondary">
+                <div class="signal-bar-userzone">
+                    <?php if (!empty($currentUser)): ?>
+                        <?php if (!empty($isImpersonating) && !empty($originalUser)): ?>
+                            <span class="signal-bar-meta">Als <?= e($currentUser['name']) ?> unterwegs</span>
+                            <form method="post" action="<?= e(url('/users/impersonate/stop')) ?>">
+                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                <button type="submit" class="signal-bar-button">Zurück zu <?= e($originalUser['name']) ?></button>
+                            </form>
+                        <?php else: ?>
+                            <span class="signal-bar-meta">Angemeldet als <?= e($currentUser['name']) ?></span>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+                <?php if (!empty($signalHint)): ?>
+                    <span class="signal-bar-hint"><?= e($signalHint) ?></span>
+                <?php endif; ?>
+                <span id="signalSelectionStatus" class="signal-bar-hint" hidden></span>
             </div>
         </div>
     </div>

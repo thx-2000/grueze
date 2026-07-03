@@ -40,7 +40,7 @@ final class ContactController extends BaseController
             'q' => trim((string) $request->input('q', '')),
             'category_id' => (string) $request->input('category_id', ''),
             'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
-            'sort' => (string) $request->input('sort', ''),
+            'sort' => (string) $request->input('sort', 'vorname'),
             'direction' => (string) $request->input('direction', 'asc'),
         ];
 
