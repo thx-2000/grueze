@@ -13,6 +13,7 @@ final class SettingRepository
     private ?array $brandingCache = null;
     private ?array $mailSettingsCache = null;
     private ?array $fieldVisibilityCache = null;
+    private ?array $permissionMatrixCache = null;
 
     public function __construct(private PDO $pdo)
     {
@@ -49,6 +50,7 @@ final class SettingRepository
         $this->brandingCache = null;
         $this->mailSettingsCache = null;
         $this->fieldVisibilityCache = null;
+        $this->permissionMatrixCache = null;
     }
 
     public function branding(): array
@@ -182,6 +184,44 @@ final class SettingRepository
         }
 
         return $this->fieldVisibilityCache = $result;
+    }
+
+    public function permissionDefaults(): array
+    {
+        return [
+            'contacts.manage'      => ['orga'],
+            'contacts.delete'      => ['orga'],
+            'categories.manage'    => ['orga'],
+            'contacts.export'      => [],
+            'contacts.copy_emails' => ['orga'],
+            'audit.view'           => [],
+            'users.manage'         => [],
+            'mail.send'            => ['orga'],
+            'mail.contact_single'  => ['stufenmitglied'],
+            'mail.view_log'        => ['orga'],
+            'settings.manage'      => ['orga'],
+        ];
+    }
+
+    public function permissionMatrix(): array
+    {
+        if ($this->permissionMatrixCache !== null) {
+            return $this->permissionMatrixCache;
+        }
+
+        $result = [];
+        foreach ($this->permissionDefaults() as $permission => $defaultRoles) {
+            $stored = $this->get('security_permission_' . str_replace('.', '_', $permission));
+            if ($stored !== null) {
+                $result[$permission] = $stored === ''
+                    ? []
+                    : array_values(array_filter(array_map('trim', explode(',', $stored))));
+            } else {
+                $result[$permission] = $defaultRoles;
+            }
+        }
+
+        return $this->permissionMatrixCache = $result;
     }
 
     public function mailSettings(): array

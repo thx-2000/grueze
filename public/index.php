@@ -227,6 +227,8 @@ try {
     $router->post('/settings/mail-footer', [SettingsController::class, 'updateMailFooter']);
     $router->get('/settings/visibility', [SettingsController::class, 'visibility']);
     $router->post('/settings/visibility', [SettingsController::class, 'updateVisibility']);
+    $router->get('/settings/permissions', [SettingsController::class, 'permissions']);
+    $router->post('/settings/permissions', [SettingsController::class, 'updatePermissions']);
 
     $router->dispatch(new Request());
 } catch (Throwable $exception) {

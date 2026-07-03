@@ -137,6 +137,10 @@ final class Auth
             return false;
         }
 
+        if ((string) $user['role_name'] === 'admin') {
+            return true;
+        }
+
         $visibility = $this->settings->fieldVisibility();
         if (array_key_exists($field, $visibility)) {
             return in_array((string) $user['role_name'], $visibility[$field], true);
@@ -168,6 +172,10 @@ final class Auth
             return false;
         }
 
+        if ((string) $user['role_name'] === 'admin') {
+            return true;
+        }
+
         if ($permission === 'contacts.view_private_details') {
             foreach (self::CONTACT_DETAIL_FIELDS as $field) {
                 if ($this->canViewContactField($field)) {
@@ -178,20 +186,13 @@ final class Auth
             return false;
         }
 
-        $matrix = [
-            'contacts.manage' => ['admin', 'orga'],
-            'contacts.delete' => ['admin', 'orga'],
-            'categories.manage' => ['admin', 'orga'],
-            'contacts.export' => ['admin'],
-            'contacts.copy_emails' => ['admin', 'orga'],
-            'audit.view' => ['admin'],
-            'users.manage' => ['admin'],
-            'mail.send' => ['admin', 'orga'],
-            'mail.contact_single' => ['stufenmitglied'],
-            'mail.view_log' => ['admin', 'orga'],
-            'settings.manage' => ['admin', 'orga'],
-        ];
+        $matrix = $this->settings->permissionMatrix();
+        if (array_key_exists($permission, $matrix)) {
+            return in_array((string) $user['role_name'], $matrix[$permission], true);
+        }
 
-        return in_array((string) $user['role_name'], $matrix[$permission] ?? [], true);
+        $defaults = $this->settings->permissionDefaults();
+
+        return in_array((string) $user['role_name'], $defaults[$permission] ?? [], true);
     }
 }

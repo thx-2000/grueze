@@ -256,6 +256,55 @@ final class SettingsController extends BaseController
         Redirect::to('/settings/visibility');
     }
 
+    public function permissions(): void
+    {
+        $this->requirePermission('users.manage');
+
+        $this->render('settings/permissions', [
+            'matrix' => $this->settings->permissionMatrix(),
+            'defaults' => $this->settings->permissionDefaults(),
+            'configurableRoles' => ['orga', 'stufenmitglied', 'betrachter'],
+            'permissionGroups' => [
+                'Kontakte' => [
+                    'contacts.manage'      => 'Kontakte anlegen und bearbeiten',
+                    'contacts.delete'      => 'Kontakte löschen',
+                    'categories.manage'    => 'Kategorien und Tags verwalten',
+                    'contacts.export'      => 'Kontakte als CSV exportieren',
+                    'contacts.copy_emails' => 'E-Mail-Adressen kopieren',
+                ],
+                'Mailing' => [
+                    'mail.send'           => 'Sammel-Mailings versenden',
+                    'mail.contact_single' => 'Einzelne Person über interne Kontaktfunktion kontaktieren',
+                    'mail.view_log'       => 'Versandprotokoll einsehen',
+                ],
+                'Administration' => [
+                    'users.manage'    => 'Benutzer und Admin-Einstellungen verwalten',
+                    'audit.view'      => 'Audit-Log einsehen',
+                    'settings.manage' => 'Mail-Fuß und Versanddaten bearbeiten',
+                ],
+            ],
+        ]);
+    }
+
+    public function updatePermissions(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $allPermissions = array_keys($this->settings->permissionDefaults());
+        $configurableRoles = ['orga', 'stufenmitglied', 'betrachter'];
+        $submitted = (array) $request->input('permissions', []);
+
+        foreach ($allPermissions as $permission) {
+            $roles = array_values(array_intersect((array) ($submitted[$permission] ?? []), $configurableRoles));
+            $storageKey = 'security_permission_' . str_replace('.', '_', $permission);
+            $this->settings->set($storageKey, implode(',', $roles));
+        }
+
+        flash('success', 'Berechtigungen wurden gespeichert.');
+        Redirect::to('/settings/permissions');
+    }
+
     private function isValidCssColor(string $value): bool
     {
         $value = trim($value);

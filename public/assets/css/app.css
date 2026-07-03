@@ -2307,3 +2307,16 @@ code {
         min-height: 4rem;
     }
 }
+
+.permission-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(38, 42, 32, 0.07);
+}
+
+.permission-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
