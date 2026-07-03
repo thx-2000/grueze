@@ -39,7 +39,7 @@ $loginEmail = $hasOld
     : (string) ($linkedUser['email'] ?? ($values['emails'][0]['email'] ?? ''));
 $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUser['role_id'] ?? '');
 ?>
-<section class="hero-card">
+<section class="hero-card compact-editor-shell">
     <div class="hero-row">
         <div>
             <p class="eyebrow"><?= $editing ? 'Kontakt bearbeiten' : 'Neuer Kontakt' ?></p>
@@ -53,7 +53,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <?php if ($editing): ?><input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>"><?php endif; ?>
 
-        <section class="subsection-card">
+        <section class="subsection-card compact-editor-card">
             <div class="section-head">
                 <div>
                     <h3>Persönliche Daten</h3>
@@ -101,28 +101,30 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
             </div>
         </section>
 
-        <section class="subsection-card">
-            <div class="section-head">
-                <div>
-                    <h3>Adresse und Profil</h3>
-                    <p class="muted">Postanschrift, Bild und ergänzende Hinweise.</p>
-                </div>
+        <details class="admin-drawer compact-editor-drawer">
+            <summary>
+                <span><?= icon('location') ?></span>
+                <span>Adresse, Bild und Notizen</span>
+            </summary>
+            <div class="admin-drawer-body">
+                <section class="subsection-card compact-editor-card compact-inside-drawer">
+                    <div class="form-grid">
+                        <label class="full-width"><span>Straße</span><input type="text" name="strasse" value="<?= e($values['strasse'] ?? '') ?>"></label>
+                        <label><span>PLZ</span><input type="text" name="plz" value="<?= e($values['plz'] ?? '') ?>"></label>
+                        <label><span>Ort</span><input type="text" name="ort" value="<?= e($values['ort'] ?? '') ?>"></label>
+                        <label class="full-width">
+                            <span>Profilbild</span>
+                            <input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp">
+                            <small class="field-hint">Erlaubt sind JPG, PNG und WEBP bis 2 MB.</small>
+                        </label>
+                        <label class="full-width"><span>Notizen</span><textarea name="notizen" rows="4"><?= e($values['notizen'] ?? '') ?></textarea></label>
+                    </div>
+                </section>
             </div>
-            <div class="form-grid">
-                <label class="full-width"><span>Straße</span><input type="text" name="strasse" value="<?= e($values['strasse'] ?? '') ?>"></label>
-                <label><span>PLZ</span><input type="text" name="plz" value="<?= e($values['plz'] ?? '') ?>"></label>
-                <label><span>Ort</span><input type="text" name="ort" value="<?= e($values['ort'] ?? '') ?>"></label>
-                <label class="full-width">
-                    <span>Profilbild</span>
-                    <input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp">
-                    <small class="field-hint">Erlaubt sind JPG, PNG und WEBP bis 2 MB.</small>
-                </label>
-                <label class="full-width"><span>Notizen</span><textarea name="notizen" rows="4"><?= e($values['notizen'] ?? '') ?></textarea></label>
-            </div>
-        </section>
+        </details>
 
         <div class="repeaters">
-            <section class="repeater-block">
+            <section class="repeater-block compact-editor-card">
                 <div class="section-head">
                     <div>
                         <h3>E-Mail-Adressen</h3>
@@ -153,7 +155,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                 </div>
             </section>
 
-            <section class="repeater-block">
+            <section class="repeater-block compact-editor-card">
                 <div class="section-head">
                     <div>
                         <h3>Telefonnummern</h3>
@@ -190,46 +192,48 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
         </div>
 
         <?php if (can('users.manage')): ?>
-            <section class="subsection-card">
-                <div class="section-head">
-                    <div>
-                        <h3>Login und Rolle</h3>
-                        <p class="muted">Ein Kontakt kann optional einen eigenen Zugang bekommen.</p>
-                    </div>
+            <details class="admin-drawer compact-editor-drawer">
+                <summary>
+                    <span><?= icon('user') ?></span>
+                    <span>Login und Rolle</span>
                     <?php if ($linkedUser): ?>
-                        <div class="account-badge<?= (int) $linkedUser['is_active'] === 1 ? ' is-active' : '' ?>">
+                        <span class="account-badge<?= (int) $linkedUser['is_active'] === 1 ? ' is-active' : '' ?>">
                             <?= (int) $linkedUser['is_active'] === 1 ? 'Login aktiv' : 'Login deaktiviert' ?>
+                        </span>
+                    <?php endif; ?>
+                </summary>
+                <div class="admin-drawer-body">
+                    <section class="subsection-card compact-editor-card compact-inside-drawer">
+                        <div class="account-panel">
+                            <label class="toggle-row">
+                                <input type="checkbox" name="login_enabled" value="1" <?= $loginEnabled ? 'checked' : '' ?>>
+                                    <span>Diesen Kontakt mit Login freischalten</span>
+                                </label>
+                            <div class="form-grid">
+                                <label>
+                                    <span>Login-E-Mail</span>
+                                    <input type="email" name="login_email" value="<?= e($loginEmail) ?>" placeholder="wird auch für Passwort-Reset verwendet">
+                                </label>
+                                <label>
+                                    <span>Rolle</span>
+                                    <select name="role_id">
+                                        <option value="">Rolle wählen</option>
+                                        <?php foreach ($roles as $role): ?>
+                                            <option value="<?= e((string) $role['id']) ?>" <?= $roleId === (string) $role['id'] ? 'selected' : '' ?>>
+                                                <?= e($role['name']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </label>
+                            </div>
+                            <p class="field-hint">Beim ersten Anlegen wird automatisch ein Erstpasswort erzeugt und nach dem Speichern eingeblendet.</p>
+                            <?php if ($linkedUser): ?>
+                                <p class="field-hint">Aktuell verknüpft: <?= e($linkedUser['email']) ?> als <?= e($linkedUser['role_name']) ?>.</p>
+                            <?php endif; ?>
                         </div>
-                    <?php endif; ?>
+                    </section>
                 </div>
-                <div class="account-panel">
-                    <label class="toggle-row">
-                        <input type="checkbox" name="login_enabled" value="1" <?= $loginEnabled ? 'checked' : '' ?>>
-                            <span>Diesen Kontakt mit Login freischalten</span>
-                        </label>
-                    <div class="form-grid">
-                        <label>
-                            <span>Login-E-Mail</span>
-                            <input type="email" name="login_email" value="<?= e($loginEmail) ?>" placeholder="wird auch für Passwort-Reset verwendet">
-                        </label>
-                        <label>
-                            <span>Rolle</span>
-                            <select name="role_id">
-                                <option value="">Rolle wählen</option>
-                                <?php foreach ($roles as $role): ?>
-                                    <option value="<?= e((string) $role['id']) ?>" <?= $roleId === (string) $role['id'] ? 'selected' : '' ?>>
-                                        <?= e($role['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </label>
-                    </div>
-                    <p class="field-hint">Beim ersten Anlegen wird automatisch ein Erstpasswort erzeugt und nach dem Speichern eingeblendet.</p>
-                    <?php if ($linkedUser): ?>
-                        <p class="field-hint">Aktuell verknüpft: <?= e($linkedUser['email']) ?> als <?= e($linkedUser['role_name']) ?>.</p>
-                    <?php endif; ?>
-                </div>
-            </section>
+            </details>
         <?php endif; ?>
 
         <div class="form-actions">

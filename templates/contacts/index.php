@@ -33,9 +33,6 @@ $canSendRegularMail = can('mail.send');
 $canSendSingleContactMail = can('mail.contact_single');
 $isMemberCompactView = $canSendSingleContactMail && !can('contacts.manage');
 $isStaffCompactView = !$isMemberCompactView;
-$hasAdvancedFiltersActive = $activeTagIds !== []
-    || ($filters['sort'] ?? 'nachname') !== 'nachname'
-    || ($filters['direction'] ?? 'asc') !== 'asc';
 $contactWithEmailCount = 0;
 $contactWithoutEmailCount = 0;
 foreach ($contacts as $contact) {
@@ -123,7 +120,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                 <a class="ghost-button" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>">CSV exportieren</a>
             <?php endif; ?>
         </div>
-        <details class="admin-drawer filter-drawer"<?= $hasAdvancedFiltersActive ? ' open' : '' ?>>
+        <details class="admin-drawer filter-drawer">
             <summary>
                 <span><?= icon('sliders') ?></span>
                 <span>Weitere Filter</span>

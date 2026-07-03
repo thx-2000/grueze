@@ -625,6 +625,19 @@ label span {
     padding: 0.88rem 0.92rem;
 }
 
+.compact-editor-drawer {
+    margin-top: 0;
+}
+
+.compact-editor-card {
+    padding: 0.78rem 0.84rem;
+}
+
+.compact-inside-drawer {
+    margin: 0;
+    background: rgba(246, 248, 240, 0.92);
+}
+
 .compact-action {
     padding: 0.4rem 0.62rem;
     font-size: 0.84rem;
@@ -1016,6 +1029,11 @@ label span {
     gap: 0.88rem;
 }
 
+.compact-editor-shell {
+    display: grid;
+    gap: 0.82rem;
+}
+
 .repeaters {
     display: grid;
     gap: 0.88rem;
@@ -1033,8 +1051,8 @@ label span {
     display: grid;
     gap: 0.75rem;
     grid-template-columns: 1fr 2fr auto;
-    margin-top: 0.65rem;
-    padding: 0.72rem;
+    margin-top: 0.52rem;
+    padding: 0.62rem;
     border-radius: var(--radius-sm);
     background: rgba(234, 239, 224, 0.94);
 }
@@ -1204,8 +1222,8 @@ label span {
 
 .account-panel {
     display: grid;
-    gap: 1rem;
-    padding: 0.88rem;
+    gap: 0.82rem;
+    padding: 0.76rem;
     border-radius: var(--radius-sm);
     background: rgba(239, 244, 229, 0.9);
     border: 1px solid rgba(38, 42, 32, 0.08);
@@ -1293,6 +1311,16 @@ label span {
     border-radius: var(--radius-md);
     border: 1px solid rgba(38, 42, 32, 0.08);
     background: rgba(245, 248, 237, 0.96);
+}
+
+.compact-user-form {
+    gap: 0.72rem;
+}
+
+.compact-users-table th,
+.compact-users-table td {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
 }
 
 table {

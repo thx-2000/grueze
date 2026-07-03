@@ -1,30 +1,47 @@
-<section class="hero-card">
-    <p class="eyebrow">Benutzerverwaltung</p>
-    <h2>Accounts für euer Team</h2>
-    <p class="muted">Neue Accounts erhalten ein einmalig angezeigtes Erstpasswort. Für Kontakte ist der bequemere Weg jetzt direkt im Kontaktformular.</p>
-
-    <form method="post" action="<?= e(url('/users/store')) ?>" class="form-grid">
-        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <label><span>Name</span><input type="text" name="name" required></label>
-        <label><span>E-Mail</span><input type="email" name="email" required></label>
-        <label>
-            <span>Rolle</span>
-            <select name="role_id" required>
-                <?php foreach ($roles as $role): ?>
-                    <option value="<?= e((string) $role['id']) ?>"><?= e($role['name']) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-        <div class="form-actions">
-            <button type="submit">Benutzer anlegen</button>
+<section class="hero-card compact-editor-shell">
+    <div class="hero-row">
+        <div>
+            <p class="eyebrow">Benutzerverwaltung</p>
+            <h2>Accounts für euer Team</h2>
+            <p class="muted">Neue Accounts erhalten ein einmalig angezeigtes Erstpasswort. Für Kontakte ist der bequemere Weg jetzt direkt im Kontaktformular.</p>
         </div>
-    </form>
+    </div>
+
+    <details class="admin-drawer compact-editor-drawer">
+        <summary>
+            <span><?= icon('plus') ?></span>
+            <span>Benutzer anlegen</span>
+        </summary>
+        <div class="admin-drawer-body">
+            <form method="post" action="<?= e(url('/users/store')) ?>" class="form-grid compact-user-form">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <label><span>Name</span><input type="text" name="name" required></label>
+                <label><span>E-Mail</span><input type="email" name="email" required></label>
+                <label>
+                    <span>Rolle</span>
+                    <select name="role_id" required>
+                        <?php foreach ($roles as $role): ?>
+                            <option value="<?= e((string) $role['id']) ?>"><?= e($role['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <div class="form-actions">
+                    <button type="submit">Benutzer anlegen</button>
+                </div>
+            </form>
+        </div>
+    </details>
 </section>
 
-<section class="panel">
-    <h3>Bestehende Accounts</h3>
+<section class="panel compact-editor-shell">
+    <div class="panel-head">
+        <div>
+            <h3>Bestehende Accounts</h3>
+            <p class="muted">Rolle, Status und letzter Login in einer kompakten Übersicht.</p>
+        </div>
+    </div>
     <div class="table-wrap">
-        <table>
+        <table class="compact-users-table">
             <thead>
                 <tr>
                     <th>Name</th>
