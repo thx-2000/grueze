@@ -337,7 +337,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                     <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
                                         <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
                                     <?php endif; ?>
-                                    <?php if (($contact['emails'] ?? []) === []): ?>
+                                    <?php if (($contact['emails'] ?? []) === [] && !$visibleContactFields['emails']): ?>
                                         <span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span>
                                     <?php endif; ?>
                                 </div>
@@ -364,11 +364,15 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             <?php endif; ?>
                             <?php if ($visibleContactFields['emails']): ?>
                                 <td data-col="emails">
-                                    <div class="table-stack">
-                                        <?php foreach ($contact['emails'] as $email): ?>
-                                            <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e($email['email']) ?></a>
-                                        <?php endforeach; ?>
-                                    </div>
+                                    <?php if ($contact['emails'] !== []): ?>
+                                        <div class="table-stack">
+                                            <?php foreach ($contact['emails'] as $email): ?>
+                                                <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e($email['email']) ?></a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span>
+                                    <?php endif; ?>
                                 </td>
                             <?php endif; ?>
                             <?php if ($visibleContactFields['phones']): ?>
@@ -419,7 +423,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                 <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
                                     <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
                                 <?php endif; ?>
-                                <?php if (($contact['emails'] ?? []) === []): ?>
+                                <?php if (($contact['emails'] ?? []) === [] && !$visibleContactFields['emails']): ?>
                                     <span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span>
                                 <?php endif; ?>
                             </div>
@@ -460,7 +464,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                         <?php endforeach; ?>
                                     </ul>
                                 <?php else: ?>
-                                    <p class="missing-contact-value"><?= icon('mail-off') ?><span>–</span></p>
+                                    <p class="missing-contact-value"><span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span></p>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
