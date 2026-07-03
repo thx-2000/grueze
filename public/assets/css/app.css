@@ -1518,6 +1518,35 @@ label span {
     padding-bottom: 0.5rem;
 }
 
+.table-sort-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    padding: 0;
+    background: transparent;
+    color: inherit !important;
+    border: 0;
+    box-shadow: none;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.table-sort-button::after {
+    content: '↕';
+    font-size: 0.72rem;
+    color: var(--color-muted);
+}
+
+.table-sort-button.is-asc::after {
+    content: '↑';
+    color: var(--color-primary-strong);
+}
+
+.table-sort-button.is-desc::after {
+    content: '↓';
+    color: var(--color-primary-strong);
+}
+
 .compact-users-table .users-action-col {
     position: sticky;
     right: 0;
@@ -1575,6 +1604,7 @@ label span {
 .user-admin-actions .ghost-button {
     width: auto;
     justify-content: flex-start;
+    min-height: 2.35rem;
 }
 
 .compact-user-password-drawer {
@@ -1583,7 +1613,14 @@ label span {
 }
 
 .compact-user-password-drawer summary {
-    padding: 0.56rem 0.68rem;
+    padding: 0.48rem 0.78rem;
+    min-height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border-radius: var(--radius-sm);
+    background: rgba(250, 252, 244, 0.96);
+    border: 1px solid rgba(38, 42, 32, 0.12);
     font-size: 0.82rem;
 }
 
@@ -1593,6 +1630,54 @@ label span {
 
 .compact-user-password-drawer input {
     background: rgba(250, 252, 244, 0.98);
+}
+
+.table-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.26rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    border: 1px solid transparent;
+    text-transform: capitalize;
+}
+
+.status-badge-active {
+    background: rgba(36, 143, 111, 0.12);
+    color: #1f6f58;
+    border-color: rgba(36, 143, 111, 0.18);
+}
+
+.status-badge-inactive {
+    background: rgba(182, 69, 33, 0.1);
+    color: #9e3d20;
+    border-color: rgba(182, 69, 33, 0.18);
+}
+
+.role-badge-admin {
+    background: rgba(45, 49, 40, 0.1);
+    color: #23261f;
+    border-color: rgba(45, 49, 40, 0.15);
+}
+
+.role-badge-orga {
+    background: rgba(229, 255, 58, 0.2);
+    color: #4a4f18;
+    border-color: rgba(191, 217, 27, 0.32);
+}
+
+.role-badge-stufenmitglied {
+    background: rgba(230, 235, 222, 0.92);
+    color: #4d5344;
+    border-color: rgba(136, 146, 124, 0.2);
+}
+
+.role-badge-betrachter {
+    background: rgba(241, 243, 237, 0.98);
+    color: #666d5d;
+    border-color: rgba(156, 163, 149, 0.2);
 }
 
 table {
@@ -1966,6 +2051,18 @@ code {
         padding: 1.05rem;
     }
 
+    .signal-bar-inner {
+        font-size: 0.7rem;
+    }
+
+    .signal-bar-label {
+        font-size: 0.82rem;
+    }
+
+    .signal-search input {
+        padding: 0.38rem 0.62rem;
+    }
+
     .view-toggle {
         width: 100%;
         justify-content: space-between;
@@ -1983,6 +2080,90 @@ code {
     .contact-card {
         padding: 0.78rem;
         gap: 0.64rem;
+    }
+
+    .compact-users-table,
+    .compact-users-table thead,
+    .compact-users-table tbody,
+    .compact-users-table th,
+    .compact-users-table td,
+    .compact-users-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .compact-users-table thead {
+        display: none;
+    }
+
+    .compact-users-table tbody {
+        display: grid;
+        gap: 0.72rem;
+        padding: 0.7rem;
+    }
+
+    .compact-users-table tr[data-user-row] {
+        border: 1px solid rgba(38, 42, 32, 0.08);
+        border-radius: var(--radius-md);
+        background: rgba(248, 250, 242, 0.98);
+        overflow: hidden;
+    }
+
+    .compact-users-table tr[data-user-row] td {
+        display: grid;
+        grid-template-columns: minmax(7.8rem, 42%) 1fr;
+        gap: 0.65rem;
+        padding: 0.55rem 0.72rem;
+        border-bottom: 1px solid rgba(38, 42, 32, 0.06);
+        background: transparent;
+    }
+
+    .compact-users-table tr[data-user-row] td::before {
+        content: attr(data-label);
+        color: var(--color-muted);
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+
+    .compact-users-table tr[data-user-row] td:last-child {
+        border-bottom: 0;
+    }
+
+    .compact-users-table .users-action-col {
+        position: static;
+        width: 100%;
+        text-align: left;
+        box-shadow: none;
+    }
+
+    .compact-users-table .users-action-col .users-more-button {
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+    }
+
+    .user-detail-row td {
+        padding-top: 0;
+    }
+
+    .user-admin-actions {
+        padding: 0.7rem;
+    }
+
+    .user-admin-actions .compact-action,
+    .user-admin-actions .danger-button,
+    .user-admin-actions .ghost-button,
+    .compact-user-password-drawer {
+        width: 100%;
+    }
+
+    .compact-user-password-drawer summary {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    body {
+        overflow-x: hidden;
     }
 
     .privacy-note.is-authenticated .privacy-note-shell {

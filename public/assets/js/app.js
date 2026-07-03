@@ -378,6 +378,81 @@ document.querySelectorAll('[data-user-toggle]').forEach((button) => {
     });
 });
 
+const usersTableBody = document.querySelector('[data-users-table-body]');
+if (usersTableBody) {
+    let activeUserSort = { key: 'name', direction: 'asc' };
+
+    const readUserSortValue = (row, key) => row.dataset[`sort${key.charAt(0).toUpperCase()}${key.slice(1)}`] || '';
+
+    const compareUserRows = (rowA, rowB, key, direction) => {
+        const rawA = readUserSortValue(rowA, key);
+        const rawB = readUserSortValue(rowB, key);
+
+        let result = 0;
+        if (key === 'passkeys' || key === 'status') {
+            result = Number(rawA) - Number(rawB);
+        } else if (key === 'login') {
+            const timeA = rawA ? Date.parse(rawA) : 0;
+            const timeB = rawB ? Date.parse(rawB) : 0;
+            result = timeA - timeB;
+        } else {
+            result = rawA.localeCompare(rawB, 'de', { sensitivity: 'base', numeric: true });
+        }
+
+        return direction === 'asc' ? result : result * -1;
+    };
+
+    const applyUserSortIndicators = () => {
+        document.querySelectorAll('[data-user-sort]').forEach((button) => {
+            button.classList.remove('is-asc', 'is-desc');
+            if (button.dataset.userSort === activeUserSort.key) {
+                button.classList.add(activeUserSort.direction === 'asc' ? 'is-asc' : 'is-desc');
+            }
+        });
+    };
+
+    const sortUsersTable = () => {
+        const pairs = [...usersTableBody.querySelectorAll('[data-user-row]')].map((row) => ({
+            row,
+            detail: document.getElementById(`user-actions-${row.id.replace('user-', '')}`),
+        }));
+
+        pairs.sort((pairA, pairB) => compareUserRows(pairA.row, pairB.row, activeUserSort.key, activeUserSort.direction));
+
+        pairs.forEach(({ row, detail }) => {
+            usersTableBody.appendChild(row);
+            if (detail) {
+                detail.hidden = true;
+                usersTableBody.appendChild(detail);
+            }
+        });
+
+        document.querySelectorAll('[data-user-toggle]').forEach((button) => {
+            button.setAttribute('aria-expanded', 'false');
+        });
+
+        applyUserSortIndicators();
+    };
+
+    document.querySelectorAll('[data-user-sort]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const key = button.dataset.userSort;
+            if (!key) {
+                return;
+            }
+
+            activeUserSort = {
+                key,
+                direction: activeUserSort.key === key && activeUserSort.direction === 'asc' ? 'desc' : 'asc',
+            };
+
+            sortUsersTable();
+        });
+    });
+
+    sortUsersTable();
+}
+
 function base64urlToBytes(value) {
     const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
     const padded = normalized + '='.repeat((4 - (normalized.length % 4 || 4)) % 4);

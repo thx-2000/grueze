@@ -44,29 +44,45 @@
         <table class="compact-users-table">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Verknüpfter Kontakt</th>
-                    <th>E-Mail</th>
-                    <th>Rolle</th>
-                    <th>Status</th>
-                    <th>Passkeys</th>
-                    <th>Letzter Login</th>
+                    <th><button type="button" class="table-sort-button" data-user-sort="name">Name</button></th>
+                    <th><button type="button" class="table-sort-button" data-user-sort="contact">Verknüpfter Kontakt</button></th>
+                    <th><button type="button" class="table-sort-button" data-user-sort="email">E-Mail</button></th>
+                    <th><button type="button" class="table-sort-button" data-user-sort="role">Rolle</button></th>
+                    <th><button type="button" class="table-sort-button" data-user-sort="status">Status</button></th>
+                    <th><button type="button" class="table-sort-button" data-user-sort="passkeys">Passkeys</button></th>
+                    <th><button type="button" class="table-sort-button" data-user-sort="login">Letzter Login</button></th>
                     <?php if ($canImpersonateUsers): ?><th class="users-action-col">Verwaltung</th><?php endif; ?>
                 </tr>
             </thead>
-            <tbody>
+            <tbody data-users-table-body>
                 <?php foreach ($users as $user): ?>
                     <?php $passkeyCount = (int) ($passkeyCounts[(int) $user['id']] ?? 0); ?>
-                    <tr id="user-<?= e((string) $user['id']) ?>">
-                        <td><?= e($user['name']) ?></td>
-                        <td><?= e(trim(($user['vorname'] ?? '') . ' ' . ($user['nachname'] ?? '')) ?: 'Keiner') ?></td>
-                        <td><?= e($user['email']) ?></td>
-                        <td><?= e($user['role_name']) ?></td>
-                        <td><?= (int) $user['is_active'] === 1 ? 'Aktiv' : 'Inaktiv' ?></td>
-                        <td><?= $passkeyCount > 0 ? e((string) $passkeyCount) : '–' ?></td>
-                        <td><?= e($user['last_login_at'] ? format_datetime($user['last_login_at']) : 'Noch nie') ?></td>
+                    <?php
+                        $linkedContact = trim(($user['vorname'] ?? '') . ' ' . ($user['nachname'] ?? '')) ?: 'Keiner';
+                        $statusLabel = (int) $user['is_active'] === 1 ? 'Aktiv' : 'Inaktiv';
+                        $loginLabel = $user['last_login_at'] ? format_datetime($user['last_login_at']) : 'Noch nie';
+                        $loginSort = $user['last_login_at'] ?: '';
+                    ?>
+                    <tr
+                        id="user-<?= e((string) $user['id']) ?>"
+                        data-user-row
+                        data-sort-name="<?= e(mb_strtolower((string) $user['name'])) ?>"
+                        data-sort-contact="<?= e(mb_strtolower($linkedContact)) ?>"
+                        data-sort-email="<?= e(mb_strtolower((string) $user['email'])) ?>"
+                        data-sort-role="<?= e(mb_strtolower((string) $user['role_name'])) ?>"
+                        data-sort-status="<?= e((string) ((int) $user['is_active'])) ?>"
+                        data-sort-passkeys="<?= e((string) $passkeyCount) ?>"
+                        data-sort-login="<?= e($loginSort) ?>"
+                    >
+                        <td data-label="Name"><?= e($user['name']) ?></td>
+                        <td data-label="Verknüpfter Kontakt"><?= e($linkedContact) ?></td>
+                        <td data-label="E-Mail"><?= e($user['email']) ?></td>
+                        <td data-label="Rolle"><span class="table-badge role-badge role-badge-<?= e((string) $user['role_name']) ?>"><?= e($user['role_name']) ?></span></td>
+                        <td data-label="Status"><span class="table-badge status-badge status-badge-<?= (int) $user['is_active'] === 1 ? 'active' : 'inactive' ?>"><?= $statusLabel ?></span></td>
+                        <td data-label="Passkeys"><?= $passkeyCount > 0 ? e((string) $passkeyCount) : '–' ?></td>
+                        <td data-label="Letzter Login"><?= e($loginLabel) ?></td>
                         <?php if ($canImpersonateUsers): ?>
-                            <td class="users-action-col">
+                            <td class="users-action-col" data-label="Verwaltung">
                                 <button
                                     type="button"
                                     class="ghost-button icon-button users-more-button"
@@ -82,7 +98,7 @@
                         <?php endif; ?>
                     </tr>
                     <?php if ($canImpersonateUsers): ?>
-                        <tr id="user-actions-<?= e((string) $user['id']) ?>" class="user-detail-row" hidden>
+                        <tr id="user-actions-<?= e((string) $user['id']) ?>" class="user-detail-row" data-user-detail-row hidden>
                             <td colspan="8" class="user-detail-cell">
                                 <div class="user-admin-actions">
                                     <?php if ((int) $user['id'] === $currentUserId): ?>

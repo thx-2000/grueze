@@ -176,7 +176,7 @@ final class Auth
             'contacts.manage' => ['admin', 'orga'],
             'contacts.delete' => ['admin', 'orga'],
             'categories.manage' => ['admin', 'orga'],
-            'contacts.export' => ['admin', 'orga'],
+            'contacts.export' => ['admin'],
             'contacts.copy_emails' => ['admin', 'orga'],
             'audit.view' => ['admin'],
             'users.manage' => ['admin'],
