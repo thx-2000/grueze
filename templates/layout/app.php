@@ -20,7 +20,7 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
     <div class="signal-bar">
         <div class="signal-bar-inner">
             <div class="signal-bar-main">
-                <span class="signal-bar-label">Zentrale</span>
+                <a class="signal-bar-label" href="<?= e(url('/')) ?>">Zentrale</a>
                 <?php if (!empty($currentUser)): ?>
                     <form method="get" action="<?= e(url('/search')) ?>" class="signal-search">
                         <input type="search" name="q" value="<?= e($globalSearchQuery) ?>" placeholder="Global suchen: Kontakte, Benutzer ...">
@@ -32,7 +32,7 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
                 <div class="signal-bar-userzone">
                     <?php if (!empty($currentUser)): ?>
                         <?php if (!empty($isImpersonating) && !empty($originalUser)): ?>
-                            <span class="signal-bar-meta">Als <?= e($currentUser['name']) ?> unterwegs</span>
+                            <span class="signal-bar-meta">Angemeldet als <?= e($currentUser['name']) ?></span>
                             <form method="post" action="<?= e(url('/users/impersonate/stop')) ?>">
                                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                                 <button type="submit" class="signal-bar-button">Zurück zu <?= e($originalUser['name']) ?></button>
@@ -65,14 +65,14 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
     </div>
     <div class="page-shell">
         <aside class="sidebar">
-            <div class="sidebar-brand">
-                <div class="brand-mark">GRUEZE</div>
+            <a class="sidebar-brand" href="<?= e(url('/')) ?>">
+                <span class="brand-mark">GRUEZE</span>
                 <div>
                     <p class="eyebrow">Abi-Stufe</p>
                     <h1><?= e(config('app.name', 'Abi Adress Zentrale')) ?></h1>
                     <p class="muted sidebar-copy">Kontakte, Mailings und Organisation an einem Ort.</p>
                 </div>
-            </div>
+            </a>
             <?php if (!empty($currentUser)): ?>
                 <nav class="nav">
                     <?php if (($currentUser['role_name'] ?? '') === 'stufenmitglied'): ?>
@@ -101,7 +101,7 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
             <header class="content-topbar">
                 <div>
                     <p class="eyebrow">Arbeitsbereich</p>
-                    <h2 class="topbar-title"><?= e(config('app.name', 'Abi Adress Zentrale')) ?></h2>
+                    <h2 class="topbar-title"><a href="<?= e(url('/')) ?>"><?= e(config('app.name', 'Abi Adress Zentrale')) ?></a></h2>
                 </div>
             </header>
             <?php foreach ($flashes as $type => $message): ?>

@@ -163,7 +163,7 @@ final class Auth
             'categories.manage' => ['admin', 'orga'],
             'contacts.export' => ['admin', 'orga'],
             'contacts.copy_emails' => ['admin', 'orga'],
-            'audit.view' => ['admin', 'orga'],
+            'audit.view' => ['admin'],
             'users.manage' => ['admin'],
             'mail.send' => ['admin', 'orga'],
             'mail.contact_single' => ['stufenmitglied'],
