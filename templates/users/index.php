@@ -37,7 +37,7 @@
     <div class="panel-head">
         <div>
             <h3>Bestehende Accounts</h3>
-            <p class="muted">Rolle, Status und letzter Login in einer kompakten Übersicht.</p>
+            <p class="muted">Rolle, Status und letzter Login in einer kompakten Übersicht. Ganz rechts kannst du testweise in ein anderes Konto wechseln.</p>
         </div>
     </div>
     <div class="table-wrap">
@@ -50,7 +50,7 @@
                     <th>Rolle</th>
                     <th>Status</th>
                     <th>Letzter Login</th>
-                    <?php if ($canImpersonateUsers): ?><th>Aktion</th><?php endif; ?>
+                    <?php if ($canImpersonateUsers): ?><th class="users-action-col">Anmelden als</th><?php endif; ?>
                 </tr>
             </thead>
             <tbody>
@@ -63,7 +63,7 @@
                         <td><?= (int) $user['is_active'] === 1 ? 'Aktiv' : 'Inaktiv' ?></td>
                         <td><?= e($user['last_login_at'] ? format_datetime($user['last_login_at']) : 'Noch nie') ?></td>
                         <?php if ($canImpersonateUsers): ?>
-                            <td>
+                            <td class="users-action-col">
                                 <?php if ((int) $user['id'] === $currentUserId): ?>
                                     <span class="muted">Aktuelle Sitzung</span>
                                 <?php elseif ((int) $user['id'] === $originalUserId): ?>

@@ -26,16 +26,6 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
                         <input type="search" name="q" value="<?= e($globalSearchQuery) ?>" placeholder="Global suchen: Kontakte, Benutzer ...">
                         <button type="submit" class="signal-bar-button"><?= icon('search') ?><span>Suchen</span></button>
                     </form>
-                    <div class="signal-bar-actions">
-                        <?php if (can('mail.send')): ?>
-                            <form method="post" action="<?= e(url('/mail/compose-all')) ?>">
-                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                <button type="submit" class="signal-bar-button"><?= icon('mail') ?><span>Neue Mail an alle</span></button>
-                            </form>
-                        <?php endif; ?>
-                        <button type="submit" id="signalComposeSelection" form="contactSelectionForm" class="signal-bar-button" hidden><?= icon('mail') ?><span>Mail an Auswahl</span></button>
-                        <button type="button" id="signalClearSelection" class="signal-bar-button" data-select="none" hidden><?= icon('reset') ?><span>Auswahl aufheben</span></button>
-                    </div>
                 <?php endif; ?>
             </div>
             <div class="signal-bar-secondary">
@@ -52,10 +42,24 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
                         <?php endif; ?>
                     <?php endif; ?>
                 </div>
-                <?php if (!empty($signalHint)): ?>
-                    <span class="signal-bar-hint"><?= e($signalHint) ?></span>
+                <?php if (!empty($currentUser)): ?>
+                    <div class="signal-bar-tools">
+                        <?php if (!empty($signalHint)): ?>
+                            <span class="signal-bar-hint"><?= e($signalHint) ?></span>
+                        <?php endif; ?>
+                        <span id="signalSelectionStatus" class="signal-bar-hint" hidden></span>
+                        <div class="signal-bar-actions">
+                            <?php if (can('mail.send')): ?>
+                                <form method="post" action="<?= e(url('/mail/compose-all')) ?>">
+                                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                    <button type="submit" class="signal-bar-button"><?= icon('mail') ?><span>Neue Mail an alle</span></button>
+                                </form>
+                            <?php endif; ?>
+                            <button type="submit" id="signalComposeSelection" form="contactSelectionForm" class="signal-bar-button" hidden><?= icon('mail') ?><span>Mail an Auswahl</span></button>
+                            <button type="button" id="signalClearSelection" class="signal-bar-button" data-select="none" hidden><?= icon('reset') ?><span>Auswahl aufheben</span></button>
+                        </div>
+                    </div>
                 <?php endif; ?>
-                <span id="signalSelectionStatus" class="signal-bar-hint" hidden></span>
             </div>
         </div>
     </div>
