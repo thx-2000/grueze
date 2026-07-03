@@ -212,6 +212,10 @@ document.querySelectorAll('[data-add-row]').forEach((button) => {
 attachRemoveHandlers();
 
 if (contactsViewRoot) {
+    document.querySelectorAll('[data-contact-checkbox]').forEach((checkbox) => {
+        checkbox.checked = false;
+    });
+
     let savedView = null;
     try {
         savedView = window.localStorage.getItem(contactsViewStorageKey);
