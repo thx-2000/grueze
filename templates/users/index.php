@@ -67,6 +67,23 @@
                         <td><?= e($user['last_login_at'] ? format_datetime($user['last_login_at']) : 'Noch nie') ?></td>
                         <?php if ($canImpersonateUsers): ?>
                             <td class="users-action-col">
+                                <button
+                                    type="button"
+                                    class="ghost-button icon-button users-more-button"
+                                    data-user-toggle="<?= e((string) $user['id']) ?>"
+                                    aria-expanded="false"
+                                    aria-controls="user-actions-<?= e((string) $user['id']) ?>"
+                                    title="Aktionen anzeigen"
+                                >
+                                    <?= icon('more') ?>
+                                    <span class="visually-hidden">Aktionen anzeigen</span>
+                                </button>
+                            </td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php if ($canImpersonateUsers): ?>
+                        <tr id="user-actions-<?= e((string) $user['id']) ?>" class="user-detail-row" hidden>
+                            <td colspan="8" class="user-detail-cell">
                                 <div class="user-admin-actions">
                                     <?php if ((int) $user['id'] === $currentUserId): ?>
                                         <a class="ghost-button compact-action" href="<?= e(url('/account')) ?>"><?= icon('user') ?><span>Mein Konto</span></a>
@@ -123,8 +140,8 @@
                                     </details>
                                 </div>
                             </td>
-                        <?php endif; ?>
-                    </tr>
+                        </tr>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </tbody>
         </table>

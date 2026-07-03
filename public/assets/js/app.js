@@ -356,6 +356,28 @@ if (subjectPreview && subjectField && subjectPrefixField) {
     updateSubjectPreview();
 }
 
+document.querySelectorAll('[data-user-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const targetId = button.dataset.userToggle;
+        const targetRow = document.getElementById(`user-actions-${targetId}`);
+        if (!targetRow) {
+            return;
+        }
+
+        const willOpen = targetRow.hidden;
+
+        document.querySelectorAll('.user-detail-row').forEach((row) => {
+            row.hidden = true;
+        });
+        document.querySelectorAll('[data-user-toggle]').forEach((toggleButton) => {
+            toggleButton.setAttribute('aria-expanded', 'false');
+        });
+
+        targetRow.hidden = !willOpen;
+        button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+});
+
 function base64urlToBytes(value) {
     const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
     const padded = normalized + '='.repeat((4 - (normalized.length % 4 || 4)) % 4);

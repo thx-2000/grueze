@@ -1514,8 +1514,8 @@ label span {
 
 .compact-users-table th,
 .compact-users-table td {
-    padding-top: 0.6rem;
-    padding-bottom: 0.6rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 
 .compact-users-table .users-action-col {
@@ -1523,16 +1523,42 @@ label span {
     right: 0;
     z-index: 1;
     background: rgba(245, 248, 237, 0.98);
+    width: 4rem;
+    text-align: right;
 }
 
 .compact-users-table tbody .users-action-col {
     box-shadow: -10px 0 14px rgba(240, 243, 237, 0.95);
 }
 
+.users-more-button {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    height: 2.2rem;
+    padding: 0;
+    justify-content: center;
+}
+
+.user-detail-row[hidden] {
+    display: none;
+}
+
+.user-detail-row td {
+    padding: 0;
+    background: rgba(245, 248, 237, 0.98);
+}
+
+.user-detail-cell {
+    border-bottom: 1px solid var(--color-border);
+}
+
 .user-admin-actions {
-    display: grid;
-    gap: 0.45rem;
-    min-width: 13.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    align-items: flex-start;
+    padding: 0.7rem 0.75rem 0.85rem;
+    background: rgba(236, 241, 226, 0.92);
 }
 
 .user-admin-actions form,
@@ -1540,15 +1566,20 @@ label span {
     margin: 0;
 }
 
+.user-admin-actions > .muted {
+    padding: 0.48rem 0.15rem;
+}
+
 .user-admin-actions .compact-action,
 .user-admin-actions .danger-button,
 .user-admin-actions .ghost-button {
-    width: 100%;
+    width: auto;
     justify-content: flex-start;
 }
 
 .compact-user-password-drawer {
     background: rgba(246, 248, 240, 0.92);
+    min-width: 15rem;
 }
 
 .compact-user-password-drawer summary {
