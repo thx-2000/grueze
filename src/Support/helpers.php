@@ -147,6 +147,9 @@ function icon(string $name): string
         'globe' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20a10 10 0 0 1 0-20Zm6.9 9h-3.1a15 15 0 0 0-1.4-5.1A8.03 8.03 0 0 1 18.9 11ZM12 4.1c-.8 1-1.9 3.3-2.2 6h4.4c-.3-2.7-1.4-5-2.2-6ZM9.6 5.9A15 15 0 0 0 8.2 11H5.1a8.03 8.03 0 0 1 4.5-5.1ZM5.1 13h3.1a15 15 0 0 0 1.4 5.1A8.03 8.03 0 0 1 5.1 13Zm6.9 6c.8-1 1.9-3.3 2.2-6H9.8c.3 2.7 1.4 5 2.2 6Zm2.4-.9a15 15 0 0 0 1.4-5.1h3.1a8.03 8.03 0 0 1-4.5 5.1Z"/></svg>',
         'cake' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5c.7-.8 1-1.5 1-2.2c0-.8-.4-1.5-1-2.3c-.6.8-1 1.5-1 2.3c0 .7.3 1.4 1 2.2ZM6 10h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V10Zm13-2H5V6h4l1 1h4l1-1h4v2Z"/></svg>',
         'trash' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm1 7h2v8h-2v-8Zm4 0h2v8h-2v-8ZM7 10h2v8H7v-8Z"/></svg>',
+        'lock' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2 0h6V8a3 3 0 1 0-6 0v2Zm3 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z"/></svg>',
+        'unlock' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 10h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h9V8a3 3 0 0 0-5.8-1H7.13A5 5 0 0 1 17 8v2Zm-5 4a2 2 0 0 1 1 3.73V19h-2v-1.27A2 2 0 0 1 12 14Z"/></svg>',
+        'key' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3a7 7 0 1 1-5.92 10.73L3 18.81V21h2.19l1.5-1.5h2.12l1.5-1.5h2.12l1.52-1.52A6.97 6.97 0 0 1 14 3Zm0 2a5 5 0 1 0 0 10a5 5 0 0 0 0-10Zm1 3a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Z"/></svg>',
     ];
 
     $svg = $icons[$name] ?? '';

@@ -108,7 +108,8 @@ try {
     Container::factory(UserController::class, static fn () => new UserController(
         Container::get(Auth::class),
         Container::get(UserRepository::class),
-        Container::get(LogRepository::class)
+        Container::get(LogRepository::class),
+        Container::get(PasswordResetService::class)
     ));
     Container::factory(SetupController::class, static fn () => new SetupController(
         Container::get(Auth::class),
@@ -176,6 +177,9 @@ try {
     $router->post('/tags/store', [TagController::class, 'store']);
     $router->get('/users', [UserController::class, 'index']);
     $router->post('/users/store', [UserController::class, 'store']);
+    $router->post('/users/set-password', [UserController::class, 'setPassword']);
+    $router->post('/users/send-reset', [UserController::class, 'sendReset']);
+    $router->post('/users/toggle-active', [UserController::class, 'toggleActive']);
     $router->post('/users/impersonate', [UserController::class, 'impersonate']);
     $router->post('/users/impersonate/stop', [UserController::class, 'stopImpersonation']);
 

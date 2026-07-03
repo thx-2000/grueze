@@ -1507,6 +1507,41 @@ label span {
     box-shadow: -10px 0 14px rgba(240, 243, 237, 0.95);
 }
 
+.user-admin-actions {
+    display: grid;
+    gap: 0.45rem;
+    min-width: 13.5rem;
+}
+
+.user-admin-actions form,
+.user-admin-actions details {
+    margin: 0;
+}
+
+.user-admin-actions .compact-action,
+.user-admin-actions .danger-button,
+.user-admin-actions .ghost-button {
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.compact-user-password-drawer {
+    background: rgba(246, 248, 240, 0.92);
+}
+
+.compact-user-password-drawer summary {
+    padding: 0.56rem 0.68rem;
+    font-size: 0.82rem;
+}
+
+.compact-user-password-drawer .admin-drawer-body {
+    padding: 0.68rem;
+}
+
+.compact-user-password-drawer input {
+    background: rgba(250, 252, 244, 0.98);
+}
+
 table {
     width: 100%;
     border-collapse: collapse;

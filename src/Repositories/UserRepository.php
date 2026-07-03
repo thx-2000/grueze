@@ -167,4 +167,34 @@ final class UserRepository
         $stmt = $this->pdo->prepare('UPDATE users SET last_login_at = NOW() WHERE id = :id');
         $stmt->execute(['id' => $id]);
     }
+
+    public function setActive(int $id, bool $isActive): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE users SET is_active = :is_active WHERE id = :id');
+        $stmt->execute([
+            'id' => $id,
+            'is_active' => $isActive ? 1 : 0,
+        ]);
+    }
+
+    public function updatePasswordHash(int $id, string $passwordHash): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE users SET password_hash = :password_hash WHERE id = :id');
+        $stmt->execute([
+            'id' => $id,
+            'password_hash' => $passwordHash,
+        ]);
+    }
+
+    public function activeAdminCount(): int
+    {
+        $stmt = $this->pdo->query(
+            "SELECT COUNT(*)
+             FROM users
+             JOIN roles ON roles.id = users.role_id
+             WHERE roles.name = 'admin' AND users.is_active = 1"
+        );
+
+        return (int) $stmt->fetchColumn();
+    }
 }

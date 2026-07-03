@@ -20,6 +20,25 @@ final class PasswordResetService
             return;
         }
 
+        $this->createForUser($user);
+    }
+
+    public function createForUserId(int $userId): bool
+    {
+        $user = $this->users->findById($userId);
+        if (!$user || !(bool) ($user['is_active'] ?? false) || empty($user['email'])) {
+            return false;
+        }
+
+        $this->createForUser($user);
+
+        return true;
+    }
+
+    private function createForUser(array $user): void
+    {
+        $email = (string) $user['email'];
+
         $token = bin2hex(random_bytes(32));
         $hash = password_hash($token, PASSWORD_DEFAULT);
         $expiresAt = date('Y-m-d H:i:s', time() + ((int) config('security.password_reset_expires_minutes', 60) * 60));
@@ -71,4 +90,3 @@ final class PasswordResetService
         return false;
     }
 }
-

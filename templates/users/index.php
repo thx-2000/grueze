@@ -37,7 +37,7 @@
     <div class="panel-head">
         <div>
             <h3>Bestehende Accounts</h3>
-            <p class="muted">Rolle, Status und letzter Login in einer kompakten Übersicht. Ganz rechts kannst du testweise in ein anderes Konto wechseln.</p>
+            <p class="muted">Sperren, Passwort setzen, Reset-Mail auslösen und testweise in andere Rollen wechseln.</p>
         </div>
     </div>
     <div class="table-wrap">
@@ -50,7 +50,7 @@
                     <th>Rolle</th>
                     <th>Status</th>
                     <th>Letzter Login</th>
-                    <?php if ($canImpersonateUsers): ?><th class="users-action-col">Anmelden als</th><?php endif; ?>
+                    <?php if ($canImpersonateUsers): ?><th class="users-action-col">Verwaltung</th><?php endif; ?>
                 </tr>
             </thead>
             <tbody>
@@ -64,17 +64,53 @@
                         <td><?= e($user['last_login_at'] ? format_datetime($user['last_login_at']) : 'Noch nie') ?></td>
                         <?php if ($canImpersonateUsers): ?>
                             <td class="users-action-col">
-                                <?php if ((int) $user['id'] === $currentUserId): ?>
-                                    <span class="muted">Aktuelle Sitzung</span>
-                                <?php elseif ((int) $user['id'] === $originalUserId): ?>
-                                    <span class="muted">Admin-Konto</span>
-                                <?php else: ?>
-                                    <form method="post" action="<?= e(url('/users/impersonate')) ?>">
+                                <div class="user-admin-actions">
+                                    <?php if ((int) $user['id'] === $currentUserId): ?>
+                                        <span class="muted">Aktuelle Sitzung</span>
+                                    <?php elseif ((int) $user['id'] === $originalUserId): ?>
+                                        <span class="muted">Steuerndes Admin-Konto</span>
+                                    <?php else: ?>
+                                        <form method="post" action="<?= e(url('/users/impersonate')) ?>">
+                                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                            <input type="hidden" name="user_id" value="<?= e((string) $user['id']) ?>">
+                                            <button type="submit" class="ghost-button compact-action"><?= icon('login') ?><span>Anmelden als</span></button>
+                                        </form>
+                                    <?php endif; ?>
+
+                                    <form method="post" action="<?= e(url('/users/toggle-active')) ?>">
                                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                                         <input type="hidden" name="user_id" value="<?= e((string) $user['id']) ?>">
-                                        <button type="submit" class="ghost-button compact-action"><?= icon('login') ?><span>Als <?= e($user['name']) ?></span></button>
+                                        <input type="hidden" name="set_active" value="<?= (int) $user['is_active'] === 1 ? '0' : '1' ?>">
+                                        <button type="submit" class="<?= (int) $user['is_active'] === 1 ? 'danger-button compact-action' : 'ghost-button compact-action' ?>">
+                                            <?= (int) $user['is_active'] === 1 ? icon('lock') : icon('unlock') ?>
+                                            <span><?= (int) $user['is_active'] === 1 ? 'Sperren' : 'Entsperren' ?></span>
+                                        </button>
                                     </form>
-                                <?php endif; ?>
+
+                                    <form method="post" action="<?= e(url('/users/send-reset')) ?>">
+                                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                        <input type="hidden" name="user_id" value="<?= e((string) $user['id']) ?>">
+                                        <button type="submit" class="ghost-button compact-action"><?= icon('mail') ?><span>Reset-Mail</span></button>
+                                    </form>
+
+                                    <details class="admin-drawer compact-inside-drawer compact-user-password-drawer">
+                                        <summary>
+                                            <span><?= icon('key') ?></span>
+                                            <span>Passwort setzen</span>
+                                        </summary>
+                                        <div class="admin-drawer-body">
+                                            <form method="post" action="<?= e(url('/users/set-password')) ?>" class="stack">
+                                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                                <input type="hidden" name="user_id" value="<?= e((string) $user['id']) ?>">
+                                                <label>
+                                                    <span>Neues Passwort</span>
+                                                    <input type="text" name="new_password" minlength="12" required>
+                                                </label>
+                                                <button type="submit" class="compact-action"><?= icon('key') ?><span>Speichern</span></button>
+                                            </form>
+                                        </div>
+                                    </details>
+                                </div>
                             </td>
                         <?php endif; ?>
                     </tr>

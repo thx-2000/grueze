@@ -8,13 +8,18 @@ use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\LogRepository;
 use App\Repositories\UserRepository;
+use App\Services\PasswordResetService;
 use App\Services\Validator;
 use App\Support\Redirect;
 
 final class UserController extends BaseController
 {
-    public function __construct(\App\Core\Auth $auth, private UserRepository $users, private LogRepository $logs)
-    {
+    public function __construct(
+        \App\Core\Auth $auth,
+        private UserRepository $users,
+        private LogRepository $logs,
+        private PasswordResetService $passwordResets
+    ) {
         parent::__construct($auth);
     }
 
@@ -117,6 +122,105 @@ final class UserController extends BaseController
         }
 
         Redirect::to('/users');
+    }
+
+    public function setPassword(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $targetUser = $this->users->findById((int) $request->input('user_id'));
+        if (!$targetUser) {
+            flash('error', 'Benutzer nicht gefunden.');
+            Redirect::to('/users');
+        }
+
+        $password = trim((string) $request->input('new_password'));
+        if (mb_strlen($password) < 12) {
+            flash('error', 'Das neue Passwort muss mindestens 12 Zeichen lang sein.');
+            Redirect::to('/users#user-' . $targetUser['id']);
+        }
+
+        $this->users->updatePasswordHash((int) $targetUser['id'], password_hash($password, PASSWORD_DEFAULT));
+        $this->logs->addAudit(
+            (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
+            null,
+            'updated',
+            'Passwort für Benutzer "' . $targetUser['name'] . '" wurde durch Admin neu gesetzt.'
+        );
+        flash('success', 'Passwort für ' . $targetUser['name'] . ' wurde geändert.');
+        Redirect::to('/users#user-' . $targetUser['id']);
+    }
+
+    public function sendReset(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $targetUser = $this->users->findById((int) $request->input('user_id'));
+        if (!$targetUser) {
+            flash('error', 'Benutzer nicht gefunden.');
+            Redirect::to('/users');
+        }
+
+        if (!$this->passwordResets->createForUserId((int) $targetUser['id'])) {
+            flash('error', 'Für diesen Benutzer konnte kein Reset ausgelöst werden.');
+            Redirect::to('/users#user-' . $targetUser['id']);
+        }
+
+        $this->logs->addAudit(
+            (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
+            null,
+            'updated',
+            'Reset-Mail für Benutzer "' . $targetUser['name'] . '" wurde durch Admin ausgelöst.'
+        );
+        flash('success', 'Reset-Mail an ' . $targetUser['name'] . ' wurde versendet.');
+        Redirect::to('/users#user-' . $targetUser['id']);
+    }
+
+    public function toggleActive(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $targetUser = $this->users->findById((int) $request->input('user_id'));
+        if (!$targetUser) {
+            flash('error', 'Benutzer nicht gefunden.');
+            Redirect::to('/users');
+        }
+
+        $shouldActivate = (string) $request->input('set_active') === '1';
+        $originalUserId = (int) ($this->auth->originalUser()['id'] ?? 0);
+
+        if (!$shouldActivate && (int) $targetUser['id'] === $originalUserId) {
+            flash('error', 'Das aktuell steuernde Admin-Konto kann nicht gesperrt werden.');
+            Redirect::to('/users#user-' . $targetUser['id']);
+        }
+
+        if (
+            !$shouldActivate
+            && (string) ($targetUser['role_name'] ?? '') === 'admin'
+            && (bool) ($targetUser['is_active'] ?? false)
+            && $this->users->activeAdminCount() <= 1
+        ) {
+            flash('error', 'Der letzte aktive Admin kann nicht gesperrt werden.');
+            Redirect::to('/users#user-' . $targetUser['id']);
+        }
+
+        $this->users->setActive((int) $targetUser['id'], $shouldActivate);
+        $this->logs->addAudit(
+            $originalUserId > 0 ? $originalUserId : (int) ($this->auth->user()['id'] ?? 0),
+            null,
+            'updated',
+            sprintf(
+                'Benutzer "%s" wurde durch Admin %s.',
+                $targetUser['name'],
+                $shouldActivate ? 'entsperrt' : 'gesperrt'
+            )
+        );
+
+        flash('success', $targetUser['name'] . ($shouldActivate ? ' wurde entsperrt.' : ' wurde gesperrt.'));
+        Redirect::to('/users#user-' . $targetUser['id']);
     }
 
     private function generatePassword(): string
