@@ -90,7 +90,12 @@ final class SettingsController extends BaseController
             'subjectPrefixes' => old('subject_prefixes', $this->settings->subjectPrefixesText()),
             'defaultSubjectPrefix' => $this->settings->defaultSubjectPrefix(),
             'defaultSubjectPrefixesText' => $this->settings->defaultSubjectPrefixesText(),
+            'mailSettings' => array_merge(
+                $this->settings->mailSettings(),
+                (array) ($_SESSION['_mail_settings_old'] ?? [])
+            ),
         ]);
+        unset($_SESSION['_mail_settings_old']);
     }
 
     public function updateMailFooter(Request $request): void
@@ -125,6 +130,83 @@ final class SettingsController extends BaseController
 
         $this->settings->set('mail_footer', $mailFooter);
         $this->settings->set('subject_prefixes', $subjectPrefixes);
+
+        if ($this->auth->can('users.manage')) {
+            $mailSettingsDefaults = $this->settings->mailSettingsDefaults();
+            $mailSettingsInput = [];
+
+            foreach (array_keys($mailSettingsDefaults) as $key) {
+                $mailSettingsInput[$key] = trim((string) $request->input($key, $mailSettingsDefaults[$key]));
+            }
+
+            if (
+                $mailSettingsInput['mail_identity_name'] === ''
+                || $mailSettingsInput['mail_identity_email'] === ''
+                || $mailSettingsInput['mail_smtp_host'] === ''
+                || $mailSettingsInput['mail_smtp_username'] === ''
+            ) {
+                $_SESSION['_errors'] = ['mail_settings' => 'Bitte die Pflichtfelder für den Mailserver vollständig ausfüllen.'];
+                $_SESSION['_old'] = [
+                    'mail_footer' => $mailFooter,
+                    'subject_prefixes' => $subjectPrefixes,
+                ];
+                $_SESSION['_mail_settings_old'] = $mailSettingsInput;
+                Redirect::to('/settings/mail-footer');
+            }
+
+            if (!filter_var($mailSettingsInput['mail_identity_email'], FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['_errors'] = ['mail_identity_email' => 'Bitte eine gültige Absender-E-Mail-Adresse angeben.'];
+                $_SESSION['_old'] = [
+                    'mail_footer' => $mailFooter,
+                    'subject_prefixes' => $subjectPrefixes,
+                ];
+                $_SESSION['_mail_settings_old'] = $mailSettingsInput;
+                Redirect::to('/settings/mail-footer');
+            }
+
+            if (!filter_var($mailSettingsInput['mail_reply_to_email'], FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['_errors'] = ['mail_reply_to_email' => 'Bitte eine gültige Antwort-an-Adresse angeben.'];
+                $_SESSION['_old'] = [
+                    'mail_footer' => $mailFooter,
+                    'subject_prefixes' => $subjectPrefixes,
+                ];
+                $_SESSION['_mail_settings_old'] = $mailSettingsInput;
+                Redirect::to('/settings/mail-footer');
+            }
+
+            if (
+                $mailSettingsInput['mail_bcc_email'] !== ''
+                && !filter_var($mailSettingsInput['mail_bcc_email'], FILTER_VALIDATE_EMAIL)
+            ) {
+                $_SESSION['_errors'] = ['mail_bcc_email' => 'Bitte eine gültige BCC-E-Mail-Adresse angeben.'];
+                $_SESSION['_old'] = [
+                    'mail_footer' => $mailFooter,
+                    'subject_prefixes' => $subjectPrefixes,
+                ];
+                $_SESSION['_mail_settings_old'] = $mailSettingsInput;
+                Redirect::to('/settings/mail-footer');
+            }
+
+            if (
+                !ctype_digit($mailSettingsInput['mail_smtp_port'])
+                || !ctype_digit($mailSettingsInput['mail_imap_port'])
+            ) {
+                $_SESSION['_errors'] = ['mail_ports' => 'SMTP- und IMAP-Port müssen numerisch sein.'];
+                $_SESSION['_old'] = [
+                    'mail_footer' => $mailFooter,
+                    'subject_prefixes' => $subjectPrefixes,
+                ];
+                $_SESSION['_mail_settings_old'] = $mailSettingsInput;
+                Redirect::to('/settings/mail-footer');
+            }
+
+            $mailSettingsInput['mail_imap_save_sent'] = $request->input('mail_imap_save_sent') === '1' ? '1' : '0';
+
+            foreach ($mailSettingsInput as $key => $value) {
+                $this->settings->set($key, $value);
+            }
+        }
+
         flash('success', 'Die Mail-Einstellungen wurden gespeichert.');
         Redirect::to('/settings/mail-footer');
     }

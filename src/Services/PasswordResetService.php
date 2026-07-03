@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Repositories\SettingRepository;
 use App\Repositories\UserRepository;
 use PDO;
 
 final class PasswordResetService
 {
-    public function __construct(private PDO $pdo, private UserRepository $users, private MailService $mailer)
+    public function __construct(
+        private PDO $pdo,
+        private UserRepository $users,
+        private MailService $mailer,
+        private SettingRepository $settings
+    )
     {
     }
 
@@ -54,7 +60,7 @@ final class PasswordResetService
 
         $link = url('/reset-password?token=' . urlencode($token) . '&email=' . urlencode($email));
         $body = "Hallo {$user['name']},\n\nüber diesen Link kannst du dein Passwort neu setzen:\n{$link}\n\nDer Link ist 60 Minuten gültig.";
-        $identity = config('mail.identities.0');
+        $identity = $this->settings->mailIdentity();
         $this->mailer->sendSystemMail($identity, $user['email'], 'Passwort zurücksetzen', $body);
     }
 

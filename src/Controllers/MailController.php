@@ -50,13 +50,15 @@ final class MailController extends BaseController
 
         $this->render('mail/compose', [
             'contacts' => $contacts,
-            'identities' => config('mail.identities', []),
+            'identities' => $this->settings->mailIdentities(),
             'replyToOptions' => $this->replyToOptions($memberContactMode),
             'mailFooter' => $this->mailFooter($memberContactMode),
             'subjectPrefixOptions' => $this->settings->subjectPrefixOptions(),
             'defaultSubjectPrefix' => $this->defaultSubjectPrefix($memberContactMode),
             'defaultSalutationMode' => 'auto',
             'memberContactMode' => $memberContactMode,
+            'defaultSenderKey' => $this->settings->defaultMailSenderKey(),
+            'defaultReplyToKey' => $this->settings->defaultMailReplyToKey(),
         ]);
     }
 
@@ -84,7 +86,7 @@ final class MailController extends BaseController
         $user = $this->auth->user();
         $memberContactMode = $this->isMemberContactMode($user);
         $identity = $this->identityByKey($memberContactMode
-            ? (string) config('mail.default_sender_key', config('mail.identities.0.key', ''))
+            ? $this->settings->defaultMailSenderKey()
             : (string) $request->input('sender_key'));
         $replyTo = $this->replyToByKey((string) $request->input('reply_to_key'), $memberContactMode, $user);
 
@@ -152,7 +154,7 @@ final class MailController extends BaseController
             Redirect::to('/');
         }
         $senderKey = $memberContactMode
-            ? (string) config('mail.default_sender_key', config('mail.identities.0.key', ''))
+            ? $this->settings->defaultMailSenderKey()
             : (string) $request->input('sender_key');
         $replyTo = $this->replyToByKey((string) $request->input('reply_to_key'), $memberContactMode, $user);
         $_SESSION['mail_job'] = [
@@ -259,13 +261,13 @@ final class MailController extends BaseController
 
     private function identityByKey(string $key): ?array
     {
-        foreach (config('mail.identities', []) as $identity) {
+        foreach ($this->settings->mailIdentities() as $identity) {
             if (($identity['key'] ?? '') === $key) {
                 return $identity;
             }
         }
 
-        return config('mail.identities.0');
+        return $this->settings->mailIdentity();
     }
 
     private function replyToByKey(string $key, bool $memberContactMode = false, ?array $user = null): ?array
@@ -291,13 +293,13 @@ final class MailController extends BaseController
             return $option ? [$option] : [];
         }
 
-        $options = config('mail.reply_to_options', []);
+        $options = $this->settings->mailReplyToOptions();
 
         if ($options !== []) {
             return $options;
         }
 
-        return config('mail.identities', []);
+        return $this->settings->mailIdentities();
     }
 
     private function composeMailBody(string $message, bool $memberContactMode = false): string

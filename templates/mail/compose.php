@@ -1,7 +1,7 @@
 <?php $draft = $_SESSION['mail_draft'] ?? []; ?>
 <?php
-$defaultSenderKey = config('mail.default_sender_key', $identities[0]['key'] ?? '');
-$defaultReplyToKey = config('mail.default_reply_to_key', $replyToOptions[0]['key'] ?? $defaultSenderKey);
+$defaultSenderKey = $defaultSenderKey ?? ($identities[0]['key'] ?? '');
+$defaultReplyToKey = $defaultReplyToKey ?? ($replyToOptions[0]['key'] ?? $defaultSenderKey);
 $activeSubjectPrefix = $draft['subject_prefix'] ?? $defaultSubjectPrefix;
 $activeSalutationMode = $draft['salutation_mode'] ?? ($defaultSalutationMode ?? 'auto');
 $subjectPreview = trim(($activeSubjectPrefix ? $activeSubjectPrefix . ' ' : '') . ($draft['subject'] ?? 'Dein Betreff'));

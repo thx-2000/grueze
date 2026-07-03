@@ -81,6 +81,9 @@ final class MailService
             $mailer->setFrom($identity['email'], $identity['name']);
             $mailer->addAddress($to);
             $mailer->addReplyTo($replyTo, $identity['name']);
+            if (!empty($identity['bcc_email'])) {
+                $mailer->addBCC((string) $identity['bcc_email']);
+            }
             $mailer->Subject = $subject;
             $mailer->Body = $body;
             $mailer->isHTML(false);
@@ -100,6 +103,9 @@ final class MailService
             'From: ' . $identity['name'] . ' <' . $identity['email'] . '>',
             'Reply-To: ' . $replyTo,
         ];
+        if (!empty($identity['bcc_email'])) {
+            $headers[] = 'Bcc: ' . $identity['bcc_email'];
+        }
 
         if ($attachments !== []) {
             throw new RuntimeException('Anhänge benötigen PHPMailer via Composer.');

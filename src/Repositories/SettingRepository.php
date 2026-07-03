@@ -11,6 +11,7 @@ final class SettingRepository
 {
     private ?bool $tableReady = null;
     private ?array $brandingCache = null;
+    private ?array $mailSettingsCache = null;
 
     public function __construct(private PDO $pdo)
     {
@@ -45,6 +46,7 @@ final class SettingRepository
             'setting_value' => $value,
         ]);
         $this->brandingCache = null;
+        $this->mailSettingsCache = null;
     }
 
     public function branding(): array
@@ -69,6 +71,7 @@ final class SettingRepository
         return [
             'branding_app_name' => (string) config('app.name', 'Adress-Zentrale'),
             'branding_short_name' => 'GRUEZE',
+            'branding_version' => '0.2.0',
             'branding_public_site_label' => 'example.org',
             'branding_public_site_url' => 'https://example.org',
             'branding_login_intro' => 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten an einem Ort.',
@@ -119,6 +122,123 @@ final class SettingRepository
             '--color-danger' => (string) $branding['branding_color_danger'],
             '--color-success' => (string) $branding['branding_color_success'],
         ];
+    }
+
+    public function mailSettings(): array
+    {
+        if ($this->mailSettingsCache !== null) {
+            return $this->mailSettingsCache;
+        }
+
+        $settings = $this->mailSettingsDefaults();
+        foreach (array_keys($settings) as $key) {
+            $stored = $this->get($key);
+            if ($stored !== null && trim($stored) !== '') {
+                $settings[$key] = $stored;
+            }
+        }
+
+        $settings['mail_smtp_port'] = (string) ((int) $settings['mail_smtp_port']);
+        $settings['mail_imap_port'] = (string) ((int) $settings['mail_imap_port']);
+        $settings['mail_imap_save_sent'] = $settings['mail_imap_save_sent'] === '0' ? '0' : '1';
+
+        return $this->mailSettingsCache = $settings;
+    }
+
+    public function mailSettingsDefaults(): array
+    {
+        $identity = (array) config('mail.identities.0', []);
+        $replyTo = (array) config('mail.reply_to_options.0', []);
+
+        return [
+            'mail_identity_key' => (string) ($identity['key'] ?? 'orga'),
+            'mail_identity_name' => (string) ($identity['name'] ?? 'Mailer'),
+            'mail_identity_email' => (string) ($identity['email'] ?? ''),
+            'mail_smtp_host' => (string) ($identity['smtp_host'] ?? ''),
+            'mail_smtp_port' => (string) ($identity['smtp_port'] ?? 587),
+            'mail_smtp_encryption' => (string) ($identity['smtp_encryption'] ?? 'tls'),
+            'mail_smtp_username' => (string) ($identity['smtp_username'] ?? ''),
+            'mail_smtp_password' => (string) ($identity['smtp_password'] ?? ''),
+            'mail_imap_save_sent' => !isset($identity['imap_save_sent']) || (bool) $identity['imap_save_sent'] ? '1' : '0',
+            'mail_imap_host' => (string) ($identity['imap_host'] ?? ($identity['smtp_host'] ?? '')),
+            'mail_imap_port' => (string) ($identity['imap_port'] ?? 993),
+            'mail_imap_encryption' => (string) ($identity['imap_encryption'] ?? 'ssl'),
+            'mail_imap_username' => (string) ($identity['imap_username'] ?? ($identity['smtp_username'] ?? '')),
+            'mail_imap_password' => (string) ($identity['imap_password'] ?? ($identity['smtp_password'] ?? '')),
+            'mail_imap_sent_mailboxes' => implode("\n", (array) ($identity['imap_sent_mailboxes'] ?? ['INBOX.Sent', 'Sent', 'INBOX.Gesendet', 'Gesendet'])),
+            'mail_reply_to_key' => (string) ($replyTo['key'] ?? 'orga_reply'),
+            'mail_reply_to_name' => (string) ($replyTo['name'] ?? ($identity['name'] ?? 'Reply-To')),
+            'mail_reply_to_email' => (string) ($replyTo['email'] ?? ''),
+            'mail_bcc_email' => (string) ($identity['bcc_email'] ?? ''),
+        ];
+    }
+
+    public function mailIdentity(): array
+    {
+        $settings = $this->mailSettings();
+
+        return [
+            'key' => $settings['mail_identity_key'],
+            'name' => $settings['mail_identity_name'],
+            'email' => $settings['mail_identity_email'],
+            'smtp_host' => $settings['mail_smtp_host'],
+            'smtp_port' => (int) $settings['mail_smtp_port'],
+            'smtp_encryption' => $settings['mail_smtp_encryption'],
+            'smtp_username' => $settings['mail_smtp_username'],
+            'smtp_password' => $settings['mail_smtp_password'],
+            'imap_save_sent' => $settings['mail_imap_save_sent'] !== '0',
+            'imap_host' => $settings['mail_imap_host'],
+            'imap_port' => (int) $settings['mail_imap_port'],
+            'imap_encryption' => $settings['mail_imap_encryption'],
+            'imap_username' => $settings['mail_imap_username'],
+            'imap_password' => $settings['mail_imap_password'],
+            'imap_sent_mailboxes' => $this->mailSentMailboxes(),
+            'bcc_email' => trim((string) $settings['mail_bcc_email']),
+        ];
+    }
+
+    public function mailIdentities(): array
+    {
+        return [$this->mailIdentity()];
+    }
+
+    public function mailReplyToOptions(): array
+    {
+        $settings = $this->mailSettings();
+
+        return [[
+            'key' => $settings['mail_reply_to_key'],
+            'name' => $settings['mail_reply_to_name'],
+            'email' => $settings['mail_reply_to_email'],
+        ]];
+    }
+
+    public function defaultMailSenderKey(): string
+    {
+        return (string) $this->mailSettings()['mail_identity_key'];
+    }
+
+    public function defaultMailReplyToKey(): string
+    {
+        return (string) $this->mailSettings()['mail_reply_to_key'];
+    }
+
+    public function mailSentMailboxes(): array
+    {
+        $settings = $this->mailSettings();
+        $candidates = preg_split('/\R+/', (string) $settings['mail_imap_sent_mailboxes']) ?: [];
+        $mailboxes = [];
+
+        foreach ($candidates as $candidate) {
+            $mailbox = trim((string) $candidate);
+            if ($mailbox === '') {
+                continue;
+            }
+
+            $mailboxes[] = $mailbox;
+        }
+
+        return $mailboxes !== [] ? array_values(array_unique($mailboxes)) : ['INBOX.Sent', 'Sent'];
     }
 
     public function mailFooter(): string

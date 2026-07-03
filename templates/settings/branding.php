@@ -25,6 +25,11 @@
                     <input type="text" name="branding_short_name" value="<?= e((string) ($branding['branding_short_name'] ?? '')) ?>" required>
                 </label>
                 <label>
+                    <span>Versionsnummer</span>
+                    <input type="text" name="branding_version" value="<?= e((string) ($branding['branding_version'] ?? '0.2.0')) ?>">
+                    <small class="field-hint">Zum Beispiel <code>0.2.0</code> oder <code>0.2.1</code>. Wird dezent im Fußbereich eingeblendet.</small>
+                </label>
+                <label>
                     <span>Öffentliche Seitenbezeichnung</span>
                     <input type="text" name="branding_public_site_label" value="<?= e((string) ($branding['branding_public_site_label'] ?? '')) ?>">
                 </label>
@@ -109,7 +114,10 @@
                 <?php foreach ($colorFields as $field => $label): ?>
                     <label>
                         <span><?= e($label) ?></span>
-                        <input type="text" name="<?= e($field) ?>" value="<?= e((string) ($branding[$field] ?? '')) ?>">
+                        <div class="color-input-row">
+                            <span class="color-preview-swatch" data-color-preview style="--swatch: <?= e((string) ($branding[$field] ?? 'transparent')) ?>;"></span>
+                            <input type="text" name="<?= e($field) ?>" value="<?= e((string) ($branding[$field] ?? '')) ?>" data-color-source>
+                        </div>
                     </label>
                 <?php endforeach; ?>
             </div>
@@ -122,3 +130,20 @@
         </div>
     </form>
 </section>
+
+<script>
+    document.querySelectorAll('[data-color-source]').forEach((input) => {
+        const wrapper = input.closest('.color-input-row');
+        const swatch = wrapper ? wrapper.querySelector('[data-color-preview]') : null;
+        if (!swatch) {
+            return;
+        }
+
+        const sync = () => {
+            swatch.style.setProperty('--swatch', input.value.trim() || 'transparent');
+        };
+
+        input.addEventListener('input', sync);
+        sync();
+    });
+</script>

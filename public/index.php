@@ -90,7 +90,8 @@ try {
     Container::factory(PasswordResetService::class, static fn () => new PasswordResetService(
         Container::get(PDO::class),
         Container::get(UserRepository::class),
-        Container::get(MailService::class)
+        Container::get(MailService::class),
+        Container::get(SettingRepository::class)
     ));
     Container::factory(WebAuthnService::class, static fn () => new WebAuthnService());
 

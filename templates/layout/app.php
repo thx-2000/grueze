@@ -14,6 +14,7 @@ $publicSiteUrl = trim((string) ($branding['branding_public_site_url'] ?? ''));
 $sidebarCopy = trim((string) ($branding['branding_sidebar_copy'] ?? ''));
 $supportEmail = trim((string) ($branding['branding_support_email'] ?? ''));
 $logoPath = trim((string) ($branding['branding_logo_path'] ?? ''));
+$appVersion = trim((string) ($branding['branding_version'] ?? ''));
 $themeStyle = branding_theme_style();
 ?>
 <!doctype html>
@@ -149,6 +150,10 @@ $themeStyle = branding_theme_style();
             <a href="<?= e(url('/impressum')) ?>">Impressum</a>
             <span>|</span>
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
+            <?php if ($appVersion !== ''): ?>
+                <span>|</span>
+                <span class="privacy-note-version">v<?= e($appVersion) ?></span>
+            <?php endif; ?>
             <?php if ($publicSiteUrl !== ''): ?>
                 <span>|</span>
                 <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= e($publicSiteLabel !== '' ? $publicSiteLabel : $publicSiteUrl) ?></a>

@@ -88,6 +88,7 @@ function app_branding(): array
         $branding = [
             'branding_app_name' => (string) config('app.name', 'Adress-Zentrale'),
             'branding_short_name' => 'App',
+            'branding_version' => '0.1.0',
             'branding_public_site_label' => '',
             'branding_public_site_url' => '',
             'branding_login_intro' => '',
