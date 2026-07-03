@@ -121,11 +121,13 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
     </div>
 
     <div class="privacy-note">
-        <a href="<?= e(url('/impressum')) ?>">Impressum</a>
-        <span>|</span>
-        <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
-        <span>|</span>
-        <a href="https://example.org" target="_blank" rel="noopener noreferrer">example.org</a>
+        <div class="privacy-note-inner">
+            <a href="<?= e(url('/impressum')) ?>">Impressum</a>
+            <span>|</span>
+            <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
+            <span>|</span>
+            <a href="https://example.org" target="_blank" rel="noopener noreferrer">example.org</a>
+        </div>
     </div>
 
     <div id="toast" class="toast" hidden></div>

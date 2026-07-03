@@ -441,8 +441,8 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         <?php if ($visibleContactFields['address'] || $visibleContactFields['birthday']): ?>
                             <div class="contact-meta-list">
                                 <?php if ($visibleContactFields['address']): ?>
-                                    <p><?= icon('location') ?><span><strong>Adresse</strong><?= e($contact['strasse']) ?>, <?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span></p>
-                                    <p><?= icon('globe') ?><span><?= e($contact['land'] ?: 'Deutschland') ?></span></p>
+                                    <p><?= icon('location') ?><span><strong><?= e(contact_value_label((int) ((trim((string) ($contact['strasse'] ?? '')) !== '' || trim((string) ($contact['plz'] ?? '')) !== '' || trim((string) ($contact['ort'] ?? '')) !== '') ? 1 : 0), 'Adresse', 'Adresse', 'Adressen')) ?></strong><?= e(contact_address_line($contact)) ?></span></p>
+                                    <p><?= icon('globe') ?><span><?= e(contact_country_label($contact)) ?></span></p>
                                 <?php endif; ?>
                                 <?php if ($visibleContactFields['birthday']): ?>
                                     <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : 'Kein Geburtstag hinterlegt') ?></span></p>
@@ -452,27 +452,31 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
 
                         <?php if ($visibleContactFields['emails']): ?>
                             <div>
-                                <strong>E-Mail-Adressen</strong>
+                                <strong><?= e(contact_value_label(count($contact['emails']), 'E-Mail-Adresse', 'E-Mail-Adresse', 'E-Mail-Adressen')) ?></strong>
                                 <?php if ($contact['emails'] !== []): ?>
                                     <ul class="mini-list">
                                         <?php foreach ($contact['emails'] as $email): ?>
-                                            <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e(($email['label'] ? $email['label'] . ': ' : '') . $email['email']) ?></a></li>
+                                            <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e($email['email']) ?></a></li>
                                         <?php endforeach; ?>
                                     </ul>
                                 <?php else: ?>
-                                    <p class="missing-contact-value"><?= icon('mail-off') ?><span>Keine Mailadresse</span></p>
+                                    <p class="missing-contact-value"><?= icon('mail-off') ?><span>–</span></p>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
 
                         <?php if ($visibleContactFields['phones']): ?>
                             <div>
-                                <strong>Telefonnummern</strong>
-                                <ul class="mini-list">
-                                    <?php foreach ($contact['phones'] as $phone): ?>
-                                        <li><a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['label'] . ': ' . $phone['phone']) ?></a></li>
-                                    <?php endforeach; ?>
-                                </ul>
+                                <strong><?= e(contact_value_label(count($contact['phones']), 'Telefonnummer', 'Telefonnummer', 'Telefonnummern')) ?></strong>
+                                <?php if ($contact['phones'] !== []): ?>
+                                    <ul class="mini-list">
+                                        <?php foreach ($contact['phones'] as $phone): ?>
+                                            <li><a href="tel:<?= e($phone['phone']) ?>"><?= e((trim((string) ($phone['label'] ?? '')) !== '' ? $phone['label'] . ': ' : '') . $phone['phone']) ?></a></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php else: ?>
+                                    <p class="missing-contact-value"><?= icon('phone-off') ?><span>–</span></p>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
 
