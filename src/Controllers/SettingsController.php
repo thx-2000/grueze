@@ -219,6 +219,43 @@ final class SettingsController extends BaseController
         Redirect::to('/settings/mail-footer');
     }
 
+    public function visibility(): void
+    {
+        $this->requirePermission('users.manage');
+
+        $this->render('settings/visibility', [
+            'visibility' => $this->settings->fieldVisibility(),
+            'defaults' => $this->settings->fieldVisibilityDefaults(),
+            'roles' => ['admin', 'orga', 'stufenmitglied', 'betrachter'],
+            'fieldLabels' => [
+                'address'  => 'Adresse',
+                'birthday' => 'Geburtstag',
+                'emails'   => 'E-Mail',
+                'phones'   => 'Telefon',
+                'notes'    => 'Notizen',
+                'login'    => 'Login / Rolle',
+            ],
+        ]);
+    }
+
+    public function updateVisibility(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $fields = array_keys($this->settings->fieldVisibilityDefaults());
+        $allRoles = ['admin', 'orga', 'stufenmitglied', 'betrachter'];
+        $submitted = (array) $request->input('visibility', []);
+
+        foreach ($fields as $field) {
+            $fieldRoles = array_values(array_intersect((array) ($submitted[$field] ?? []), $allRoles));
+            $this->settings->set('security_visibility_' . $field, implode(',', $fieldRoles));
+        }
+
+        flash('success', 'Sichtbarkeits-Einstellungen wurden gespeichert.');
+        Redirect::to('/settings/visibility');
+    }
+
     private function isValidCssColor(string $value): bool
     {
         $value = trim($value);

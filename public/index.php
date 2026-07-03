@@ -76,7 +76,10 @@ try {
     Container::factory(LogRepository::class, static fn () => new LogRepository(Container::get(PDO::class)));
     Container::factory(SettingRepository::class, static fn () => new SettingRepository(Container::get(PDO::class)));
     Container::factory(PasskeyRepository::class, static fn () => new PasskeyRepository(Container::get(PDO::class)));
-    Container::factory(Auth::class, static fn () => new Auth(Container::get(UserRepository::class)));
+    Container::factory(Auth::class, static fn () => new Auth(
+        Container::get(UserRepository::class),
+        Container::get(SettingRepository::class)
+    ));
     Container::factory(UploadService::class, static fn () => new UploadService());
     Container::factory(CsvExportService::class, static fn () => new CsvExportService());
     Container::factory(XlsxReader::class, static fn () => new XlsxReader());
@@ -222,6 +225,8 @@ try {
     $router->post('/settings/branding', [SettingsController::class, 'updateBranding']);
     $router->get('/settings/mail-footer', [SettingsController::class, 'mailFooter']);
     $router->post('/settings/mail-footer', [SettingsController::class, 'updateMailFooter']);
+    $router->get('/settings/visibility', [SettingsController::class, 'visibility']);
+    $router->post('/settings/visibility', [SettingsController::class, 'updateVisibility']);
 
     $router->dispatch(new Request());
 } catch (Throwable $exception) {

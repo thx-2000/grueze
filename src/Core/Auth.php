@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Repositories\SettingRepository;
 use App\Repositories\UserRepository;
 
 final class Auth
 {
     private const CONTACT_DETAIL_FIELDS = ['address', 'birthday', 'emails', 'phones', 'notes', 'login'];
 
-    public function __construct(private UserRepository $users)
+    public function __construct(private UserRepository $users, private SettingRepository $settings)
     {
     }
 
@@ -134,6 +135,11 @@ final class Auth
         $user = $this->user();
         if (!$user) {
             return false;
+        }
+
+        $visibility = $this->settings->fieldVisibility();
+        if (array_key_exists($field, $visibility)) {
+            return in_array((string) $user['role_name'], $visibility[$field], true);
         }
 
         $legacyRoles = (array) config('security.private_contact_detail_roles', ['admin', 'orga']);

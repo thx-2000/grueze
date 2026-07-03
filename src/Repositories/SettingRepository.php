@@ -12,6 +12,7 @@ final class SettingRepository
     private ?bool $tableReady = null;
     private ?array $brandingCache = null;
     private ?array $mailSettingsCache = null;
+    private ?array $fieldVisibilityCache = null;
 
     public function __construct(private PDO $pdo)
     {
@@ -47,6 +48,7 @@ final class SettingRepository
         ]);
         $this->brandingCache = null;
         $this->mailSettingsCache = null;
+        $this->fieldVisibilityCache = null;
     }
 
     public function branding(): array
@@ -147,6 +149,39 @@ final class SettingRepository
             '--color-danger' => (string) $branding['branding_color_danger'],
             '--color-success' => (string) $branding['branding_color_success'],
         ];
+    }
+
+    public function fieldVisibilityDefaults(): array
+    {
+        return [
+            'address'  => ['admin', 'orga'],
+            'birthday' => ['admin', 'orga'],
+            'emails'   => ['admin', 'orga'],
+            'phones'   => ['admin', 'orga'],
+            'notes'    => ['admin', 'orga'],
+            'login'    => ['admin', 'orga'],
+        ];
+    }
+
+    public function fieldVisibility(): array
+    {
+        if ($this->fieldVisibilityCache !== null) {
+            return $this->fieldVisibilityCache;
+        }
+
+        $result = [];
+        foreach ($this->fieldVisibilityDefaults() as $field => $defaultRoles) {
+            $stored = $this->get('security_visibility_' . $field);
+            if ($stored !== null) {
+                $result[$field] = $stored === ''
+                    ? []
+                    : array_values(array_filter(array_map('trim', explode(',', $stored))));
+            } else {
+                $result[$field] = $defaultRoles;
+            }
+        }
+
+        return $this->fieldVisibilityCache = $result;
     }
 
     public function mailSettings(): array
