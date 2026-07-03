@@ -127,7 +127,7 @@ function branding_theme_style(): string
 
 function system_version(): string
 {
-    return '0.2.4';
+    return '0.2.5';
 }
 
 function system_label(): string
