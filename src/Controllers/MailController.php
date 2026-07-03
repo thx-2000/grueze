@@ -15,8 +15,6 @@ use App\Support\Redirect;
 
 final class MailController extends BaseController
 {
-    private const MEMBER_CONTACT_FOOTER_FALLBACK = "Diese Nachricht wurde von einem Stufenmitglied über die interne Kontaktfunktion versendet und stammt nicht vom Orga-Team.\nDu erhältst sie, weil deine Kontaktdaten in der Adress-Zentrale hinterlegt sind.\nAntworten auf diese Nachricht gehen direkt an die absendende Person.\nFalls unsere Nachrichten fälschlich als Spam erkannt werden, nimm bitte kontakt@example.org und mailer@example.org in dein Adressbuch auf.\nWenn du keine weiteren Kontaktanfragen über dieses System erhalten möchtest, schreibe bitte an kontakt@example.org. Wir prüfen das dann mit dir.";
-    private const MEMBER_CONTACT_SUBJECT_PREFIX = '[Kontakt]';
 
     public function __construct(
         \App\Core\Auth $auth,
@@ -357,7 +355,7 @@ final class MailController extends BaseController
 
         return [
             'key' => 'member_reply',
-            'name' => (string) ($user['name'] ?? 'Stufenmitglied'),
+            'name' => (string) ($user['name'] ?? branding_value('branding_short_name', 'Stufenmitglied') . '-Stufenmitglied'),
             'email' => (string) $user['email'],
         ];
     }
@@ -365,7 +363,7 @@ final class MailController extends BaseController
     private function mailFooter(bool $memberContactMode = false): string
     {
         if ($memberContactMode) {
-            return (string) config('defaults.member_contact_footer', self::MEMBER_CONTACT_FOOTER_FALLBACK);
+            return (string) config('defaults.member_contact_footer', $this->settings->memberContactFooter());
         }
 
         return $this->settings->mailFooter();
@@ -374,7 +372,7 @@ final class MailController extends BaseController
     private function defaultSubjectPrefix(bool $memberContactMode = false): string
     {
         if ($memberContactMode) {
-            return (string) config('defaults.member_contact_subject_prefix', self::MEMBER_CONTACT_SUBJECT_PREFIX);
+            return (string) config('defaults.member_contact_subject_prefix', $this->settings->memberContactSubjectPrefix());
         }
 
         return $this->settings->defaultSubjectPrefix();

@@ -138,7 +138,7 @@ final class MailService
         }
 
         if (!$saved) {
-            error_log('Mailer: Kopie konnte nicht im IMAP-Gesendet-Ordner abgelegt werden.');
+            error_log(system_label() . ' Mailer: Kopie konnte nicht im IMAP-Gesendet-Ordner abgelegt werden.');
         }
     }
 

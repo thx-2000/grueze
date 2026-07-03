@@ -341,6 +341,37 @@ final class SettingRepository
         return $mailboxes !== [] ? array_values(array_unique($mailboxes)) : ['INBOX.Sent', 'Sent'];
     }
 
+    public function memberContactFooter(): string
+    {
+        $stored = trim((string) $this->get('mail_member_contact_footer', ''));
+        if ($stored !== '') {
+            return $stored;
+        }
+
+        $b = $this->branding();
+        $shortName = (string) ($b['branding_short_name'] ?? 'Adress-Zentrale');
+        $appName = (string) ($b['branding_app_name'] ?? 'Adress-Zentrale');
+        $supportEmail = trim((string) ($b['branding_support_email'] ?? ''));
+        $contactLine = $supportEmail !== ''
+            ? "Falls unsere Nachrichten fälschlich als Spam erkannt werden, nimm bitte {$supportEmail} in dein Adressbuch auf.\nWenn du keine weiteren Kontaktanfragen über dieses System erhalten möchtest, schreibe bitte an {$supportEmail}. Wir prüfen das dann mit dir."
+            : "Falls du keine weiteren Kontaktanfragen über dieses System erhalten möchtest, wende dich bitte ans Orga-Team.";
+
+        return "Diese Nachricht wurde von einem {$shortName}-Stufenmitglied über die interne Kontaktfunktion versendet und stammt nicht vom Orga-Team.\nDu erhältst sie, weil deine Kontaktdaten in der {$appName} hinterlegt sind.\nAntworten auf diese Nachricht gehen direkt an die absendende Person.\n{$contactLine}";
+    }
+
+    public function memberContactSubjectPrefix(): string
+    {
+        $stored = trim((string) $this->get('mail_member_contact_prefix', ''));
+        if ($stored !== '') {
+            return $stored;
+        }
+
+        $b = $this->branding();
+        $shortName = (string) ($b['branding_short_name'] ?? 'Kontakt');
+
+        return '[' . $shortName . ' Kontakt]';
+    }
+
     public function mailFooter(): string
     {
         $value = trim((string) $this->get('mail_footer', ''));

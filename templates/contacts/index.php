@@ -220,7 +220,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                     <?php if ($isMemberCompactView): ?>
                         <ul class="compact-help-list">
                             <li><strong>Mail fehlt</strong> bedeutet: Uns liegt noch keine Adresse vor.</li>
-                            <li>Wenn du sie kennst, bitte an <a href="mailto:kontakt@example.org">kontakt@example.org</a> senden.</li>
+                            <li>Wenn du sie kennst, bitte an <a href="mailto:<?= e($supportEmail ?: 'kontakt@example.org') ?>"><?= e($supportEmail ?: 'kontakt@example.org') ?></a> senden.</li>
                             <li>Für eine Nachricht genau eine Person auswählen und dann <strong>Person kontaktieren</strong>.</li>
                         </ul>
                     <?php endif; ?>
@@ -242,7 +242,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                 </div>
                 <ol class="workflow-list">
                     <li>Wenn neben einem Namen <strong>Mail fehlt</strong> steht, liegt uns noch keine Adresse vor.</li>
-                    <li>Wenn du die fehlende Adresse kennst, schicke sie bitte an <a href="mailto:kontakt@example.org">kontakt@example.org</a>.</li>
+                    <li>Wenn du die fehlende Adresse kennst, schicke sie bitte an <a href="mailto:<?= e($supportEmail ?: 'kontakt@example.org') ?>"><?= e($supportEmail ?: 'kontakt@example.org') ?></a>.</li>
                     <li>Für eine Kontaktaufnahme genau eine Person auswählen und <strong>Person kontaktieren</strong> klicken. Die Zieladresse bleibt verborgen, Antworten gehen an dich.</li>
                 </ol>
             </aside>

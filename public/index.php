@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\CategoryController;
 use App\Controllers\ContactController;
@@ -32,13 +33,14 @@ use App\Repositories\UserRepository;
 use App\Services\CsvExportService;
 use App\Services\ContactImportService;
 use App\Services\MailService;
+use App\Services\MigrationService;
 use App\Services\PasswordResetService;
 use App\Services\UploadService;
 use App\Services\WebAuthnService;
 use App\Services\XlsxReader;
 
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
 error_reporting(E_ALL);
 
 register_shutdown_function(static function (): void {
@@ -48,10 +50,14 @@ register_shutdown_function(static function (): void {
     }
 
     http_response_code(500);
-    echo '<h1>PHP-Fehler</h1>';
-    echo '<p><strong>' . htmlspecialchars($error['message'] ?? 'Unbekannter Fehler', ENT_QUOTES, 'UTF-8') . '</strong></p>';
-    echo '<p>Datei: ' . htmlspecialchars($error['file'] ?? '-', ENT_QUOTES, 'UTF-8') . '</p>';
-    echo '<p>Zeile: ' . htmlspecialchars((string) ($error['line'] ?? '-'), ENT_QUOTES, 'UTF-8') . '</p>';
+    if ((bool) (config('app.debug', false))) {
+        echo '<h1>PHP-Fehler</h1>';
+        echo '<p><strong>' . htmlspecialchars($error['message'] ?? 'Unbekannter Fehler', ENT_QUOTES, 'UTF-8') . '</strong></p>';
+        echo '<p>Datei: ' . htmlspecialchars($error['file'] ?? '-', ENT_QUOTES, 'UTF-8') . '</p>';
+        echo '<p>Zeile: ' . htmlspecialchars((string) ($error['line'] ?? '-'), ENT_QUOTES, 'UTF-8') . '</p>';
+    } else {
+        echo '<h1>Serverfehler</h1><p>Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.</p>';
+    }
 });
 
 require dirname(__DIR__) . '/src/Core/Autoloader.php';
@@ -66,6 +72,10 @@ if (is_file($composerAutoload)) {
 try {
     Autoloader::register();
     Config::load(dirname(__DIR__));
+    if ((bool) config('app.debug', false)) {
+        ini_set('display_errors', '1');
+        ini_set('display_startup_errors', '1');
+    }
     Session::start();
 
     Container::factory(PDO::class, static fn () => Database::connect());
@@ -97,6 +107,11 @@ try {
         Container::get(SettingRepository::class)
     ));
     Container::factory(WebAuthnService::class, static fn () => new WebAuthnService());
+    Container::factory(MigrationService::class, static fn () => new MigrationService(Container::get(PDO::class)));
+    Container::factory(AdminController::class, static fn () => new AdminController(
+        Container::get(Auth::class),
+        Container::get(MigrationService::class)
+    ));
 
     Container::factory(AuthController::class, static fn () => new AuthController(
         Container::get(Auth::class),
@@ -219,6 +234,8 @@ try {
     $router->get('/mail/status', [MailController::class, 'status']);
     $router->post('/mail/batch', [MailController::class, 'batch']);
 
+    $router->get('/admin/migrations', [AdminController::class, 'migrations']);
+    $router->post('/admin/migrations/apply', [AdminController::class, 'applyMigration']);
     $router->get('/logs/audit', [LogController::class, 'audit']);
     $router->get('/logs/mail', [LogController::class, 'mail']);
     $router->get('/settings/branding', [SettingsController::class, 'branding']);
