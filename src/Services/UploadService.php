@@ -45,6 +45,44 @@ final class UploadService
         return $relativePath;
     }
 
+    public function storeBrandAsset(?array $file, ?string $existingPath = null): ?string
+    {
+        if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            return $existingPath;
+        }
+
+        if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+            throw new RuntimeException('Der Logo-Upload ist fehlgeschlagen.');
+        }
+
+        if (($file['size'] ?? 0) > 3145728) {
+            throw new RuntimeException('Das Logo ist zu groß.');
+        }
+
+        $mime = mime_content_type($file['tmp_name']);
+        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'], true)) {
+            throw new RuntimeException('Das Logo muss JPG, PNG, WEBP oder SVG sein.');
+        }
+
+        $extension = match ($mime) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/svg+xml' => 'svg',
+            default => throw new RuntimeException('Unbekannter Logotyp.'),
+        };
+
+        $filename = 'brand_' . bin2hex(random_bytes(12)) . '.' . $extension;
+        $relativePath = 'assets/uploads/' . $filename;
+        $target = dirname(__DIR__, 2) . '/public/' . $relativePath;
+
+        if (!move_uploaded_file($file['tmp_name'], $target)) {
+            throw new RuntimeException('Das Logo konnte nicht gespeichert werden.');
+        }
+
+        return $relativePath;
+    }
+
     public function storeAttachments(?array $files): array
     {
         if (!$files || empty($files['name'])) {

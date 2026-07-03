@@ -6,21 +6,33 @@ $flashes = [
 $pageErrors = errors();
 $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
+$branding = app_branding();
+$appName = (string) ($branding['branding_app_name'] ?? config('app.name', 'Adress-Zentrale'));
+$shortName = trim((string) ($branding['branding_short_name'] ?? 'App'));
+$publicSiteLabel = trim((string) ($branding['branding_public_site_label'] ?? ''));
+$publicSiteUrl = trim((string) ($branding['branding_public_site_url'] ?? ''));
+$sidebarCopy = trim((string) ($branding['branding_sidebar_copy'] ?? ''));
+$supportEmail = trim((string) ($branding['branding_support_email'] ?? ''));
+$logoPath = trim((string) ($branding['branding_logo_path'] ?? ''));
+$themeStyle = branding_theme_style();
 ?>
 <!doctype html>
 <html lang="de">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= e(config('app.name', 'Abi Adress Zentrale')) ?></title>
+    <title><?= e($appName) ?></title>
     <link rel="stylesheet" href="<?= e(asset_url('/assets/css/theme.css')) ?>">
     <link rel="stylesheet" href="<?= e(asset_url('/assets/css/app.css')) ?>">
+    <?php if ($themeStyle !== ''): ?>
+        <style><?= $themeStyle ?></style>
+    <?php endif; ?>
 </head>
 <body>
     <div class="signal-bar">
         <div class="signal-bar-inner">
             <div class="signal-bar-main">
-                <a class="signal-bar-label" href="<?= e(url('/')) ?>">Zentrale</a>
+                <a class="signal-bar-label" href="<?= e(url('/')) ?>"><?= e($appName) ?></a>
                 <?php if (!empty($currentUser)): ?>
                     <form method="get" action="<?= e(url('/search')) ?>" class="signal-search">
                         <input type="search" name="q" value="<?= e($globalSearchQuery) ?>" placeholder="Global suchen: Kontakte, Benutzer ...">
@@ -66,19 +78,26 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
     <div class="page-shell">
         <aside class="sidebar">
             <a class="sidebar-brand" href="<?= e(url('/')) ?>">
-                <span class="brand-mark">GRUEZE</span>
+                <?php if ($logoPath !== ''): ?>
+                    <span class="brand-mark brand-mark-image">
+                        <img src="<?= e(asset_url('/' . ltrim($logoPath, '/'))) ?>" alt="<?= e($shortName !== '' ? $shortName : $appName) ?>">
+                    </span>
+                <?php else: ?>
+                    <span class="brand-mark"><?= e($shortName !== '' ? $shortName : $appName) ?></span>
+                <?php endif; ?>
                 <div>
-                    <p class="eyebrow">Abi-Stufe</p>
-                    <h1><?= e(config('app.name', 'Abi Adress Zentrale')) ?></h1>
-                    <p class="muted sidebar-copy">Kontakte, Mailings und Organisation an einem Ort.</p>
+                    <p class="eyebrow">Organisation</p>
+                    <h1><?= e($appName) ?></h1>
+                    <p class="muted sidebar-copy"><?= e($sidebarCopy !== '' ? $sidebarCopy : 'Kontakte, Mailings und Organisation an einem Ort.') ?></p>
                 </div>
             </a>
             <?php if (!empty($currentUser)): ?>
                 <nav class="nav">
-                    <?php if (($currentUser['role_name'] ?? '') === 'stufenmitglied'): ?>
-                        <a href="https://example.org" target="_blank" rel="noopener noreferrer"><?= icon('globe') ?><span>Startseite</span></a>
+                    <?php if (($currentUser['role_name'] ?? '') === 'stufenmitglied' && $publicSiteUrl !== ''): ?>
+                        <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= icon('globe') ?><span><?= e($publicSiteLabel !== '' ? $publicSiteLabel : 'Startseite') ?></span></a>
                     <?php endif; ?>
                     <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('contacts') ?><span>Kontakte</span></a>
+                    <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/branding') ? 'is-active' : '' ?>" href="<?= e(url('/settings/branding')) ?>"><?= icon('sparkles') ?><span>Design & Branding</span></a><?php endif; ?>
                     <?php if (can('settings.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/mail-footer') ? 'is-active' : '' ?>" href="<?= e(url('/settings/mail-footer')) ?>"><?= icon('sliders') ?><span>Mail-Einstellungen</span></a><?php endif; ?>
                     <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/users') ? 'is-active' : '' ?>" href="<?= e(url('/users')) ?>"><?= icon('user') ?><span>Benutzer</span></a><?php endif; ?>
                     <?php if (can('audit.view')): ?><a class="<?= str_starts_with($currentPath, '/logs/audit') ? 'is-active' : '' ?>" href="<?= e(url('/logs/audit')) ?>"><?= icon('history') ?><span>Audit-Log</span></a><?php endif; ?>
@@ -102,7 +121,7 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
             <header class="content-topbar">
                 <div>
                     <p class="eyebrow">Arbeitsbereich</p>
-                    <h2 class="topbar-title"><a href="<?= e(url('/')) ?>"><?= e(config('app.name', 'Abi Adress Zentrale')) ?></a></h2>
+                    <h2 class="topbar-title"><a href="<?= e(url('/')) ?>"><?= e($appName) ?></a></h2>
                 </div>
             </header>
             <?php foreach ($flashes as $type => $message): ?>
@@ -130,8 +149,14 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
             <a href="<?= e(url('/impressum')) ?>">Impressum</a>
             <span>|</span>
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
-            <span>|</span>
-            <a href="https://example.org" target="_blank" rel="noopener noreferrer">example.org</a>
+            <?php if ($publicSiteUrl !== ''): ?>
+                <span>|</span>
+                <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= e($publicSiteLabel !== '' ? $publicSiteLabel : $publicSiteUrl) ?></a>
+            <?php endif; ?>
+            <?php if ($supportEmail !== ''): ?>
+                <span>|</span>
+                <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>
+            <?php endif; ?>
             </div>
         </div>
     </div>

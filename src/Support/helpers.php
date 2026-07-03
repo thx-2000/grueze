@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Core\Auth;
+use App\Repositories\SettingRepository;
 
 function e(?string $value): string
 {
@@ -71,6 +72,56 @@ function can(string $permission): bool
 function can_view_contact_field(string $field): bool
 {
     return auth()->canViewContactField($field);
+}
+
+function app_branding(): array
+{
+    static $branding = null;
+
+    if ($branding !== null) {
+        return $branding;
+    }
+
+    try {
+        $branding = App\Core\Container::get(SettingRepository::class)->branding();
+    } catch (Throwable) {
+        $branding = [
+            'branding_app_name' => (string) config('app.name', 'Adress-Zentrale'),
+            'branding_short_name' => 'App',
+            'branding_public_site_label' => '',
+            'branding_public_site_url' => '',
+            'branding_login_intro' => '',
+            'branding_login_public_hint' => '',
+            'branding_sidebar_copy' => '',
+            'branding_support_email' => '',
+            'branding_logo_path' => '',
+            'branding_font_display' => '',
+            'branding_font_body' => '',
+        ];
+    }
+
+    return $branding;
+}
+
+function branding_value(string $key, mixed $default = null): mixed
+{
+    return app_branding()[$key] ?? $default;
+}
+
+function branding_theme_style(): string
+{
+    try {
+        $variables = App\Core\Container::get(SettingRepository::class)->brandingThemeVariables();
+    } catch (Throwable) {
+        return '';
+    }
+
+    $declarations = [];
+    foreach ($variables as $property => $value) {
+        $declarations[] = sprintf('%s: %s;', $property, $value);
+    }
+
+    return $declarations === [] ? '' : ':root {' . implode(' ', $declarations) . '}';
 }
 
 function format_date(?string $value): string

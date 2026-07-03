@@ -153,7 +153,8 @@ try {
     ));
     Container::factory(SettingsController::class, static fn () => new SettingsController(
         Container::get(Auth::class),
-        Container::get(SettingRepository::class)
+        Container::get(SettingRepository::class),
+        Container::get(UploadService::class)
     ));
     Container::factory(SearchController::class, static fn () => new SearchController(
         Container::get(Auth::class),
@@ -216,6 +217,8 @@ try {
 
     $router->get('/logs/audit', [LogController::class, 'audit']);
     $router->get('/logs/mail', [LogController::class, 'mail']);
+    $router->get('/settings/branding', [SettingsController::class, 'branding']);
+    $router->post('/settings/branding', [SettingsController::class, 'updateBranding']);
     $router->get('/settings/mail-footer', [SettingsController::class, 'mailFooter']);
     $router->post('/settings/mail-footer', [SettingsController::class, 'updateMailFooter']);
 
