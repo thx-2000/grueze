@@ -1,7 +1,7 @@
 <?php $draft = $_SESSION['mail_draft'] ?? []; ?>
 <?php
 $branding = app_branding();
-$appName = (string) ($branding['branding_app_name'] ?? 'GRUEZE');
+$appName = (string) ($branding['branding_app_name'] ?? 'Adress-Zentrale');
 $supportEmail = trim((string) ($branding['branding_support_email'] ?? ''));
 $defaultSenderKey = $defaultSenderKey ?? ($identities[0]['key'] ?? '');
 $defaultReplyToKey = $defaultReplyToKey ?? ($replyToOptions[0]['key'] ?? $defaultSenderKey);

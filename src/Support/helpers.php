@@ -86,13 +86,13 @@ function app_branding(): array
         $branding = App\Core\Container::get(SettingRepository::class)->branding();
     } catch (Throwable) {
         $branding = [
-            'branding_app_name' => 'GRUEZE',
+            'branding_app_name' => 'Adress-Zentrale',
             'branding_short_name' => 'GRUEZE',
             'branding_version' => '0.1.0',
-            'branding_public_site_label' => 'grueze.eu',
-            'branding_public_site_url' => 'https://grueze.eu',
+            'branding_public_site_label' => 'example.org',
+            'branding_public_site_url' => 'https://example.org',
             'branding_login_intro' => 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten an einem Ort.',
-            'branding_login_public_hint' => 'Weitere Infos und die öffentliche Startseite findet ihr unter grueze.eu.',
+            'branding_login_public_hint' => 'Weitere Infos und die öffentliche Startseite findet ihr unter example.org.',
             'branding_sidebar_copy' => '',
             'branding_support_email' => '',
             'branding_logo_path' => '',
@@ -127,7 +127,12 @@ function branding_theme_style(): string
 
 function system_version(): string
 {
-    return '0.2.1';
+    return '0.2.2';
+}
+
+function system_label(): string
+{
+    return 'GRUEZE';
 }
 
 function format_date(?string $value): string

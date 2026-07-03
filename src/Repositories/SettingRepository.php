@@ -65,22 +65,19 @@ final class SettingRepository
 
         $legacyReplacements = [
             'branding_app_name' => [
-                'Adress-Zentrale' => 'GRUEZE',
+                'GRUEZE' => 'Adress-Zentrale',
             ],
             'branding_short_name' => [
                 'GRUEZE' => 'GRUEZE',
             ],
             'branding_public_site_label' => [
-                'example.org' => 'grueze.eu',
+                'grueze.eu' => 'example.org',
             ],
             'branding_public_site_url' => [
-                'https://example.org' => 'https://grueze.eu',
-            ],
-            'branding_login_intro' => [
-                'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten an einem Ort.' => 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten an einem Ort.',
+                'https://grueze.eu' => 'https://example.org',
             ],
             'branding_login_public_hint' => [
-                'Infos zum Treffen und die öffentliche Startseite findet ihr unter example.org.' => 'Weitere Infos und die öffentliche Startseite findet ihr unter grueze.eu.',
+                'Weitere Infos und die öffentliche Startseite findet ihr unter grueze.eu.' => 'Weitere Infos und die öffentliche Startseite findet ihr unter example.org.',
             ],
         ];
 
@@ -97,13 +94,13 @@ final class SettingRepository
     public function brandingDefaults(): array
     {
         return [
-            'branding_app_name' => 'GRUEZE',
+            'branding_app_name' => 'Adress-Zentrale',
             'branding_short_name' => 'GRUEZE',
             'branding_version' => '0.2.0',
-            'branding_public_site_label' => 'grueze.eu',
-            'branding_public_site_url' => 'https://grueze.eu',
+            'branding_public_site_label' => 'example.org',
+            'branding_public_site_url' => 'https://example.org',
             'branding_login_intro' => 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten an einem Ort.',
-            'branding_login_public_hint' => 'Weitere Infos und die öffentliche Startseite findet ihr unter grueze.eu.',
+            'branding_login_public_hint' => 'Weitere Infos und die öffentliche Startseite findet ihr unter example.org.',
             'branding_sidebar_copy' => 'Kontakte, Mailings und Organisation an einem Ort.',
             'branding_support_email' => 'kontakt@example.org',
             'branding_logo_path' => '',

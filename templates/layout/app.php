@@ -15,6 +15,7 @@ $sidebarCopy = trim((string) ($branding['branding_sidebar_copy'] ?? ''));
 $supportEmail = trim((string) ($branding['branding_support_email'] ?? ''));
 $logoPath = trim((string) ($branding['branding_logo_path'] ?? ''));
 $appVersion = system_version();
+$systemLabel = system_label();
 $themeStyle = branding_theme_style();
 ?>
 <!doctype html>
@@ -152,7 +153,7 @@ $themeStyle = branding_theme_style();
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
             <?php if ($appVersion !== ''): ?>
                 <span>|</span>
-                <span class="privacy-note-version">v<?= e($appVersion) ?></span>
+                <span class="privacy-note-version"><?= e($systemLabel) ?> v.<?= e($appVersion) ?></span>
             <?php endif; ?>
             <?php if ($publicSiteUrl !== ''): ?>
                 <span>|</span>
