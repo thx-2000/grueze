@@ -11,6 +11,8 @@ body {
     color: var(--color-text);
     background: var(--color-bg);
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .signal-bar {
@@ -241,12 +243,15 @@ label span {
 }
 
 .page-shell {
+    flex: 1;
     display: grid;
     grid-template-columns: var(--shell-sidebar-width) 1fr;
     gap: 1.2rem;
     max-width: var(--shell-max-width);
+    width: 100%;
     margin: 0 auto;
     padding: 5.3rem var(--shell-side-pad) 1.15rem;
+    box-sizing: border-box;
 }
 
 .sidebar {
