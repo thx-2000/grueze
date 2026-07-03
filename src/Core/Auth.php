@@ -16,12 +16,39 @@ final class Auth
 
     public function user(): ?array
     {
+        $userId = $this->activeUserId();
+        if ($userId === null) {
+            return null;
+        }
+
+        $user = $this->users->findById($userId);
+        if ($user && (bool) $user['is_active']) {
+            return $user;
+        }
+
+        if ($this->isImpersonating()) {
+            $this->stopImpersonation();
+            return $this->originalUser();
+        }
+
+        return null;
+    }
+
+    public function originalUser(): ?array
+    {
         $userId = $_SESSION['user_id'] ?? null;
         if (!$userId) {
             return null;
         }
 
-        return $this->users->findById((int) $userId);
+        $user = $this->users->findById((int) $userId);
+
+        return $user && (bool) $user['is_active'] ? $user : null;
+    }
+
+    public function isImpersonating(): bool
+    {
+        return !empty($_SESSION['impersonated_user_id']);
     }
 
     public function check(): bool
@@ -47,6 +74,30 @@ final class Auth
         return true;
     }
 
+    public function startImpersonation(int $targetUserId): bool
+    {
+        if (!$this->canAsOriginal('users.manage')) {
+            return false;
+        }
+
+        $original = $this->originalUser();
+        $target = $this->users->findById($targetUserId);
+        if (!$original || !$target || !(bool) $target['is_active'] || (int) $original['id'] === (int) $target['id']) {
+            return false;
+        }
+
+        $_SESSION['impersonated_user_id'] = (int) $target['id'];
+        Session::regenerate();
+
+        return true;
+    }
+
+    public function stopImpersonation(): void
+    {
+        unset($_SESSION['impersonated_user_id']);
+        Session::regenerate();
+    }
+
     public function logout(): void
     {
         $_SESSION = [];
@@ -55,7 +106,43 @@ final class Auth
 
     public function can(string $permission): bool
     {
+        return $this->resolvePermission($this->user(), $permission);
+    }
+
+    public function canAsOriginal(string $permission): bool
+    {
+        return $this->resolvePermission($this->originalUser(), $permission);
+    }
+
+    public function canViewContactField(string $field): bool
+    {
         $user = $this->user();
+        if (!$user) {
+            return false;
+        }
+
+        $legacyRoles = (array) config('security.private_contact_detail_roles', ['admin', 'orga']);
+        $defaultVisibility = array_fill_keys(self::CONTACT_DETAIL_FIELDS, $legacyRoles);
+        $configuredVisibility = (array) config('security.contact_detail_visibility', []);
+        $allowedRoles = (array) ($configuredVisibility[$field] ?? $defaultVisibility[$field] ?? []);
+
+        return in_array((string) $user['role_name'], $allowedRoles, true);
+    }
+
+    private function activeUserId(): ?int
+    {
+        $impersonated = $_SESSION['impersonated_user_id'] ?? null;
+        if ($impersonated) {
+            return (int) $impersonated;
+        }
+
+        $userId = $_SESSION['user_id'] ?? null;
+
+        return $userId ? (int) $userId : null;
+    }
+
+    private function resolvePermission(?array $user, string $permission): bool
+    {
         if (!$user) {
             return false;
         }
@@ -84,21 +171,6 @@ final class Auth
             'settings.manage' => ['admin', 'orga'],
         ];
 
-        return in_array($user['role_name'], $matrix[$permission] ?? [], true);
-    }
-
-    public function canViewContactField(string $field): bool
-    {
-        $user = $this->user();
-        if (!$user) {
-            return false;
-        }
-
-        $legacyRoles = (array) config('security.private_contact_detail_roles', ['admin', 'orga']);
-        $defaultVisibility = array_fill_keys(self::CONTACT_DETAIL_FIELDS, $legacyRoles);
-        $configuredVisibility = (array) config('security.contact_detail_visibility', []);
-        $allowedRoles = (array) ($configuredVisibility[$field] ?? $defaultVisibility[$field] ?? []);
-
-        return in_array((string) $user['role_name'], $allowedRoles, true);
+        return in_array((string) $user['role_name'], $matrix[$permission] ?? [], true);
     }
 }

@@ -20,6 +20,8 @@ abstract class BaseController
     {
         View::render($template, array_merge($data, [
             'currentUser' => $this->auth->user(),
+            'originalUser' => $this->auth->originalUser(),
+            'isImpersonating' => $this->auth->isImpersonating(),
             'csrfToken' => Csrf::token(),
         ]));
     }
@@ -40,4 +42,3 @@ abstract class BaseController
         }
     }
 }
-

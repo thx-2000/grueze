@@ -19,9 +19,19 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     <div class="signal-bar">
         <div class="signal-bar-inner">
             <span class="signal-bar-label">Zentrale</span>
-            <?php if (!empty($currentUser)): ?>
-                <span class="signal-bar-meta">Angemeldet als <?= e($currentUser['name']) ?></span>
-            <?php endif; ?>
+            <div class="signal-bar-userzone">
+                <?php if (!empty($currentUser)): ?>
+                    <?php if (!empty($isImpersonating) && !empty($originalUser)): ?>
+                        <span class="signal-bar-meta">Als <?= e($currentUser['name']) ?> unterwegs</span>
+                        <form method="post" action="<?= e(url('/users/impersonate/stop')) ?>">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <button type="submit" class="signal-bar-button">Zurück zu <?= e($originalUser['name']) ?></button>
+                        </form>
+                    <?php else: ?>
+                        <span class="signal-bar-meta">Angemeldet als <?= e($currentUser['name']) ?></span>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
     <div class="page-shell">

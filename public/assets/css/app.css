@@ -31,6 +31,22 @@ body {
     font-weight: 800;
 }
 
+.signal-bar-userzone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.signal-bar-button {
+    padding: 0.34rem 0.62rem;
+    border-radius: 999px;
+    background: rgba(24, 26, 21, 0.14);
+    color: #181a15 !important;
+    box-shadow: none;
+    border-color: rgba(24, 26, 21, 0.1);
+    font-size: 0.74rem;
+}
+
 a {
     color: var(--color-primary-strong);
     text-decoration: none;

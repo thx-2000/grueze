@@ -50,17 +50,33 @@
                     <th>Rolle</th>
                     <th>Status</th>
                     <th>Letzter Login</th>
+                    <?php if ($canImpersonateUsers): ?><th>Aktion</th><?php endif; ?>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($users as $user): ?>
-                    <tr>
+                    <tr id="user-<?= e((string) $user['id']) ?>">
                         <td><?= e($user['name']) ?></td>
                         <td><?= e(trim(($user['vorname'] ?? '') . ' ' . ($user['nachname'] ?? '')) ?: 'Keiner') ?></td>
                         <td><?= e($user['email']) ?></td>
                         <td><?= e($user['role_name']) ?></td>
                         <td><?= (int) $user['is_active'] === 1 ? 'Aktiv' : 'Inaktiv' ?></td>
                         <td><?= e($user['last_login_at'] ? format_datetime($user['last_login_at']) : 'Noch nie') ?></td>
+                        <?php if ($canImpersonateUsers): ?>
+                            <td>
+                                <?php if ((int) $user['id'] === $currentUserId): ?>
+                                    <span class="muted">Aktuelle Sitzung</span>
+                                <?php elseif ((int) $user['id'] === $originalUserId): ?>
+                                    <span class="muted">Admin-Konto</span>
+                                <?php else: ?>
+                                    <form method="post" action="<?= e(url('/users/impersonate')) ?>">
+                                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                        <input type="hidden" name="user_id" value="<?= e((string) $user['id']) ?>">
+                                        <button type="submit" class="ghost-button compact-action"><?= icon('login') ?><span>Als <?= e($user['name']) ?></span></button>
+                                    </form>
+                                <?php endif; ?>
+                            </td>
+                        <?php endif; ?>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
