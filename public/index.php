@@ -160,7 +160,8 @@ try {
         Container::get(LogRepository::class)
     ));
     Container::factory(LegalController::class, static fn () => new LegalController(
-        Container::get(Auth::class)
+        Container::get(Auth::class),
+        Container::get(SettingRepository::class)
     ));
     Container::factory(MailController::class, static fn () => new MailController(
         Container::get(Auth::class),
@@ -236,6 +237,10 @@ try {
 
     $router->get('/admin/migrations', [AdminController::class, 'migrations']);
     $router->post('/admin/migrations/apply', [AdminController::class, 'applyMigration']);
+    $router->get('/admin/legal/impressum', [LegalController::class, 'editImpressum']);
+    $router->post('/admin/legal/impressum', [LegalController::class, 'updateImpressum']);
+    $router->get('/admin/legal/datenschutz', [LegalController::class, 'editDatenschutz']);
+    $router->post('/admin/legal/datenschutz', [LegalController::class, 'updateDatenschutz']);
     $router->get('/logs/audit', [LogController::class, 'audit']);
     $router->get('/logs/mail', [LogController::class, 'mail']);
     $router->get('/settings/branding', [SettingsController::class, 'branding']);

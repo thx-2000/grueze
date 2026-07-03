@@ -1967,6 +1967,19 @@ td {
     padding-left: 1.2rem;
 }
 
+.legal-editor {
+    width: 100%;
+    font-family: "SF Mono", "Fira Mono", "Menlo", "Consolas", monospace;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    resize: vertical;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface-soft);
+    color: var(--color-text);
+}
+
 .toast {
     position: fixed;
     right: 1.2rem;

@@ -23,6 +23,22 @@ final class MigrationService
                 applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
         );
+        $this->seedPreExisting();
+    }
+
+    private function seedPreExisting(): void
+    {
+        $count = (int) $this->pdo->query('SELECT COUNT(*) FROM schema_migrations')->fetchColumn();
+        if ($count > 0) {
+            return;
+        }
+
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO schema_migrations (migration) VALUES (:migration)'
+        );
+        foreach (array_keys($this->allMigrationFiles()) as $name) {
+            $stmt->execute(['migration' => $name]);
+        }
     }
 
     public function applied(): array
