@@ -49,18 +49,21 @@
                     <th>E-Mail</th>
                     <th>Rolle</th>
                     <th>Status</th>
+                    <th>Passkeys</th>
                     <th>Letzter Login</th>
                     <?php if ($canImpersonateUsers): ?><th class="users-action-col">Verwaltung</th><?php endif; ?>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($users as $user): ?>
+                    <?php $passkeyCount = (int) ($passkeyCounts[(int) $user['id']] ?? 0); ?>
                     <tr id="user-<?= e((string) $user['id']) ?>">
                         <td><?= e($user['name']) ?></td>
                         <td><?= e(trim(($user['vorname'] ?? '') . ' ' . ($user['nachname'] ?? '')) ?: 'Keiner') ?></td>
                         <td><?= e($user['email']) ?></td>
                         <td><?= e($user['role_name']) ?></td>
                         <td><?= (int) $user['is_active'] === 1 ? 'Aktiv' : 'Inaktiv' ?></td>
+                        <td><?= $passkeyCount > 0 ? e((string) $passkeyCount) : '–' ?></td>
                         <td><?= e($user['last_login_at'] ? format_datetime($user['last_login_at']) : 'Noch nie') ?></td>
                         <?php if ($canImpersonateUsers): ?>
                             <td class="users-action-col">
@@ -92,6 +95,14 @@
                                         <input type="hidden" name="user_id" value="<?= e((string) $user['id']) ?>">
                                         <button type="submit" class="ghost-button compact-action"><?= icon('mail') ?><span>Reset-Mail</span></button>
                                     </form>
+
+                                    <?php if (!empty($passkeysAvailable)): ?>
+                                        <form method="post" action="<?= e(url('/users/passkeys/reset')) ?>" onsubmit="return confirm('Alle Passkeys dieses Benutzers wirklich entfernen?');">
+                                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                            <input type="hidden" name="user_id" value="<?= e((string) $user['id']) ?>">
+                                            <button type="submit" class="danger-button compact-action"<?= $passkeyCount === 0 ? ' disabled' : '' ?>><?= icon('passkey') ?><span>Passkeys löschen</span></button>
+                                        </form>
+                                    <?php endif; ?>
 
                                     <details class="admin-drawer compact-inside-drawer compact-user-password-drawer">
                                         <summary>

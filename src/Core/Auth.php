@@ -74,6 +74,21 @@ final class Auth
         return true;
     }
 
+    public function loginUsingId(int $userId): bool
+    {
+        $user = $this->users->findById($userId);
+        if (!$user || !(bool) $user['is_active']) {
+            return false;
+        }
+
+        $_SESSION['user_id'] = (int) $user['id'];
+        unset($_SESSION['impersonated_user_id']);
+        Session::regenerate();
+        $this->users->touchLogin((int) $user['id']);
+
+        return true;
+    }
+
     public function startImpersonation(int $targetUserId): bool
     {
         if (!$this->canAsOriginal('users.manage')) {

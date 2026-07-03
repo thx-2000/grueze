@@ -355,3 +355,166 @@ if (subjectPreview && subjectField && subjectPrefixField) {
     subjectPrefixField.addEventListener('change', updateSubjectPreview);
     updateSubjectPreview();
 }
+
+function base64urlToBytes(value) {
+    const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized + '='.repeat((4 - (normalized.length % 4 || 4)) % 4);
+    const binary = window.atob(padded);
+    return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
+function bytesToBase64url(buffer) {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    let binary = '';
+    bytes.forEach((byte) => {
+        binary += String.fromCharCode(byte);
+    });
+
+    return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function decodePublicKeyOptions(options) {
+    const decoded = { ...options };
+    decoded.challenge = base64urlToBytes(options.challenge);
+
+    if (options.user) {
+        decoded.user = {
+            ...options.user,
+            id: base64urlToBytes(options.user.id),
+        };
+    }
+
+    if (Array.isArray(options.excludeCredentials)) {
+        decoded.excludeCredentials = options.excludeCredentials.map((credential) => ({
+            ...credential,
+            id: base64urlToBytes(credential.id),
+        }));
+    }
+
+    if (Array.isArray(options.allowCredentials)) {
+        decoded.allowCredentials = options.allowCredentials.map((credential) => ({
+            ...credential,
+            id: base64urlToBytes(credential.id),
+        }));
+    }
+
+    return decoded;
+}
+
+async function fetchJson(url, payload) {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) {
+        throw new Error(data.message || 'Die Anfrage konnte nicht verarbeitet werden.');
+    }
+
+    return data;
+}
+
+function credentialToPayload(credential) {
+    const response = credential.response || {};
+    const payload = {
+        id: credential.id,
+        rawId: bytesToBase64url(credential.rawId),
+        type: credential.type,
+        response: {},
+    };
+
+    if (response.clientDataJSON) {
+        payload.response.clientDataJSON = bytesToBase64url(response.clientDataJSON);
+    }
+    if (response.attestationObject) {
+        payload.response.attestationObject = bytesToBase64url(response.attestationObject);
+    }
+    if (response.authenticatorData) {
+        payload.response.authenticatorData = bytesToBase64url(response.authenticatorData);
+    }
+    if (response.signature) {
+        payload.response.signature = bytesToBase64url(response.signature);
+    }
+    if (response.userHandle) {
+        payload.response.userHandle = bytesToBase64url(response.userHandle);
+    }
+    if (typeof response.getTransports === 'function') {
+        payload.response.transports = response.getTransports();
+    }
+
+    return payload;
+}
+
+const passkeyRegisterButton = document.querySelector('[data-passkey-register]');
+if (passkeyRegisterButton) {
+    passkeyRegisterButton.addEventListener('click', async () => {
+        if (!window.PublicKeyCredential || !navigator.credentials) {
+            showToast('Dieser Browser unterstützt Passkeys nicht.');
+            return;
+        }
+
+        const labelField = document.getElementById('passkeyLabel');
+        passkeyRegisterButton.disabled = true;
+
+        try {
+            const optionsResponse = await fetchJson(passkeyRegisterButton.dataset.optionsUrl, {
+                _csrf: window.APP.csrfToken,
+            });
+            const options = decodePublicKeyOptions(optionsResponse.options);
+            const credential = await navigator.credentials.create({ publicKey: options });
+            if (!credential) {
+                throw new Error('Der Passkey wurde nicht erstellt.');
+            }
+
+            await fetchJson(passkeyRegisterButton.dataset.registerUrl, {
+                _csrf: window.APP.csrfToken,
+                label: labelField?.value || '',
+                ...credentialToPayload(credential),
+            });
+
+            showToast('Passkey gespeichert.');
+            window.location.reload();
+        } catch (error) {
+            showToast(error.message || 'Passkey konnte nicht gespeichert werden.');
+        } finally {
+            passkeyRegisterButton.disabled = false;
+        }
+    });
+}
+
+const passkeyLoginButton = document.querySelector('[data-passkey-login]');
+if (passkeyLoginButton) {
+    passkeyLoginButton.addEventListener('click', async () => {
+        if (!window.PublicKeyCredential || !navigator.credentials) {
+            showToast('Dieser Browser unterstützt Passkeys nicht.');
+            return;
+        }
+
+        passkeyLoginButton.disabled = true;
+
+        try {
+            const optionsResponse = await fetchJson(passkeyLoginButton.dataset.optionsUrl, {
+                _csrf: window.APP.csrfToken,
+            });
+            const options = decodePublicKeyOptions(optionsResponse.options);
+            const credential = await navigator.credentials.get({ publicKey: options });
+            if (!credential) {
+                throw new Error('Die Passkey-Anmeldung wurde abgebrochen.');
+            }
+
+            const authResponse = await fetchJson(passkeyLoginButton.dataset.authUrl, {
+                _csrf: window.APP.csrfToken,
+                ...credentialToPayload(credential),
+            });
+
+            window.location.href = authResponse.redirect || '/';
+        } catch (error) {
+            showToast(error.message || 'Passkey-Anmeldung fehlgeschlagen.');
+        } finally {
+            passkeyLoginButton.disabled = false;
+        }
+    });
+}

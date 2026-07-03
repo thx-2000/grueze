@@ -26,6 +26,22 @@
         <button type="submit"><?= icon('login') ?><span>Anmelden</span></button>
     </form>
 
+    <?php if (!empty($passkeysAvailable)): ?>
+        <div class="subsection-card passkey-login-box">
+            <strong>Schnell anmelden</strong>
+            <p class="detail-hint">Wenn für dein Konto bereits ein Passkey hinterlegt ist, kannst du dich damit direkt per Gerätefreigabe anmelden.</p>
+            <button
+                type="button"
+                class="ghost-button"
+                data-passkey-login
+                data-options-url="<?= e(url('/passkeys/auth/options')) ?>"
+                data-auth-url="<?= e(url('/passkeys/authenticate')) ?>"
+            >
+                <?= icon('passkey') ?><span>Mit Passkey anmelden</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
     <div class="link-row">
         <p><a href="<?= e(url('/forgot-password')) ?>">Passwort vergessen?</a></p>
         <p><a href="https://example.org" target="_blank" rel="noopener noreferrer">Zur Website</a></p>

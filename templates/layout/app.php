@@ -79,6 +79,7 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
                         <a href="https://example.org" target="_blank" rel="noopener noreferrer"><?= icon('globe') ?><span>Startseite</span></a>
                     <?php endif; ?>
                     <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('contacts') ?><span>Kontakte</span></a>
+                    <a class="<?= str_starts_with($currentPath, '/security/passkeys') ? 'is-active' : '' ?>" href="<?= e(url('/security/passkeys')) ?>"><?= icon('passkey') ?><span>Passkeys</span></a>
                     <?php if (can('settings.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/mail-footer') ? 'is-active' : '' ?>" href="<?= e(url('/settings/mail-footer')) ?>"><?= icon('sliders') ?><span>Mail-Einstellungen</span></a><?php endif; ?>
                     <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/users') ? 'is-active' : '' ?>" href="<?= e(url('/users')) ?>"><?= icon('user') ?><span>Benutzer</span></a><?php endif; ?>
                     <?php if (can('audit.view')): ?><a class="<?= str_starts_with($currentPath, '/logs/audit') ? 'is-active' : '' ?>" href="<?= e(url('/logs/audit')) ?>"><?= icon('history') ?><span>Audit-Log</span></a><?php endif; ?>
@@ -120,13 +121,18 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
         </main>
     </div>
 
-    <div class="privacy-note">
-        <div class="privacy-note-inner">
+    <div class="privacy-note<?= !empty($currentUser) ? ' is-authenticated' : '' ?>">
+        <div class="privacy-note-shell">
+            <?php if (!empty($currentUser)): ?>
+                <div class="privacy-note-spacer" aria-hidden="true"></div>
+            <?php endif; ?>
+            <div class="privacy-note-inner">
             <a href="<?= e(url('/impressum')) ?>">Impressum</a>
             <span>|</span>
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
             <span>|</span>
             <a href="https://example.org" target="_blank" rel="noopener noreferrer">example.org</a>
+            </div>
         </div>
     </div>
 

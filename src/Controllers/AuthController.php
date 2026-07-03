@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\LogRepository;
+use App\Repositories\PasskeyRepository;
 use App\Services\PasswordResetService;
 use App\Services\Validator;
 use App\Support\Redirect;
@@ -16,7 +17,8 @@ final class AuthController extends BaseController
     public function __construct(
         \App\Core\Auth $auth,
         private LogRepository $logs,
-        private PasswordResetService $passwordResets
+        private PasswordResetService $passwordResets,
+        private PasskeyRepository $passkeys
     ) {
         parent::__construct($auth);
     }
@@ -25,6 +27,7 @@ final class AuthController extends BaseController
     {
         $this->render('auth/login', [
             'adminExists' => \App\Core\Container::get(\App\Repositories\UserRepository::class)->adminExists(),
+            'passkeysAvailable' => $this->passkeys->isAvailable(),
         ]);
     }
 

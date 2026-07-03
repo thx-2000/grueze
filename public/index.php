@@ -8,6 +8,7 @@ use App\Controllers\ContactController;
 use App\Controllers\LegalController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
+use App\Controllers\PasskeyController;
 use App\Controllers\SearchController;
 use App\Controllers\SettingsController;
 use App\Controllers\SetupController;
@@ -24,6 +25,7 @@ use App\Core\Session;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
 use App\Repositories\LogRepository;
+use App\Repositories\PasskeyRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
@@ -32,6 +34,7 @@ use App\Services\ContactImportService;
 use App\Services\MailService;
 use App\Services\PasswordResetService;
 use App\Services\UploadService;
+use App\Services\WebAuthnService;
 use App\Services\XlsxReader;
 
 ini_set('display_errors', '1');
@@ -72,6 +75,7 @@ try {
     Container::factory(ContactRepository::class, static fn () => new ContactRepository(Container::get(PDO::class)));
     Container::factory(LogRepository::class, static fn () => new LogRepository(Container::get(PDO::class)));
     Container::factory(SettingRepository::class, static fn () => new SettingRepository(Container::get(PDO::class)));
+    Container::factory(PasskeyRepository::class, static fn () => new PasskeyRepository(Container::get(PDO::class)));
     Container::factory(Auth::class, static fn () => new Auth(Container::get(UserRepository::class)));
     Container::factory(UploadService::class, static fn () => new UploadService());
     Container::factory(CsvExportService::class, static fn () => new CsvExportService());
@@ -88,11 +92,13 @@ try {
         Container::get(UserRepository::class),
         Container::get(MailService::class)
     ));
+    Container::factory(WebAuthnService::class, static fn () => new WebAuthnService());
 
     Container::factory(AuthController::class, static fn () => new AuthController(
         Container::get(Auth::class),
         Container::get(LogRepository::class),
-        Container::get(PasswordResetService::class)
+        Container::get(PasswordResetService::class),
+        Container::get(PasskeyRepository::class)
     ));
     Container::factory(ContactController::class, static fn () => new ContactController(
         Container::get(Auth::class),
@@ -109,7 +115,14 @@ try {
         Container::get(Auth::class),
         Container::get(UserRepository::class),
         Container::get(LogRepository::class),
-        Container::get(PasswordResetService::class)
+        Container::get(PasswordResetService::class),
+        Container::get(PasskeyRepository::class)
+    ));
+    Container::factory(PasskeyController::class, static fn () => new PasskeyController(
+        Container::get(Auth::class),
+        Container::get(PasskeyRepository::class),
+        Container::get(WebAuthnService::class),
+        Container::get(LogRepository::class)
     ));
     Container::factory(SetupController::class, static fn () => new SetupController(
         Container::get(Auth::class),
@@ -180,8 +193,16 @@ try {
     $router->post('/users/set-password', [UserController::class, 'setPassword']);
     $router->post('/users/send-reset', [UserController::class, 'sendReset']);
     $router->post('/users/toggle-active', [UserController::class, 'toggleActive']);
+    $router->post('/users/passkeys/reset', [UserController::class, 'resetPasskeys']);
     $router->post('/users/impersonate', [UserController::class, 'impersonate']);
     $router->post('/users/impersonate/stop', [UserController::class, 'stopImpersonation']);
+
+    $router->get('/security/passkeys', [PasskeyController::class, 'index']);
+    $router->post('/passkeys/register/options', [PasskeyController::class, 'registrationOptions']);
+    $router->post('/passkeys/register', [PasskeyController::class, 'register']);
+    $router->post('/passkeys/auth/options', [PasskeyController::class, 'authenticationOptions']);
+    $router->post('/passkeys/authenticate', [PasskeyController::class, 'authenticate']);
+    $router->post('/passkeys/delete', [PasskeyController::class, 'delete']);
 
     $router->post('/mail/compose', [MailController::class, 'compose']);
     $router->get('/mail/compose', [MailController::class, 'compose']);

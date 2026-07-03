@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\LogRepository;
+use App\Repositories\PasskeyRepository;
 use App\Repositories\UserRepository;
 use App\Services\PasswordResetService;
 use App\Services\Validator;
@@ -18,7 +19,8 @@ final class UserController extends BaseController
         \App\Core\Auth $auth,
         private UserRepository $users,
         private LogRepository $logs,
-        private PasswordResetService $passwordResets
+        private PasswordResetService $passwordResets,
+        private PasskeyRepository $passkeys
     ) {
         parent::__construct($auth);
     }
@@ -26,9 +28,16 @@ final class UserController extends BaseController
     public function index(): void
     {
         $this->requirePermission('users.manage');
+        $users = $this->users->all();
+
         $this->render('users/index', [
-            'users' => $this->users->all(),
+            'users' => $users,
             'roles' => $this->users->roles(),
+            'passkeysAvailable' => $this->passkeys->isAvailable(),
+            'passkeyCounts' => $this->passkeys->countByUserIds(array_map(
+                static fn (array $user): int => (int) $user['id'],
+                $users
+            )),
             'canImpersonateUsers' => $this->auth->canAsOriginal('users.manage'),
             'originalUserId' => (int) (($this->auth->originalUser()['id'] ?? 0)),
             'currentUserId' => (int) (($this->auth->user()['id'] ?? 0)),
@@ -220,6 +229,39 @@ final class UserController extends BaseController
         );
 
         flash('success', $targetUser['name'] . ($shouldActivate ? ' wurde entsperrt.' : ' wurde gesperrt.'));
+        Redirect::to('/users#user-' . $targetUser['id']);
+    }
+
+    public function resetPasskeys(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        if (!$this->passkeys->isAvailable()) {
+            flash('error', 'Passkeys sind erst nach der Datenbank-Migration verfügbar.');
+            Redirect::to('/users');
+        }
+
+        $targetUser = $this->users->findById((int) $request->input('user_id'));
+        if (!$targetUser) {
+            flash('error', 'Benutzer nicht gefunden.');
+            Redirect::to('/users');
+        }
+
+        $deleted = $this->passkeys->deleteAllForUserId((int) $targetUser['id']);
+        $this->logs->addAudit(
+            (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
+            null,
+            'updated',
+            'Alle Passkeys für Benutzer "' . $targetUser['name'] . '" wurden durch Admin entfernt.'
+        );
+
+        flash(
+            'success',
+            $deleted > 0
+                ? 'Alle Passkeys für ' . $targetUser['name'] . ' wurden entfernt.'
+                : 'Für ' . $targetUser['name'] . ' waren keine Passkeys hinterlegt.'
+        );
         Redirect::to('/users#user-' . $targetUser['id']);
     }
 
