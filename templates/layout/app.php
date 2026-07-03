@@ -14,7 +14,7 @@ $publicSiteUrl = trim((string) ($branding['branding_public_site_url'] ?? ''));
 $sidebarCopy = trim((string) ($branding['branding_sidebar_copy'] ?? ''));
 $supportEmail = trim((string) ($branding['branding_support_email'] ?? ''));
 $logoPath = trim((string) ($branding['branding_logo_path'] ?? ''));
-$appVersion = trim((string) ($branding['branding_version'] ?? ''));
+$appVersion = system_version();
 $themeStyle = branding_theme_style();
 ?>
 <!doctype html>

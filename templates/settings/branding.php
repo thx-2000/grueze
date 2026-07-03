@@ -25,11 +25,6 @@
                     <input type="text" name="branding_short_name" value="<?= e((string) ($branding['branding_short_name'] ?? '')) ?>" required>
                 </label>
                 <label>
-                    <span>Versionsnummer</span>
-                    <input type="text" name="branding_version" value="<?= e((string) ($branding['branding_version'] ?? '0.2.0')) ?>">
-                    <small class="field-hint">Zum Beispiel <code>0.2.0</code> oder <code>0.2.1</code>. Wird dezent im Fußbereich eingeblendet.</small>
-                </label>
-                <label>
                     <span>Öffentliche Seitenbezeichnung</span>
                     <input type="text" name="branding_public_site_label" value="<?= e((string) ($branding['branding_public_site_label'] ?? '')) ?>">
                 </label>

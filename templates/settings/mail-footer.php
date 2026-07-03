@@ -81,7 +81,8 @@
                             </label>
                             <label class="full-width">
                                 <span>Passwort</span>
-                                <input type="text" name="mail_smtp_password" value="<?= e((string) ($mailSettings['mail_smtp_password'] ?? '')) ?>">
+                                <input type="password" name="mail_smtp_password" value="" autocomplete="new-password" placeholder="unverändert lassen">
+                                <small class="field-hint">Aus Sicherheitsgründen wird das gespeicherte Passwort nicht angezeigt. Leer lassen bedeutet: unverändert übernehmen.</small>
                             </label>
                         </div>
                     </div>
@@ -115,7 +116,8 @@
                             </label>
                             <label>
                                 <span>IMAP-Passwort</span>
-                                <input type="text" name="mail_imap_password" value="<?= e((string) ($mailSettings['mail_imap_password'] ?? '')) ?>">
+                                <input type="password" name="mail_imap_password" value="" autocomplete="new-password" placeholder="unverändert lassen">
+                                <small class="field-hint">Auch dieses Passwort bleibt im Backend verborgen. Leer lassen bedeutet: unverändert übernehmen.</small>
                             </label>
                             <label class="full-width">
                                 <span>Mögliche Gesendet-Ordner</span>

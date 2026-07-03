@@ -1,5 +1,8 @@
 <?php $draft = $_SESSION['mail_draft'] ?? []; ?>
 <?php
+$branding = app_branding();
+$appName = (string) ($branding['branding_app_name'] ?? 'GRUEZE');
+$supportEmail = trim((string) ($branding['branding_support_email'] ?? ''));
 $defaultSenderKey = $defaultSenderKey ?? ($identities[0]['key'] ?? '');
 $defaultReplyToKey = $defaultReplyToKey ?? ($replyToOptions[0]['key'] ?? $defaultSenderKey);
 $activeSubjectPrefix = $draft['subject_prefix'] ?? $defaultSubjectPrefix;
@@ -11,7 +14,7 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
     <div class="hero-row">
         <div>
             <p class="eyebrow"><?= $memberContactMode ? 'Kontaktaufnahme' : 'Mailing' ?></p>
-            <h2><?= $memberContactMode ? 'Einzelkontakt über das System' : 'Personalisierte E-Mail verfassen' ?></h2>
+            <h2><?= $memberContactMode ? 'Einzelkontakt über ' . e($appName) : 'Personalisierte E-Mail verfassen' ?></h2>
             <p class="muted"><?= count($contacts) ?> ausgewählte Kontakte. Platzhalter: <code>{Anrede}</code>, <code>{Vorname}</code> und <code>{Nachname}</code>.</p>
         </div>
         <div class="selection-status"><?= count($contacts) ?> Empfänger ausgewählt</div>
@@ -40,13 +43,13 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
                     </div>
                     <ol class="workflow-list">
                         <li>Formuliere deine Nachricht wie gewohnt.</li>
-                        <li>Das System verschickt sie technisch über den Mailer, aber Antworten landen bei dir.</li>
-                        <li>Falls dir zu einem Kontakt noch eine fehlende Mailadresse bekannt ist, schicke sie bitte zusätzlich an <a href="mailto:kontakt@example.org">kontakt@example.org</a>.</li>
+                        <li><?= e($appName) ?> verschickt sie technisch über den Mailer, aber Antworten landen bei dir.</li>
+                        <li>Falls dir zu einem Kontakt noch eine fehlende Mailadresse bekannt ist, schicke sie bitte zusätzlich an <a href="mailto:<?= e($supportEmail !== '' ? $supportEmail : 'kontakt@example.org') ?>"><?= e($supportEmail !== '' ? $supportEmail : 'kontakt@example.org') ?></a>.</li>
                     </ol>
                 </div>
                 <div class="subsection-card full-width">
                     <strong>Absender und Antwortweg</strong>
-                    <div class="mail-footer-preview">Die Nachricht wird über den Mailer verschickt. Antworten gehen automatisch direkt an deine eigene Login-Mailadresse.</div>
+                    <div class="mail-footer-preview">Die Nachricht wird über den <?= e($appName) ?>-Mailer verschickt. Antworten gehen automatisch direkt an deine eigene Login-Mailadresse.</div>
                 </div>
             <?php else: ?>
                 <label>

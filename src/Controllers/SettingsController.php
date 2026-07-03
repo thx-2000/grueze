@@ -139,6 +139,14 @@ final class SettingsController extends BaseController
                 $mailSettingsInput[$key] = trim((string) $request->input($key, $mailSettingsDefaults[$key]));
             }
 
+            $currentMailSettings = $this->settings->mailSettings();
+            if ($mailSettingsInput['mail_smtp_password'] === '') {
+                $mailSettingsInput['mail_smtp_password'] = (string) ($currentMailSettings['mail_smtp_password'] ?? '');
+            }
+            if ($mailSettingsInput['mail_imap_password'] === '') {
+                $mailSettingsInput['mail_imap_password'] = (string) ($currentMailSettings['mail_imap_password'] ?? '');
+            }
+
             if (
                 $mailSettingsInput['mail_identity_name'] === ''
                 || $mailSettingsInput['mail_identity_email'] === ''
