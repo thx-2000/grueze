@@ -17,6 +17,22 @@
             <p class="detail-hint role-chip-label"><?= e((string) ($accountUser['role_name'] ?? '')) ?></p>
         </div>
     </div>
+    <div class="account-quicknav">
+        <a class="account-quicknav-item" href="#password">
+            <span class="account-quicknav-icon"><?= icon('key') ?></span>
+            <span>
+                <strong>Passwort</strong>
+                <small>Eigenes Kennwort ändern</small>
+            </span>
+        </a>
+        <a class="account-quicknav-item" href="#passkeys">
+            <span class="account-quicknav-icon"><?= icon('passkey') ?></span>
+            <span>
+                <strong>Passkeys</strong>
+                <small>Geräte verwalten</small>
+            </span>
+        </a>
+    </div>
 </section>
 
 <section class="panel compact-editor-shell" id="password">
@@ -26,24 +42,26 @@
             <p class="muted">Für Änderungen am eigenen Passwort brauchst du zur Sicherheit zuerst dein aktuelles Kennwort.</p>
         </div>
     </div>
-    <form method="post" action="<?= e(url('/account/password')) ?>" class="form-grid account-settings-form">
-        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <label>
-            <span>Aktuelles Passwort</span>
-            <input type="password" name="current_password" autocomplete="current-password" required>
-        </label>
-        <label>
-            <span>Neues Passwort</span>
-            <input type="password" name="new_password" minlength="12" autocomplete="new-password" required>
-        </label>
-        <label>
-            <span>Neues Passwort wiederholen</span>
-            <input type="password" name="new_password_repeat" minlength="12" autocomplete="new-password" required>
-        </label>
-        <div class="form-actions">
-            <button type="submit"><?= icon('key') ?><span>Passwort aktualisieren</span></button>
-        </div>
-    </form>
+    <div class="subsection-card account-section-card">
+        <form method="post" action="<?= e(url('/account/password')) ?>" class="form-grid account-settings-form">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <label>
+                <span>Aktuelles Passwort</span>
+                <input type="password" name="current_password" autocomplete="current-password" required>
+            </label>
+            <label>
+                <span>Neues Passwort</span>
+                <input type="password" name="new_password" minlength="12" autocomplete="new-password" required>
+            </label>
+            <label>
+                <span>Neues Passwort wiederholen</span>
+                <input type="password" name="new_password_repeat" minlength="12" autocomplete="new-password" required>
+            </label>
+            <div class="form-actions">
+                <button type="submit"><?= icon('key') ?><span>Passwort aktualisieren</span></button>
+            </div>
+        </form>
+    </div>
 </section>
 
 <section class="panel compact-editor-shell" id="passkeys">
@@ -82,7 +100,7 @@
             <p class="detail-hint">Beim Entfernen eines Geräts ist danach wieder Passwort oder ein anderer Passkey nötig.</p>
 
             <?php if ($passkeys === []): ?>
-                <p class="muted">Für dieses Konto ist noch kein Passkey gespeichert.</p>
+                <p class="muted account-empty-state">Für dieses Konto ist noch kein Passkey gespeichert.</p>
             <?php else: ?>
                 <div class="passkey-list">
                     <?php foreach ($passkeys as $passkey): ?>
