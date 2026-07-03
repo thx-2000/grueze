@@ -79,17 +79,17 @@ $globalSearchQuery = trim((string) ($_GET['q'] ?? ''));
                         <a href="https://example.org" target="_blank" rel="noopener noreferrer"><?= icon('globe') ?><span>Startseite</span></a>
                     <?php endif; ?>
                     <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('contacts') ?><span>Kontakte</span></a>
-                    <a class="<?= str_starts_with($currentPath, '/security/passkeys') ? 'is-active' : '' ?>" href="<?= e(url('/security/passkeys')) ?>"><?= icon('passkey') ?><span>Passkeys</span></a>
                     <?php if (can('settings.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/mail-footer') ? 'is-active' : '' ?>" href="<?= e(url('/settings/mail-footer')) ?>"><?= icon('sliders') ?><span>Mail-Einstellungen</span></a><?php endif; ?>
                     <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/users') ? 'is-active' : '' ?>" href="<?= e(url('/users')) ?>"><?= icon('user') ?><span>Benutzer</span></a><?php endif; ?>
                     <?php if (can('audit.view')): ?><a class="<?= str_starts_with($currentPath, '/logs/audit') ? 'is-active' : '' ?>" href="<?= e(url('/logs/audit')) ?>"><?= icon('history') ?><span>Audit-Log</span></a><?php endif; ?>
                     <?php if (can('mail.view_log')): ?><a class="<?= str_starts_with($currentPath, '/logs/mail') ? 'is-active' : '' ?>" href="<?= e(url('/logs/mail')) ?>"><?= icon('mail') ?><span>Versandprotokoll</span></a><?php endif; ?>
                 </nav>
                 <div class="sidebar-footer">
-                    <div class="profile-chip">
+                    <a class="profile-chip<?= str_starts_with($currentPath, '/account') ? ' is-active' : '' ?>" href="<?= e(url('/account')) ?>">
                         <strong><?= e($currentUser['name']) ?></strong>
                         <span><?= e($currentUser['role_name'] ?? '') ?></span>
-                    </div>
+                        <small>Konto verwalten</small>
+                    </a>
                     <form method="post" action="<?= e(url('/logout')) ?>">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <button type="submit" class="ghost-button">Abmelden</button>

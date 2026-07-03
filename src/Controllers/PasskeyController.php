@@ -28,12 +28,7 @@ final class PasskeyController extends BaseController
     public function index(): void
     {
         $this->requireAuth();
-        $user = $this->auth->user();
-
-        $this->render('security/passkeys', [
-            'passkeysAvailable' => $this->passkeys->isAvailable(),
-            'passkeys' => $user ? $this->passkeys->byUserId((int) $user['id']) : [],
-        ]);
+        Redirect::to('/account#passkeys');
     }
 
     public function registrationOptions(): void
@@ -180,7 +175,7 @@ final class PasskeyController extends BaseController
         );
 
         flash('success', 'Passkey entfernt.');
-        Redirect::to('/security/passkeys');
+        Redirect::to('/account#passkeys');
     }
 
     private function jsonPayload(): array

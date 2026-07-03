@@ -69,7 +69,7 @@
                             <td class="users-action-col">
                                 <div class="user-admin-actions">
                                     <?php if ((int) $user['id'] === $currentUserId): ?>
-                                        <span class="muted">Aktuelle Sitzung</span>
+                                        <a class="ghost-button compact-action" href="<?= e(url('/account')) ?>"><?= icon('user') ?><span>Mein Konto</span></a>
                                     <?php elseif ((int) $user['id'] === $originalUserId): ?>
                                         <span class="muted">Steuerndes Admin-Konto</span>
                                     <?php else: ?>

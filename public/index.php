@@ -189,6 +189,8 @@ try {
     $router->post('/categories/store', [CategoryController::class, 'store']);
     $router->post('/tags/store', [TagController::class, 'store']);
     $router->get('/users', [UserController::class, 'index']);
+    $router->get('/account', [UserController::class, 'account']);
+    $router->post('/account/password', [UserController::class, 'updateOwnPassword']);
     $router->post('/users/store', [UserController::class, 'store']);
     $router->post('/users/set-password', [UserController::class, 'setPassword']);
     $router->post('/users/send-reset', [UserController::class, 'sendReset']);

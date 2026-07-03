@@ -44,6 +44,22 @@ final class UserController extends BaseController
         ]);
     }
 
+    public function account(): void
+    {
+        $this->requireAuth();
+        $user = $this->auth->user();
+
+        if (!$user) {
+            Redirect::to('/login');
+        }
+
+        $this->render('account/index', [
+            'accountUser' => $user,
+            'passkeysAvailable' => $this->passkeys->isAvailable(),
+            'passkeys' => $this->passkeys->byUserId((int) $user['id']),
+        ]);
+    }
+
     public function store(Request $request): void
     {
         $this->requirePermission('users.manage');
@@ -159,6 +175,47 @@ final class UserController extends BaseController
         );
         flash('success', 'Passwort für ' . $targetUser['name'] . ' wurde geändert.');
         Redirect::to('/users#user-' . $targetUser['id']);
+    }
+
+    public function updateOwnPassword(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+
+        $user = $this->auth->user();
+        if (!$user) {
+            Redirect::to('/login');
+        }
+
+        $currentPassword = (string) $request->input('current_password');
+        $newPassword = trim((string) $request->input('new_password'));
+        $newPasswordRepeat = trim((string) $request->input('new_password_repeat'));
+
+        if (!password_verify($currentPassword, (string) ($user['password_hash'] ?? ''))) {
+            flash('error', 'Das aktuelle Passwort stimmt nicht.');
+            Redirect::to('/account#password');
+        }
+
+        if (mb_strlen($newPassword) < 12) {
+            flash('error', 'Das neue Passwort muss mindestens 12 Zeichen lang sein.');
+            Redirect::to('/account#password');
+        }
+
+        if ($newPassword !== $newPasswordRepeat) {
+            flash('error', 'Die beiden neuen Passwörter stimmen nicht überein.');
+            Redirect::to('/account#password');
+        }
+
+        $this->users->updatePasswordHash((int) $user['id'], password_hash($newPassword, PASSWORD_DEFAULT));
+        $this->logs->addAudit(
+            (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
+            null,
+            'updated',
+            'Benutzer "' . $user['name'] . '" hat das eigene Passwort geändert.'
+        );
+
+        flash('success', 'Dein Passwort wurde aktualisiert.');
+        Redirect::to('/account#password');
     }
 
     public function sendReset(Request $request): void
