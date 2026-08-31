@@ -6,11 +6,11 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 ## Neu
 
 - **UX-Umbau – nächste Stufen** (Gerüst erledigt in v0.5.0):
-  - **0.5.1** Rundmail-Bereich: eigener Menüpunkt, Empfänger wählen
+  - **0.5.2** Rundmail-Bereich: eigener Menüpunkt, Empfänger wählen
     (alle / Kategorie / Tag(s) / aktuelle Suche übernehmen), dann schreiben.
-  - **0.5.2** Kontakte-Seite inhaltlich straffen (Massen-/Bulk-Werkzeuge in
+  - **0.5.3** Kontakte-Seite inhaltlich straffen (Massen-/Bulk-Werkzeuge in
     Aufklapp-Bereiche, Progressive Disclosure).
-  - **0.5.3** Namensliste erzeugen & versenden (reine Namensliste per Mail zum
+  - **0.5.4** Namensliste erzeugen & versenden (reine Namensliste per Mail zum
     Vollständigkeitsabgleich durch den Jahrgang).
   - **später** gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
@@ -59,6 +59,9 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Footer-Feinschliff (v0.5.1): „GRUEZE"/Versionsnummer saßen wegen kleinerer
+  Schriftgröße einen Tick zu hoch – `.site-footer-inner` auf
+  `align-items: baseline` gestellt, sitzt jetzt auf gemeinsamer Grundlinie.
 - UX-Gerüst (v0.5.0): Neue ruhige **Startseite** (`/`) mit großem Suchfeld,
   Schnellaktionen und 3 Kennzahlen (gesamt / ohne Mailadresse / ohne
   Handynummer, verlinken in die gefilterte Liste). Kontaktliste auf eigene
