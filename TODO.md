@@ -5,6 +5,21 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
+  u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
+  Endpunkt, SQL-/Template-Injection, Datei-Uploads (XLSX-Import, Logo),
+  Passwort-Reset, Speicherung von Mailserver-Zugangsdaten, Deploy-Hygiene
+  (rsync spielt aktuell auch Dev-Dateien wie `docker/`, `tests/`,
+  `*_HANDOFF_*` auf den Webspace). Ergebnis mit Priorisierung dokumentieren.
+
+- **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
+  neu gruppieren und klarer benennen, Gesamtbedienung eleganter und
+  übersichtlicher machen. Vorgehen: zuerst erheben, welche Tätigkeiten am
+  häufigsten auf der Seite anfallen (Rückfrage an die Nutzer:innen), dann
+  diese Kern-Workflows so gestalten, dass sie mit möglichst wenigen,
+  eindeutigen Schritten erledigt sind. Menüstruktur, Benennung, Seitenlayout
+  und Einstiegspunkte daran ausrichten.
+
 - **Blickschutz-Knopf ("Datenschutz-Button")**: Als eingeloggter Admin/Orga
   soll man mit einem Klick E-Mail-Adressen und Telefonnummern in der
   Oberfläche ausblenden/unleserlich machen können (z. B. Weichzeichner oder

@@ -4,6 +4,9 @@
 **/.DS_Store
 .agents/
 .codex/
+.claude/
+OPEN_TERMINAL_API_KEY
+WEBUI_SECRET_KEY
 config/config.php
 config/config.production-template.php
 storage/tmp/*

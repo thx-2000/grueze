@@ -1,6 +1,10 @@
 /\.DS_Store
 **/.DS_Store
 /config/config.php
+
+# Lokale Tool-Artefakte, gehören nicht ins Repo und nicht auf den Server
+/OPEN_TERMINAL_API_KEY
+/WEBUI_SECRET_KEY
 /vendor/
 /public/assets/uploads/*
 !/public/assets/uploads/.htaccess
