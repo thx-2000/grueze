@@ -143,7 +143,7 @@ function branding_theme_style(): string
 
 function system_version(): string
 {
-    return '0.5.1';
+    return '0.5.2';
 }
 
 function system_label(): string

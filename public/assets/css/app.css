@@ -2389,15 +2389,22 @@ code {
         padding: 1.4rem 1.1rem;
     }
 
-    .start-actions .button-link,
-    .start-actions .ghost-button,
-    .start-actions > a {
-        width: 100%;
-        justify-content: center;
+    .start-actions {
+        flex-direction: column;
     }
 
-    .start-actions form {
+    .start-actions > a,
+    .start-actions button {
         width: 100%;
+    }
+
+    .start-search input[type="search"] {
+        font-size: 1.05rem;
+        padding: 0.85rem 0.8rem;
+    }
+
+    .start-search button {
+        padding: 0 1.1rem;
     }
 }
 
@@ -2436,49 +2443,71 @@ code {
     font-size: 1.7rem;
 }
 
+/* Suchfeld als eine geschlossene Einheit: Rahmen nur außen, Eingabe und
+   Knopf randlos, gleiche Höhe, Fokus-Ring auf dem Container. */
 .start-search {
     display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    background: var(--color-bg);
+    align-items: stretch;
+    background: var(--color-surface-strong);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: 0.5rem 0.7rem;
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.start-search:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(216, 239, 84, 0.3);
 }
 
 .start-search .icon {
-    width: 1.15rem;
-    height: 1.15rem;
-    flex: 0 0 1.15rem;
+    align-self: center;
+    margin-left: 1rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    flex: 0 0 1.2rem;
     color: var(--color-muted);
 }
 
-.start-search input {
+.start-search input[type="search"] {
     flex: 1;
     min-width: 0;
     border: 0;
+    border-radius: 0;
     background: transparent;
+    box-shadow: none;
     font: inherit;
-    font-size: 1.05rem;
-    padding: 0.4rem 0.1rem;
+    font-size: 1.2rem;
+    line-height: 1.2;
+    padding: 1rem 0.9rem;
     color: var(--color-text);
 }
 
-.start-search input:focus-visible {
+.start-search input[type="search"]:focus {
     outline: none;
+    border: 0;
+    box-shadow: none;
 }
 
 .start-search button {
     flex: 0 0 auto;
-    padding: 0.5rem 1.1rem;
-    border-radius: var(--radius-sm);
+    border: 0;
+    border-radius: 0;
+    padding: 0 1.6rem;
     background: var(--color-primary);
     color: #fff;
-    border: 0;
     font-weight: 700;
+    font-size: 1rem;
     cursor: pointer;
+    box-shadow: none;
 }
 
+.start-search button:hover {
+    transform: none;
+    background: var(--color-primary-strong);
+}
+
+/* Alle drei Aktionen als gleich hohe, gleich geformte Knöpfe. */
 .start-actions {
     display: flex;
     flex-wrap: wrap;
@@ -2486,7 +2515,25 @@ code {
 }
 
 .start-actions form {
-    margin: 0;
+    display: contents;
+}
+
+.start-actions > a,
+.start-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 3.1rem;
+    padding: 0 1.5rem;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+}
+
+.start-actions .icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex: 0 0 1.05rem;
 }
 
 .start-stats {

@@ -5,14 +5,17 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **UX-Umbau – nächste Stufen** (Gerüst erledigt in v0.5.0):
-  - **0.5.2** Rundmail-Bereich: eigener Menüpunkt, Empfänger wählen
+- **UX-Umbau – nächste Stufen** (Gerüst + Startseiten-Feinschliff erledigt in
+  v0.5.0–0.5.2):
+  - Rundmail-Bereich: eigener Menüpunkt, Empfänger wählen
     (alle / Kategorie / Tag(s) / aktuelle Suche übernehmen), dann schreiben.
-  - **0.5.3** Kontakte-Seite inhaltlich straffen (Massen-/Bulk-Werkzeuge in
+  - Kontakte-Seite inhaltlich straffen (Massen-/Bulk-Werkzeuge in
     Aufklapp-Bereiche, Progressive Disclosure).
-  - **0.5.4** Namensliste erzeugen & versenden (reine Namensliste per Mail zum
+  - Mobil weiter entschlacken: Signalbalken-Buttons und Profil/Abmelden auf
+    dem Handy kompakter, weniger Chrome vor dem Inhalt.
+  - Namensliste erzeugen & versenden (reine Namensliste per Mail zum
     Vollständigkeitsabgleich durch den Jahrgang).
-  - **später** gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
+  - später: gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
@@ -59,6 +62,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Startseiten-Feinschliff (v0.5.2): Suchfeld ist jetzt eine geschlossene
+  Einheit (Rahmen nur außen, Eingabe + Knopf randlos und gleich hoch,
+  Fokus-Ring auf dem Container statt sichtbarem Innenrahmen), Suchtext größer
+  (1,2 rem). Die drei Schnellaktionen (Neuer Kontakt / Rundmail / Alle
+  Kontakte) sind einheitlich hoch und gleich geformt; auf dem Handy volle
+  Breite untereinander.
 - Footer-Feinschliff (v0.5.1): „GRUEZE"/Versionsnummer saßen wegen kleinerer
   Schriftgröße einen Tick zu hoch – `.site-footer-inner` auf
   `align-items: baseline` gestellt, sitzt jetzt auf gemeinsamer Grundlinie.
