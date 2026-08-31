@@ -117,6 +117,9 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         </label>
         <div class="filter-actions">
             <button type="submit">Filtern</button>
+            <?php if (can('mail.send')): ?>
+                <a class="ghost-button" href="<?= e(url('/rundmail?' . http_build_query(array_merge($filters, ['from' => 'filter'])))) ?>"><?= icon('mail') ?><span>Rundmail an diese Auswahl</span></a>
+            <?php endif; ?>
             <?php if (can('contacts.export')): ?>
                 <a class="ghost-button" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>">CSV exportieren</a>
             <?php endif; ?>

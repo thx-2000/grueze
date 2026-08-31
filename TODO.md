@@ -5,10 +5,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **UX-Umbau – nächste Stufen** (Gerüst + Startseiten-Feinschliff erledigt in
-  v0.5.0–0.5.2):
-  - Rundmail-Bereich: eigener Menüpunkt, Empfänger wählen
-    (alle / Kategorie / Tag(s) / aktuelle Suche übernehmen), dann schreiben.
+- **UX-Umbau – nächste Stufen** (Gerüst, Startseite, Suche, Rundmail erledigt
+  in v0.5.0–0.6.0):
   - Kontakte-Seite inhaltlich straffen (Massen-/Bulk-Werkzeuge in
     Aufklapp-Bereiche, Progressive Disclosure).
   - Mobil weiter entschlacken: Signalbalken-Buttons und Profil/Abmelden auf
@@ -62,6 +60,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Rundmail-Bereich (v0.6.0): eigener Menüpunkt „Rundmail". Empfängerkreis
+  wählen – alle mit Mailadresse / eine Kategorie / bestimmte Tags / die
+  aktuelle gefilterte Kontaktliste (Link „Rundmail an diese Auswahl" im
+  Filterbereich). Jede Option zeigt die Empfängerzahl. Weiter → bestehender
+  Schreiben-Dialog. „Neue Mail an alle" aus dem Signalbalken entfernt (jetzt
+  über Rundmail → „Alle mit Mailadresse").
 - BUG behoben (v0.5.4): Kontakt mit `mailto:`-Präfix in der Adresse (Alt-
   Importdaten, z. B. Vorname Nachname) ließ sich nicht speichern – das
   `<input type="email">` blockte das Absenden ohne sichtbare Meldung.

@@ -181,7 +181,9 @@ try {
         Container::get(LogRepository::class),
         Container::get(SettingRepository::class),
         Container::get(MailService::class),
-        Container::get(UploadService::class)
+        Container::get(UploadService::class),
+        Container::get(CategoryRepository::class),
+        Container::get(TagRepository::class)
     ));
     Container::factory(SettingsController::class, static fn () => new SettingsController(
         Container::get(Auth::class),
@@ -241,6 +243,8 @@ try {
     $router->post('/passkeys/authenticate', [PasskeyController::class, 'authenticate']);
     $router->post('/passkeys/delete', [PasskeyController::class, 'delete']);
 
+    $router->get('/rundmail', [MailController::class, 'rundmail']);
+    $router->post('/rundmail', [MailController::class, 'rundmailStart']);
     $router->post('/mail/compose', [MailController::class, 'compose']);
     $router->get('/mail/compose', [MailController::class, 'compose']);
     $router->post('/mail/compose-all', [MailController::class, 'composeAll']);

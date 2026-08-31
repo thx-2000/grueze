@@ -22,9 +22,136 @@ final class MailController extends BaseController
         private LogRepository $logs,
         private SettingRepository $settings,
         private MailService $mailer,
-        private UploadService $uploads
+        private UploadService $uploads,
+        private \App\Repositories\CategoryRepository $categories,
+        private \App\Repositories\TagRepository $tags
     ) {
         parent::__construct($auth);
+    }
+
+    /** Filter aus dem Request lesen (identisch zur Kontaktliste). */
+    private function recipientFilters(Request $request): array
+    {
+        return [
+            'q' => trim((string) $request->input('q', '')),
+            'category_id' => (string) $request->input('category_id', ''),
+            'tag_ids' => array_values(array_filter(array_map('intval', (array) $request->input('tag_ids', [])))),
+            'without_email' => (string) $request->input('without_email', '') === '1' ? '1' : '',
+            'without_phone' => (string) $request->input('without_phone', '') === '1' ? '1' : '',
+        ];
+    }
+
+    private function hasActiveFilter(array $filters): bool
+    {
+        return $filters['q'] !== ''
+            || $filters['category_id'] !== ''
+            || $filters['tag_ids'] !== []
+            || $filters['without_email'] === '1'
+            || $filters['without_phone'] === '1';
+    }
+
+    public function rundmail(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+
+        $categories = $this->categories->all();
+        $tags = $this->tags->all();
+        $filters = $this->recipientFilters($request);
+        $fromFilter = $request->input('from') === 'filter' && $this->hasActiveFilter($filters);
+
+        $categoryCounts = [];
+        foreach ($categories as $category) {
+            $categoryCounts[(int) $category['id']] = count($this->contacts->recipientIds(['category_id' => (string) $category['id']]));
+        }
+        $tagCounts = [];
+        foreach ($tags as $tag) {
+            $tagCounts[(int) $tag['id']] = count($this->contacts->recipientIds(['tag_ids' => [(int) $tag['id']]]));
+        }
+
+        $filterIds = $fromFilter ? $this->contacts->recipientIds($filters) : [];
+        $_SESSION['rundmail_filter_ids'] = $filterIds;
+
+        $this->render('mail/rundmail', [
+            'categories' => $categories,
+            'tags' => $tags,
+            'categoryCounts' => $categoryCounts,
+            'tagCounts' => $tagCounts,
+            'totalWithEmail' => count($this->contacts->recipientIds([])),
+            'fromFilter' => $fromFilter,
+            'filterCount' => count($filterIds),
+            'filterSummary' => $fromFilter ? $this->filterSummary($filters, $categories, $tags) : '',
+        ]);
+    }
+
+    public function rundmailStart(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        $mode = (string) $request->input('mode', '');
+
+        if ($mode === 'filter') {
+            $ids = array_map('intval', (array) ($_SESSION['rundmail_filter_ids'] ?? []));
+        } else {
+            $filters = match ($mode) {
+                'all' => [],
+                'category' => ['category_id' => (string) $request->input('category_id', '')],
+                'tags' => ['tag_ids' => array_values(array_filter(array_map('intval', (array) $request->input('tag_ids', []))))],
+                default => null,
+            };
+
+            if ($filters === null
+                || ($mode === 'category' && $filters['category_id'] === '')
+                || ($mode === 'tags' && $filters['tag_ids'] === [])
+            ) {
+                flash('error', 'Bitte einen Empfängerkreis auswählen.');
+                Redirect::to('/rundmail');
+            }
+
+            $ids = $this->contacts->recipientIds($filters);
+        }
+
+        if ($ids === []) {
+            flash('error', 'In dieser Auswahl hat niemand eine Mailadresse hinterlegt.');
+            Redirect::to('/rundmail');
+        }
+
+        $_GET['contact_ids'] = $ids;
+        $this->compose(new Request());
+    }
+
+    private function filterSummary(array $filters, array $categories, array $tags): string
+    {
+        $parts = [];
+        if ($filters['q'] !== '') {
+            $parts[] = 'Suche „' . $filters['q'] . '"';
+        }
+        if ($filters['category_id'] !== '') {
+            foreach ($categories as $category) {
+                if ((string) $category['id'] === $filters['category_id']) {
+                    $parts[] = 'Kategorie ' . $category['name'];
+                }
+            }
+        }
+        if ($filters['tag_ids'] !== []) {
+            $names = [];
+            foreach ($tags as $tag) {
+                if (in_array((int) $tag['id'], $filters['tag_ids'], true)) {
+                    $names[] = $tag['name'];
+                }
+            }
+            if ($names !== []) {
+                $parts[] = 'Tags: ' . implode(', ', $names);
+            }
+        }
+        if ($filters['without_email'] === '1') {
+            $parts[] = 'ohne Mailadresse';
+        }
+        if ($filters['without_phone'] === '1') {
+            $parts[] = 'ohne Handynummer';
+        }
+
+        return $parts === [] ? 'alle Kontakte' : implode(' · ', $parts);
     }
 
     public function compose(Request $request): void

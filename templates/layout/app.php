@@ -74,12 +74,6 @@ $themeStyle = branding_theme_style();
                         <?php endif; ?>
                         <span id="signalSelectionStatus" class="signal-bar-hint" hidden></span>
                         <div class="signal-bar-actions">
-                            <?php if (can('mail.send')): ?>
-                                <form method="post" action="<?= e(url('/mail/compose-all')) ?>">
-                                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                    <button type="submit" class="signal-bar-button"><?= icon('mail') ?><span>Neue Mail an alle</span></button>
-                                </form>
-                            <?php endif; ?>
                             <button type="submit" id="signalComposeSelection" form="contactSelectionForm" class="signal-bar-button" hidden><?= icon('mail') ?><span>Mail an Auswahl</span></button>
                             <button type="button" id="signalClearSelection" class="signal-bar-button" data-select="none" hidden><?= icon('reset') ?><span>Auswahl aufheben</span></button>
                         </div>
@@ -109,6 +103,7 @@ $themeStyle = branding_theme_style();
                 $showAdminHub = can('users.manage') || can('settings.manage') || can('audit.view') || can('mail.view_log');
                 $onContacts = $currentPath === '/kontakte' || str_starts_with($currentPath, '/kontakte/')
                     || str_starts_with($currentPath, '/contacts') || str_starts_with($currentPath, '/search');
+                $onRundmail = str_starts_with($currentPath, '/rundmail') || str_starts_with($currentPath, '/mail');
                 $onAdminHub = str_starts_with($currentPath, '/verwaltung')
                     || str_starts_with($currentPath, '/settings') || str_starts_with($currentPath, '/admin')
                     || str_starts_with($currentPath, '/users') || str_starts_with($currentPath, '/logs');
@@ -119,6 +114,9 @@ $themeStyle = branding_theme_style();
                     <?php endif; ?>
                     <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('home') ?><span>Start</span></a>
                     <a class="<?= $onContacts ? 'is-active' : '' ?>" href="<?= e(url('/kontakte')) ?>"><?= icon('contacts') ?><span>Kontakte</span></a>
+                    <?php if (can('mail.send')): ?>
+                        <a class="<?= $onRundmail ? 'is-active' : '' ?>" href="<?= e(url('/rundmail')) ?>"><?= icon('mail') ?><span>Rundmail</span></a>
+                    <?php endif; ?>
                     <?php if ($showAdminHub): ?>
                         <a class="<?= $onAdminHub ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung')) ?>"><?= icon('sliders') ?><span>Verwaltung</span></a>
                     <?php endif; ?>

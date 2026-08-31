@@ -12,12 +12,13 @@ final class ContactRepository
     {
     }
 
-    public function search(array $filters = []): array
+    /**
+     * Baut die WHERE-Bedingungen für die Kontaktfilter (q, Kategorie, Tags,
+     * ohne-Mail/ohne-Telefon). Rückgabe: ['sql' => ' AND …', 'params' => [...]].
+     */
+    private function filterClause(array $filters): array
     {
-        $sql = 'SELECT contacts.*, categories.name AS category_name
-                FROM contacts
-                LEFT JOIN categories ON categories.id = contacts.category_id
-                WHERE 1=1';
+        $sql = '';
         $params = [];
 
         if (!empty($filters['q'])) {
@@ -67,6 +68,42 @@ final class ContactRepository
                 AND TRIM(COALESCE(contact_phones.phone, "")) <> ""
             )';
         }
+
+        return ['sql' => $sql, 'params' => $params];
+    }
+
+    /**
+     * Kontakt-IDs, die zum Filter passen UND mindestens eine Mailadresse haben.
+     * Für den Rundmail-Empfängerkreis.
+     */
+    public function recipientIds(array $filters = []): array
+    {
+        $clause = $this->filterClause($filters);
+        $sql = 'SELECT contacts.id
+                FROM contacts
+                LEFT JOIN categories ON categories.id = contacts.category_id
+                WHERE 1=1' . $clause['sql'] . '
+                AND EXISTS (
+                    SELECT 1 FROM contact_emails
+                    WHERE contact_emails.contact_id = contacts.id
+                    AND TRIM(COALESCE(contact_emails.email, "")) <> ""
+                )
+                ORDER BY contacts.vorname ASC, contacts.nachname ASC';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($clause['params']);
+
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    public function search(array $filters = []): array
+    {
+        $clause = $this->filterClause($filters);
+        $sql = 'SELECT contacts.*, categories.name AS category_name
+                FROM contacts
+                LEFT JOIN categories ON categories.id = contacts.category_id
+                WHERE 1=1' . $clause['sql'];
+        $params = $clause['params'];
 
         $allowedSorts = ['nachname', 'vorname', 'category_name', 'ort', 'geburtstag', 'created_at'];
         $sort = in_array($filters['sort'] ?? '', $allowedSorts, true) ? $filters['sort'] : 'vorname';

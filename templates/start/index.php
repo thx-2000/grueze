@@ -20,10 +20,7 @@ $canMail = can('mail.send');
             <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Neuen Kontakt anlegen</span></a>
         <?php endif; ?>
         <?php if ($canMail): ?>
-            <form method="post" action="<?= e(url('/mail/compose-all')) ?>">
-                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                <button type="submit" class="ghost-button"><?= icon('mail') ?><span>Rundmail schreiben</span></button>
-            </form>
+            <a class="ghost-button" href="<?= e(url('/rundmail')) ?>"><?= icon('mail') ?><span>Rundmail schreiben</span></a>
         <?php endif; ?>
         <a class="ghost-button" href="<?= e(url('/kontakte')) ?>"><?= icon('contacts') ?><span>Alle Kontakte</span></a>
     </div>
