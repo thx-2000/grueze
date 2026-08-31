@@ -1,0 +1,51 @@
+services:
+  db:
+    image: mariadb:10.11
+    container_name: grueze_db
+    restart: "no"
+    environment:
+      MYSQL_DATABASE: abi_adress_zentrale
+      MYSQL_USER: abi_user
+      MYSQL_PASSWORD: abi_local_pw
+      MYSQL_ROOT_PASSWORD: abi_root_pw
+      TZ: Europe/Berlin
+    volumes:
+      - grueze_db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "3307:3306"
+    networks:
+      - grueze_net
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: grueze_app
+    restart: "no"
+    depends_on:
+      - db
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8095:80"
+    networks:
+      - grueze_net
+
+  adminer:
+    image: adminer:latest
+    container_name: grueze_adminer
+    restart: "no"
+    depends_on:
+      - db
+    ports:
+      - "8096:8080"
+    networks:
+      - grueze_net
+
+networks:
+  grueze_net:
+    driver: bridge
+
+volumes:
+  grueze_db_data:

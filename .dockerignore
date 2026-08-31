@@ -1,0 +1,13 @@
+.git
+.DS_Store
+storage/tmp/*
+!storage/tmp/.gitkeep
+!storage/tmp/.htaccess
+public/assets/uploads/*
+!public/assets/uploads/.gitkeep
+!public/assets/uploads/.htaccess
+assets/uploads/*
+!assets/uploads/.gitkeep
+!assets/uploads/.htaccess
+config/config.php
+vendor
