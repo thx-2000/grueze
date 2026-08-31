@@ -38,23 +38,58 @@ final class MailController extends BaseController
         $categoryId = (string) $request->input('category_id', '');
         $sort = (string) $request->input('sort', 'nachname') === 'vorname' ? 'vorname' : 'nachname';
         $numbered = (string) $request->input('numbered', '1') === '1';
+        $withoutEmail = (string) $request->input('without_email', '') === '1';
+        $withoutPhone = (string) $request->input('without_phone', '') === '1';
 
         $contacts = $this->contacts->search([
             'category_id' => $categoryId,
+            'without_email' => $withoutEmail ? '1' : '',
+            'without_phone' => $withoutPhone ? '1' : '',
             'sort' => $sort,
             'direction' => 'asc',
         ]);
 
+        $subjectTitle = 'Namensliste – bitte auf Vollständigkeit prüfen';
+
         $this->render('mail/namensliste', [
             'categories' => $this->categories->all(),
+            'tags' => $this->tags->all(),
             'categoryId' => $categoryId,
             'sort' => $sort,
             'numbered' => $numbered,
+            'withoutEmail' => $withoutEmail,
+            'withoutPhone' => $withoutPhone,
             'count' => count($contacts),
             'nameList' => $this->formatNameList($contacts, $numbered),
             'canSend' => $this->auth->can('mail.send'),
-            'defaultSubject' => trim($this->settings->defaultSubjectPrefix() . ' Namensliste – bitte auf Vollständigkeit prüfen'),
+            'totalWithEmail' => count($this->contacts->recipientIds([])),
+            'subjectTitle' => $subjectTitle,
+            'defaultSubject' => trim($this->settings->defaultSubjectPrefix() . ' ' . $subjectTitle),
         ]);
+    }
+
+    /** Übergibt die Namensliste als Nachrichtentext an den Rundmail-Flow. */
+    public function namenslisteToRundmail(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        $list = trim((string) $request->input('name_list'));
+        $intro = trim((string) $request->input('intro'));
+        $subject = trim((string) $request->input('subject_title')) ?: 'Namensliste';
+
+        if ($list === '') {
+            flash('error', 'Die Namensliste ist leer.');
+            Redirect::to('/namensliste');
+        }
+
+        $_SESSION['mail_draft'] = [
+            'subject' => $subject,
+            'message' => ($intro !== '' ? $intro . "\n\n" : '') . $list,
+            'salutation_mode' => 'hallo',
+        ];
+
+        Redirect::to('/rundmail');
     }
 
     public function namenslisteSend(Request $request): void
@@ -282,8 +317,14 @@ final class MailController extends BaseController
 
         $_SESSION['mail_draft_contact_ids'] = $ids;
 
+        // Entwurf einmalig übernehmen (z. B. aus der Namensliste) und danach
+        // aus der Session entfernen, damit er nicht bei der nächsten Mail wieder auftaucht.
+        $draft = (array) ($_SESSION['mail_draft'] ?? []);
+        unset($_SESSION['mail_draft']);
+
         $this->render('mail/compose', [
             'contacts' => $contacts,
+            'draft' => $draft,
             'identities' => $this->settings->mailIdentities(),
             'replyToOptions' => $this->replyToOptions($memberContactMode),
             'mailFooter' => $this->mailFooter($memberContactMode),

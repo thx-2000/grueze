@@ -1,4 +1,4 @@
-<?php $draft = $_SESSION['mail_draft'] ?? []; ?>
+<?php $draft = (array) ($draft ?? $_SESSION['mail_draft'] ?? []); ?>
 <?php
 $branding = app_branding();
 $appName = (string) ($branding['branding_app_name'] ?? 'Adress-Zentrale');

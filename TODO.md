@@ -56,6 +56,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Namensliste erweitert (v0.7.2): Filter „nur ohne Mailadresse" / „nur ohne
+  Handynummer" (die Namensliste ist damit auch die Lückenliste). Versand jetzt
+  zweistufig: „Als Rundmail an eine Gruppe" reicht die Liste als
+  Nachrichtentext an den Rundmail-Flow weiter (Empfängerwahl alle / Kategorie /
+  Tags, Vorschau, gestapelter Versand), „An diese Adressen senden" bleibt für
+  wenige eingetippte Adressen. Nebenbei: `mail_draft` wird nach dem Öffnen des
+  Schreiben-Dialogs aus der Session entfernt (kein Nachhall mehr).
 - Kategorien & Tags verwalten (v0.7.1): eigene Seite unter Verwaltung →
   „Kategorien & Tags" (`/verwaltung/kategorien-tags`). Anlegen, Inline-
   Umbenennen (mit Dublettencheck), Löschen mit Rückfrage. Beim Löschen einer
