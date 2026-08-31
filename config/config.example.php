@@ -9,6 +9,25 @@ return [
         'force_https' => true,
         'debug' => true,
     ],
+
+    // White-Label: Startwerte für Name, Links und Texte einer Instanz.
+    // Reihenfolge der Auflösung: Admin-Oberfläche (app_settings) > diese Sektion
+    // > eingebaute Standardwerte. Für die Instanz kann die Sektion
+    // komplett entfallen. Einzelne Schlüssel dürfen fehlen; leere Strings zählen
+    // als "nicht gesetzt". Farben/Fonts (color_*, font_*) sind ebenfalls
+    // überschreibbar, werden hier aber nur bei Bedarf gesetzt.
+    'branding' => [
+        'app_name' => 'Adress-Zentrale',
+        'short_name' => 'GRUEZE',
+        'system_label' => 'GRUEZE',
+        'public_site_label' => 'example.org',
+        'public_site_url' => 'https://example.org',
+        'support_email' => 'kontakt@example.org',
+        'login_intro' => 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten an einem Ort.',
+        'login_public_hint' => 'Weitere Infos und die öffentliche Startseite findet ihr unter example.org.',
+        'sidebar_copy' => 'Kontakte, Mailings und Organisation an einem Ort.',
+    ],
+
     'database' => [
         'dsn' => 'mysql:host=localhost;dbname=abi_adress_zentrale;charset=utf8mb4',
         'username' => 'db_user',

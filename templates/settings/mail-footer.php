@@ -21,7 +21,7 @@
                 <label>
                     <span>Betreff-Präfixe</span>
                     <textarea name="subject_prefixes" rows="4" required><?= e($subjectPrefixes) ?></textarea>
-                    <small class="field-hint">Ein Präfix pro Zeile. Die erste Zeile ist der Standard, zum Beispiel <code>[Verteiler]</code>.</small>
+                    <small class="field-hint">Ein Präfix pro Zeile. Die erste Zeile ist der Standard, zum Beispiel <code><?= e($defaultSubjectPrefix) ?></code>.</small>
                 </label>
             </div>
 

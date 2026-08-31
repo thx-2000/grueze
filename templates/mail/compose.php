@@ -44,7 +44,9 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
                     <ol class="workflow-list">
                         <li>Formuliere deine Nachricht wie gewohnt.</li>
                         <li><?= e($appName) ?> verschickt sie technisch über den Mailer, aber Antworten landen bei dir.</li>
-                        <li>Falls dir zu einem Kontakt noch eine fehlende Mailadresse bekannt ist, schicke sie bitte zusätzlich an <a href="mailto:<?= e($supportEmail !== '' ? $supportEmail : 'kontakt@example.org') ?>"><?= e($supportEmail !== '' ? $supportEmail : 'kontakt@example.org') ?></a>.</li>
+                        <?php if ($supportEmail !== ''): ?>
+                            <li>Falls dir zu einem Kontakt noch eine fehlende Mailadresse bekannt ist, schicke sie bitte zusätzlich an <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>.</li>
+                        <?php endif; ?>
                     </ol>
                 </div>
                 <div class="subsection-card full-width">

@@ -5,6 +5,16 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Personen ohne Mailadresse / ohne Handynummer benennbar machen**: Eine
+  Ansicht/Funktion, die auflistet, welche Personen im System noch keine
+  E-Mail-Adresse hinterlegt haben – vorausschauend auch: keine Handynummer.
+  Zweck: gezielt nachfragen und Lücken schließen.
+
+- **Namensliste erzeugen und versenden**: Aus dem aktuellen Kontaktbestand
+  eine reine Namensliste erzeugen und per Mail verschicken können, damit alle
+  prüfen können, ob noch jemand fehlt, der dazugehört
+  (Vollständigkeitsabgleich durch den Jahrgang).
+
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
   Endpunkt, SQL-/Template-Injection, Datei-Uploads (XLSX-Import, Logo),
@@ -33,9 +43,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 ## Aus der ursprünglichen Übergabe (ChatGPT), noch offen
 
 1. White-Label-Vorbereitung vervollständigen, ohne die laufende Instanz
-   neutral umzubiegen.
+   neutral umzubiegen. (Teil erledigt in v0.3.1: `config('branding.*')`-Sektion,
+   `system_label`, Template-Fallbacks. Offen: `defaultLegalText()` in
+   `SettingRepository` enthält noch reale Personendaten – erst Instanz-Rechtstexte
+   in `app_settings` seeden, dann Code-Default neutralisieren.)
 2. Noch verbleibende hartcodierte Instanz-Texte systematisch identifizieren und
-   auf konfigurierbare Defaults umstellen.
+   auf konfigurierbare Defaults umstellen. (siehe Punkt 1; Rest: Standard-Mail-Fuß
+   und Betreff-Präfixe in `config/config.*` sind bereits `defaults.*`-basiert,
+   könnten in die `branding`-Logik integriert werden.)
 3. Rollen- und Rechtekonzept weiter schärfen, vor allem für spätere
    "Kontakt kann optional Login haben"-Logik.
 4. Sichtbarkeit einzelner Kontaktfelder noch granularer pro Rolle
@@ -49,6 +64,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- White-Label-Vorbereitung, Schritt 1 (v0.3.1): Branding-Standardwerte
+  (Name, Kurzname, Links, Support-Mail, Login-/Sidebar-Texte, `system_label`
+  „GRUEZE") kommen jetzt über `config('branding.*')` mit Instanzwerten als
+  eingebautem Fallback. Dokumentierte `branding`-Sektion in
+  `config/config.example.php` und `config.production-template.php`.
+  Hartcodierte `kontakt@example.org`- und `[Verteiler]`-Fallbacks in Templates entfernt.
+  Instanz unverändert (ihre config hat keine `branding`-Sektion).
 - Blickschutz-Knopf (v0.3.0): clientseitiger Toggle im Signalbalken, der alle
   personenbezogenen Kontaktfelder (E-Mail, Telefon, Adresse, Geburtstag,
   Notizen, verknüpfte Login-Mail) in Liste, Karten, Suche und Empfängerliste

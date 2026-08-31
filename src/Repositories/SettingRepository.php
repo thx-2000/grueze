@@ -97,7 +97,11 @@ final class SettingRepository
 
     public function brandingDefaults(): array
     {
-        return [
+        // Standardwerte. Jeder Eintrag kann per config('branding.<key ohne
+        // branding_-Präfix>') vorbelegt werden, ohne die laufende Instanz zu
+        // verändern (deren config keine branding-Sektion enthält). Die
+        // Admin-Oberfläche (app_settings) hat weiterhin Vorrang vor beidem.
+        $defaults = [
             'branding_app_name' => 'Adress-Zentrale',
             'branding_short_name' => 'GRUEZE',
             'branding_version' => '0.2.0',
@@ -126,6 +130,16 @@ final class SettingRepository
             'branding_color_danger' => '#b64521',
             'branding_color_success' => '#3f7558',
         ];
+
+        foreach ($defaults as $key => $fallback) {
+            if ($key === 'branding_logo_path' || $key === 'branding_version') {
+                continue;
+            }
+
+            $defaults[$key] = branding_default(substr($key, strlen('branding_')), (string) $fallback);
+        }
+
+        return $defaults;
     }
 
     public function brandingThemeVariables(): array

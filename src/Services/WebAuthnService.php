@@ -19,7 +19,7 @@ final class WebAuthnService
         return [
             'challenge' => self::base64urlEncode($challenge),
             'rp' => [
-                'name' => (string) config('app.name', 'Adress-Zentrale'),
+                'name' => (string) branding_value('branding_app_name', (string) config('app.name', 'Adress-Zentrale')),
                 'id' => $this->rpId(),
             ],
             'user' => [
