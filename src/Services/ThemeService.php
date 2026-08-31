@@ -193,6 +193,11 @@ final class ThemeService
             $vars[$css] = $tokens[$key];
         }
 
+        // Textfarbe auf farbigen Flächen automatisch nach Kontrast wählen.
+        $vars['--color-on-primary'] = readable_ink($tokens['color_primary']);
+        $vars['--color-on-danger'] = readable_ink($tokens['color_danger']);
+        $vars['--color-on-accent'] = readable_ink($tokens['color_accent']);
+
         return $vars;
     }
 

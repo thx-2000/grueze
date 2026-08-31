@@ -28,7 +28,7 @@ body {
     right: 0;
     z-index: 50;
     background: var(--color-accent);
-    box-shadow: 0 1px 0 rgba(24, 26, 21, 0.12);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--color-text) 12%, transparent);
 }
 
 .signal-bar-inner {
@@ -38,7 +38,7 @@ body {
     padding: 0.36rem var(--shell-side-pad) 0.42rem;
     display: grid;
     gap: 0.34rem;
-    color: var(--color-text);
+    color: var(--color-on-accent);
     font-size: 0.74rem;
     font-weight: 800;
 }
@@ -59,7 +59,7 @@ body {
 }
 
 .signal-bar-label {
-    color: var(--color-text);
+    color: var(--color-on-accent);
     font-family: var(--font-display);
     font-size: 0.88rem;
     font-weight: 800;
@@ -78,7 +78,7 @@ body {
     min-width: 0;
     padding: 0.44rem 0.72rem;
     border-radius: 999px;
-    background: rgba(248, 249, 244, 0.92);
+    background: var(--surface-veil);
 }
 
 .signal-bar-tools {
@@ -105,16 +105,16 @@ body {
 }
 
 .signal-bar-meta {
-    color: rgba(24, 26, 21, 0.92);
+    color: var(--color-on-accent);
 }
 
 .signal-bar-button {
     padding: 0.3rem 0.56rem;
     border-radius: 999px;
-    background: rgba(24, 26, 21, 0.14);
-    color: var(--color-text) !important;
+    background: color-mix(in srgb, var(--color-on-accent) 14%, transparent);
+    color: var(--color-on-accent) !important;
     box-shadow: none;
-    border-color: rgba(24, 26, 21, 0.1);
+    border-color: color-mix(in srgb, var(--color-on-accent) 18%, transparent);
     font-size: 0.72rem;
 }
 
@@ -127,7 +127,8 @@ body {
 .signal-bar-hint {
     padding: 0.22rem 0.52rem;
     border-radius: 999px;
-    background: rgba(24, 26, 21, 0.1);
+    background: color-mix(in srgb, var(--color-on-accent) 12%, transparent);
+    color: var(--color-on-accent);
 }
 
 a {
@@ -160,12 +161,12 @@ button,
     align-items: center;
     justify-content: center;
     gap: 0.55rem;
-    box-shadow: 0 10px 18px rgba(24, 26, 21, 0.12);
+    box-shadow: 0 10px 18px color-mix(in srgb, var(--color-text) 12%, transparent);
 }
 
 .ghost-button {
-    background: rgba(244, 247, 235, 0.9);
-    border: 1px solid rgba(38, 42, 32, 0.12);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-strong);
     color: var(--color-text) !important;
     box-shadow: none;
 }
@@ -174,7 +175,7 @@ button,
     background: var(--color-primary);
     color: var(--color-on-primary) !important;
     border-color: transparent;
-    box-shadow: 0 10px 18px rgba(24, 26, 21, 0.18);
+    box-shadow: 0 10px 18px color-mix(in srgb, var(--color-text) 18%, transparent);
 }
 
 .sidebar-footer .ghost-button .icon {
@@ -192,7 +193,7 @@ button,
     background: var(--color-danger);
     color: var(--color-on-danger) !important;
     border-color: transparent;
-    box-shadow: 0 10px 18px rgba(24, 26, 21, 0.16);
+    box-shadow: 0 10px 18px color-mix(in srgb, var(--color-text) 16%, transparent);
 }
 
 .form-actions .danger-button .icon {
@@ -223,10 +224,10 @@ textarea {
     padding: 0.82rem 0.92rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    background: rgba(250, 252, 244, 0.98);
+    background: var(--surface-veil);
     font: inherit;
     color: var(--color-text);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.38);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface-strong) 38%, transparent);
 }
 
 input:focus,
@@ -262,8 +263,8 @@ label span {
 
 .sidebar {
     padding: 1.25rem;
-    background: rgba(240, 243, 237, 0.94);
-    border: 1px solid rgba(255,255,255,0.52);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-light);
     backdrop-filter: blur(14px);
     color: var(--color-text);
     display: flex;
@@ -301,13 +302,13 @@ label span {
     line-height: 1;
     letter-spacing: -0.02em;
     white-space: nowrap;
-    color: var(--color-text);
-    box-shadow: 0 10px 18px rgba(24, 26, 21, 0.08);
+    color: var(--color-on-accent);
+    box-shadow: 0 10px 18px color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 
 .brand-mark-image {
     padding: 0.35rem 0.45rem;
-    background: rgba(255, 255, 255, 0.88);
+    background: var(--surface-veil);
 }
 
 .brand-mark-image img {
@@ -344,8 +345,8 @@ label span {
     color: var(--color-text);
     padding: 0.82rem 0.92rem;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.62);
-    border: 1px solid rgba(255,255,255,0.72);
+    background: var(--surface-veil);
+    border: 1px solid var(--edge-light);
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -353,8 +354,8 @@ label span {
 }
 
 .nav a.is-active {
-    background: rgba(224, 228, 218, 0.92);
-    border-color: rgba(216, 239, 84, 0.28);
+    background: var(--surface-sunken);
+    border-color: var(--accent-edge);
     color: var(--color-primary-strong);
 }
 
@@ -387,10 +388,10 @@ label span {
 .profile-chip {
     padding: 0.82rem 0.92rem;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--surface-veil);
     display: grid;
     gap: 0.2rem;
-    border: 1px solid rgba(255,255,255,0.72);
+    border: 1px solid var(--edge-light);
     color: inherit;
 }
 
@@ -400,13 +401,13 @@ label span {
 }
 
 .profile-chip small {
-    color: rgba(24, 26, 21, 0.64);
+    color: var(--color-text);
     font-weight: 700;
 }
 
 .profile-chip.is-active {
-    border-color: rgba(24, 26, 21, 0.16);
-    background: rgba(238, 242, 229, 0.92);
+    border-color: var(--edge-strong);
+    background: var(--surface-sunken);
 }
 
 .content {
@@ -437,8 +438,8 @@ label span {
 .search-result-card {
     padding: 0.9rem 0.95rem;
     border-radius: var(--radius-md);
-    background: rgba(246, 248, 240, 0.96);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
     display: grid;
     gap: 0.7rem;
 }
@@ -464,9 +465,9 @@ label span {
     align-items: center;
     gap: 0.4rem;
     padding: 0.4rem 0.6rem;
-    border: 1px solid rgba(24, 26, 21, 0.14);
+    border: 1px solid var(--edge-strong);
     border-radius: var(--radius-sm);
-    background: rgba(24, 26, 21, 0.08);
+    background: var(--fill-ghost);
     color: var(--color-text);
     font: inherit;
     font-weight: 700;
@@ -510,18 +511,18 @@ label span {
 .topbar-meta {
     padding: 0.72rem 0.95rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.68);
+    background: var(--surface-veil);
     color: var(--color-muted);
     display: inline-flex;
     gap: 0.55rem;
     align-items: center;
-    border: 1px solid rgba(255,255,255,0.58);
+    border: 1px solid var(--edge-light);
 }
 
 .hero-card,
 .panel {
     background: var(--color-surface);
-    border: 1px solid rgba(255, 255, 255, 0.58);
+    border: 1px solid var(--edge-light);
     backdrop-filter: blur(14px);
     box-shadow: var(--shadow-soft);
     border-radius: var(--radius-xl);
@@ -529,7 +530,7 @@ label span {
 }
 
 .hero-card {
-    background: rgba(248, 249, 245, 0.94);
+    background: var(--surface-veil);
 }
 
 .hero-row,
@@ -627,8 +628,8 @@ label span {
 .stat-card {
     padding: 0.88rem 0.95rem;
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.78);
-    border: 1px solid rgba(255,255,255,0.58);
+    background: var(--surface-veil);
+    border: 1px solid var(--edge-light);
     display: grid;
     gap: 0.35rem;
 }
@@ -695,10 +696,10 @@ label span {
 .selection-status {
     padding: 0.68rem 0.92rem;
     border-radius: 999px;
-    background: rgba(240, 243, 237, 0.98);
+    background: var(--surface-sunken);
     color: var(--color-primary-strong);
     font-weight: 700;
-    border: 1px solid rgba(38, 42, 32, 0.1);
+    border: 1px solid var(--edge-hairline);
 }
 
 .selection-tools {
@@ -747,8 +748,8 @@ label span {
     gap: 0.25rem;
     padding: 0.24rem;
     border-radius: 999px;
-    background: rgba(240, 243, 237, 0.98);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
 }
 
 .view-toggle-button {
@@ -761,7 +762,7 @@ label span {
     padding: 0.42rem 0.8rem;
     border-radius: 999px;
     cursor: pointer;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface-strong) 45%, transparent);
 }
 
 .view-toggle-button:hover {
@@ -786,8 +787,8 @@ label span {
     gap: 0.45rem;
     padding: 0.48rem 0.65rem;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: var(--surface-veil);
+    border: 1px solid var(--edge-hairline);
     font-weight: 600;
 }
 
@@ -804,8 +805,8 @@ label span {
 .bulk-card {
     padding: 0.88rem 0.95rem;
     border-radius: var(--radius-md);
-    background: rgba(245, 248, 237, 0.96);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
     display: grid;
     gap: 0.8rem;
     align-content: start;
@@ -813,8 +814,8 @@ label span {
 }
 
 .bulk-card.accent {
-    background: rgba(240, 243, 237, 0.98);
-    border-color: rgba(216, 239, 84, 0.22);
+    background: var(--surface-sunken);
+    border-color: var(--accent-edge);
 }
 
 .bulk-card.is-member-compact {
@@ -839,9 +840,9 @@ label span {
 
 .admin-drawer {
     margin-top: 0.8rem;
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    border: 1px solid var(--edge-hairline);
     border-radius: var(--radius-md);
-    background: rgba(241, 244, 235, 0.96);
+    background: var(--surface-sunken);
     overflow: hidden;
 }
 
@@ -861,8 +862,8 @@ label span {
 }
 
 .admin-drawer[open] summary {
-    border-bottom: 1px solid rgba(38, 42, 32, 0.08);
-    background: rgba(236, 240, 228, 0.96);
+    border-bottom: 1px solid var(--edge-hairline);
+    background: var(--surface-sunken);
 }
 
 .admin-drawer-body {
@@ -879,7 +880,7 @@ label span {
 
 .compact-inside-drawer {
     margin: 0;
-    background: rgba(246, 248, 240, 0.92);
+    background: var(--surface-sunken);
 }
 
 .compact-action {
@@ -920,8 +921,8 @@ label span {
 
 .quick-category-list .ghost-button,
 .selection-tools .ghost-button {
-    background: rgba(250, 252, 244, 0.98);
-    border-color: rgba(38, 42, 32, 0.1);
+    background: var(--surface-veil);
+    border-color: var(--edge-hairline);
     color: var(--color-primary-strong) !important;
 }
 
@@ -967,8 +968,8 @@ label span {
 .contacts-table-wrap {
     overflow-x: auto;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(38, 42, 32, 0.08);
-    background: rgba(243, 246, 236, 0.98);
+    border: 1px solid var(--edge-hairline);
+    background: var(--color-surface);
 }
 
 .contacts-table {
@@ -982,27 +983,27 @@ label span {
 .contacts-table td {
     padding: 0.62rem 0.64rem;
     vertical-align: middle;
-    border-bottom: 1px solid rgba(38, 42, 32, 0.07);
-    background: rgba(243, 246, 236, 0.98);
+    border-bottom: 1px solid var(--edge-hairline);
+    background: var(--color-surface-strong);
 }
 
 .contacts-table thead th {
     position: sticky;
     top: 0;
     z-index: 1;
-    background: rgba(229, 234, 220, 0.98);
+    background: var(--surface-raised);
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .contacts-table tbody tr:nth-child(even) td {
-    background: rgba(239, 243, 231, 0.94);
+    background: var(--surface-sunken);
 }
 
 .contacts-table tbody tr:hover td,
 .contacts-table tbody tr.has-selection td {
-    background: rgba(233, 239, 223, 0.98);
+    background: var(--accent-veil);
 }
 
 .contacts-table .col-select {
@@ -1061,7 +1062,7 @@ label span {
     width: fit-content;
     padding: 0.22rem 0.52rem;
     border-radius: 999px;
-    background: rgba(45, 49, 40, 0.08);
+    background: var(--fill-ghost);
     color: var(--color-primary-strong);
     font-weight: 700;
     font-size: 0.82rem;
@@ -1135,7 +1136,7 @@ label span {
 
 .signal-bar-button.is-active {
     background: var(--color-primary);
-    color: #fff !important;
+    color: var(--color-on-primary) !important;
     border-color: var(--color-primary);
 }
 
@@ -1152,20 +1153,20 @@ label span {
 }
 
 .contact-card {
-    background: rgba(250, 251, 248, 0.98);
+    background: var(--surface-veil);
     border-radius: var(--radius-md);
     padding: 0.68rem;
     box-shadow: var(--shadow-card);
     display: grid;
     grid-template-rows: auto auto 1fr auto;
     gap: 0.56rem;
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    border: 1px solid var(--edge-hairline);
     height: 100%;
 }
 
 .contact-card.has-selection {
-    border-color: rgba(255, 159, 10, 0.24);
-    box-shadow: 0 18px 36px rgba(255, 159, 10, 0.12);
+    border-color: color-mix(in srgb, var(--color-secondary) 30%, transparent);
+    box-shadow: 0 18px 36px color-mix(in srgb, var(--color-secondary) 12%, transparent);
 }
 
 .contact-head {
@@ -1182,7 +1183,7 @@ label span {
 }
 
 .tag {
-    background: rgba(45, 49, 40, 0.08);
+    background: var(--fill-ghost);
     color: var(--color-primary-strong);
     border-radius: 999px;
     padding: 0.18rem 0.44rem;
@@ -1199,18 +1200,18 @@ label span {
 }
 
 .tag-secondary {
-    background: rgba(240, 163, 23, 0.12);
-    color: #53411e;
+    background: var(--secondary-veil);
+    color: color-mix(in srgb, var(--color-secondary) 52%, var(--color-text));
 }
 
 .tag-account {
-    background: rgba(45, 49, 40, 0.08);
-    color: #2d3128;
+    background: var(--fill-ghost);
+    color: var(--color-text);
 }
 
 .tag-account.is-active {
-    background: rgba(47, 106, 82, 0.14);
-    color: #214a3a;
+    background: var(--success-veil);
+    color: color-mix(in srgb, var(--color-success) 45%, var(--color-text));
 }
 
 .status-icon,
@@ -1219,7 +1220,7 @@ label span {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: #a06000;
+    color: color-mix(in srgb, var(--color-secondary) 50%, var(--color-text));
 }
 
 .status-icon {
@@ -1228,15 +1229,15 @@ label span {
     align-self: center;
     justify-content: center;
     border-radius: 999px;
-    background: rgba(255, 179, 0, 0.14);
+    background: var(--secondary-veil);
 }
 
 .missing-email-badge {
     align-self: center;
     padding: 0.16rem 0.44rem;
     border-radius: 999px;
-    background: rgba(229, 255, 58, 0.16);
-    border: 1px solid rgba(167, 186, 31, 0.22);
+    background: var(--accent-veil);
+    border: 1px solid var(--accent-edge);
     color: var(--color-primary-strong);
     font-size: 0.72rem;
     font-weight: 800;
@@ -1311,7 +1312,7 @@ label span {
 
 .note {
     padding: 0.78rem 0.84rem;
-    background: rgba(237, 241, 227, 0.94);
+    background: var(--surface-sunken);
     border-radius: var(--radius-sm);
 }
 
@@ -1337,9 +1338,9 @@ label span {
 .subsection-card,
 .repeater-block {
     padding: 0.9rem;
-    background: rgba(245, 248, 237, 0.96);
+    background: var(--surface-sunken);
     border-radius: var(--radius-md);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    border: 1px solid var(--edge-hairline);
 }
 
 .repeater-row {
@@ -1349,7 +1350,7 @@ label span {
     margin-top: 0.52rem;
     padding: 0.62rem;
     border-radius: var(--radius-sm);
-    background: rgba(234, 239, 224, 0.94);
+    background: var(--surface-sunken);
 }
 
 .field-hint {
@@ -1361,8 +1362,8 @@ label span {
     margin-top: 0.7rem;
     padding: 0.82rem 0.88rem;
     border-radius: var(--radius-sm);
-    background: rgba(234, 239, 224, 0.94);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
     white-space: pre-wrap;
     line-height: 1.55;
 }
@@ -1378,7 +1379,7 @@ label span {
     gap: 0.7rem;
     padding: 0.82rem 0.92rem;
     border-radius: var(--radius-sm);
-    background: rgba(250, 252, 244, 0.98);
+    background: var(--surface-veil);
     border: 1px solid var(--color-border);
 }
 
@@ -1402,14 +1403,14 @@ label span {
     width: 2.8rem;
     height: 2.8rem;
     border-radius: var(--radius-sm);
-    border: 1px solid rgba(38, 42, 32, 0.14);
+    border: 1px solid var(--edge-strong);
     background:
-        linear-gradient(45deg, rgba(24, 26, 21, 0.08) 25%, transparent 25%, transparent 75%, rgba(24, 26, 21, 0.08) 75%, rgba(24, 26, 21, 0.08)),
-        linear-gradient(45deg, rgba(24, 26, 21, 0.08) 25%, transparent 25%, transparent 75%, rgba(24, 26, 21, 0.08) 75%, rgba(24, 26, 21, 0.08)),
+        linear-gradient(45deg, var(--fill-ghost) 25%, transparent 25%, transparent 75%, var(--fill-ghost) 75%, var(--fill-ghost)),
+        linear-gradient(45deg, var(--fill-ghost) 25%, transparent 25%, transparent 75%, var(--fill-ghost) 75%, var(--fill-ghost)),
         var(--swatch, transparent);
     background-size: 14px 14px, 14px 14px, auto;
     background-position: 0 0, 7px 7px, 0 0;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-surface-strong) 40%, transparent);
 }
 
 .branding-logo-grid {
@@ -1424,8 +1425,8 @@ label span {
     gap: 0.72rem;
     padding: 0.92rem 0.98rem;
     border-radius: var(--radius-md);
-    background: rgba(245, 248, 237, 0.96);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
     min-height: 100%;
 }
 
@@ -1476,8 +1477,8 @@ label span {
     gap: 0.85rem;
     padding: 0.92rem 0.98rem;
     border-radius: var(--radius-md);
-    background: rgba(238, 240, 233, 0.98);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
     margin-bottom: 0.95rem;
 }
 
@@ -1494,7 +1495,7 @@ label span {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(229, 255, 58, 0.18);
+    background: var(--accent-veil);
     color: var(--color-primary-strong);
     flex: 0 0 2rem;
 }
@@ -1569,8 +1570,8 @@ label span {
     gap: 0.65rem;
     padding: 0.6rem 0.72rem;
     border-radius: var(--radius-sm);
-    background: rgba(250, 252, 244, 0.96);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: var(--surface-veil);
+    border: 1px solid var(--edge-hairline);
     width: fit-content;
 }
 
@@ -1591,8 +1592,8 @@ label span {
     gap: 0.5rem;
     padding: 0.52rem 0.72rem;
     border-radius: var(--radius-sm);
-    border: 1px solid rgba(38, 42, 32, 0.12);
-    background: rgba(241, 245, 231, 0.94);
+    border: 1px solid var(--edge-strong);
+    background: var(--surface-sunken);
     color: var(--color-text);
     font-weight: 600;
 }
@@ -1609,8 +1610,8 @@ label span {
 }
 
 .tag-option.is-selected {
-    background: rgba(216, 239, 84, 0.14);
-    border-color: rgba(216, 239, 84, 0.28);
+    background: var(--accent-veil);
+    border-color: var(--accent-edge);
 }
 
 .account-panel {
@@ -1618,8 +1619,8 @@ label span {
     gap: 0.82rem;
     padding: 0.76rem;
     border-radius: var(--radius-sm);
-    background: rgba(239, 244, 229, 0.9);
-    border: 1px solid rgba(38, 42, 32, 0.08);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
 }
 
 .toggle-row {
@@ -1628,7 +1629,7 @@ label span {
     gap: 0.75rem;
     padding: 0.72rem 0.92rem;
     border-radius: var(--radius-sm);
-    background: rgba(233, 239, 223, 0.96);
+    background: var(--surface-sunken);
     width: fit-content;
 }
 
@@ -1645,20 +1646,20 @@ label span {
 .account-badge {
     padding: 0.42rem 0.72rem;
     border-radius: 999px;
-    background: rgba(45, 49, 40, 0.08);
-    color: #2d3128;
+    background: var(--fill-ghost);
+    color: var(--color-text);
     font-weight: 700;
 }
 
 .account-badge.is-active {
-    background: rgba(47, 106, 82, 0.14);
-    color: #214a3a;
+    background: var(--success-veil);
+    color: color-mix(in srgb, var(--color-success) 45%, var(--color-text));
 }
 
 .account-summary {
     padding: 0.72rem 0.82rem;
     border-radius: var(--radius-sm);
-    background: rgba(234, 239, 224, 0.96);
+    background: var(--surface-sunken);
 }
 
 .subsection-card input,
@@ -1670,19 +1671,19 @@ label span {
 .account-panel input,
 .account-panel select,
 .account-panel textarea {
-    background: rgba(250, 252, 244, 0.98);
-    border-color: rgba(38, 42, 32, 0.14);
+    background: var(--surface-veil);
+    border-color: var(--edge-strong);
 }
 
 .subsection-card input[type="file"] {
     padding: 0.72rem 0.8rem;
-    background: rgba(239, 244, 229, 0.96);
+    background: var(--surface-sunken);
 }
 
 .subsection-card .ghost-button,
 .repeater-block .ghost-button,
 .form-actions .ghost-button {
-    background: rgba(240, 245, 231, 0.94);
+    background: var(--surface-sunken);
 }
 
 .icon-button.danger-button {
@@ -1702,8 +1703,8 @@ label span {
 .table-wrap {
     overflow-x: auto;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(38, 42, 32, 0.08);
-    background: rgba(245, 248, 237, 0.96);
+    border: 1px solid var(--edge-hairline);
+    background: var(--surface-sunken);
 }
 
 .compact-user-form {
@@ -1749,13 +1750,13 @@ label span {
     position: sticky;
     right: 0;
     z-index: 1;
-    background: rgba(245, 248, 237, 0.98);
+    background: var(--surface-sunken);
     width: 4rem;
     text-align: right;
 }
 
 .compact-users-table tbody .users-action-col {
-    box-shadow: -10px 0 14px rgba(240, 243, 237, 0.95);
+    box-shadow: -10px 0 14px color-mix(in srgb, var(--color-bg-alt) 95%, transparent);
 }
 
 .users-more-button {
@@ -1772,7 +1773,7 @@ label span {
 
 .user-detail-row td {
     padding: 0;
-    background: rgba(245, 248, 237, 0.98);
+    background: var(--surface-sunken);
 }
 
 .user-detail-cell {
@@ -1785,7 +1786,7 @@ label span {
     gap: 0.55rem;
     align-items: flex-start;
     padding: 0.7rem 0.75rem 0.85rem;
-    background: rgba(236, 241, 226, 0.92);
+    background: var(--surface-sunken);
 }
 
 .user-admin-actions form,
@@ -1806,7 +1807,7 @@ label span {
 }
 
 .compact-user-password-drawer {
-    background: rgba(246, 248, 240, 0.92);
+    background: var(--surface-sunken);
     min-width: 15rem;
 }
 
@@ -1817,8 +1818,8 @@ label span {
     align-items: center;
     gap: 0.55rem;
     border-radius: var(--radius-sm);
-    background: rgba(250, 252, 244, 0.96);
-    border: 1px solid rgba(38, 42, 32, 0.12);
+    background: var(--surface-veil);
+    border: 1px solid var(--edge-strong);
     font-size: 0.82rem;
 }
 
@@ -1827,7 +1828,7 @@ label span {
 }
 
 .compact-user-password-drawer input {
-    background: rgba(250, 252, 244, 0.98);
+    background: var(--surface-veil);
 }
 
 .table-badge {
@@ -1843,39 +1844,39 @@ label span {
 }
 
 .status-badge-active {
-    background: rgba(36, 143, 111, 0.12);
-    color: #1f6f58;
-    border-color: rgba(36, 143, 111, 0.18);
+    background: var(--success-veil);
+    color: color-mix(in srgb, var(--color-success) 55%, var(--color-text));
+    border-color: color-mix(in srgb, var(--color-success) 32%, transparent);
 }
 
 .status-badge-inactive {
-    background: rgba(182, 69, 33, 0.1);
-    color: #9e3d20;
-    border-color: rgba(182, 69, 33, 0.18);
+    background: var(--danger-veil);
+    color: color-mix(in srgb, var(--color-danger) 68%, var(--color-text));
+    border-color: color-mix(in srgb, var(--color-danger) 32%, transparent);
 }
 
 .role-badge-admin {
-    background: rgba(45, 49, 40, 0.1);
+    background: var(--fill-ghost);
     color: var(--color-text);
-    border-color: rgba(45, 49, 40, 0.15);
+    border-color: var(--edge-strong);
 }
 
 .role-badge-orga {
-    background: rgba(229, 255, 58, 0.2);
-    color: #4a4f18;
-    border-color: rgba(191, 217, 27, 0.32);
+    background: var(--accent-veil);
+    color: color-mix(in srgb, var(--color-accent) 26%, var(--color-text));
+    border-color: var(--accent-edge);
 }
 
 .role-badge-stufenmitglied {
-    background: rgba(230, 235, 222, 0.92);
+    background: var(--surface-sunken);
     color: var(--color-muted);
-    border-color: rgba(136, 146, 124, 0.2);
+    border-color: var(--edge-hairline);
 }
 
 .role-badge-betrachter {
-    background: rgba(241, 243, 237, 0.98);
+    background: var(--surface-sunken);
     color: var(--color-muted);
-    border-color: rgba(156, 163, 149, 0.2);
+    border-color: var(--edge-hairline);
 }
 
 table {
@@ -1889,7 +1890,7 @@ td {
     text-align: left;
     padding: 0.75rem 0.62rem;
     border-bottom: 1px solid var(--color-border);
-    background: rgba(245, 248, 237, 0.82);
+    background: var(--surface-sunken);
 }
 
 .flash {
@@ -1898,12 +1899,12 @@ td {
 }
 
 .flash-success {
-    background: rgba(36, 143, 111, 0.12);
+    background: var(--success-veil);
     color: var(--color-success);
 }
 
 .flash-error {
-    background: rgba(182, 69, 33, 0.12);
+    background: var(--danger-veil);
     color: var(--color-danger);
 }
 
@@ -1965,7 +1966,7 @@ td {
     padding: 0.9rem 1rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    background: rgba(248, 250, 241, 0.78);
+    background: var(--surface-sunken);
 }
 
 .passkey-item-copy strong {
@@ -1990,8 +1991,8 @@ td {
     gap: 0.8rem;
     padding: 0.82rem 0.9rem;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(38, 42, 32, 0.08);
-    background: rgba(242, 245, 235, 0.92);
+    border: 1px solid var(--edge-hairline);
+    background: var(--surface-sunken);
     color: inherit;
 }
 
@@ -2013,7 +2014,7 @@ td {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(226, 233, 209, 0.92);
+    background: var(--surface-sunken);
     color: var(--color-text);
     flex: 0 0 2.3rem;
 }
@@ -2067,8 +2068,8 @@ td {
     position: fixed;
     right: 1.2rem;
     bottom: 1.2rem;
-    background: rgba(31, 42, 68, 0.92);
-    color: #fff;
+    background: var(--color-primary-strong);
+    color: var(--color-on-primary);
     padding: 0.9rem 1rem;
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-card);
@@ -2077,15 +2078,15 @@ td {
 .progress-panel {
     margin-top: 0.85rem;
     padding: 0.88rem;
-    background: rgba(255,255,255,0.64);
+    background: var(--surface-veil);
     border-radius: var(--radius-md);
-    border: 1px solid rgba(255,255,255,0.58);
+    border: 1px solid var(--edge-light);
 }
 
 .progress-track {
     width: 100%;
     height: 14px;
-    background: rgba(45, 49, 40, 0.1);
+    background: var(--fill-ghost);
     border-radius: 999px;
     overflow: hidden;
 }
@@ -2116,8 +2117,8 @@ td {
 .recipient-chip {
     padding: 0.75rem 0.88rem;
     border-radius: var(--radius-md);
-    background: rgba(255,255,255,0.64);
-    border: 1px solid rgba(255,255,255,0.58);
+    background: var(--surface-veil);
+    border: 1px solid var(--edge-light);
     display: grid;
     gap: 0.2rem;
 }
@@ -2132,8 +2133,8 @@ td {
     border-radius: 1.35rem;
     display: grid;
     place-items: center;
-    background: rgba(240, 243, 237, 0.98);
-    border: 1px solid rgba(216, 239, 84, 0.22);
+    background: var(--surface-sunken);
+    border: 1px solid var(--accent-edge);
     color: var(--color-primary-strong);
     font-size: 1.35rem;
 }
@@ -2145,7 +2146,7 @@ td {
 }
 
 code {
-    background: rgba(229, 255, 58, 0.16);
+    background: var(--accent-veil);
     padding: 0.15rem 0.4rem;
     border-radius: 0.4rem;
 }
@@ -2257,7 +2258,7 @@ code {
         position: fixed;
         inset: 0;
         z-index: 55;
-        background: rgba(20, 22, 16, 0.4);
+        background: color-mix(in srgb, var(--color-text) 42%, transparent);
     }
 
     body.nav-open {
@@ -2392,9 +2393,9 @@ code {
     }
 
     .compact-users-table tr[data-user-row] {
-        border: 1px solid rgba(38, 42, 32, 0.08);
+        border: 1px solid var(--edge-hairline);
         border-radius: var(--radius-md);
-        background: rgba(248, 250, 242, 0.98);
+        background: var(--surface-sunken);
         overflow: hidden;
     }
 
@@ -2403,7 +2404,7 @@ code {
         grid-template-columns: minmax(7.8rem, 42%) 1fr;
         gap: 0.65rem;
         padding: 0.55rem 0.72rem;
-        border-bottom: 1px solid rgba(38, 42, 32, 0.06);
+        border-bottom: 1px solid var(--edge-hairline);
         background: transparent;
     }
 
@@ -2530,7 +2531,7 @@ code {
     flex-direction: column;
     gap: 0.45rem;
     padding-top: 0.6rem;
-    border-top: 1px solid rgba(38, 42, 32, 0.07);
+    border-top: 1px solid var(--edge-hairline);
 }
 
 .permission-label {
@@ -2568,7 +2569,7 @@ code {
 
 .start-search:focus-within {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(216, 239, 84, 0.3);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
 
 .start-search .icon {
@@ -2614,7 +2615,7 @@ code {
     border-radius: 0;
     padding: 0 1.6rem;
     background: var(--color-primary);
-    color: #fff;
+    color: var(--color-on-primary);
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
@@ -3010,7 +3011,7 @@ code {
 
 .theme-badge.is-active {
     background: var(--color-accent);
-    color: var(--color-primary-strong);
+    color: var(--color-on-accent);
     border-color: transparent;
 }
 

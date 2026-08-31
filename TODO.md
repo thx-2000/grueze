@@ -11,11 +11,17 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
     leerer Raum im aufgeklappten Menü verkleinern.
   - später: gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
-- **Theme-System – Feinschliff** (Grundgerüst erledigt in v0.8.0): Noch fest
-  hinterlegte, auf helle Themes ausgelegte Flächen-Effekte (durchscheinende
-  Karten-/Seitenleisten-Hintergründe, Glanzkanten, kleine Status-Pills) auf
-  Tokens umstellen, damit auch dunklere Themes möglich werden. Danach ggf.
-  ein zweites mitgeliefertes Datei-Theme als Alternative.
+- **Theme-System – Feinschliff** (Grundgerüst erledigt in v0.8.0, erste
+  Tokenisierungsstufe in v0.9.0): Restliche fest hinterlegte Flächen-Effekte
+  (Detail-Verläufe, einzelne Glanzkanten) prüfen; ein echtes dunkles
+  Datei-Theme als Gegenprobe anlegen und dabei die noch nicht token-fähigen
+  Stellen aufspüren.
+
+- **Visueller Theme-Editor mit Live-Vorschau**: Der aktuelle Editor
+  (`templates/settings/theme-edit.php`) ist ein Formular mit Farbfeldern und
+  Vorschau-Kacheln. Wünschenswert: Änderungen sofort auf einer echten
+  Beispielansicht sehen (Buttons, Karten, Tabelle, Kopfleiste), Farbwähler
+  statt Texteingabe, evtl. Kontrast-Warnung direkt am Feld.
 
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
@@ -62,6 +68,16 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Theme-Feinschliff, erste Stufe (v0.9.0): `app.css` durchgehend auf Tokens
+  umgestellt – Flächen, Kanten und Schatten mischen sich jetzt per
+  `color-mix` aus den Basis-Tokens (`--surface-veil`, `--surface-sunken`,
+  `--edge-hairline`, `--ink-shadow` …) und tragen damit auch andere
+  Paletten. Neu: **automatische Schriftfarbe** auf farbigen Flächen –
+  `readable_ink()` wählt Schwarz oder Weiß nach WCAG-Kontrast
+  (`--color-on-primary/-danger/-accent`, vom ThemeService berechnet).
+  **Favicon** ist jetzt dynamisch: abgerundete Kachel in der Akzentfarbe des
+  aktiven Themes mit kontrastierender Initiale (SVG-Data-URI). Footer-Tooltip
+  korrigiert: „Grüß-Zentrale" (nicht „Gruß-Zentrale").
 - Theme-System (v0.8.0): Das komplette Aussehen (2 Schriften, 15 Farben,
   4 Eckenradien) steckt jetzt in benannten **Themes**. Neue Seite Verwaltung →
   „Themes" (`/settings/themes`): Kachelübersicht mit Farbstreifen, aktives

@@ -1,3 +1,8 @@
+/*
+ * Basis-Tokens. Diese Werte liefert das aktive Theme (ThemeService) zur
+ * Laufzeit als Inline-Style im <head> nach; hier stehen die Standardwerte
+ * (Theme "signalfarbe"), damit die Seite auch ohne Datenbank trägt.
+ */
 :root {
     --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
     --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
@@ -20,11 +25,39 @@
     --radius-md: 0.7rem;
     --radius-lg: 0.95rem;
     --radius-xl: 1.2rem;
-    --shadow-soft: 0 20px 40px rgba(24, 26, 21, 0.08);
-    --shadow-card: 0 12px 24px rgba(24, 26, 21, 0.08);
 
-    /* Textfarbe auf farbigen Flaechen. Nicht Teil des Theme-Editors: Primaer-
-       und Akzentfarbe muessen dunkel genug fuer helle Schrift bleiben. */
+    /*
+     * Textfarbe auf farbigen Flächen. ThemeService berechnet diese Werte
+     * automatisch aus der jeweiligen Fläche (Schwarz oder Weiß, je nach
+     * Kontrast). Die Angaben hier sind nur der Fallback für Theme "signalfarbe".
+     */
     --color-on-primary: #f7f8f4;
     --color-on-danger: #ffffff;
+    --color-on-accent: #181a15;
+
+    /*
+     * Abgeleitete Flächen, Kanten und Schatten. Bewusst NICHT vom Theme
+     * überschrieben – sie mischen sich per color-mix aus den Basis-Tokens
+     * und tragen damit auch dunklere Themes.
+     */
+    --surface-veil: color-mix(in srgb, var(--color-surface-strong) 82%, transparent);
+    --surface-sunken: color-mix(in srgb, var(--color-bg-alt) 72%, var(--color-surface-strong));
+    --surface-raised: color-mix(in srgb, var(--color-bg-alt) 90%, var(--color-text));
+
+    --edge-hairline: var(--color-border);
+    --edge-strong: color-mix(in srgb, var(--color-text) 14%, transparent);
+    --edge-light: color-mix(in srgb, var(--color-surface-strong) 58%, transparent);
+
+    --fill-ghost: color-mix(in srgb, var(--color-text) 8%, transparent);
+    --fill-ghost-strong: color-mix(in srgb, var(--color-text) 13%, transparent);
+
+    --ink-shadow: color-mix(in srgb, var(--color-text) 10%, transparent);
+    --shadow-soft: 0 20px 40px var(--ink-shadow);
+    --shadow-card: 0 12px 24px var(--ink-shadow);
+
+    --accent-veil: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    --accent-edge: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    --danger-veil: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    --success-veil: color-mix(in srgb, var(--color-success) 15%, transparent);
+    --secondary-veil: color-mix(in srgb, var(--color-secondary) 14%, transparent);
 }

@@ -139,9 +139,115 @@ function branding_theme_style(): string
     return $declarations === [] ? '' : ':root {' . implode(' ', $declarations) . '}';
 }
 
+/**
+ * Zerlegt einen CSS-Farbwert (#rgb, #rrggbb, rgb(), rgba()) in [r, g, b].
+ * Teiltransparente Werte werden über Weiß zusammengerechnet, da alle Flächen
+ * auf hellem Grund liegen. Gibt null zurück, wenn nichts erkannt wird.
+ *
+ * @return array{0:int,1:int,2:int}|null
+ */
+function css_color_to_rgb(string $value): ?array
+{
+    $value = trim($value);
+
+    if (preg_match('/^#([0-9a-f]{3})$/i', $value, $m)) {
+        return [
+            (int) hexdec($m[1][0] . $m[1][0]),
+            (int) hexdec($m[1][1] . $m[1][1]),
+            (int) hexdec($m[1][2] . $m[1][2]),
+        ];
+    }
+
+    if (preg_match('/^#([0-9a-f]{6})$/i', $value, $m)) {
+        return [
+            (int) hexdec(substr($m[1], 0, 2)),
+            (int) hexdec(substr($m[1], 2, 2)),
+            (int) hexdec(substr($m[1], 4, 2)),
+        ];
+    }
+
+    if (preg_match('/^rgba?\(\s*([0-9.]+)[\s,]+([0-9.]+)[\s,]+([0-9.]+)(?:[\s,\/]+([0-9.]+%?))?\s*\)$/i', $value, $m)) {
+        $r = (float) $m[1];
+        $g = (float) $m[2];
+        $b = (float) $m[3];
+        $a = 1.0;
+        if (isset($m[4]) && $m[4] !== '') {
+            $a = str_ends_with($m[4], '%') ? ((float) rtrim($m[4], '%') / 100) : (float) $m[4];
+        }
+        $a = max(0.0, min(1.0, $a));
+
+        return [
+            (int) round($r * $a + 255 * (1 - $a)),
+            (int) round($g * $a + 255 * (1 - $a)),
+            (int) round($b * $a + 255 * (1 - $a)),
+        ];
+    }
+
+    return null;
+}
+
+/**
+ * Wählt zwischen dunkler und heller Schrift, je nachdem was auf der
+ * angegebenen Hintergrundfarbe den höheren WCAG-Kontrast liefert.
+ */
+function readable_ink(string $background, string $dark = '#181a15', string $light = '#ffffff'): string
+{
+    $rgb = css_color_to_rgb($background);
+    if ($rgb === null) {
+        return $dark;
+    }
+
+    $channel = static function (int $value): float {
+        $c = $value / 255;
+
+        return $c <= 0.03928 ? $c / 12.92 : (($c + 0.055) / 1.055) ** 2.4;
+    };
+
+    $luminance = 0.2126 * $channel($rgb[0]) + 0.7152 * $channel($rgb[1]) + 0.0722 * $channel($rgb[2]);
+
+    $contrastWithLight = 1.05 / ($luminance + 0.05);
+    $contrastWithDark = ($luminance + 0.05) / 0.05;
+
+    return $contrastWithDark >= $contrastWithLight ? $dark : $light;
+}
+
+/**
+ * Favicon als SVG-Data-URI: abgerundete Kachel in der Akzentfarbe des
+ * aktiven Themes, Initiale in automatisch kontrastierender Schrift.
+ */
+function theme_favicon(): string
+{
+    $accent = '#d8ef54';
+    $shortName = 'A';
+    try {
+        $tokens = App\Core\Container::get(App\Services\ThemeService::class)->activeTokens();
+        $accent = (string) ($tokens['color_accent'] ?? $accent);
+    } catch (Throwable) {
+        // Fallback-Werte behalten.
+    }
+
+    $branding = app_branding();
+    $name = trim((string) ($branding['branding_short_name'] ?? ''));
+    if ($name !== '') {
+        $shortName = mb_substr($name, 0, 1);
+    }
+
+    $glyph = htmlspecialchars(mb_strtoupper($shortName), ENT_QUOTES | ENT_XML1, 'UTF-8');
+    $ink = readable_ink($accent);
+
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+        . '<rect width="32" height="32" rx="7" fill="' . $accent . '"/>'
+        . '<text x="16" y="16" text-anchor="middle" dominant-baseline="central" fill="' . $ink . '"'
+        . ' font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif"'
+        . ' font-size="19" font-weight="700">' . $glyph . '</text>'
+        . '</svg>';
+
+    return 'data:image/svg+xml,' . rawurlencode($svg);
+}
+
 function system_version(): string
 {
-    return '0.8.0';
+    return '0.9.0';
 }
 
 function system_label(): string

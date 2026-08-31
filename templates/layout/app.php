@@ -24,6 +24,7 @@ $themeStyle = branding_theme_style();
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($appName) ?></title>
+    <link rel="icon" href="<?= e(theme_favicon()) ?>">
     <script>
         // Blickschutz-Zustand vor dem ersten Paint setzen, damit Kontaktdaten nicht kurz aufblitzen.
         try {
@@ -177,7 +178,7 @@ $themeStyle = branding_theme_style();
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
             <?php if ($appVersion !== ''): ?>
                 <span>|</span>
-                <span class="site-footer-version" title="GRUEZE: Anspielung auf „Grüezi“ und Kurzform von „Gruß-Zentrale“"><?= e($systemLabel) ?> v.<?= e($appVersion) ?></span>
+                <span class="site-footer-version" title="GRUEZE: Anspielung auf „Grüezi“ und Kurzform von „Grüß-Zentrale“"><?= e($systemLabel) ?> v.<?= e($appVersion) ?></span>
             <?php endif; ?>
             <?php if ($publicSiteUrl !== ''): ?>
                 <span>|</span>
