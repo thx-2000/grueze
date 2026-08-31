@@ -2476,11 +2476,19 @@ code {
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    font: inherit;
-    font-size: 1.2rem;
+    font-family: var(--font-body);
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     line-height: 1.2;
     padding: 1rem 0.9rem;
     color: var(--color-text);
+}
+
+.start-search input[type="search"]::placeholder {
+    color: var(--color-muted);
+    font-weight: 600;
+    opacity: 1;
 }
 
 .start-search input[type="search"]:focus {
@@ -2609,4 +2617,50 @@ code {
     color: var(--color-muted);
     font-size: 0.88rem;
     line-height: 1.35;
+}
+
+/* ---------------------------------------------------------------- Suchseite */
+
+.search-bar-panel {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.search-bar-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    color: var(--color-muted);
+}
+
+.search-bar-meta strong {
+    display: inline;
+    margin: 0;
+    color: var(--color-text);
+}
+
+.search-result-card {
+    color: var(--color-text);
+    transition: border-color 0.15s ease;
+}
+
+.search-result-card:hover {
+    border-color: var(--color-accent);
+}
+
+.search-result-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-primary-strong);
+}
+
+.search-result-open .icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    flex: 0 0 0.95rem;
 }

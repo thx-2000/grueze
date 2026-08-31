@@ -5,6 +5,15 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **BUG prüfen: Änderung einer Mailadresse wird nicht gespeichert.** Vom Nutzer
+  gemeldet, lokal bisher nicht reproduzierbar (Kontakt-E-Mail ändern + speichern
+  funktioniert in allen getesteten Fällen inkl. mehrerer Adressen und
+  verknüpftem Login). Offene Fragen: welche Seite genau (Kontakt bearbeiten /
+  Mail-Einstellungen / Login-E-Mail im Drawer)? Erscheint eine
+  Erfolgsmeldung? Ein bestimmter Kontakt oder alle? Desktop/Handy?
+  Verdacht: Browser-Back-Cache zeigt alten Stand, oder `<input type="email">`
+  blockt einen Wert (z. B. Umlaut-Domain) ohne sichtbare Meldung.
+
 - **UX-Umbau – nächste Stufen** (Gerüst + Startseiten-Feinschliff erledigt in
   v0.5.0–0.5.2):
   - Rundmail-Bereich: eigener Menüpunkt, Empfänger wählen
@@ -62,6 +71,11 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Suche ergebnis-zuerst + Suchfeld-Typo (v0.5.3): Die Namenssuche von der
+  Startseite geht jetzt auf `/search` (durchsucht auch den Ort). Die
+  Suchergebnis-Seite wurde entrümpelt: schlanke Suchleiste oben, direkt
+  darunter die Treffer als anklickbare Karten – keine Erklärtext-Wand mehr
+  davor. Suchfeld-Schrift größer (1,4 rem) und halbfett.
 - Startseiten-Feinschliff (v0.5.2): Suchfeld ist jetzt eine geschlossene
   Einheit (Rahmen nur außen, Eingabe + Knopf randlos und gleich hoch,
   Fokus-Ring auf dem Container statt sichtbarem Innenrahmen), Suchtext größer

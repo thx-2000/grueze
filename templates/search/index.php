@@ -1,27 +1,27 @@
-<section class="hero-card">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow">Globale Suche</p>
-            <h2><?= $query === '' ? 'Schnell finden' : 'Ergebnisse für „' . e($query) . '“' ?></h2>
-            <p class="muted">Kontakte und, für Admin/Orga, auch Benutzerkonten werden gemeinsam durchsucht.</p>
-        </div>
-        <div class="selection-status">
-            <?= e((string) (count($contactResults) + count($userResults))) ?> Treffer
-        </div>
+<?php
+$total = count($contactResults) + count($userResults);
+$hasQuery = $query !== '';
+?>
+<section class="panel search-bar-panel">
+    <form method="get" action="<?= e(url('/search')) ?>" class="start-search" role="search">
+        <label for="searchField" class="visually-hidden">Suchen</label>
+        <?= icon('search') ?>
+        <input type="search" id="searchField" name="q" value="<?= e($query) ?>" placeholder="Name, Geburtsname, Ort …" autocomplete="off" autofocus>
+        <button type="submit">Suchen</button>
+    </form>
+    <div class="search-bar-meta">
+        <?php if ($hasQuery): ?>
+            <span><strong><?= e((string) $total) ?></strong> Treffer für „<?= e($query) ?>"</span>
+        <?php endif; ?>
+        <a class="ghost-button compact-action" href="<?= e(url('/kontakte')) ?>"><?= icon('contacts') ?><span>Zur Kontaktliste</span></a>
     </div>
 </section>
 
-<section class="panel stack">
-    <form method="get" action="<?= e(url('/search')) ?>" class="global-search-panel">
-        <input type="search" name="q" value="<?= e($query) ?>" placeholder="Vorname, Nachname, Ort, E-Mail, Benutzername ...">
-        <button type="submit"><?= icon('search') ?><span>Suchen</span></button>
-        <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Zurück zur Kontaktliste</a>
-    </form>
-
-    <?php if ($query === ''): ?>
-        <p class="muted">Einfach oben einen Begriff eingeben, zum Beispiel einen Vornamen, Nachnamen, Ort oder eine Mailadresse.</p>
-    <?php endif; ?>
-</section>
+<?php if (!$hasQuery): ?>
+    <section class="panel">
+        <p class="muted">Tippe oben einen Namen, Geburtsnamen oder Ort ein. Für Admin/Orga werden auch Benutzerkonten durchsucht.</p>
+    </section>
+<?php endif; ?>
 
 <?php if ($contactResults !== []): ?>
     <section class="panel stack">
@@ -33,7 +33,7 @@
         </div>
         <div class="search-result-grid">
             <?php foreach ($contactResults as $contact): ?>
-                <article class="search-result-card">
+                <a class="search-result-card" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>">
                     <div class="search-result-head">
                         <div>
                             <strong><?= e(trim(($contact['vorname'] ?? '') . ' ' . ($contact['nachname'] ?? ''))) ?></strong>
@@ -49,12 +49,8 @@
                         <span><?= e($contact['category_name'] ?: '—') ?></span>
                         <span class="muted is-guarded"><?= e($contact['ort'] ?: 'Ort unbekannt') ?></span>
                     </div>
-                    <div class="card-actions">
-                        <a class="ghost-button compact-action" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>">
-                            <?= icon('edit') ?><span>Öffnen</span>
-                        </a>
-                    </div>
-                </article>
+                    <span class="search-result-open"><?= icon('edit') ?><span>Öffnen</span></span>
+                </a>
             <?php endforeach; ?>
         </div>
     </section>
@@ -70,7 +66,7 @@
         </div>
         <div class="search-result-grid">
             <?php foreach ($userResults as $user): ?>
-                <article class="search-result-card">
+                <a class="search-result-card" href="<?= e(url('/users#user-' . $user['id'])) ?>">
                     <div class="search-result-head">
                         <strong><?= e($user['name']) ?></strong>
                         <span class="table-pill"><?= e($user['role_name']) ?></span>
@@ -81,19 +77,15 @@
                             <?= e(trim((string) ($user['vorname'] ?? '') . ' ' . (string) ($user['nachname'] ?? '')) ?: 'Kein Kontakt verknüpft') ?>
                         </span>
                     </div>
-                    <div class="card-actions">
-                        <a class="ghost-button compact-action" href="<?= e(url('/users#user-' . $user['id'])) ?>">
-                            <?= icon('user') ?><span>Zum Benutzer</span>
-                        </a>
-                    </div>
-                </article>
+                    <span class="search-result-open"><?= icon('user') ?><span>Zum Benutzer</span></span>
+                </a>
             <?php endforeach; ?>
         </div>
     </section>
 <?php endif; ?>
 
-<?php if ($query !== '' && $contactResults === [] && $userResults === []): ?>
+<?php if ($hasQuery && $contactResults === [] && $userResults === []): ?>
     <section class="panel">
-        <p class="muted">Keine Treffer gefunden. Probiere einen anderen Namen, Ort oder eine andere Mailadresse.</p>
+        <p class="muted">Keine Treffer für „<?= e($query) ?>". Probiere einen anderen Namen, Geburtsnamen oder Ort.</p>
     </section>
 <?php endif; ?>

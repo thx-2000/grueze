@@ -8,10 +8,10 @@ $canMail = can('mail.send');
     <p class="eyebrow">Willkommen<?= $firstName !== '' ? ', ' . e($firstName) : '' ?></p>
     <h2>Was möchtest du tun?</h2>
 
-    <form method="get" action="<?= e(url('/kontakte')) ?>" class="start-search" role="search">
+    <form method="get" action="<?= e(url('/search')) ?>" class="start-search" role="search">
         <label for="startSearch" class="visually-hidden">Kontakt suchen</label>
         <?= icon('search') ?>
-        <input type="search" id="startSearch" name="q" placeholder="Kontakt suchen – Name, Geburtsname …" autocomplete="off" autofocus>
+        <input type="search" id="startSearch" name="q" placeholder="Kontakt suchen – Name, Geburtsname, Ort …" autocomplete="off" autofocus>
         <button type="submit">Suchen</button>
     </form>
 
