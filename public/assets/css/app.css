@@ -2736,3 +2736,41 @@ code {
 .rundmail-sub select {
     max-width: 22rem;
 }
+
+/* ---------------------------------------------- Kontaktliste, entschlackt */
+
+.contacts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.contacts-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.contacts-header .muted {
+    margin: 0.2rem 0 0;
+}
+
+.list-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.8rem;
+}
+
+.inline-drawer {
+    margin: 0.6rem 0 0.2rem;
+}
+
+.inline-drawer summary {
+    font-size: 0.9rem;
+}
+
+.inline-drawer .column-toggle-list {
+    padding-top: 0.7rem;
+}

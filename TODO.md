@@ -5,10 +5,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **UX-Umbau – nächste Stufen** (Gerüst, Startseite, Suche, Rundmail erledigt
-  in v0.5.0–0.6.0):
-  - Kontakte-Seite inhaltlich straffen (Massen-/Bulk-Werkzeuge in
-    Aufklapp-Bereiche, Progressive Disclosure).
+- **UX-Umbau – nächste Stufen** (Gerüst, Startseite, Suche, Rundmail,
+  Kontakte-Seite erledigt in v0.5.0–0.6.1):
   - Mobil weiter entschlacken: Signalbalken-Buttons und Profil/Abmelden auf
     dem Handy kompakter, weniger Chrome vor dem Inhalt.
   - Namensliste erzeugen & versenden (reine Namensliste per Mail zum
@@ -60,6 +58,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Kontakte-Seite entschlackt (v0.6.1): Hero-Card + 3 Statistik-Kacheln raus,
+  stattdessen schlanke Kopfzeile („Kontakte" + Anzahl + „Neuen Kontakt").
+  Verwaltungs-Erklärtexte entfernt. Massen-/Sammelaktionen (Schnellauswahl,
+  Aktionen für Auswahl, Workflow-Hinweise) in einen zugeklappten Bereich
+  „Auswählen & Sammelaktionen", Spaltenauswahl in „Spalten ein-/ausblenden".
+  Tabelle sitzt jetzt direkt unter Suche/Filter statt weit unten.
+  Ansicht-Umschalter (Tabelle/Karten) in die Kopfzeile. CSV-Export und
+  „Rundmail an diese Liste" als kompakte Buttons unter den Filtern.
 - Rundmail-Bereich (v0.6.0): eigener Menüpunkt „Rundmail". Empfängerkreis
   wählen – alle mit Mailadresse / eine Kategorie / bestimmte Tags / die
   aktuelle gefilterte Kontaktliste (Link „Rundmail an diese Auswahl" im

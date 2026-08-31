@@ -63,42 +63,26 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
     return $label . ' ' . ($currentDirection === 'asc' ? '↑' : '↓');
 };
 ?>
-<section class="hero-card<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow">Kontaktverwaltung</p>
-            <h2>Alle Kontakte an einem Ort</h2>
-            <p class="muted">
-                <?= $canSendSingleContactMail
-                    ? 'Fehlende Mailadressen erkennen und einzelne Personen diskret kontaktieren.'
-                    : 'Schnell filtern, markieren, exportieren oder für Mailings verwenden.' ?>
-            </p>
-        </div>
-        <?php if (can('contacts.manage')): ?>
-            <div class="hero-actions">
-                <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Neuen Kontakt anlegen</span></a>
-            </div>
-        <?php endif; ?>
+<?php
+$hasActiveFilter = ($filters['q'] ?? '') !== ''
+    || ($filters['category_id'] ?? '') !== ''
+    || $activeTagIds !== []
+    || ($filters['without_email'] ?? '') === '1'
+    || ($filters['without_phone'] ?? '') === '1';
+?>
+<section class="panel contacts-header">
+    <div>
+        <h2>Kontakte</h2>
+        <p class="muted">
+            <?= e((string) $contactCount) ?> <?= $contactCount === 1 ? 'Kontakt' : 'Kontakte' ?><?= $hasActiveFilter ? ' (gefiltert)' : '' ?>
+        </p>
     </div>
+    <?php if (can('contacts.manage')): ?>
+        <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Neuen Kontakt</span></a>
+    <?php endif; ?>
+</section>
 
-    <div class="stats-grid<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
-        <article class="stat-card">
-            <?= icon('contacts') ?>
-            <span class="stat-label">Kontakte</span>
-            <strong><?= e((string) $contactCount) ?></strong>
-        </article>
-        <article class="stat-card">
-            <?= icon('mail') ?>
-            <span class="stat-label"><?= $canSendSingleContactMail ? 'Mit Mailadresse' : 'E-Mail-Adressen' ?></span>
-            <strong><?= e((string) ($canSendSingleContactMail ? $contactWithEmailCount : $emailCount)) ?></strong>
-        </article>
-        <article class="stat-card">
-            <?= $canSendSingleContactMail ? icon('mail-off') : icon('user') ?>
-            <span class="stat-label"><?= $canSendSingleContactMail ? 'Mailadresse fehlt' : 'Telefonnummern' ?></span>
-            <strong><?= e((string) ($canSendSingleContactMail ? $contactWithoutEmailCount : $phoneCount)) ?></strong>
-        </article>
-    </div>
-
+<section class="panel">
     <form method="get" action="<?= e(url('/kontakte')) ?>" class="filter-grid<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
         <label>
             <span>Suche</span>
@@ -117,11 +101,8 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         </label>
         <div class="filter-actions">
             <button type="submit">Filtern</button>
-            <?php if (can('mail.send')): ?>
-                <a class="ghost-button" href="<?= e(url('/rundmail?' . http_build_query(array_merge($filters, ['from' => 'filter'])))) ?>"><?= icon('mail') ?><span>Rundmail an diese Auswahl</span></a>
-            <?php endif; ?>
-            <?php if (can('contacts.export')): ?>
-                <a class="ghost-button" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>">CSV exportieren</a>
+            <?php if ($hasActiveFilter): ?>
+                <a class="ghost-button compact-action" href="<?= e(url('/kontakte')) ?>"><?= icon('reset') ?><span>Zurücksetzen</span></a>
             <?php endif; ?>
         </div>
         <details class="admin-drawer filter-drawer">
@@ -179,22 +160,67 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
             </div>
         </details>
     </form>
+    <?php if (can('mail.send') || can('contacts.export')): ?>
+        <div class="list-actions">
+            <?php if (can('mail.send')): ?>
+                <a class="ghost-button compact-action" href="<?= e(url('/rundmail?' . http_build_query(array_merge($filters, ['from' => 'filter'])))) ?>"><?= icon('mail') ?><span>Rundmail an diese Liste</span></a>
+            <?php endif; ?>
+            <?php if (can('contacts.export')): ?>
+                <a class="ghost-button compact-action" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>"><?= icon('upload') ?><span>CSV exportieren</span></a>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 </section>
 
 <section class="panel contacts-view-root is-table<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>" data-contacts-view-root>
         <div class="panel-head">
-        <div>
-            <h3>Kontaktliste</h3>
-            <p class="muted"><?= $isMemberCompactView ? 'Mailstatus prüfen, Person auswählen, Kontakt starten.' : 'Auswahl, Kopieren und Mailing starten direkt aus der Übersicht.' ?></p>
+            <div>
+                <h3>Kontaktliste</h3>
+                <?php if (!$canViewPrivateDetails): ?>
+                    <p class="muted">Für diese Rolle sind Kontaktdaten ausgeblendet – „Mail fehlt" markiert Personen ohne Adresse.</p>
+                <?php endif; ?>
+            </div>
+            <div class="selection-tools">
+                <span class="selection-status" id="selectionStatus">Noch nichts ausgewählt</span>
+                <?php if (!$isMemberCompactView): ?>
+                    <div class="view-toggle" role="group" aria-label="Ansicht umschalten">
+                        <button type="button" class="view-toggle-button is-active" data-view-toggle="desktop">Tabelle</button>
+                        <button type="button" class="view-toggle-button" data-view-toggle="mobile">Karten</button>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
-        <div class="selection-tools">
-            <div class="selection-status" id="selectionStatus">Noch nichts ausgewählt</div>
-            <button type="button" class="ghost-button compact-action" data-select="none"><?= icon('reset') ?><span>Auswahl aufheben</span></button>
-        </div>
-    </div>
+
+        <?php if (!$isMemberCompactView): ?>
+            <details class="admin-drawer inline-drawer">
+                <summary><span><?= icon('sliders') ?></span><span>Spalten ein-/ausblenden</span></summary>
+                <div class="admin-drawer-body column-toggle-list">
+                    <label class="column-toggle"><input type="checkbox" data-column-toggle="category" checked><span>Kategorie</span></label>
+                    <label class="column-toggle"><input type="checkbox" data-column-toggle="tags" checked><span>Tags</span></label>
+                    <?php if ($visibleContactFields['address']): ?>
+                        <label class="column-toggle"><input type="checkbox" data-column-toggle="adresse" checked><span>Adresse</span></label>
+                    <?php endif; ?>
+                    <?php if ($visibleContactFields['birthday']): ?>
+                        <label class="column-toggle"><input type="checkbox" data-column-toggle="geburtstag" checked><span>Geburtstag</span></label>
+                    <?php endif; ?>
+                    <?php if ($visibleContactFields['emails']): ?>
+                        <label class="column-toggle"><input type="checkbox" data-column-toggle="emails" checked><span>E-Mail</span></label>
+                    <?php endif; ?>
+                    <?php if ($visibleContactFields['phones']): ?>
+                        <label class="column-toggle"><input type="checkbox" data-column-toggle="phones" checked><span>Telefon</span></label>
+                    <?php endif; ?>
+                    <?php if ($visibleContactFields['login']): ?>
+                        <label class="column-toggle"><input type="checkbox" data-column-toggle="login" checked><span>Login</span></label>
+                    <?php endif; ?>
+                </div>
+            </details>
+        <?php endif; ?>
 
     <form id="contactSelectionForm" method="post" action="<?= e(url('/mail/compose')) ?>">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+        <details class="admin-drawer" data-bulk-drawer>
+            <summary><span><?= icon('check-double') ?></span><span>Auswählen &amp; Sammelaktionen</span></summary>
+            <div class="admin-drawer-body">
         <div class="bulk-layout<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
             <div class="bulk-card<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
                 <span class="bulk-title">Schnellauswahl</span>
@@ -266,47 +292,8 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                 </ol>
             </aside>
         <?php endif; ?>
-
-        <div class="table-options">
-            <div>
-                <strong>Ansicht</strong>
-                <p class="muted">
-                    <?php if ($canViewPrivateDetails): ?>
-                        Auf größeren Bildschirmen ist die Tabelle kompakter und besser sortierbar.
-                        <?php if ($visibleDetailLabels !== []): ?>
-                            Sichtbar sind aktuell: <?= e(implode(', ', $visibleDetailLabels)) ?>.
-                        <?php endif; ?>
-                    <?php else: ?>
-                        Diese Rolle sieht bewusst nur Namen, Kategorie und Tags. <strong>Mail fehlt</strong> markiert Kontakte ohne hinterlegte Adresse.
-                    <?php endif; ?>
-                </p>
             </div>
-            <?php if (!$isMemberCompactView): ?>
-                <div class="view-toggle" role="group" aria-label="Ansicht umschalten">
-                    <button type="button" class="view-toggle-button is-active" data-view-toggle="desktop">Tabelle</button>
-                    <button type="button" class="view-toggle-button" data-view-toggle="mobile">Karten</button>
-                </div>
-                <div class="column-toggle-list">
-                    <label class="column-toggle"><input type="checkbox" data-column-toggle="category" checked><span>Kategorie</span></label>
-                    <label class="column-toggle"><input type="checkbox" data-column-toggle="tags" checked><span>Tags</span></label>
-                    <?php if ($visibleContactFields['address']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="adresse" checked><span>Adresse</span></label>
-                    <?php endif; ?>
-                    <?php if ($visibleContactFields['birthday']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="geburtstag" checked><span>Geburtstag</span></label>
-                    <?php endif; ?>
-                    <?php if ($visibleContactFields['emails']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="emails" checked><span>E-Mail</span></label>
-                    <?php endif; ?>
-                    <?php if ($visibleContactFields['phones']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="phones" checked><span>Telefon</span></label>
-                    <?php endif; ?>
-                    <?php if ($visibleContactFields['login']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="login" checked><span>Login</span></label>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
-        </div>
+        </details>
 
         <div class="contacts-table-wrap">
             <table class="contacts-table">
