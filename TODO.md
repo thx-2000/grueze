@@ -20,6 +20,16 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   eindeutigen Schritten erledigt sind. Menüstruktur, Benennung, Seitenlayout
   und Einstiegspunkte daran ausrichten.
 
+- **Voll-Export & -Import aller Daten**: Funktion, um den gesamten
+  Datenbestand (Kontakte, Kategorien, Tags, Benutzer/Rollen, Einstellungen,
+  Protokolle, hochgeladene Dateien wie Logo) als vollständiges Backup zu
+  exportieren – maschinenlesbar und wieder importierbar. Zweck: Datensicherung,
+  Umzug auf einen anderen Server, späterer Wechsel auf die neutrale Fassung.
+  Import muss klar zwischen "leeres System befüllen" und "bestehende Daten
+  ersetzen/zusammenführen" unterscheiden. Baut auf und ersetzt den groben
+  Punkt "Backup-/Restore-Konzept" weiter unten. Verhältnis zum bestehenden
+  XLSX-Kontaktimport klären (der bleibt für Teil-Importe).
+
 - **Blickschutz-Knopf ("Datenschutz-Button")**: Als eingeloggter Admin/Orga
   soll man mit einem Klick E-Mail-Adressen und Telefonnummern in der
   Oberfläche ausblenden/unleserlich machen können (z. B. Weichzeichner oder
