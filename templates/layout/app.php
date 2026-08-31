@@ -146,18 +146,18 @@ $themeStyle = branding_theme_style();
         </main>
     </div>
 
-    <div class="privacy-note<?= !empty($currentUser) ? ' is-authenticated' : '' ?>">
-        <div class="privacy-note-shell">
+    <footer class="site-footer<?= !empty($currentUser) ? ' is-authenticated' : '' ?>">
+        <div class="site-footer-shell">
             <?php if (!empty($currentUser)): ?>
-                <div class="privacy-note-spacer" aria-hidden="true"></div>
+                <div class="site-footer-spacer" aria-hidden="true"></div>
             <?php endif; ?>
-            <div class="privacy-note-inner">
+            <div class="site-footer-inner">
             <a href="<?= e(url('/impressum')) ?>">Impressum</a>
             <span>|</span>
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
             <?php if ($appVersion !== ''): ?>
                 <span>|</span>
-                <span class="privacy-note-version"><?= e($systemLabel) ?> v.<?= e($appVersion) ?></span>
+                <span class="site-footer-version" title="GRUEZE: Anspielung auf „Grüezi“ und Kurzform von „Gruß-Zentrale“"><?= e($systemLabel) ?> v.<?= e($appVersion) ?></span>
             <?php endif; ?>
             <?php if ($publicSiteUrl !== ''): ?>
                 <span>|</span>
@@ -169,7 +169,7 @@ $themeStyle = branding_theme_style();
             <?php endif; ?>
             </div>
         </div>
-    </div>
+    </footer>
 
     <div id="toast" class="toast" hidden></div>
     <script>

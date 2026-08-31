@@ -32,5 +32,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Footer-Klasse `privacy-note` → `site-footer` umbenannt und als `<footer>`
+  ausgezeichnet (v0.2.8). Grund: Inhalts-/Cookie-Blocker (Filterlisten) haben
+  den alten Klassennamen erkannt und Teile des Footers – inkl. Versionsanzeige –
+  bei manchen Besuchern ausgeblendet. Mouse-over an der Versionsanzeige erklärt
+  jetzt den Namen GRUEZE (Grüezi / „Gruß-Zentrale").
 - Lokale Docker-Testumgebung eingerichtet (PHP 8.2 + Apache + MariaDB 10.11,
   siehe `docker/README.md`), angenähert an den all-inkl-KAS-Produktivstand.

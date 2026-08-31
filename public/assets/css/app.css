@@ -1826,36 +1826,37 @@ td {
     color: var(--color-danger);
 }
 
-.privacy-note {
+.site-footer {
     padding: 1rem 0 2rem;
     color: var(--color-muted);
 }
 
-.privacy-note-shell {
+.site-footer-shell {
     max-width: var(--shell-max-width);
     margin: 0 auto;
     padding: 0 var(--shell-side-pad);
 }
 
-.privacy-note.is-authenticated .privacy-note-shell {
+.site-footer.is-authenticated .site-footer-shell {
     display: grid;
     grid-template-columns: var(--shell-sidebar-width) 1fr;
     gap: 1.2rem;
 }
 
-.privacy-note-spacer {
+.site-footer-spacer {
     min-height: 1px;
 }
 
-.privacy-note-inner {
+.site-footer-inner {
     display: flex;
     gap: 0.65rem;
     flex-wrap: wrap;
 }
 
-.privacy-note-version {
+.site-footer-version {
     color: var(--color-muted);
     font-size: 0.84rem;
+    cursor: help;
 }
 
 .passkey-login-box {
@@ -2307,7 +2308,7 @@ code {
         overflow-x: hidden;
     }
 
-    .privacy-note.is-authenticated .privacy-note-shell {
+    .site-footer.is-authenticated .site-footer-shell {
         grid-template-columns: 1fr;
     }
 
