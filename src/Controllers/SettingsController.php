@@ -59,14 +59,6 @@ final class SettingsController extends BaseController
             Redirect::to('/settings/branding');
         }
 
-        foreach ($incoming as $key => $value) {
-            if (str_starts_with($key, 'branding_color_') && !$this->isValidCssColor($value)) {
-                $_SESSION['_errors'] = [$key => 'Bitte einen gültigen Farbwert angeben.'];
-                $_SESSION['_old'] = $incoming;
-                Redirect::to('/settings/branding');
-            }
-        }
-
         $currentBranding = $this->settings->branding();
         $logoPath = $currentBranding['branding_logo_path'] ?? '';
         $logoPath = $this->uploads->storeBrandAsset($request->file('branding_logo'), $logoPath !== '' ? $logoPath : null) ?? '';
@@ -303,16 +295,5 @@ final class SettingsController extends BaseController
 
         flash('success', 'Berechtigungen wurden gespeichert.');
         Redirect::to('/settings/permissions');
-    }
-
-    private function isValidCssColor(string $value): bool
-    {
-        $value = trim($value);
-        if ($value === '') {
-            return false;
-        }
-
-        return preg_match('/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $value) === 1
-            || preg_match('/^rgba?\(([^)]+)\)$/', $value) === 1;
     }
 }

@@ -1,9 +1,9 @@
 <section class="hero-card">
     <div class="hero-row">
         <div>
-            <p class="eyebrow">Phase 1</p>
-            <h2>Design & Branding</h2>
-            <p class="muted">Hier entsteht die erste White-Label-Schicht. Name, öffentliche Links, Basisfarben, Fonts und Logo kommen von nun an aus einer zentralen Admin-Konfiguration statt aus fest eingebauten Projekttexten.</p>
+            <p class="eyebrow">Verwaltung</p>
+            <h2>Branding</h2>
+            <p class="muted">Name, Kurzname, öffentliche Links, Login-Texte, Support-Adresse und Logo. Das Aussehen – Farben, Schriften, Ecken – steckt in den <a href="<?= e(url('/settings/themes')) ?>">Themes</a>.</p>
         </div>
         <div class="floating-icon"><?= icon('sliders') ?></div>
     </div>
@@ -71,50 +71,10 @@
         </div>
 
         <div class="subsection-card">
-            <strong>Typografie</strong>
-            <div class="form-grid">
-                <label>
-                    <span>Display-Font</span>
-                    <input type="text" name="branding_font_display" value="<?= e((string) ($branding['branding_font_display'] ?? '')) ?>">
-                </label>
-                <label>
-                    <span>Text-Font</span>
-                    <input type="text" name="branding_font_body" value="<?= e((string) ($branding['branding_font_body'] ?? '')) ?>">
-                </label>
-            </div>
-        </div>
-
-        <div class="subsection-card">
-            <strong>Farben</strong>
-            <div class="form-grid branding-color-grid">
-                <?php
-                $colorFields = [
-                    'branding_color_bg' => 'Hintergrund',
-                    'branding_color_bg_alt' => 'Hintergrund alt',
-                    'branding_color_surface' => 'Fläche',
-                    'branding_color_surface_strong' => 'Fläche stark',
-                    'branding_color_surface_soft' => 'Fläche weich',
-                    'branding_color_text' => 'Text',
-                    'branding_color_muted' => 'Sekundärtext',
-                    'branding_color_primary' => 'Primär',
-                    'branding_color_primary_strong' => 'Primär stark',
-                    'branding_color_secondary' => 'Sekundär',
-                    'branding_color_accent' => 'Signal',
-                    'branding_color_highlight' => 'Highlight',
-                    'branding_color_border' => 'Rahmen',
-                    'branding_color_danger' => 'Warnung',
-                    'branding_color_success' => 'Erfolg',
-                ];
-                ?>
-                <?php foreach ($colorFields as $field => $label): ?>
-                    <label>
-                        <span><?= e($label) ?></span>
-                        <div class="color-input-row">
-                            <span class="color-preview-swatch" data-color-preview style="--swatch: <?= e((string) ($branding[$field] ?? 'transparent')) ?>;"></span>
-                            <input type="text" name="<?= e($field) ?>" value="<?= e((string) ($branding[$field] ?? '')) ?>" data-color-source>
-                        </div>
-                    </label>
-                <?php endforeach; ?>
+            <strong>Farben, Schriften &amp; Ecken</strong>
+            <p class="detail-hint">Das Aussehen steckt jetzt im Theme-System. Dort lässt sich das aktive Theme wechseln, duplizieren und anpassen.</p>
+            <div class="toolbar-actions">
+                <a class="ghost-button compact-action" href="<?= e(url('/settings/themes')) ?>"><?= icon('sparkles') ?><span>Zu den Themes</span></a>
             </div>
         </div>
 
@@ -125,20 +85,3 @@
         </div>
     </form>
 </section>
-
-<script>
-    document.querySelectorAll('[data-color-source]').forEach((input) => {
-        const wrapper = input.closest('.color-input-row');
-        const swatch = wrapper ? wrapper.querySelector('[data-color-preview]') : null;
-        if (!swatch) {
-            return;
-        }
-
-        const sync = () => {
-            swatch.style.setProperty('--swatch', input.value.trim() || 'transparent');
-        };
-
-        input.addEventListener('input', sync);
-        sync();
-    });
-</script>

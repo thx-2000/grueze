@@ -38,7 +38,7 @@ body {
     padding: 0.36rem var(--shell-side-pad) 0.42rem;
     display: grid;
     gap: 0.34rem;
-    color: #181a15;
+    color: var(--color-text);
     font-size: 0.74rem;
     font-weight: 800;
 }
@@ -59,7 +59,7 @@ body {
 }
 
 .signal-bar-label {
-    color: #181a15;
+    color: var(--color-text);
     font-family: var(--font-display);
     font-size: 0.88rem;
     font-weight: 800;
@@ -112,7 +112,7 @@ body {
     padding: 0.3rem 0.56rem;
     border-radius: 999px;
     background: rgba(24, 26, 21, 0.14);
-    color: #181a15 !important;
+    color: var(--color-text) !important;
     box-shadow: none;
     border-color: rgba(24, 26, 21, 0.1);
     font-size: 0.72rem;
@@ -154,8 +154,8 @@ button,
 
 button,
 .button-link {
-    background: #33372f;
-    color: #f6f7f3 !important;
+    background: var(--color-primary);
+    color: var(--color-on-primary) !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -171,9 +171,9 @@ button,
 }
 
 .sidebar-footer .ghost-button {
-    background: #3c4037;
-    color: #f8fbef !important;
-    border-color: rgba(45, 49, 40, 0.3);
+    background: var(--color-primary);
+    color: var(--color-on-primary) !important;
+    border-color: transparent;
     box-shadow: 0 10px 18px rgba(24, 26, 21, 0.18);
 }
 
@@ -182,17 +182,17 @@ button,
 }
 
 .danger-button {
-    background: rgba(182, 69, 33, 0.12);
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
     color: var(--color-danger) !important;
-    border-color: rgba(182, 69, 33, 0.12);
+    border-color: color-mix(in srgb, var(--color-danger) 12%, transparent);
     box-shadow: none;
 }
 
 .form-actions .danger-button {
-    background: #b64521;
-    color: #fff !important;
-    border-color: rgba(182, 69, 33, 0.38);
-    box-shadow: 0 10px 18px rgba(182, 69, 33, 0.18);
+    background: var(--color-danger);
+    color: var(--color-on-danger) !important;
+    border-color: transparent;
+    box-shadow: 0 10px 18px rgba(24, 26, 21, 0.16);
 }
 
 .form-actions .danger-button .icon {
@@ -233,8 +233,8 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: rgba(255, 159, 10, 0.45);
-    box-shadow: 0 0 0 4px rgba(229, 255, 58, 0.18);
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 24%, transparent);
 }
 
 label span,
@@ -244,7 +244,7 @@ strong {
 }
 
 label span {
-    color: #34382f;
+    color: var(--color-text);
     font-weight: 700;
 }
 
@@ -301,7 +301,7 @@ label span {
     line-height: 1;
     letter-spacing: -0.02em;
     white-space: nowrap;
-    color: #181a15;
+    color: var(--color-text);
     box-shadow: 0 10px 18px rgba(24, 26, 21, 0.08);
 }
 
@@ -467,7 +467,7 @@ label span {
     border: 1px solid rgba(24, 26, 21, 0.14);
     border-radius: var(--radius-sm);
     background: rgba(24, 26, 21, 0.08);
-    color: #181a15;
+    color: var(--color-text);
     font: inherit;
     font-weight: 700;
     cursor: pointer;
@@ -753,9 +753,9 @@ label span {
 
 .view-toggle-button {
     appearance: none;
-    border: 1px solid rgba(45, 49, 40, 0.26);
-    background: #dde1d7;
-    color: #21251e;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-alt);
+    color: var(--color-text);
     font: inherit;
     font-weight: 700;
     padding: 0.42rem 0.8rem;
@@ -765,13 +765,13 @@ label span {
 }
 
 .view-toggle-button:hover {
-    background: #d3d9cd;
+    background: color-mix(in srgb, var(--color-bg-alt) 88%, var(--color-text));
 }
 
 .view-toggle-button.is-active {
-    background: rgba(45, 49, 40, 0.96);
-    color: #f6f8f2;
-    border-color: rgba(45, 49, 40, 0.96);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    border-color: var(--color-primary);
 }
 
 .column-toggle-list {
@@ -1856,7 +1856,7 @@ label span {
 
 .role-badge-admin {
     background: rgba(45, 49, 40, 0.1);
-    color: #23261f;
+    color: var(--color-text);
     border-color: rgba(45, 49, 40, 0.15);
 }
 
@@ -1868,13 +1868,13 @@ label span {
 
 .role-badge-stufenmitglied {
     background: rgba(230, 235, 222, 0.92);
-    color: #4d5344;
+    color: var(--color-muted);
     border-color: rgba(136, 146, 124, 0.2);
 }
 
 .role-badge-betrachter {
     background: rgba(241, 243, 237, 0.98);
-    color: #666d5d;
+    color: var(--color-muted);
     border-color: rgba(156, 163, 149, 0.2);
 }
 
@@ -2014,7 +2014,7 @@ td {
     align-items: center;
     justify-content: center;
     background: rgba(226, 233, 209, 0.92);
-    color: #23261f;
+    color: var(--color-text);
     flex: 0 0 2.3rem;
 }
 
@@ -2831,7 +2831,7 @@ code {
     padding: 0.05rem 0.5rem;
     border-radius: 999px;
     background: var(--color-accent);
-    color: #181a15;
+    color: var(--color-text);
     font-size: 0.82rem;
 }
 
@@ -2942,4 +2942,97 @@ code {
 .taxo-add input[type="text"] {
     flex: 1 1 14rem;
     width: auto;
+}
+
+/* -------------------------------------------------------------------- Themes */
+
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.theme-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.theme-card.is-active {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent) inset;
+}
+
+.theme-swatches {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    height: 3.2rem;
+}
+
+.theme-swatches span {
+    display: block;
+}
+
+.theme-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 0.95rem 1rem 1rem;
+}
+
+.theme-card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.theme-card-head strong {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+}
+
+.theme-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+}
+
+.theme-badge.is-active {
+    background: var(--color-accent);
+    color: var(--color-primary-strong);
+    border-color: transparent;
+}
+
+.theme-card-body .muted {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
+.theme-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 0.35rem;
+}
+
+.theme-card-actions form {
+    margin: 0;
+}
+
+.theme-editor .subsection-card {
+    margin-bottom: 1rem;
 }

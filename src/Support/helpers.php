@@ -99,8 +99,6 @@ function app_branding(): array
             'branding_sidebar_copy' => branding_default('sidebar_copy', ''),
             'branding_support_email' => branding_default('support_email', 'kontakt@example.org'),
             'branding_logo_path' => '',
-            'branding_font_display' => '',
-            'branding_font_body' => '',
         ];
     }
 
@@ -128,7 +126,7 @@ function branding_value(string $key, mixed $default = null): mixed
 function branding_theme_style(): string
 {
     try {
-        $variables = App\Core\Container::get(SettingRepository::class)->brandingThemeVariables();
+        $variables = App\Core\Container::get(App\Services\ThemeService::class)->cssVariables();
     } catch (Throwable) {
         return '';
     }
@@ -143,7 +141,7 @@ function branding_theme_style(): string
 
 function system_version(): string
 {
-    return '0.7.2';
+    return '0.8.0';
 }
 
 function system_label(): string

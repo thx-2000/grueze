@@ -11,6 +11,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
     leerer Raum im aufgeklappten Menü verkleinern.
   - später: gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
+- **Theme-System – Feinschliff** (Grundgerüst erledigt in v0.8.0): Noch fest
+  hinterlegte, auf helle Themes ausgelegte Flächen-Effekte (durchscheinende
+  Karten-/Seitenleisten-Hintergründe, Glanzkanten, kleine Status-Pills) auf
+  Tokens umstellen, damit auch dunklere Themes möglich werden. Danach ggf.
+  ein zweites mitgeliefertes Datei-Theme als Alternative.
+
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
   Endpunkt, SQL-/Template-Injection, Datei-Uploads (XLSX-Import, Logo),
@@ -56,6 +62,20 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Theme-System (v0.8.0): Das komplette Aussehen (2 Schriften, 15 Farben,
+  4 Eckenradien) steckt jetzt in benannten **Themes**. Neue Seite Verwaltung →
+  „Themes" (`/settings/themes`): Kachelübersicht mit Farbstreifen, aktives
+  Theme wechseln, duplizieren, eigene Themes bearbeiten (gruppierter
+  Token-Editor mit Farbvorschau), umbenennen, löschen. Datei-Themes im Ordner
+  `themes/` (`grueze.php`, `hell.php`) bieten sich automatisch als Vorlage an;
+  Doku in `themes/README.md`. Der bisherige Look heißt jetzt **GRUEZE**, neuer
+  Standard für frische Installationen ist **Hell** (viel Weiß, Orange-Akzent).
+  „Design & Branding" ist in **Branding** (Name/Texte/Logo) und **Themes**
+  aufgeteilt; die alten Farb-/Font-Felder auf der Branding-Seite sind weg.
+  `app.css` in den sichtbaren Kern-Elementen (Buttons, Text, Links, Fokus,
+  Umschalter, Kopfleiste) auf Tokens umgestellt. Laufende Instanz bleibt
+  optisch unverändert (aktives Theme = `signalfarbe`).
+  **Auf Prod unter Verwaltung → Migrationen `2026-08-31-themes` anwenden.**
 - Namensliste erweitert (v0.7.2): Filter „nur ohne Mailadresse" / „nur ohne
   Handynummer" (die Namensliste ist damit auch die Lückenliste). Versand jetzt
   zweistufig: „Als Rundmail an eine Gruppe" reicht die Liste als

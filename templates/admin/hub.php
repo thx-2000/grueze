@@ -6,7 +6,8 @@ $groups = [
         ['users.manage', '/settings/visibility', 'eye', 'Sichtbarkeit', 'Steuern, welche Rolle welche Kontaktfelder sieht.'],
     ],
     'Erscheinungsbild & Texte' => [
-        ['users.manage', '/settings/branding', 'sparkles', 'Design & Branding', 'Name, Farben, Fonts, Logo und sichtbare Texte.'],
+        ['users.manage', '/settings/themes', 'sparkles', 'Themes', 'Farben, Schriften und Ecken – Theme wechseln, duplizieren, anpassen.'],
+        ['users.manage', '/settings/branding', 'sliders', 'Branding', 'Name, Kurzname, öffentliche Links, Login-Texte und Logo.'],
         ['settings.manage', '/settings/mail-footer', 'mail', 'Mail-Einstellungen', 'Absender, Mailserver, Betreff-Präfixe und Mail-Fuß.'],
         ['users.manage', '/admin/legal/impressum', 'sliders', 'Rechtliches', 'Impressum und Datenschutzerklärung bearbeiten.'],
     ],

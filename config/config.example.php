@@ -14,8 +14,8 @@ return [
     // Reihenfolge der Auflösung: Admin-Oberfläche (app_settings) > diese Sektion
     // > eingebaute Standardwerte. Für die Instanz kann die Sektion
     // komplett entfallen. Einzelne Schlüssel dürfen fehlen; leere Strings zählen
-    // als "nicht gesetzt". Farben/Fonts (color_*, font_*) sind ebenfalls
-    // überschreibbar, werden hier aber nur bei Bedarf gesetzt.
+    // als "nicht gesetzt". Farben, Schriften und Ecken stecken im Theme-System
+    // (Ordner themes/ + Verwaltung -> Themes), nicht hier.
     'branding' => [
         'app_name' => 'Adress-Zentrale',
         'short_name' => 'GRUEZE',

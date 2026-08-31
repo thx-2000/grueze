@@ -101,6 +101,8 @@ final class SettingRepository
         // branding_-Präfix>') vorbelegt werden, ohne die laufende Instanz zu
         // verändern (deren config keine branding-Sektion enthält). Die
         // Admin-Oberfläche (app_settings) hat weiterhin Vorrang vor beidem.
+        // Farben, Fonts und Eckenradien liegen seit v0.8.0 im Theme-System
+        // (ThemeService / Ordner themes/), nicht mehr hier.
         $defaults = [
             'branding_app_name' => 'Adress-Zentrale',
             'branding_short_name' => 'GRUEZE',
@@ -112,23 +114,6 @@ final class SettingRepository
             'branding_sidebar_copy' => 'Kontakte, Mailings und Organisation an einem Ort.',
             'branding_support_email' => 'kontakt@example.org',
             'branding_logo_path' => '',
-            'branding_font_display' => '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
-            'branding_font_body' => '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
-            'branding_color_bg' => '#e8ebe5',
-            'branding_color_bg_alt' => '#dde1da',
-            'branding_color_surface' => 'rgba(255, 255, 255, 0.82)',
-            'branding_color_surface_strong' => 'rgba(255, 255, 255, 0.92)',
-            'branding_color_surface_soft' => 'rgba(243, 245, 240, 0.92)',
-            'branding_color_text' => '#181a15',
-            'branding_color_muted' => '#5d6258',
-            'branding_color_primary' => '#2d3128',
-            'branding_color_primary_strong' => '#141610',
-            'branding_color_secondary' => '#f0a317',
-            'branding_color_accent' => '#d8ef54',
-            'branding_color_highlight' => '#eef4c5',
-            'branding_color_border' => 'rgba(38, 42, 32, 0.12)',
-            'branding_color_danger' => '#b64521',
-            'branding_color_success' => '#3f7558',
         ];
 
         foreach ($defaults as $key => $fallback) {
@@ -140,31 +125,6 @@ final class SettingRepository
         }
 
         return $defaults;
-    }
-
-    public function brandingThemeVariables(): array
-    {
-        $branding = $this->branding();
-
-        return [
-            '--font-display' => (string) $branding['branding_font_display'],
-            '--font-body' => (string) $branding['branding_font_body'],
-            '--color-bg' => (string) $branding['branding_color_bg'],
-            '--color-bg-alt' => (string) $branding['branding_color_bg_alt'],
-            '--color-surface' => (string) $branding['branding_color_surface'],
-            '--color-surface-strong' => (string) $branding['branding_color_surface_strong'],
-            '--color-surface-soft' => (string) $branding['branding_color_surface_soft'],
-            '--color-text' => (string) $branding['branding_color_text'],
-            '--color-muted' => (string) $branding['branding_color_muted'],
-            '--color-primary' => (string) $branding['branding_color_primary'],
-            '--color-primary-strong' => (string) $branding['branding_color_primary_strong'],
-            '--color-secondary' => (string) $branding['branding_color_secondary'],
-            '--color-accent' => (string) $branding['branding_color_accent'],
-            '--color-highlight' => (string) $branding['branding_color_highlight'],
-            '--color-border' => (string) $branding['branding_color_border'],
-            '--color-danger' => (string) $branding['branding_color_danger'],
-            '--color-success' => (string) $branding['branding_color_success'],
-        ];
     }
 
     public function fieldVisibilityDefaults(): array

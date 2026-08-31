@@ -32,6 +32,7 @@ use App\Repositories\LogRepository;
 use App\Repositories\PasskeyRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\TagRepository;
+use App\Repositories\ThemeRepository;
 use App\Repositories\UserRepository;
 use App\Services\BackupService;
 use App\Services\CsvExportService;
@@ -39,6 +40,7 @@ use App\Services\ContactImportService;
 use App\Services\MailService;
 use App\Services\MigrationService;
 use App\Services\PasswordResetService;
+use App\Services\ThemeService;
 use App\Services\UploadService;
 use App\Services\WebAuthnService;
 use App\Services\XlsxReader;
@@ -89,6 +91,11 @@ try {
     Container::factory(ContactRepository::class, static fn () => new ContactRepository(Container::get(PDO::class)));
     Container::factory(LogRepository::class, static fn () => new LogRepository(Container::get(PDO::class)));
     Container::factory(SettingRepository::class, static fn () => new SettingRepository(Container::get(PDO::class)));
+    Container::factory(ThemeRepository::class, static fn () => new ThemeRepository(Container::get(PDO::class)));
+    Container::factory(ThemeService::class, static fn () => new ThemeService(
+        Container::get(SettingRepository::class),
+        Container::get(ThemeRepository::class)
+    ));
     Container::factory(PasskeyRepository::class, static fn () => new PasskeyRepository(Container::get(PDO::class)));
     Container::factory(Auth::class, static fn () => new Auth(
         Container::get(UserRepository::class),
@@ -158,7 +165,8 @@ try {
     ));
     Container::factory(SetupController::class, static fn () => new SetupController(
         Container::get(Auth::class),
-        Container::get(UserRepository::class)
+        Container::get(UserRepository::class),
+        Container::get(SettingRepository::class)
     ));
     Container::factory(CategoryController::class, static fn () => new CategoryController(
         Container::get(Auth::class),
@@ -195,6 +203,11 @@ try {
         Container::get(Auth::class),
         Container::get(SettingRepository::class),
         Container::get(UploadService::class)
+    ));
+    Container::factory(\App\Controllers\ThemeController::class, static fn () => new \App\Controllers\ThemeController(
+        Container::get(Auth::class),
+        Container::get(ThemeService::class),
+        Container::get(ThemeRepository::class)
     ));
     Container::factory(SearchController::class, static fn () => new SearchController(
         Container::get(Auth::class),
@@ -280,6 +293,13 @@ try {
     $router->get('/logs/mail', [LogController::class, 'mail']);
     $router->get('/settings/branding', [SettingsController::class, 'branding']);
     $router->post('/settings/branding', [SettingsController::class, 'updateBranding']);
+    $router->get('/settings/themes', [\App\Controllers\ThemeController::class, 'index']);
+    $router->post('/settings/themes/aktivieren', [\App\Controllers\ThemeController::class, 'activate']);
+    $router->post('/settings/themes/duplizieren', [\App\Controllers\ThemeController::class, 'duplicate']);
+    $router->post('/settings/themes/umbenennen', [\App\Controllers\ThemeController::class, 'rename']);
+    $router->get('/settings/themes/bearbeiten', [\App\Controllers\ThemeController::class, 'edit']);
+    $router->post('/settings/themes/speichern', [\App\Controllers\ThemeController::class, 'save']);
+    $router->post('/settings/themes/loeschen', [\App\Controllers\ThemeController::class, 'delete']);
     $router->get('/settings/mail-footer', [SettingsController::class, 'mailFooter']);
     $router->post('/settings/mail-footer', [SettingsController::class, 'updateMailFooter']);
     $router->get('/settings/visibility', [SettingsController::class, 'visibility']);

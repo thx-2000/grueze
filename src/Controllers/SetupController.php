@@ -6,14 +6,19 @@ namespace App\Controllers;
 
 use App\Core\Csrf;
 use App\Core\Request;
+use App\Repositories\SettingRepository;
 use App\Repositories\UserRepository;
+use App\Services\ThemeService;
 use App\Services\Validator;
 use App\Support\Redirect;
 
 final class SetupController extends BaseController
 {
-    public function __construct(\App\Core\Auth $auth, private UserRepository $users)
-    {
+    public function __construct(
+        \App\Core\Auth $auth,
+        private UserRepository $users,
+        private SettingRepository $settings
+    ) {
         parent::__construct($auth);
     }
 
@@ -75,6 +80,13 @@ final class SetupController extends BaseController
             'role_id' => $adminRoleId,
             'is_active' => 1,
         ]);
+
+        // Frische Installation: helles Standard-Theme setzen. Bestandsinstanzen
+        // durchlaufen diesen Schritt nie und bleiben über die Theme-Migration
+        // auf ihrem bisherigen Look.
+        if ($this->settings->get('active_theme') === null) {
+            $this->settings->set('active_theme', ThemeService::FALLBACK_SLUG);
+        }
 
         flash('success', 'Das erste Admin-Konto wurde angelegt. Du kannst dich jetzt anmelden.');
         Redirect::to('/login');
