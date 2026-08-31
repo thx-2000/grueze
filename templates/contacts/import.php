@@ -5,7 +5,7 @@
             <h2>Kontakte aus XLSX einspielen</h2>
             <p class="muted">Gedacht für die vorhandene Namens- und Adressliste. Bestehende Kontakte werden am Namen abgeglichen und bei Bedarf ergänzt.</p>
         </div>
-        <a class="ghost-button" href="<?= e(url('/')) ?>">Zurück zur Übersicht</a>
+        <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Zurück zur Übersicht</a>
     </div>
 </section>
 
@@ -35,7 +35,7 @@
         </label>
         <div class="form-actions">
             <button type="submit"><?= icon('upload') ?><span>Import starten</span></button>
-            <a class="ghost-button" href="<?= e(url('/')) ?>">Abbrechen</a>
+            <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Abbrechen</a>
         </div>
     </form>
 </section>

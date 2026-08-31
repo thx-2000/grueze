@@ -52,6 +52,22 @@ final class ContactRepository
             )';
         }
 
+        if (!empty($filters['without_email'])) {
+            $sql .= ' AND NOT EXISTS (
+                SELECT 1 FROM contact_emails
+                WHERE contact_emails.contact_id = contacts.id
+                AND TRIM(COALESCE(contact_emails.email, "")) <> ""
+            )';
+        }
+
+        if (!empty($filters['without_phone'])) {
+            $sql .= ' AND NOT EXISTS (
+                SELECT 1 FROM contact_phones
+                WHERE contact_phones.contact_id = contacts.id
+                AND TRIM(COALESCE(contact_phones.phone, "")) <> ""
+            )';
+        }
+
         $allowedSorts = ['nachname', 'vorname', 'category_name', 'ort', 'geburtstag', 'created_at'];
         $sort = in_array($filters['sort'] ?? '', $allowedSorts, true) ? $filters['sort'] : 'vorname';
         $direction = strtolower((string) ($filters['direction'] ?? 'asc')) === 'desc' ? 'DESC' : 'ASC';
@@ -102,6 +118,34 @@ final class ContactRepository
         ]);
 
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Kennzahlen für die Startseite.
+     *
+     * @return array{total:int, without_email:int, without_phone:int}
+     */
+    public function stats(): array
+    {
+        $row = $this->pdo->query(
+            'SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN NOT EXISTS (
+                    SELECT 1 FROM contact_emails ce
+                    WHERE ce.contact_id = contacts.id AND TRIM(COALESCE(ce.email, "")) <> ""
+                ) THEN 1 ELSE 0 END) AS without_email,
+                SUM(CASE WHEN NOT EXISTS (
+                    SELECT 1 FROM contact_phones cp
+                    WHERE cp.contact_id = contacts.id AND TRIM(COALESCE(cp.phone, "")) <> ""
+                ) THEN 1 ELSE 0 END) AS without_phone
+             FROM contacts'
+        )->fetch();
+
+        return [
+            'total' => (int) ($row['total'] ?? 0),
+            'without_email' => (int) ($row['without_email'] ?? 0),
+            'without_phone' => (int) ($row['without_phone'] ?? 0),
+        ];
     }
 
     public function mailingContactIds(): array

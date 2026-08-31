@@ -40,6 +40,8 @@ final class ContactController extends BaseController
             'q' => trim((string) $request->input('q', '')),
             'category_id' => (string) $request->input('category_id', ''),
             'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
+            'without_email' => (string) $request->input('without_email', '') === '1' ? '1' : '',
+            'without_phone' => (string) $request->input('without_phone', '') === '1' ? '1' : '',
             'sort' => (string) $request->input('sort', 'vorname'),
             'direction' => (string) $request->input('direction', 'asc'),
         ];
@@ -105,7 +107,7 @@ final class ContactController extends BaseController
             Redirect::to('/contacts/import');
         }
 
-        Redirect::to('/');
+        Redirect::to('/kontakte');
     }
 
     public function store(Request $request): void
@@ -140,7 +142,7 @@ final class ContactController extends BaseController
         $accountMessage = $this->syncLinkedAccount($contactId, $data);
         $this->logs->addAudit((int) $this->auth->user()['id'], $contactId, 'created', 'Kontakt wurde angelegt.');
         flash('success', trim('Der Kontakt wurde angelegt. ' . $accountMessage));
-        Redirect::to('/');
+        Redirect::to('/kontakte');
     }
 
     public function edit(Request $request): void
@@ -149,7 +151,7 @@ final class ContactController extends BaseController
         $contact = $this->contacts->find((int) $request->input('id'));
         if (!$contact) {
             flash('error', 'Kontakt nicht gefunden.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $this->render('contacts/form', [
@@ -169,7 +171,7 @@ final class ContactController extends BaseController
         $existing = $this->contacts->find($id);
         if (!$existing) {
             flash('error', 'Kontakt nicht gefunden.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $data = $this->sanitizePayload($request);
@@ -197,7 +199,7 @@ final class ContactController extends BaseController
         $accountMessage = $this->syncLinkedAccount($id, $data);
         $this->logs->addAudit((int) $this->auth->user()['id'], $id, 'updated', 'Kontaktdaten wurden aktualisiert.');
         flash('success', trim('Der Kontakt wurde gespeichert. ' . $accountMessage));
-        Redirect::to('/');
+        Redirect::to('/kontakte');
     }
 
     public function delete(Request $request): void
@@ -213,7 +215,7 @@ final class ContactController extends BaseController
             : 'Kontakt wurde gelöscht.';
         $this->logs->addAudit((int) $this->auth->user()['id'], null, 'deleted', $details);
         flash('success', 'Der Kontakt wurde gelöscht.');
-        Redirect::to('/');
+        Redirect::to('/kontakte');
     }
 
     public function export(Request $request): never
@@ -240,7 +242,7 @@ final class ContactController extends BaseController
         )));
         if ($contactIds === []) {
             flash('error', 'Bitte zuerst Kontakte auswählen.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $categoryInput = trim((string) $request->input('bulk_category_id', ''));
@@ -258,7 +260,7 @@ final class ContactController extends BaseController
 
         if (!$changeCategory && $tagIdsToAdd === [] && $tagIdsToRemove === []) {
             flash('error', 'Bitte mindestens eine Kategorie oder einen Tag für die Sammeländerung wählen.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $updatedContacts = $this->contacts->applyBulkUpdate(
@@ -291,7 +293,7 @@ final class ContactController extends BaseController
         );
         $this->logs->addAudit((int) $this->auth->user()['id'], null, 'updated', $message);
         flash('success', $message);
-        Redirect::to('/');
+        Redirect::to('/kontakte');
     }
 
     private function sanitizePayload(Request $request): array

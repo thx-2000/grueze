@@ -148,7 +148,7 @@
         <div class="form-actions">
             <button type="submit">Speichern</button>
             <button type="submit" class="ghost-button" name="use_default" value="1">Standardwerte einsetzen</button>
-            <a class="ghost-button" href="<?= e(url('/')) ?>">Zurück</a>
+            <a class="ghost-button" href="<?= e(url('/verwaltung')) ?>">Zurück</a>
         </div>
     </form>
 </section>

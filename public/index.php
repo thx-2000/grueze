@@ -14,6 +14,7 @@ use App\Controllers\PasskeyController;
 use App\Controllers\SearchController;
 use App\Controllers\SettingsController;
 use App\Controllers\SetupController;
+use App\Controllers\StartController;
 use App\Controllers\TagController;
 use App\Controllers\UserController;
 use App\Core\Auth;
@@ -119,6 +120,10 @@ try {
         Container::get(Auth::class),
         Container::get(BackupService::class)
     ));
+    Container::factory(StartController::class, static fn () => new StartController(
+        Container::get(Auth::class),
+        Container::get(ContactRepository::class)
+    ));
 
     Container::factory(AuthController::class, static fn () => new AuthController(
         Container::get(Auth::class),
@@ -190,7 +195,9 @@ try {
     ));
 
     $router = new Router();
-    $router->get('/', [ContactController::class, 'index']);
+    $router->get('/', [StartController::class, 'index']);
+    $router->get('/kontakte', [ContactController::class, 'index']);
+    $router->get('/verwaltung', [AdminController::class, 'hub']);
     $router->get('/search', [SearchController::class, 'index']);
     $router->get('/login', [AuthController::class, 'showLogin']);
     $router->post('/login', [AuthController::class, 'login']);

@@ -127,7 +127,7 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
         <div class="form-actions">
             <button type="submit">Versand starten</button>
             <button type="submit" formaction="<?= e(url('/mail/test')) ?>">Testmail an mich senden</button>
-            <a class="ghost-button" href="<?= e(url('/')) ?>">Zurück</a>
+            <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Zurück</a>
         </div>
     </form>
 

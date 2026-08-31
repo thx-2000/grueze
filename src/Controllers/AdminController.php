@@ -18,6 +18,16 @@ final class AdminController extends BaseController
         parent::__construct($auth);
     }
 
+    public function hub(): void
+    {
+        $this->requireAuth();
+        if (!(can('users.manage') || can('settings.manage') || can('audit.view') || can('mail.view_log'))) {
+            throw new \RuntimeException('Für diesen Bereich fehlt die Berechtigung.');
+        }
+
+        $this->render('admin/hub', []);
+    }
+
     public function migrations(): void
     {
         $this->requirePermission('users.manage');

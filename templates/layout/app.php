@@ -105,21 +105,23 @@ $themeStyle = branding_theme_style();
                 </div>
             </a>
             <?php if (!empty($currentUser)): ?>
+                <?php
+                $showAdminHub = can('users.manage') || can('settings.manage') || can('audit.view') || can('mail.view_log');
+                $onContacts = $currentPath === '/kontakte' || str_starts_with($currentPath, '/kontakte/')
+                    || str_starts_with($currentPath, '/contacts') || str_starts_with($currentPath, '/search');
+                $onAdminHub = str_starts_with($currentPath, '/verwaltung')
+                    || str_starts_with($currentPath, '/settings') || str_starts_with($currentPath, '/admin')
+                    || str_starts_with($currentPath, '/users') || str_starts_with($currentPath, '/logs');
+                ?>
                 <nav class="nav">
                     <?php if (($currentUser['role_name'] ?? '') === 'stufenmitglied' && $publicSiteUrl !== ''): ?>
                         <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= icon('globe') ?><span><?= e($publicSiteLabel !== '' ? $publicSiteLabel : 'Startseite') ?></span></a>
                     <?php endif; ?>
-                    <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('contacts') ?><span>Kontakte</span></a>
-                    <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/branding') ? 'is-active' : '' ?>" href="<?= e(url('/settings/branding')) ?>"><?= icon('sparkles') ?><span>Design & Branding</span></a><?php endif; ?>
-                    <?php if (can('settings.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/mail-footer') ? 'is-active' : '' ?>" href="<?= e(url('/settings/mail-footer')) ?>"><?= icon('sliders') ?><span>Mail-Einstellungen</span></a><?php endif; ?>
-                    <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/visibility') ? 'is-active' : '' ?>" href="<?= e(url('/settings/visibility')) ?>"><?= icon('user') ?><span>Sichtbarkeit</span></a><?php endif; ?>
-                    <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/settings/permissions') ? 'is-active' : '' ?>" href="<?= e(url('/settings/permissions')) ?>"><?= icon('sliders') ?><span>Berechtigungen</span></a><?php endif; ?>
-                    <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/admin/migrations') ? 'is-active' : '' ?>" href="<?= e(url('/admin/migrations')) ?>"><?= icon('history') ?><span>Migrationen</span></a><?php endif; ?>
-                    <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/admin/backup') ? 'is-active' : '' ?>" href="<?= e(url('/admin/backup')) ?>"><?= icon('archive') ?><span>Datensicherung</span></a><?php endif; ?>
-                    <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/admin/legal') ? 'is-active' : '' ?>" href="<?= e(url('/admin/legal/impressum')) ?>"><?= icon('sliders') ?><span>Rechtliches</span></a><?php endif; ?>
-                    <?php if (can('users.manage')): ?><a class="<?= str_starts_with($currentPath, '/users') ? 'is-active' : '' ?>" href="<?= e(url('/users')) ?>"><?= icon('user') ?><span>Benutzer</span></a><?php endif; ?>
-                    <?php if (can('audit.view')): ?><a class="<?= str_starts_with($currentPath, '/logs/audit') ? 'is-active' : '' ?>" href="<?= e(url('/logs/audit')) ?>"><?= icon('history') ?><span>Audit-Log</span></a><?php endif; ?>
-                    <?php if (can('mail.view_log')): ?><a class="<?= str_starts_with($currentPath, '/logs/mail') ? 'is-active' : '' ?>" href="<?= e(url('/logs/mail')) ?>"><?= icon('mail') ?><span>Versandprotokoll</span></a><?php endif; ?>
+                    <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('home') ?><span>Start</span></a>
+                    <a class="<?= $onContacts ? 'is-active' : '' ?>" href="<?= e(url('/kontakte')) ?>"><?= icon('contacts') ?><span>Kontakte</span></a>
+                    <?php if ($showAdminHub): ?>
+                        <a class="<?= $onAdminHub ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung')) ?>"><?= icon('sliders') ?><span>Verwaltung</span></a>
+                    <?php endif; ?>
                 </nav>
                 <div class="sidebar-footer">
                     <a class="profile-chip<?= str_starts_with($currentPath, '/account') ? ' is-active' : '' ?>" href="<?= e(url('/account')) ?>">

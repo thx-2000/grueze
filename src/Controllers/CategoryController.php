@@ -23,12 +23,12 @@ final class CategoryController extends BaseController
         $name = trim((string) $request->input('name'));
         if ($name === '') {
             flash('error', 'Bitte einen Kategorienamen angeben.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $this->categories->create($name);
         flash('success', 'Kategorie angelegt.');
-        Redirect::to('/');
+        Redirect::to('/kontakte');
     }
 }
 

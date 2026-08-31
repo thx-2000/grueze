@@ -46,7 +46,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
             <h2><?= $editing ? 'Kontaktdaten aktualisieren' : 'Kontakt anlegen' ?></h2>
             <p class="muted">Stammdaten, Kontaktwege und Notizen in einem Schritt pflegen.</p>
         </div>
-        <a class="ghost-button" href="<?= e(url('/')) ?>">Zurück zur Übersicht</a>
+        <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Zurück zur Übersicht</a>
     </div>
 
     <form method="post" action="<?= e(url($editing ? '/contacts/update' : '/contacts/store')) ?>" enctype="multipart/form-data" class="stack">
@@ -249,7 +249,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                     aria-label="Kontakt löschen"
                 ><?= icon('trash') ?><span>Kontakt löschen</span></button>
             <?php endif; ?>
-            <a class="ghost-button" href="<?= e(url('/')) ?>">Zurück</a>
+            <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Zurück</a>
         </div>
     </form>
 </section>

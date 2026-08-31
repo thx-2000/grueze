@@ -52,7 +52,7 @@ $buildSortUrl = static function (string $sortKey) use ($filters, $currentSort, $
     $query['sort'] = $sortKey;
     $query['direction'] = $nextDirection;
 
-    return url('/?' . http_build_query($query));
+    return url('/kontakte?' . http_build_query($query));
 };
 
 $sortLabel = static function (string $sortKey, string $label) use ($currentSort, $currentDirection): string {
@@ -99,7 +99,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
         </article>
     </div>
 
-    <form method="get" action="<?= e(url('/')) ?>" class="filter-grid<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
+    <form method="get" action="<?= e(url('/kontakte')) ?>" class="filter-grid<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
         <label>
             <span>Suche</span>
             <input type="search" name="q" value="<?= e($filters['q'] ?? '') ?>" placeholder="Name oder Geburtsname">
@@ -160,6 +160,17 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                 <p class="field-hint">Noch keine Tags angelegt.</p>
                             <?php endif; ?>
                         </div>
+                    </div>
+                    <div class="filter-tags">
+                        <span>Fehlende Angaben</span>
+                        <label class="inline-toggle">
+                            <input type="checkbox" name="without_email" value="1" <?= ($filters['without_email'] ?? '') === '1' ? 'checked' : '' ?>>
+                            <span>Nur Personen ohne Mailadresse</span>
+                        </label>
+                        <label class="inline-toggle">
+                            <input type="checkbox" name="without_phone" value="1" <?= ($filters['without_phone'] ?? '') === '1' ? 'checked' : '' ?>>
+                            <span>Nur Personen ohne Handynummer</span>
+                        </label>
                     </div>
                 </div>
             </div>

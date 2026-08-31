@@ -15,7 +15,7 @@
     <form method="get" action="<?= e(url('/search')) ?>" class="global-search-panel">
         <input type="search" name="q" value="<?= e($query) ?>" placeholder="Vorname, Nachname, Ort, E-Mail, Benutzername ...">
         <button type="submit"><?= icon('search') ?><span>Suchen</span></button>
-        <a class="ghost-button" href="<?= e(url('/')) ?>">Zurück zur Kontaktliste</a>
+        <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Zurück zur Kontaktliste</a>
     </form>
 
     <?php if ($query === ''): ?>

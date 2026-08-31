@@ -23,11 +23,11 @@ final class TagController extends BaseController
         $name = trim((string) $request->input('name'));
         if ($name === '') {
             flash('error', 'Bitte einen Tag-Namen angeben.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $this->tags->create($name);
         flash('success', 'Tag angelegt.');
-        Redirect::to('/');
+        Redirect::to('/kontakte');
     }
 }

@@ -36,12 +36,12 @@ final class MailController extends BaseController
 
         if ($contacts === []) {
             flash('error', 'Bitte zuerst Kontakte auswählen.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         if ($memberContactMode && count($contacts) !== 1) {
             flash('error', 'Stufenmitglieder können immer nur eine einzelne Person kontaktieren.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $_SESSION['mail_draft_contact_ids'] = $ids;
@@ -68,7 +68,7 @@ final class MailController extends BaseController
         $ids = $this->contacts->mailingContactIds();
         if ($ids === []) {
             flash('error', 'Es sind aktuell keine Kontakte mit Mailadresse vorhanden.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $_GET['contact_ids'] = $ids;
@@ -90,12 +90,12 @@ final class MailController extends BaseController
 
         if (!$identity || !$replyTo || !$user) {
             flash('error', 'Absender oder Nutzer konnte nicht geladen werden.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         if ($memberContactMode && count($contacts) !== 1) {
             flash('error', 'Stufenmitglieder können immer nur eine einzelne Person kontaktieren.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $sample = $contacts[0] ?? ['vorname' => 'Max', 'nachname' => 'Mustermann'];
@@ -149,7 +149,7 @@ final class MailController extends BaseController
         $contactIds = array_map('intval', (array) $request->input('contact_ids', []));
         if ($memberContactMode && count($contactIds) !== 1) {
             flash('error', 'Stufenmitglieder können immer nur eine einzelne Person kontaktieren.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
         $senderKey = $memberContactMode
             ? $this->settings->defaultMailSenderKey()
@@ -187,7 +187,7 @@ final class MailController extends BaseController
 
         if (!$job) {
             flash('error', 'Es ist kein aktiver Versandauftrag vorhanden.');
-            Redirect::to('/');
+            Redirect::to('/kontakte');
         }
 
         $contacts = $this->contacts->findManyByIds($job['contacts']);
@@ -337,7 +337,7 @@ final class MailController extends BaseController
         }
 
         flash('error', 'Dafür fehlen die nötigen Rechte.');
-        Redirect::to('/');
+        Redirect::to('/kontakte');
     }
 
     private function isMemberContactMode(?array $user = null): bool

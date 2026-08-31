@@ -5,15 +5,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **Personen ohne Mailadresse / ohne Handynummer benennbar machen**: Eine
-  Ansicht/Funktion, die auflistet, welche Personen im System noch keine
-  E-Mail-Adresse hinterlegt haben – vorausschauend auch: keine Handynummer.
-  Zweck: gezielt nachfragen und Lücken schließen.
-
-- **Namensliste erzeugen und versenden**: Aus dem aktuellen Kontaktbestand
-  eine reine Namensliste erzeugen und per Mail verschicken können, damit alle
-  prüfen können, ob noch jemand fehlt, der dazugehört
-  (Vollständigkeitsabgleich durch den Jahrgang).
+- **UX-Umbau – nächste Stufen** (Gerüst erledigt in v0.5.0):
+  - **0.5.1** Rundmail-Bereich: eigener Menüpunkt, Empfänger wählen
+    (alle / Kategorie / Tag(s) / aktuelle Suche übernehmen), dann schreiben.
+  - **0.5.2** Kontakte-Seite inhaltlich straffen (Massen-/Bulk-Werkzeuge in
+    Aufklapp-Bereiche, Progressive Disclosure).
+  - **0.5.3** Namensliste erzeugen & versenden (reine Namensliste per Mail zum
+    Vollständigkeitsabgleich durch den Jahrgang).
+  - **später** gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
@@ -60,6 +59,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- UX-Gerüst (v0.5.0): Neue ruhige **Startseite** (`/`) mit großem Suchfeld,
+  Schnellaktionen und 3 Kennzahlen (gesamt / ohne Mailadresse / ohne
+  Handynummer, verlinken in die gefilterte Liste). Kontaktliste auf eigene
+  Route `/kontakte`. Neuer **Verwaltung**-Hub (`/verwaltung`) mit Kacheln
+  statt 9 Einzel-Menüpunkten. Hauptmenü auf **Start · Kontakte · Verwaltung**
+  reduziert. Mobil: kompakte horizontale Navi statt 12-Punkte-Stapel. Neue
+  Kontaktfilter „ohne Mailadresse" / „ohne Handynummer".
 - Datensicherung (v0.4.0): Voll-Backup aller Tabellen + Uploads als ZIP
   (manifest.json / database.json / uploads/) unter „Datensicherung"
   (/admin/backup, nur Admin). Wiederherstellung aus Backup in zwei Modi:

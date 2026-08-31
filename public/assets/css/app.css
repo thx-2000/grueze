@@ -2354,6 +2354,50 @@ code {
         grid-template-columns: 1fr;
         display: grid;
     }
+
+    /* Kompakte Navigation statt 12-Punkte-Stapel */
+    .sidebar .eyebrow,
+    .sidebar .sidebar-copy {
+        display: none;
+    }
+
+    .sidebar h1 {
+        font-size: 1.45rem;
+        line-height: 1.1;
+    }
+
+    .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 1rem;
+    }
+
+    .nav a {
+        flex: 1 1 auto;
+        justify-content: center;
+        padding: 0.6rem 0.7rem;
+        font-size: 0.95rem;
+    }
+
+    .start-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .start-hero {
+        padding: 1.4rem 1.1rem;
+    }
+
+    .start-actions .button-link,
+    .start-actions .ghost-button,
+    .start-actions > a {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .start-actions form {
+        width: 100%;
+    }
 }
 
 @media (min-width: 901px) {
@@ -2373,4 +2417,148 @@ code {
 .permission-label {
     font-size: 0.875rem;
     font-weight: 500;
+}
+
+/* -------------------------------------------------------------- Startseite */
+
+.start-hero {
+    background: var(--color-surface-strong);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 2rem 1.6rem;
+    display: grid;
+    gap: 1.1rem;
+}
+
+.start-hero h2 {
+    margin: 0;
+    font-size: 1.7rem;
+}
+
+.start-search {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 0.7rem;
+}
+
+.start-search .icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: 0 0 1.15rem;
+    color: var(--color-muted);
+}
+
+.start-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 1.05rem;
+    padding: 0.4rem 0.1rem;
+    color: var(--color-text);
+}
+
+.start-search input:focus-visible {
+    outline: none;
+}
+
+.start-search button {
+    flex: 0 0 auto;
+    padding: 0.5rem 1.1rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: #fff;
+    border: 0;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.start-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.start-actions form {
+    margin: 0;
+}
+
+.start-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem;
+    margin-top: 1.1rem;
+}
+
+.start-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1.1rem 1.2rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+}
+
+.start-stat:hover {
+    border-color: var(--color-accent);
+}
+
+.start-stat-value {
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.start-stat-label {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.start-stat.is-attention .start-stat-value {
+    color: var(--color-secondary);
+}
+
+/* ------------------------------------------------------- Verwaltungs-Hub */
+
+.hub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.9rem;
+}
+
+.hub-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.1rem 1.2rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+}
+
+.hub-tile:hover {
+    border-color: var(--color-accent);
+}
+
+.hub-tile-icon .icon {
+    width: 1.3rem;
+    height: 1.3rem;
+}
+
+.hub-tile-title {
+    font-weight: 700;
+}
+
+.hub-tile-desc {
+    color: var(--color-muted);
+    font-size: 0.88rem;
+    line-height: 1.35;
 }

@@ -33,7 +33,7 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
     </div>
 
     <div class="form-actions top-gap">
-        <a class="ghost-button" href="<?= e(url('/')) ?>">Zur Kontaktübersicht</a>
+        <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Zur Kontaktübersicht</a>
         <?php if ($canViewLog): ?>
             <a class="button-link" id="mailLogLink" href="<?= e(url('/logs/mail')) ?>">Versandprotokoll öffnen</a>
         <?php endif; ?>
