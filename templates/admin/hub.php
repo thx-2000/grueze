@@ -11,6 +11,7 @@ $groups = [
         ['users.manage', '/admin/legal/impressum', 'sliders', 'Rechtliches', 'Impressum und Datenschutzerklärung bearbeiten.'],
     ],
     'Werkzeuge' => [
+        ['categories.manage', '/verwaltung/kategorien-tags', 'sliders', 'Kategorien & Tags', 'Kategorien und Tags anlegen, umbenennen und löschen.'],
         ['contacts.manage', '/namensliste', 'contacts', 'Namensliste', 'Namensliste als Kopiervorlage erzeugen und für den Vollständigkeitsabgleich verschicken.'],
     ],
     'System' => [

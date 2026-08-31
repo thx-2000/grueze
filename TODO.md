@@ -5,14 +5,6 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **Kategorien & Tags vollständig verwaltbar machen.** Aktuell: anlegen ✅,
-  zuweisen ✅ (einzeln + Sammelbearbeitung). Es fehlen: **umbenennen** und
-  **löschen** (DB-seitig sicher: `contacts.category_id` ON DELETE SET NULL,
-  `contact_tags` ON DELETE CASCADE). Außerdem alles nur in einem Aufklappbereich
-  auf der Kontaktliste versteckt. Vorschlag: eigene Seite „Kategorien & Tags"
-  unter Verwaltung mit Liste, Inline-Umbenennen, Löschen (mit „X Kontakte
-  betroffen"-Hinweis) und Anlegen.
-
 - **UX-Umbau – nächste Stufen** (Gerüst, Startseite, Suche, Rundmail,
   Kontakte-Seite, Mobil-Navigation, Namensliste erledigt in v0.5.0–0.7.0):
   - Feinschliff: Blickschutz-Knopf auf dem Handy evtl. nur als Icon;
@@ -64,6 +56,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Kategorien & Tags verwalten (v0.7.1): eigene Seite unter Verwaltung →
+  „Kategorien & Tags" (`/verwaltung/kategorien-tags`). Anlegen, Inline-
+  Umbenennen (mit Dublettencheck), Löschen mit Rückfrage. Beim Löschen einer
+  Kategorie verlieren betroffene Kontakte nur die Zuordnung (FK SET NULL),
+  beim Löschen eines Tags nur die Tag-Verknüpfung (CASCADE). Jede Zeile zeigt
+  die Anzahl zugeordneter Kontakte. Der Schnell-Anlegen-Aufklappbereich auf
+  der Kontaktliste verweist auf die neue Seite.
 - Namensliste (v0.7.0): `/namensliste` (Verwaltung → „Werkzeuge" und Link im
   Filterbereich der Kontaktliste). Reine Namensliste als Kopiervorlage –
   Kategorie-Filter, Sortierung Nachname/Vorname, nummeriert an/aus, editierbares

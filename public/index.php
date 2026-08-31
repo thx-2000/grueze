@@ -16,6 +16,7 @@ use App\Controllers\SettingsController;
 use App\Controllers\SetupController;
 use App\Controllers\StartController;
 use App\Controllers\TagController;
+use App\Controllers\TaxonomyController;
 use App\Controllers\UserController;
 use App\Core\Auth;
 use App\Core\Autoloader;
@@ -167,6 +168,11 @@ try {
         Container::get(Auth::class),
         Container::get(TagRepository::class)
     ));
+    Container::factory(TaxonomyController::class, static fn () => new TaxonomyController(
+        Container::get(Auth::class),
+        Container::get(CategoryRepository::class),
+        Container::get(TagRepository::class)
+    ));
     Container::factory(LogController::class, static fn () => new LogController(
         Container::get(Auth::class),
         Container::get(LogRepository::class)
@@ -225,6 +231,11 @@ try {
 
     $router->post('/categories/store', [CategoryController::class, 'store']);
     $router->post('/tags/store', [TagController::class, 'store']);
+    $router->get('/verwaltung/kategorien-tags', [TaxonomyController::class, 'index']);
+    $router->post('/verwaltung/kategorien-tags/kategorie', [TaxonomyController::class, 'saveCategory']);
+    $router->post('/verwaltung/kategorien-tags/kategorie/loeschen', [TaxonomyController::class, 'deleteCategory']);
+    $router->post('/verwaltung/kategorien-tags/tag', [TaxonomyController::class, 'saveTag']);
+    $router->post('/verwaltung/kategorien-tags/tag/loeschen', [TaxonomyController::class, 'deleteTag']);
     $router->get('/users', [UserController::class, 'index']);
     $router->get('/account', [UserController::class, 'account']);
     $router->post('/account/password', [UserController::class, 'updateOwnPassword']);

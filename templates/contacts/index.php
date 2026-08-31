@@ -584,7 +584,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
         <details class="admin-drawer">
             <summary>
                 <span><?= icon('plus') ?></span>
-                <span>Kategorien und Tags verwalten</span>
+                <span>Kategorie oder Tag schnell anlegen</span>
             </summary>
             <div class="admin-drawer-body stack">
                 <div>
@@ -603,6 +603,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                         <button type="submit">Speichern</button>
                     </form>
                 </div>
+                <p class="field-hint"><a href="<?= e(url('/verwaltung/kategorien-tags')) ?>">Kategorien &amp; Tags umbenennen oder löschen &rarr;</a></p>
             </div>
         </details>
     </section>

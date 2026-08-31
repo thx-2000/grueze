@@ -17,9 +17,48 @@ final class TagRepository
         return $this->pdo->query('SELECT * FROM tags ORDER BY name')->fetchAll();
     }
 
+    /** Tags mit Anzahl zugeordneter Kontakte. */
+    public function allWithCounts(): array
+    {
+        return $this->pdo->query(
+            'SELECT tags.id, tags.name,
+                    (SELECT COUNT(*) FROM contact_tags WHERE contact_tags.tag_id = tags.id) AS contact_count
+             FROM tags
+             ORDER BY tags.name'
+        )->fetchAll();
+    }
+
     public function create(string $name): void
     {
         $stmt = $this->pdo->prepare('INSERT INTO tags (name) VALUES (:name)');
         $stmt->execute(['name' => $name]);
+    }
+
+    public function rename(int $id, string $name): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE tags SET name = :name WHERE id = :id');
+        $stmt->execute(['name' => $name, 'id' => $id]);
+    }
+
+    /** Löscht den Tag; die Zuordnungen verschwinden mit (FK ON DELETE CASCADE),
+        die Kontakte bleiben unverändert. */
+    public function delete(int $id): void
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM tags WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+    }
+
+    public function nameExists(string $name, ?int $exceptId = null): bool
+    {
+        $sql = 'SELECT COUNT(*) FROM tags WHERE name = :name';
+        $params = ['name' => $name];
+        if ($exceptId !== null) {
+            $sql .= ' AND id <> :id';
+            $params['id'] = $exceptId;
+        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn() > 0;
     }
 }

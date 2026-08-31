@@ -2895,3 +2895,51 @@ code {
     white-space: pre-wrap;
     resize: vertical;
 }
+
+/* ------------------------------------------------------- Kategorien & Tags */
+
+.taxo-list {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.taxo-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.taxo-row form {
+    margin: 0;
+}
+
+.taxo-edit {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.taxo-edit input[type="text"] {
+    flex: 1 1 12rem;
+    width: auto;
+}
+
+.taxo-count {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.taxo-add {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.4rem;
+}
+
+.taxo-add input[type="text"] {
+    flex: 1 1 14rem;
+    width: auto;
+}
