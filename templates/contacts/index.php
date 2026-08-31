@@ -352,7 +352,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             </td>
                             <?php if ($visibleContactFields['address']): ?>
                                 <td data-col="adresse">
-                                    <div class="table-stack">
+                                    <div class="table-stack is-guarded">
                                         <span><?= e($contact['strasse']) ?></span>
                                         <span><?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span>
                                         <span class="muted"><?= e($contact['land'] ?: 'Deutschland') ?></span>
@@ -360,12 +360,12 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                 </td>
                             <?php endif; ?>
                             <?php if ($visibleContactFields['birthday']): ?>
-                                <td data-col="geburtstag"><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : '—') ?></td>
+                                <td data-col="geburtstag"><span class="is-guarded"><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : '—') ?></span></td>
                             <?php endif; ?>
                             <?php if ($visibleContactFields['emails']): ?>
                                 <td data-col="emails">
                                     <?php if ($contact['emails'] !== []): ?>
-                                        <div class="table-stack">
+                                        <div class="table-stack is-guarded">
                                             <?php foreach ($contact['emails'] as $email): ?>
                                                 <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e($email['email']) ?></a>
                                             <?php endforeach; ?>
@@ -377,7 +377,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             <?php endif; ?>
                             <?php if ($visibleContactFields['phones']): ?>
                                 <td data-col="phones">
-                                    <div class="table-stack">
+                                    <div class="table-stack is-guarded">
                                         <?php foreach ($contact['phones'] as $phone): ?>
                                             <a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['phone']) ?></a>
                                         <?php endforeach; ?>
@@ -388,7 +388,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                                 <td data-col="login">
                                     <?php if (!empty($contact['linked_user'])): ?>
                                         <div class="table-stack">
-                                            <span><?= e($contact['linked_user']['email']) ?></span>
+                                            <span class="is-guarded"><?= e($contact['linked_user']['email']) ?></span>
                                             <span class="muted"><?= e($contact['linked_user']['role_name']) ?></span>
                                         </div>
                                     <?php else: ?>
@@ -443,7 +443,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
 
                     <div class="contact-body">
                         <?php if ($visibleContactFields['address'] || $visibleContactFields['birthday']): ?>
-                            <div class="contact-meta-list">
+                            <div class="contact-meta-list is-guarded">
                                 <?php if ($visibleContactFields['address']): ?>
                                     <p><?= icon('location') ?><span><strong><?= e(contact_value_label((int) ((trim((string) ($contact['strasse'] ?? '')) !== '' || trim((string) ($contact['plz'] ?? '')) !== '' || trim((string) ($contact['ort'] ?? '')) !== '') ? 1 : 0), 'Adresse', 'Adresse', 'Adressen')) ?></strong><?= e(contact_address_line($contact)) ?></span></p>
                                     <p><?= icon('globe') ?><span><?= e(contact_country_label($contact)) ?></span></p>
@@ -458,7 +458,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             <div>
                                 <strong><?= e(contact_value_label(count($contact['emails']), 'E-Mail-Adresse', 'E-Mail-Adresse', 'E-Mail-Adressen')) ?></strong>
                                 <?php if ($contact['emails'] !== []): ?>
-                                    <ul class="mini-list">
+                                    <ul class="mini-list is-guarded">
                                         <?php foreach ($contact['emails'] as $email): ?>
                                             <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e($email['email']) ?></a></li>
                                         <?php endforeach; ?>
@@ -473,7 +473,7 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                             <div>
                                 <strong><?= e(contact_value_label(count($contact['phones']), 'Telefonnummer', 'Telefonnummer', 'Telefonnummern')) ?></strong>
                                 <?php if ($contact['phones'] !== []): ?>
-                                    <ul class="mini-list">
+                                    <ul class="mini-list is-guarded">
                                         <?php foreach ($contact['phones'] as $phone): ?>
                                             <li><a href="tel:<?= e($phone['phone']) ?>"><?= e((trim((string) ($phone['label'] ?? '')) !== '' ? $phone['label'] . ': ' : '') . $phone['phone']) ?></a></li>
                                         <?php endforeach; ?>
@@ -487,11 +487,11 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
                         <?php if ($visibleContactFields['login'] && !empty($contact['linked_user'])): ?>
                             <div class="account-summary">
                                 <strong>Login</strong>
-                                <p><?= e($contact['linked_user']['email']) ?></p>
+                                <p class="is-guarded"><?= e($contact['linked_user']['email']) ?></p>
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($visibleContactFields['notes'] && !empty($contact['notizen'])): ?><p class="note"><?= e($contact['notizen']) ?></p><?php endif; ?>
+                        <?php if ($visibleContactFields['notes'] && !empty($contact['notizen'])): ?><p class="note is-guarded"><?= e($contact['notizen']) ?></p><?php endif; ?>
 
                         <?php if (!$canViewPrivateDetails): ?>
                             <p class="detail-hint">Weitere Kontaktdaten sind für diese Rolle ausgeblendet.</p>

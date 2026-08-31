@@ -615,3 +615,43 @@ if (passkeyLoginButton) {
         }
     });
 }
+
+// Blickschutz: clientseitiger Toggle, der personenbezogene Kontaktdaten weichzeichnet.
+// Der Zustand wird pro Gerät gemerkt; das Setzen von data-privacy-guard passiert
+// bereits im <head>, hier wird nur der Button synchron gehalten.
+const privacyGuardToggle = document.getElementById('privacyGuardToggle');
+if (privacyGuardToggle) {
+    const privacyGuardKey = 'grueze_privacy_guard';
+    const guardLabel = privacyGuardToggle.querySelector('[data-privacy-guard-label]');
+
+    const syncGuardButton = (isOn) => {
+        privacyGuardToggle.setAttribute('aria-pressed', isOn ? 'true' : 'false');
+        privacyGuardToggle.classList.toggle('is-active', isOn);
+        if (guardLabel) {
+            guardLabel.textContent = isOn ? 'Blickschutz an' : 'Blickschutz';
+        }
+    };
+
+    syncGuardButton(document.documentElement.dataset.privacyGuard === 'on');
+
+    privacyGuardToggle.addEventListener('click', () => {
+        const nextOn = document.documentElement.dataset.privacyGuard !== 'on';
+
+        if (nextOn) {
+            document.documentElement.dataset.privacyGuard = 'on';
+        } else {
+            delete document.documentElement.dataset.privacyGuard;
+        }
+
+        try {
+            window.localStorage.setItem(privacyGuardKey, nextOn ? 'on' : 'off');
+        } catch (error) {
+            // Ohne persistenten Speicher wirkt der Toggle nur für die aktuelle Ansicht.
+        }
+
+        syncGuardButton(nextOn);
+        showToast(nextOn
+            ? 'Blickschutz aktiv – Kontaktdaten sind unkenntlich gemacht.'
+            : 'Blickschutz aus – Kontaktdaten sind wieder sichtbar.');
+    });
+}

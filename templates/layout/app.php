@@ -24,6 +24,14 @@ $themeStyle = branding_theme_style();
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($appName) ?></title>
+    <script>
+        // Blickschutz-Zustand vor dem ersten Paint setzen, damit Kontaktdaten nicht kurz aufblitzen.
+        try {
+            if (window.localStorage.getItem('grueze_privacy_guard') === 'on') {
+                document.documentElement.dataset.privacyGuard = 'on';
+            }
+        } catch (error) {}
+    </script>
     <link rel="stylesheet" href="<?= e(asset_url('/assets/css/theme.css')) ?>">
     <link rel="stylesheet" href="<?= e(asset_url('/assets/css/app.css')) ?>">
     <?php if ($themeStyle !== ''): ?>
@@ -58,6 +66,9 @@ $themeStyle = branding_theme_style();
                 </div>
                 <?php if (!empty($currentUser)): ?>
                     <div class="signal-bar-tools">
+                        <button type="button" id="privacyGuardToggle" class="signal-bar-button" aria-pressed="false" title="Kontaktdaten (E-Mail, Telefon, Adresse, Geburtstag, Notizen) aus- oder einblenden – falls jemand mitliest">
+                            <?= icon('eye-off') ?><span data-privacy-guard-label>Blickschutz</span>
+                        </button>
                         <?php if (!empty($signalHint)): ?>
                             <span class="signal-bar-hint"><?= e($signalHint) ?></span>
                         <?php endif; ?>

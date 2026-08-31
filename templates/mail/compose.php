@@ -147,7 +147,7 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
         <?php foreach ($contacts as $contact): ?>
             <article class="recipient-chip">
                 <strong><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?></strong>
-                <span><?= e($memberContactMode ? 'Adresse verborgen' : ($contact['emails'][0]['email'] ?? 'Keine Adresse')) ?></span>
+                <span class="is-guarded"><?= e($memberContactMode ? 'Adresse verborgen' : ($contact['emails'][0]['email'] ?? 'Keine Adresse')) ?></span>
             </article>
         <?php endforeach; ?>
     </div>

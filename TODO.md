@@ -30,14 +30,6 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   Punkt "Backup-/Restore-Konzept" weiter unten. Verhältnis zum bestehenden
   XLSX-Kontaktimport klären (der bleibt für Teil-Importe).
 
-- **Blickschutz-Knopf ("Datenschutz-Button")**: Als eingeloggter Admin/Orga
-  soll man mit einem Klick E-Mail-Adressen und Telefonnummern in der
-  Oberfläche ausblenden/unleserlich machen können (z. B. Weichzeichner oder
-  Maskierung), falls jemand am Bildschirm mitliest. Mit erneutem Klick sollen
-  sie genauso schnell wieder eingeblendet werden. Gedacht als rein
-  clientseitiger Toggle (kein Server-Roundtrip nötig), der über alle
-  Kontaktlisten- und Detailansichten hinweg konsistent wirkt.
-
 ## Aus der ursprünglichen Übergabe (ChatGPT), noch offen
 
 1. White-Label-Vorbereitung vervollständigen, ohne die laufende Instanz
@@ -57,6 +49,11 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Blickschutz-Knopf (v0.3.0): clientseitiger Toggle im Signalbalken, der alle
+  personenbezogenen Kontaktfelder (E-Mail, Telefon, Adresse, Geburtstag,
+  Notizen, verknüpfte Login-Mail) in Liste, Karten, Suche und Empfängerliste
+  weichzeichnet. Zustand wird pro Gerät gemerkt (localStorage), kein
+  Server-Roundtrip. Bewusst nicht auf dem Bearbeiten-Formular aktiv.
 - Footer-Klasse `privacy-note` → `site-footer` umbenannt und als `<footer>`
   ausgezeichnet (v0.2.8). Grund: Inhalts-/Cookie-Blocker (Filterlisten) haben
   den alten Klassennamen erkannt und Teile des Footers – inkl. Versionsanzeige –

@@ -47,7 +47,7 @@
                     </div>
                     <div class="table-stack">
                         <span><?= e($contact['category_name'] ?: '—') ?></span>
-                        <span class="muted"><?= e($contact['ort'] ?: 'Ort unbekannt') ?></span>
+                        <span class="muted is-guarded"><?= e($contact['ort'] ?: 'Ort unbekannt') ?></span>
                     </div>
                     <div class="card-actions">
                         <a class="ghost-button compact-action" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>">
@@ -76,7 +76,7 @@
                         <span class="table-pill"><?= e($user['role_name']) ?></span>
                     </div>
                     <div class="table-stack">
-                        <span><?= e($user['email']) ?></span>
+                        <span class="is-guarded"><?= e($user['email']) ?></span>
                         <span class="muted">
                             <?= e(trim((string) ($user['vorname'] ?? '') . ' ' . (string) ($user['nachname'] ?? '')) ?: 'Kein Kontakt verknüpft') ?>
                         </span>

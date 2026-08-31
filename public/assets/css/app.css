@@ -1066,6 +1066,41 @@ label span {
     border: 0;
 }
 
+/* Blickschutz: macht personenbezogene Werte auf Knopfdruck unkenntlich
+   (rein clientseitig). Umsetzung über transparenten Text + weichen
+   Text-Schatten – wirkt zuverlässig auf Grid-, Tabellen- und Flex-Elementen,
+   anders als filter: blur(). */
+.is-guarded,
+.is-guarded * {
+    transition: color 0.12s ease, text-shadow 0.12s ease;
+}
+
+[data-privacy-guard="on"] .is-guarded,
+[data-privacy-guard="on"] .is-guarded * {
+    color: transparent !important;
+    text-shadow: 0 0 0.55rem var(--color-text);
+    user-select: none;
+    cursor: default;
+}
+
+[data-privacy-guard="on"] .is-guarded a {
+    pointer-events: none;
+}
+
+.signal-bar-button.is-active {
+    background: var(--color-primary);
+    color: #fff !important;
+    border-color: var(--color-primary);
+}
+
+@media print {
+    [data-privacy-guard="on"] .is-guarded,
+    [data-privacy-guard="on"] .is-guarded * {
+        color: inherit !important;
+        text-shadow: none;
+    }
+}
+
 .contacts-table [data-col].is-hidden-column {
     display: none;
 }
