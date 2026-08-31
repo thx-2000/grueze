@@ -2885,3 +2885,13 @@ code {
 .inline-drawer .column-toggle-list {
     padding-top: 0.7rem;
 }
+
+/* ------------------------------------------------------------- Namensliste */
+
+#nameListField {
+    font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    resize: vertical;
+}

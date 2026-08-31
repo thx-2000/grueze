@@ -10,6 +10,9 @@ $groups = [
         ['settings.manage', '/settings/mail-footer', 'mail', 'Mail-Einstellungen', 'Absender, Mailserver, Betreff-Präfixe und Mail-Fuß.'],
         ['users.manage', '/admin/legal/impressum', 'sliders', 'Rechtliches', 'Impressum und Datenschutzerklärung bearbeiten.'],
     ],
+    'Werkzeuge' => [
+        ['contacts.manage', '/namensliste', 'contacts', 'Namensliste', 'Namensliste als Kopiervorlage erzeugen und für den Vollständigkeitsabgleich verschicken.'],
+    ],
     'System' => [
         ['users.manage', '/admin/backup', 'archive', 'Datensicherung', 'Voll-Backup herunterladen oder wiederherstellen.'],
         ['users.manage', '/admin/migrations', 'history', 'Migrationen', 'Stand der Datenbank-Migrationen einsehen.'],

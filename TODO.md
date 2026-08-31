@@ -5,10 +5,16 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Kategorien & Tags vollständig verwaltbar machen.** Aktuell: anlegen ✅,
+  zuweisen ✅ (einzeln + Sammelbearbeitung). Es fehlen: **umbenennen** und
+  **löschen** (DB-seitig sicher: `contacts.category_id` ON DELETE SET NULL,
+  `contact_tags` ON DELETE CASCADE). Außerdem alles nur in einem Aufklappbereich
+  auf der Kontaktliste versteckt. Vorschlag: eigene Seite „Kategorien & Tags"
+  unter Verwaltung mit Liste, Inline-Umbenennen, Löschen (mit „X Kontakte
+  betroffen"-Hinweis) und Anlegen.
+
 - **UX-Umbau – nächste Stufen** (Gerüst, Startseite, Suche, Rundmail,
-  Kontakte-Seite, Mobil-Navigation erledigt in v0.5.0–0.6.2):
-  - Namensliste erzeugen & versenden (reine Namensliste per Mail zum
-    Vollständigkeitsabgleich durch den Jahrgang).
+  Kontakte-Seite, Mobil-Navigation, Namensliste erledigt in v0.5.0–0.7.0):
   - Feinschliff: Blickschutz-Knopf auf dem Handy evtl. nur als Icon;
     leerer Raum im aufgeklappten Menü verkleinern.
   - später: gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
@@ -58,6 +64,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Namensliste (v0.7.0): `/namensliste` (Verwaltung → „Werkzeuge" und Link im
+  Filterbereich der Kontaktliste). Reine Namensliste als Kopiervorlage –
+  Kategorie-Filter, Sortierung Nachname/Vorname, nummeriert an/aus, editierbares
+  Textfeld + Kopieren-Knopf. Verschicken per Mail an eine oder mehrere
+  eingegebene Adressen (+ optional Kopie an sich selbst), mit Betreff und
+  optionalem Einleitungstext; jede Zustellung landet im Versandprotokoll.
 - Mobil-Navigation (v0.6.2): Auf dem Handy statt des langen Menü-Stapels eine
   schlanke, klebende Kopfleiste (☰ Menü + Name). Das Menü (Start/Kontakte/
   Rundmail/Verwaltung + Konto + Abmelden) klappt als Overlay auf und schließt

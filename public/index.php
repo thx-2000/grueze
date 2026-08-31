@@ -245,6 +245,8 @@ try {
 
     $router->get('/rundmail', [MailController::class, 'rundmail']);
     $router->post('/rundmail', [MailController::class, 'rundmailStart']);
+    $router->get('/namensliste', [MailController::class, 'namensliste']);
+    $router->post('/namensliste', [MailController::class, 'namenslisteSend']);
     $router->post('/mail/compose', [MailController::class, 'compose']);
     $router->get('/mail/compose', [MailController::class, 'compose']);
     $router->post('/mail/compose-all', [MailController::class, 'composeAll']);

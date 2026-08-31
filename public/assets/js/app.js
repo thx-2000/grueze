@@ -695,3 +695,23 @@ if (navToggle && pageSidebar) {
         }
     });
 }
+
+// Generischer Kopieren-Knopf: [data-copy="#ziel"] kopiert den Wert/Text des Ziels.
+document.querySelectorAll('[data-copy]').forEach((button) => {
+    button.addEventListener('click', async () => {
+        const target = document.querySelector(button.dataset.copy);
+        if (!target) return;
+        const text = 'value' in target ? target.value : target.textContent;
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast('In die Zwischenablage kopiert.');
+        } catch (error) {
+            if ('select' in target) {
+                target.focus();
+                target.select();
+                document.execCommand('copy');
+                showToast('In die Zwischenablage kopiert.');
+            }
+        }
+    });
+});

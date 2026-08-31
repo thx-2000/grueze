@@ -160,10 +160,13 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
             </div>
         </details>
     </form>
-    <?php if (can('mail.send') || can('contacts.export')): ?>
+    <?php if (can('mail.send') || can('contacts.export') || can('contacts.manage')): ?>
         <div class="list-actions">
             <?php if (can('mail.send')): ?>
                 <a class="ghost-button compact-action" href="<?= e(url('/rundmail?' . http_build_query(array_merge($filters, ['from' => 'filter'])))) ?>"><?= icon('mail') ?><span>Rundmail an diese Liste</span></a>
+            <?php endif; ?>
+            <?php if (can('contacts.manage')): ?>
+                <a class="ghost-button compact-action" href="<?= e(url('/namensliste' . (($filters['category_id'] ?? '') !== '' ? '?category_id=' . rawurlencode((string) $filters['category_id']) : ''))) ?>"><?= icon('contacts') ?><span>Namensliste</span></a>
             <?php endif; ?>
             <?php if (can('contacts.export')): ?>
                 <a class="ghost-button compact-action" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>"><?= icon('upload') ?><span>CSV exportieren</span></a>
