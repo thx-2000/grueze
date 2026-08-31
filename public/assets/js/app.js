@@ -655,3 +655,43 @@ if (privacyGuardToggle) {
             : 'Blickschutz aus – Kontaktdaten sind wieder sichtbar.');
     });
 }
+
+// Mobile-Navigation: Hamburger-Menue oeffnet/schliesst die Seitenleiste.
+const navToggle = document.querySelector('.nav-toggle');
+const pageSidebar = document.getElementById('pageSidebar');
+const navBackdrop = document.querySelector('.nav-backdrop');
+if (navToggle && pageSidebar) {
+    const setNavOpen = (open) => {
+        document.body.classList.toggle('nav-open', open);
+        navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (navBackdrop) {
+            navBackdrop.hidden = !open;
+        }
+    };
+
+    navToggle.addEventListener('click', () => {
+        setNavOpen(!document.body.classList.contains('nav-open'));
+    });
+
+    if (navBackdrop) {
+        navBackdrop.addEventListener('click', () => setNavOpen(false));
+    }
+
+    pageSidebar.querySelectorAll('a, button[type="submit"]').forEach((el) => {
+        el.addEventListener('click', () => setNavOpen(false));
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && document.body.classList.contains('nav-open')) {
+            setNavOpen(false);
+            navToggle.focus();
+        }
+    });
+
+    // Beim Wechsel auf Desktop-Breite den Overlay-Zustand zuruecksetzen.
+    window.matchMedia('(min-width: 901px)').addEventListener('change', (event) => {
+        if (event.matches) {
+            setNavOpen(false);
+        }
+    });
+}

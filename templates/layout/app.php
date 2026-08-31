@@ -42,6 +42,13 @@ $themeStyle = branding_theme_style();
     <div class="signal-bar">
         <div class="signal-bar-inner">
             <div class="signal-bar-main">
+                <?php if (!empty($currentUser)): ?>
+                    <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="pageSidebar">
+                        <span class="nav-toggle-icon nav-toggle-icon--menu"><?= icon('menu') ?></span>
+                        <span class="nav-toggle-icon nav-toggle-icon--close"><?= icon('close') ?></span>
+                        <span class="nav-toggle-label">Menü</span>
+                    </button>
+                <?php endif; ?>
                 <a class="signal-bar-label" href="<?= e(url('/')) ?>"><?= e($appName) ?></a>
                 <?php if (!empty($currentUser)): ?>
                     <form method="get" action="<?= e(url('/search')) ?>" class="signal-search">
@@ -82,8 +89,9 @@ $themeStyle = branding_theme_style();
             </div>
         </div>
     </div>
+    <div class="nav-backdrop" hidden></div>
     <div class="page-shell">
-        <aside class="sidebar">
+        <aside class="sidebar" id="pageSidebar">
             <a class="sidebar-brand" href="<?= e(url('/')) ?>">
                 <?php if ($logoPath !== ''): ?>
                     <span class="brand-mark brand-mark-image">

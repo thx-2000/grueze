@@ -6,11 +6,11 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 ## Neu
 
 - **UX-Umbau – nächste Stufen** (Gerüst, Startseite, Suche, Rundmail,
-  Kontakte-Seite erledigt in v0.5.0–0.6.1):
-  - Mobil weiter entschlacken: Signalbalken-Buttons und Profil/Abmelden auf
-    dem Handy kompakter, weniger Chrome vor dem Inhalt.
+  Kontakte-Seite, Mobil-Navigation erledigt in v0.5.0–0.6.2):
   - Namensliste erzeugen & versenden (reine Namensliste per Mail zum
     Vollständigkeitsabgleich durch den Jahrgang).
+  - Feinschliff: Blickschutz-Knopf auf dem Handy evtl. nur als Icon;
+    leerer Raum im aufgeklappten Menü verkleinern.
   - später: gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
@@ -58,6 +58,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Mobil-Navigation (v0.6.2): Auf dem Handy statt des langen Menü-Stapels eine
+  schlanke, klebende Kopfleiste (☰ Menü + Name). Das Menü (Start/Kontakte/
+  Rundmail/Verwaltung + Konto + Abmelden) klappt als Overlay auf und schließt
+  per ☰-Knopf, Tipp daneben, Menüpunkt oder Esc. Der „Arbeitsbereich"-Kopf und
+  die globale Suchleiste sind auf dem Handy ausgeblendet (Suche über Start).
+  Nebenbei: `[hidden]`-Attribut wird jetzt zuverlässig durchgesetzt.
 - Kontakte-Seite entschlackt (v0.6.1): Hero-Card + 3 Statistik-Kacheln raus,
   stattdessen schlanke Kopfzeile („Kontakte" + Anzahl + „Neuen Kontakt").
   Verwaltungs-Erklärtexte entfernt. Massen-/Sammelaktionen (Schnellauswahl,
