@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AdminController;
 use App\Controllers\AuthController;
+use App\Controllers\BackupController;
 use App\Controllers\CategoryController;
 use App\Controllers\ContactController;
 use App\Controllers\LegalController;
@@ -30,6 +31,7 @@ use App\Repositories\PasskeyRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
+use App\Services\BackupService;
 use App\Services\CsvExportService;
 use App\Services\ContactImportService;
 use App\Services\MailService;
@@ -108,9 +110,14 @@ try {
     ));
     Container::factory(WebAuthnService::class, static fn () => new WebAuthnService());
     Container::factory(MigrationService::class, static fn () => new MigrationService(Container::get(PDO::class)));
+    Container::factory(BackupService::class, static fn () => new BackupService(Container::get(PDO::class)));
     Container::factory(AdminController::class, static fn () => new AdminController(
         Container::get(Auth::class),
         Container::get(MigrationService::class)
+    ));
+    Container::factory(BackupController::class, static fn () => new BackupController(
+        Container::get(Auth::class),
+        Container::get(BackupService::class)
     ));
 
     Container::factory(AuthController::class, static fn () => new AuthController(
@@ -237,6 +244,9 @@ try {
 
     $router->get('/admin/migrations', [AdminController::class, 'migrations']);
     $router->post('/admin/migrations/apply', [AdminController::class, 'applyMigration']);
+    $router->get('/admin/backup', [BackupController::class, 'index']);
+    $router->post('/admin/backup/export', [BackupController::class, 'export']);
+    $router->post('/admin/backup/restore', [BackupController::class, 'restore']);
     $router->get('/admin/legal/impressum', [LegalController::class, 'editImpressum']);
     $router->post('/admin/legal/impressum', [LegalController::class, 'updateImpressum']);
     $router->get('/admin/legal/datenschutz', [LegalController::class, 'editDatenschutz']);

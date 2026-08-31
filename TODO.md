@@ -30,15 +30,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   eindeutigen Schritten erledigt sind. Menüstruktur, Benennung, Seitenlayout
   und Einstiegspunkte daran ausrichten.
 
-- **Voll-Export & -Import aller Daten**: Funktion, um den gesamten
-  Datenbestand (Kontakte, Kategorien, Tags, Benutzer/Rollen, Einstellungen,
-  Protokolle, hochgeladene Dateien wie Logo) als vollständiges Backup zu
-  exportieren – maschinenlesbar und wieder importierbar. Zweck: Datensicherung,
-  Umzug auf einen anderen Server, späterer Wechsel auf die neutrale Fassung.
-  Import muss klar zwischen "leeres System befüllen" und "bestehende Daten
-  ersetzen/zusammenführen" unterscheiden. Baut auf und ersetzt den groben
-  Punkt "Backup-/Restore-Konzept" weiter unten. Verhältnis zum bestehenden
-  XLSX-Kontaktimport klären (der bleibt für Teil-Importe).
+- **Voll-Import: Merge-/Zusammenführen-Modus** (v0.4.0 liefert Export +
+  Wiederherstellung „Alles ersetzen" / „Nur wenn leer"). Offen: Backup in einen
+  bestehenden Datenbestand einspielen, ohne ihn zu löschen – mit Dedup und
+  ID-Konfliktbehandlung. Deutlich aufwändiger, daher separat.
 
 ## Aus der ursprünglichen Übergabe (ChatGPT), noch offen
 
@@ -58,12 +53,18 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 5. Admin-Einstellungsbereich weiter strukturieren (Branding / Mail-Versand /
    Sichtbarkeiten-Rollen / ggf. System-Backup später).
 6. Vorbereitung für neutrale Distribution: Installer-Konzept,
-   Backup-/Restore-Konzept, Update-Konzept, konfigurierbare Startwerte.
+   Update-Konzept, konfigurierbare Startwerte. (Backup/Restore erledigt in
+   v0.4.0, siehe „Datensicherung" unter /admin/backup.)
 7. Saubere Migrationsstrategie überlegen, damit die Instanz später ohne
    manuelle Neueingabe auf eine neutralisierte, bessere Fassung wechseln kann.
 
 ## Erledigt
 
+- Datensicherung (v0.4.0): Voll-Backup aller Tabellen + Uploads als ZIP
+  (manifest.json / database.json / uploads/) unter „Datensicherung"
+  (/admin/backup, nur Admin). Wiederherstellung aus Backup in zwei Modi:
+  „Alles ersetzen" (mit Tipp-Bestätigung) und „Nur wenn leer". Protokolle
+  optional abwählbar. Merge-Modus noch offen (siehe Backlog).
 - White-Label-Vorbereitung, Schritt 1 (v0.3.1): Branding-Standardwerte
   (Name, Kurzname, Links, Support-Mail, Login-/Sidebar-Texte, `system_label`
   „GRUEZE") kommen jetzt über `config('branding.*')` mit Instanzwerten als
