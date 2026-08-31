@@ -5,15 +5,6 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **BUG prüfen: Änderung einer Mailadresse wird nicht gespeichert.** Vom Nutzer
-  gemeldet, lokal bisher nicht reproduzierbar (Kontakt-E-Mail ändern + speichern
-  funktioniert in allen getesteten Fällen inkl. mehrerer Adressen und
-  verknüpftem Login). Offene Fragen: welche Seite genau (Kontakt bearbeiten /
-  Mail-Einstellungen / Login-E-Mail im Drawer)? Erscheint eine
-  Erfolgsmeldung? Ein bestimmter Kontakt oder alle? Desktop/Handy?
-  Verdacht: Browser-Back-Cache zeigt alten Stand, oder `<input type="email">`
-  blockt einen Wert (z. B. Umlaut-Domain) ohne sichtbare Meldung.
-
 - **UX-Umbau – nächste Stufen** (Gerüst + Startseiten-Feinschliff erledigt in
   v0.5.0–0.5.2):
   - Rundmail-Bereich: eigener Menüpunkt, Empfänger wählen
@@ -71,6 +62,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- BUG behoben (v0.5.4): Kontakt mit `mailto:`-Präfix in der Adresse (Alt-
+  Importdaten, z. B. Vorname Nachname) ließ sich nicht speichern – das
+  `<input type="email">` blockte das Absenden ohne sichtbare Meldung.
+  Fix: E-Mail-Felder im Kontaktformular auf `type="text" inputmode="email"`,
+  `mailto:`/`tel:`-Präfixe werden beim Speichern automatisch entfernt, und die
+  Migration `2026-08-31-mailto-praefixe-bereinigen` säubert bestehende
+  Datensätze. **Auf Prod unter Verwaltung → Migrationen anwenden.**
 - Suche ergebnis-zuerst + Suchfeld-Typo (v0.5.3): Die Namenssuche von der
   Startseite geht jetzt auf `/search` (durchsucht auch den Ort). Die
   Suchergebnis-Seite wurde entrümpelt: schlanke Suchleiste oben, direkt

@@ -32,11 +32,20 @@ if ($editing) {
         : array_map(static fn (array $tag): int => (int) $tag['id'], $contact['tags'] ?? []);
 }
 
+// Alt-Importdaten enthalten teils "mailto:"/"tel:"-Praefixe. Fuer die Anzeige
+// bereinigen, damit die Felder gueltige Werte zeigen und speicherbar sind.
+foreach (($values['emails'] ?? []) as $i => $em) {
+    $values['emails'][$i]['email'] = preg_replace('/^\s*mailto:\s*/i', '', (string) ($em['email'] ?? ''));
+}
+foreach (($values['phones'] ?? []) as $i => $ph) {
+    $values['phones'][$i]['phone'] = preg_replace('/^\s*tel:\s*/i', '', (string) ($ph['phone'] ?? ''));
+}
+
 $linkedUser = $editing ? ($contact['linked_user'] ?? null) : null;
 $loginEnabled = can('users.manage') && ($hasOld ? array_key_exists('login_enabled', $oldInput) : $linkedUser !== null);
-$loginEmail = $hasOld
+$loginEmail = preg_replace('/^\s*mailto:\s*/i', '', $hasOld
     ? (string) ($oldInput['login_email'] ?? '')
-    : (string) ($linkedUser['email'] ?? ($values['emails'][0]['email'] ?? ''));
+    : (string) ($linkedUser['email'] ?? ($values['emails'][0]['email'] ?? '')));
 $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUser['role_id'] ?? '');
 ?>
 <section class="hero-card compact-editor-shell">
@@ -142,7 +151,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                     <?php foreach (($values['emails'] ?? []) as $index => $email): ?>
                         <div class="repeater-row">
                             <input type="text" name="emails[<?= e((string) $index) ?>][label]" value="<?= e($email['label'] ?? '') ?>" placeholder="Label, z. B. privat">
-                            <input type="email" name="emails[<?= e((string) $index) ?>][email]" value="<?= e($email['email'] ?? '') ?>" placeholder="name@example.com">
+                            <input type="text" inputmode="email" name="emails[<?= e((string) $index) ?>][email]" value="<?= e($email['email'] ?? '') ?>" placeholder="name@example.com">
                             <button
                                 type="button"
                                 class="danger-button icon-button"
@@ -257,7 +266,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
 <template id="emailRowTemplate">
     <div class="repeater-row">
         <input type="text" data-name="label" placeholder="Label, z. B. privat">
-        <input type="email" data-name="email" placeholder="name@example.com">
+        <input type="text" inputmode="email" data-name="email" placeholder="name@example.com">
         <button
             type="button"
             class="danger-button icon-button"

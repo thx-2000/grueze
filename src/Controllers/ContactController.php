@@ -296,11 +296,17 @@ final class ContactController extends BaseController
         Redirect::to('/kontakte');
     }
 
+    /** Entfernt fuehrende "mailto:"-Praefixe (Alt-Importdaten) und trimmt. */
+    private function cleanEmail(string $value): string
+    {
+        return trim((string) preg_replace('/^\s*mailto:\s*/i', '', $value));
+    }
+
     private function sanitizePayload(Request $request): array
     {
         $emails = [];
         foreach (($request->input('emails', []) ?: []) as $entry) {
-            $email = trim((string) ($entry['email'] ?? ''));
+            $email = $this->cleanEmail((string) ($entry['email'] ?? ''));
             $label = trim((string) ($entry['label'] ?? ''));
             if ($email !== '') {
                 $emails[] = ['email' => $email, 'label' => $label];
@@ -309,7 +315,7 @@ final class ContactController extends BaseController
 
         $phones = [];
         foreach (($request->input('phones', []) ?: []) as $entry) {
-            $phone = trim((string) ($entry['phone'] ?? ''));
+            $phone = trim((string) preg_replace('/^\s*tel:\s*/i', '', (string) ($entry['phone'] ?? '')));
             $label = trim((string) ($entry['label'] ?? 'Sonstige'));
             if ($phone !== '') {
                 $phones[] = ['phone' => $phone, 'label' => $label];
@@ -317,7 +323,7 @@ final class ContactController extends BaseController
         }
 
         $loginEnabled = can('users.manage') && $request->input('login_enabled') !== null;
-        $loginEmail = trim((string) $request->input('login_email'));
+        $loginEmail = $this->cleanEmail((string) $request->input('login_email'));
         if ($loginEmail === '' && isset($emails[0]['email'])) {
             $loginEmail = $emails[0]['email'];
         }
