@@ -3,6 +3,7 @@ $total = count($contactResults) + count($userResults);
 $hasQuery = $query !== '';
 ?>
 <section class="panel search-bar-panel">
+    <h2 class="visually-hidden">Suche</h2>
     <form method="get" action="<?= e(url('/search')) ?>" class="start-search" role="search">
         <label for="searchField" class="visually-hidden">Suchen</label>
         <?= icon('search') ?>

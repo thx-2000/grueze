@@ -55,6 +55,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
     <?php endif; ?>
 </head>
 <body>
+    <a class="skip-link" href="#main">Zum Inhalt springen</a>
     <div class="signal-bar">
         <div class="signal-bar-inner">
             <div class="signal-bar-main">
@@ -67,8 +68,9 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                 <?php endif; ?>
                 <a class="signal-bar-label" href="<?= e(url('/')) ?>"><?= e($appName) ?></a>
                 <?php if (!empty($currentUser)): ?>
-                    <form method="get" action="<?= e(url('/search')) ?>" class="signal-search">
-                        <input type="search" name="q" value="<?= e($globalSearchQuery) ?>" placeholder="Global suchen: Kontakte, Benutzer ...">
+                    <form method="get" action="<?= e(url('/search')) ?>" class="signal-search" role="search">
+                        <label class="visually-hidden" for="globalSearch">Global suchen: Kontakte, Benutzer</label>
+                        <input type="search" id="globalSearch" name="q" value="<?= e($globalSearchQuery) ?>" placeholder="Global suchen: Kontakte, Benutzer ...">
                         <button type="submit" class="signal-bar-button"><?= icon('search') ?><span>Suchen</span></button>
                     </form>
                 <?php endif; ?>
@@ -95,7 +97,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                         <?php if (!empty($signalHint)): ?>
                             <span class="signal-bar-hint"><?= e($signalHint) ?></span>
                         <?php endif; ?>
-                        <span id="signalSelectionStatus" class="signal-bar-hint" hidden></span>
+                        <span id="signalSelectionStatus" class="signal-bar-hint" role="status" hidden></span>
                         <div class="signal-bar-actions">
                             <button type="submit" id="signalComposeSelection" form="contactSelectionForm" class="signal-bar-button" hidden><?= icon('mail') ?><span>Mail an Auswahl</span></button>
                             <button type="button" id="signalClearSelection" class="signal-bar-button" data-select="none" hidden><?= icon('reset') ?><span>Auswahl aufheben</span></button>
@@ -165,21 +167,21 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
             <?php endif; ?>
         </aside>
 
-        <main class="content">
+        <main class="content" id="main">
             <header class="content-topbar">
                 <div>
                     <p class="eyebrow">Arbeitsbereich</p>
-                    <h2 class="topbar-title"><a href="<?= e(url('/')) ?>"><?= e($appName) ?></a></h2>
+                    <p class="topbar-title"><a href="<?= e(url('/')) ?>"><?= e($appName) ?></a></p>
                 </div>
             </header>
             <?php foreach ($flashes as $type => $message): ?>
                 <?php if ($message): ?>
-                    <div class="flash flash-<?= e($type) ?>"><?= e($message) ?></div>
+                    <div class="flash flash-<?= e($type) ?>" role="<?= $type === 'error' ? 'alert' : 'status' ?>"><?= e($message) ?></div>
                 <?php endif; ?>
             <?php endforeach; ?>
 
             <?php if ($pageErrors !== []): ?>
-                <div class="flash flash-error">
+                <div class="flash flash-error" role="alert">
                     <?= e(implode(' ', array_values($pageErrors))) ?>
                 </div>
             <?php endif; ?>
@@ -195,25 +197,25 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
             <?php endif; ?>
             <div class="site-footer-inner">
             <a href="<?= e(url('/impressum')) ?>">Impressum</a>
-            <span>|</span>
+            <span aria-hidden="true">|</span>
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
             <?php if ($appVersion !== ''): ?>
-                <span>|</span>
+                <span aria-hidden="true">|</span>
                 <span class="site-footer-version"<?= $systemLabel === 'GRUEZE' ? ' title="GRUEZE: Anspielung auf „Grüezi“ und Kurzform von „Grüß-Zentrale“"' : '' ?>><?= $systemLabel !== '' ? e($systemLabel) . ' ' : '' ?>v<?= e($appVersion) ?></span>
             <?php endif; ?>
             <?php if ($publicSiteUrl !== ''): ?>
-                <span>|</span>
+                <span aria-hidden="true">|</span>
                 <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= e($publicSiteLabel !== '' ? $publicSiteLabel : $publicSiteUrl) ?></a>
             <?php endif; ?>
             <?php if ($supportEmail !== ''): ?>
-                <span>|</span>
+                <span aria-hidden="true">|</span>
                 <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>
             <?php endif; ?>
             </div>
         </div>
     </footer>
 
-    <div id="toast" class="toast" hidden></div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
     <script>
         window.APP = {
             csrfToken: <?= json_encode($csrfToken, JSON_THROW_ON_ERROR) ?>,

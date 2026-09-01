@@ -5,11 +5,17 @@ const contactsViewStorageKey = 'grueze_contacts_view_mode';
 
 function showToast(message) {
     if (!toast) return;
-    toast.textContent = message;
+    // Erst einblenden, dann Text setzen – so meldet die aria-live-Region
+    // die Änderung zuverlässig an Screenreader.
     toast.hidden = false;
+    toast.textContent = '';
+    window.requestAnimationFrame(() => {
+        toast.textContent = message;
+    });
     window.clearTimeout(showToast.timer);
     showToast.timer = window.setTimeout(() => {
         toast.hidden = true;
+        toast.textContent = '';
     }, 2400);
 }
 
@@ -90,7 +96,9 @@ function applyContactsView(view) {
     contactsViewRoot.classList.toggle('is-cards', normalizedView === 'mobile');
 
     document.querySelectorAll('[data-view-toggle]').forEach((button) => {
-        button.classList.toggle('is-active', button.dataset.viewToggle === normalizedView);
+        const isActive = button.dataset.viewToggle === normalizedView;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });
 
     try {
@@ -322,13 +330,19 @@ if (statusPage) {
 
         const percent = data.total > 0 ? (data.processed / data.total) * 100 : 0;
         progressBar.style.width = `${percent}%`;
+        progressBar.parentElement?.setAttribute('aria-valuenow', String(Math.round(percent)));
         progressText.textContent = `${data.processed} von ${data.total} gesendet`;
         if (statusBadge) {
             statusBadge.textContent = `${data.processed} / ${data.total} verarbeitet`;
         }
-        results.innerHTML = data.results.map((entry) => `
-            <div>${entry.ok ? 'OK' : 'Fehler'}: ${entry.name}${entry.error ? ` (${entry.error})` : ''}</div>
-        `).join('');
+        // Kontaktnamen/Fehlertexte per textContent setzen – nie als HTML,
+        // sonst schlägt ein "<" im Namen als Markup durch.
+        results.replaceChildren(...data.results.map((entry) => {
+            const line = document.createElement('div');
+            const status = entry.ok ? 'OK' : 'Fehler';
+            line.textContent = `${status}: ${entry.name}${entry.error ? ` (${entry.error})` : ''}`;
+            return line;
+        }));
 
         if (!data.done) {
             await runBatch();
@@ -405,9 +419,14 @@ if (usersTableBody) {
     const applyUserSortIndicators = () => {
         document.querySelectorAll('[data-user-sort]').forEach((button) => {
             button.classList.remove('is-asc', 'is-desc');
-            if (button.dataset.userSort === activeUserSort.key) {
+            const isActive = button.dataset.userSort === activeUserSort.key;
+            if (isActive) {
                 button.classList.add(activeUserSort.direction === 'asc' ? 'is-asc' : 'is-desc');
             }
+            button.closest('th')?.setAttribute(
+                'aria-sort',
+                isActive ? (activeUserSort.direction === 'asc' ? 'ascending' : 'descending') : 'none',
+            );
         });
     };
 
@@ -661,16 +680,22 @@ const navToggle = document.querySelector('.nav-toggle');
 const pageSidebar = document.getElementById('pageSidebar');
 const navBackdrop = document.querySelector('.nav-backdrop');
 if (navToggle && pageSidebar) {
-    const setNavOpen = (open) => {
+    const setNavOpen = (open, { moveFocus = false } = {}) => {
+        const wasOpen = document.body.classList.contains('nav-open');
         document.body.classList.toggle('nav-open', open);
         navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
         if (navBackdrop) {
             navBackdrop.hidden = !open;
         }
+        if (open && moveFocus) {
+            pageSidebar.querySelector('a, button')?.focus();
+        } else if (!open && wasOpen && moveFocus) {
+            navToggle.focus();
+        }
     };
 
     navToggle.addEventListener('click', () => {
-        setNavOpen(!document.body.classList.contains('nav-open'));
+        setNavOpen(!document.body.classList.contains('nav-open'), { moveFocus: true });
     });
 
     if (navBackdrop) {

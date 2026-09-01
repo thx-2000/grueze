@@ -44,14 +44,14 @@
         <table class="compact-users-table">
             <thead>
                 <tr>
-                    <th><button type="button" class="table-sort-button" data-user-sort="name">Name</button></th>
-                    <th><button type="button" class="table-sort-button" data-user-sort="contact">Verknüpfter Kontakt</button></th>
-                    <th><button type="button" class="table-sort-button" data-user-sort="email">E-Mail</button></th>
-                    <th><button type="button" class="table-sort-button" data-user-sort="role">Rolle</button></th>
-                    <th><button type="button" class="table-sort-button" data-user-sort="status">Status</button></th>
-                    <th><button type="button" class="table-sort-button" data-user-sort="passkeys">Passkeys</button></th>
-                    <th><button type="button" class="table-sort-button" data-user-sort="login">Letzter Login</button></th>
-                    <?php if ($canImpersonateUsers): ?><th class="users-action-col">Verwaltung</th><?php endif; ?>
+                    <th scope="col" aria-sort="ascending"><button type="button" class="table-sort-button" data-user-sort="name">Name</button></th>
+                    <th scope="col" aria-sort="none"><button type="button" class="table-sort-button" data-user-sort="contact">Verknüpfter Kontakt</button></th>
+                    <th scope="col" aria-sort="none"><button type="button" class="table-sort-button" data-user-sort="email">E-Mail</button></th>
+                    <th scope="col" aria-sort="none"><button type="button" class="table-sort-button" data-user-sort="role">Rolle</button></th>
+                    <th scope="col" aria-sort="none"><button type="button" class="table-sort-button" data-user-sort="status">Status</button></th>
+                    <th scope="col" aria-sort="none"><button type="button" class="table-sort-button" data-user-sort="passkeys">Passkeys</button></th>
+                    <th scope="col" aria-sort="none"><button type="button" class="table-sort-button" data-user-sort="login">Letzter Login</button></th>
+                    <?php if ($canImpersonateUsers): ?><th scope="col" class="users-action-col">Verwaltung</th><?php endif; ?>
                 </tr>
             </thead>
             <tbody data-users-table-body>

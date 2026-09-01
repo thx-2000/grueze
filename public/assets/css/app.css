@@ -13,6 +13,60 @@ html {
     display: none !important;
 }
 
+/* ------------------------------------------------------------------ *
+ * Barrierefreiheit: Fokus, Skip-Link, Bewegung
+ * ------------------------------------------------------------------ */
+
+/* Durchgaengiger, gut sichtbarer Tastatur-Fokus. outline-offset haelt den
+   Ring auch auf farbig gefuellten Bedienelementen frei, wo er sonst mit der
+   Fuellfarbe verschmelzen wuerde. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* Auf der Akzent-Kopfleiste traegt der dunkle Primaerton nicht immer –
+   dort den kontrastierenden On-Accent-Ton nehmen. */
+.signal-bar :where(a, button, input, select):focus-visible {
+    outline-color: var(--color-on-accent);
+}
+
+/* Maus-Klicks sollen keinen bleibenden Ring hinterlassen (nur Tastatur). */
+:where(a, button, summary):focus:not(:focus-visible) {
+    outline: none;
+}
+
+.skip-link {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.55rem;
+    z-index: 200;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-weight: 700;
+    text-decoration: none;
+    transform: translateY(-160%);
+    transition: transform 0.15s ease;
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 body {
     --shell-max-width: 1600px;
     --shell-side-pad: 1.15rem;
@@ -260,6 +314,12 @@ strong {
 label span {
     color: var(--color-text);
     font-weight: 700;
+}
+
+label span .required-marker {
+    display: inline;
+    margin: 0;
+    color: var(--color-danger);
 }
 
 .page-shell {
@@ -536,6 +596,9 @@ label span {
 .topbar-title {
     margin: 0;
     font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
 .topbar-title a {

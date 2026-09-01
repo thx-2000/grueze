@@ -62,6 +62,15 @@ $sortLabel = static function (string $sortKey, string $label) use ($currentSort,
 
     return $label . ' ' . ($currentDirection === 'asc' ? '↑' : '↓');
 };
+
+// aria-sort für die sortierte Spaltenüberschrift (WCAG 1.3.1).
+$ariaSort = static function (string $sortKey) use ($currentSort, $currentDirection): string {
+    if ($currentSort !== $sortKey) {
+        return 'none';
+    }
+
+    return $currentDirection === 'asc' ? 'ascending' : 'descending';
+};
 ?>
 <?php
 $hasActiveFilter = ($filters['q'] ?? '') !== ''
@@ -130,7 +139,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                             <option value="desc" <?= ($filters['direction'] ?? '') === 'desc' ? 'selected' : '' ?>>Z bis A</option>
                         </select>
                     </label>
-                    <div class="filter-tags">
+                    <div class="filter-tags" role="group" aria-label="Nach Tags filtern">
                         <span>Tags</span>
                         <div class="tag-picker">
                             <?php foreach ($tags as $tag): ?>
@@ -145,7 +154,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                             <?php endif; ?>
                         </div>
                     </div>
-                    <div class="filter-tags">
+                    <div class="filter-tags" role="group" aria-label="Fehlende Angaben">
                         <span>Fehlende Angaben</span>
                         <label class="inline-toggle">
                             <input type="checkbox" name="without_email" value="1" <?= ($filters['without_email'] ?? '') === '1' ? 'checked' : '' ?>>
@@ -184,11 +193,11 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                 <?php endif; ?>
             </div>
             <div class="selection-tools">
-                <span class="selection-status" id="selectionStatus">Noch nichts ausgewählt</span>
+                <span class="selection-status" id="selectionStatus" role="status">Noch nichts ausgewählt</span>
                 <?php if (!$isMemberCompactView): ?>
                     <div class="view-toggle" role="group" aria-label="Ansicht umschalten">
-                        <button type="button" class="view-toggle-button is-active" data-view-toggle="desktop">Tabelle</button>
-                        <button type="button" class="view-toggle-button" data-view-toggle="mobile">Karten</button>
+                        <button type="button" class="view-toggle-button is-active" data-view-toggle="desktop" aria-pressed="true">Tabelle</button>
+                        <button type="button" class="view-toggle-button" data-view-toggle="mobile" aria-pressed="false">Karten</button>
                     </div>
                 <?php endif; ?>
             </div>
@@ -302,28 +311,28 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
             <table class="contacts-table">
                 <thead>
                     <tr>
-                        <th class="col-select">Auswahl</th>
-                        <th><a class="sort-link" href="<?= e($buildSortUrl('vorname')) ?>"><?= e($sortLabel('vorname', 'Vorname')) ?></a></th>
-                        <th><a class="sort-link" href="<?= e($buildSortUrl('nachname')) ?>"><?= e($sortLabel('nachname', 'Nachname')) ?></a></th>
-                        <th data-col="category"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>"><?= e($sortLabel('category_name', 'Kategorie')) ?></a></th>
-                        <th data-col="tags">Tags</th>
+                        <th class="col-select" scope="col">Auswahl</th>
+                        <th scope="col" aria-sort="<?= e($ariaSort('vorname')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('vorname')) ?>"><?= e($sortLabel('vorname', 'Vorname')) ?></a></th>
+                        <th scope="col" aria-sort="<?= e($ariaSort('nachname')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('nachname')) ?>"><?= e($sortLabel('nachname', 'Nachname')) ?></a></th>
+                        <th data-col="category" scope="col" aria-sort="<?= e($ariaSort('category_name')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>"><?= e($sortLabel('category_name', 'Kategorie')) ?></a></th>
+                        <th data-col="tags" scope="col">Tags</th>
                         <?php if ($visibleContactFields['address']): ?>
-                            <th data-col="adresse"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>"><?= e($sortLabel('ort', 'Adresse')) ?></a></th>
+                            <th data-col="adresse" scope="col" aria-sort="<?= e($ariaSort('ort')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>"><?= e($sortLabel('ort', 'Adresse')) ?></a></th>
                         <?php endif; ?>
                         <?php if ($visibleContactFields['birthday']): ?>
-                            <th data-col="geburtstag"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>"><?= e($sortLabel('geburtstag', 'Geburtstag')) ?></a></th>
+                            <th data-col="geburtstag" scope="col" aria-sort="<?= e($ariaSort('geburtstag')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>"><?= e($sortLabel('geburtstag', 'Geburtstag')) ?></a></th>
                         <?php endif; ?>
                         <?php if ($visibleContactFields['emails']): ?>
-                            <th data-col="emails">E-Mail</th>
+                            <th data-col="emails" scope="col">E-Mail</th>
                         <?php endif; ?>
                         <?php if ($visibleContactFields['phones']): ?>
-                            <th data-col="phones">Telefon</th>
+                            <th data-col="phones" scope="col">Telefon</th>
                         <?php endif; ?>
                         <?php if ($visibleContactFields['login']): ?>
-                            <th data-col="login">Login / Rolle</th>
+                            <th data-col="login" scope="col">Login / Rolle</th>
                         <?php endif; ?>
                         <?php if (can('contacts.manage')): ?>
-                            <th class="col-actions">Aktionen</th>
+                            <th class="col-actions" scope="col">Aktionen</th>
                         <?php endif; ?>
                     </tr>
                 </thead>
@@ -332,7 +341,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                         <tr class="contact-row" data-contact-selectable data-view="desktop" data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
                             <td class="col-select">
                                 <label class="table-check">
-                                    <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox>
+                                    <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox aria-label="<?= e(trim($contact['vorname'] . ' ' . $contact['nachname']) . ' auswählen') ?>">
                                 </label>
                             </td>
                             <td>
@@ -422,8 +431,8 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
             <?php foreach ($contacts as $contact): ?>
                 <article class="contact-card" data-contact-selectable data-view="mobile" data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
                     <label class="contact-select">
-                        <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox>
-                        <span>Auswählen</span>
+                        <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox aria-label="<?= e(trim($contact['vorname'] . ' ' . $contact['nachname']) . ' auswählen') ?>">
+                        <span aria-hidden="true">Auswählen</span>
                     </label>
                     <div class="contact-head">
                         <div>
@@ -538,7 +547,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                             <input type="checkbox" name="bulk_category_only_if_empty" value="1">
                             <span>Nur setzen, wenn noch keine Kategorie gepflegt ist</span>
                         </label>
-                        <div>
+                        <div role="group" aria-label="Tags ergänzen">
                             <span>Tags ergänzen</span>
                             <div class="tag-picker compact-picker">
                                 <?php foreach ($tags as $tag): ?>
@@ -552,7 +561,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <div>
+                        <div role="group" aria-label="Tags entfernen">
                             <span>Tags entfernen</span>
                             <div class="tag-picker compact-picker">
                                 <?php foreach ($tags as $tag): ?>
@@ -566,7 +575,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <p class="field-hint" id="bulkSelectionHint">Keine Kontakte ausgewählt.</p>
+                        <p class="field-hint" id="bulkSelectionHint" role="status">Keine Kontakte ausgewählt.</p>
                         <div class="toolbar-actions">
                             <button type="submit" formaction="<?= e(url('/contacts/bulk-update')) ?>" formmethod="post">
                                 <?= icon('edit') ?><span>Auf Auswahl anwenden</span>
@@ -591,7 +600,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                     <h3>Kategorie ergänzen</h3>
                     <form method="post" action="<?= e(url('/categories/store')) ?>" class="inline-form">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                        <input type="text" name="name" placeholder="Neue Kategorie" required>
+                        <input type="text" name="name" placeholder="Neue Kategorie" aria-label="Name der neuen Kategorie" required>
                         <button type="submit">Speichern</button>
                     </form>
                 </div>
@@ -599,7 +608,7 @@ $hasActiveFilter = ($filters['q'] ?? '') !== ''
                     <h3>Tag ergänzen</h3>
                     <form method="post" action="<?= e(url('/tags/store')) ?>" class="inline-form">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                        <input type="text" name="name" placeholder="Neuer Tag" required>
+                        <input type="text" name="name" placeholder="Neuer Tag" aria-label="Name des neuen Tags" required>
                         <button type="submit">Speichern</button>
                     </form>
                 </div>

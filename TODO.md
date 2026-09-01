@@ -26,13 +26,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   bestehenden Datenbestand einspielen, ohne ihn zu löschen – mit Dedup und
   ID-Konfliktbehandlung. Deutlich aufwändiger, daher separat.
 
-- **Barrierefrei machen**: Systematischer Durchgang nach WCAG 2.1 AA –
-  Landmarks/Skip-Link, Heading-Hierarchie, `alt`-Texte, Formular-Labels &
-  Fehlermeldungen (`aria-describedby`), Fokus-Reihenfolge und sichtbarer
-  Fokus, Tastaturbedienung (Mobil-Menü, Drawer, Blickschutz, Sammelauswahl),
-  Kontraste (die Themes sind schon geprüft, aber UI-Zustände nicht),
-  `aria-live` für Toasts/Statusmeldungen, `prefers-reduced-motion`.
-  Screenreader-Test (VoiceOver) an den Kern-Workflows.
+- **Barrierefreiheit – Rest**: Grunddurchgang erledigt (v0.17.0, siehe unten).
+  Noch offen: echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows;
+  Kontrast-Check der UI-Zustände (Hover/aktiv/deaktiviert – die Themes selbst
+  sind geprüft); Fokus-Falle im aufgeklappten Mobil-Menü (aktuell nur
+  Fokus-Verschiebung + Esc, kein echtes Trap); `alt`-Texte an nutzerseitig
+  hochgeladenen Logos/Profilbildern prüfen.
 
 - **SEO – Rest**: Grundausstattung erledigt (v0.16.0, siehe unten). Offen und
   erst sinnvoll, sobald es eine echte öffentliche Seite / White-Label-Landing
@@ -62,6 +61,17 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Barrierefreiheit, Grunddurchgang (v0.17.0): Skip-Link + `<main id="main">`,
+  durchgehender `:focus-visible`-Ring (statt UA-Default / `outline: none`),
+  `@media (prefers-reduced-motion)`. Live-Regionen: Toast (`role="status"`),
+  Flash-Meldungen (`status`/`alert`), Auswahl- und Versandstatus, Fortschritts-
+  balken als `role="progressbar"`. Formulare: unbeschriftete Felder benannt
+  (Global-Suche, Repeater-Zeilen für Mail/Telefon, Schnell-Anlegen), Tag-/
+  Checkbox-Gruppen als `role="group"` mit Label, Pflichtfeld-Markierung.
+  Tabellen: `scope="col"` + `aria-sort` (Kontakte, Benutzer), Auswahl-
+  Checkboxen mit Kontaktnamen als `aria-label`. Doppelte App-Namen-Überschrift
+  in der Topbar zu `<p>` gemacht (nur noch ein `<h1>`). Nebenbei: XSS im
+  Versand-Ergebnis (`innerHTML` → `textContent`) geschlossen.
 - SEO-Grundausstattung (v0.16.0): Die App hat keine öffentlichen Inhalte,
   daher defensiv statt offensiv. `public/robots.txt` (`Disallow: /`),
   `<meta name="robots" content="noindex, nofollow">` im Layout-Head plus

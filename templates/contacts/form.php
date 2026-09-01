@@ -69,9 +69,10 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                     <p class="muted">Name, Zuordnung und Basisinformationen.</p>
                 </div>
             </div>
+            <p class="field-hint">Mit <span aria-hidden="true">*</span> markierte Felder sind Pflicht.</p>
             <div class="form-grid">
-                <label><span>Vorname</span><input type="text" name="vorname" value="<?= e($values['vorname'] ?? '') ?>" required></label>
-                <label><span>Nachname</span><input type="text" name="nachname" value="<?= e($values['nachname'] ?? '') ?>" required></label>
+                <label><span>Vorname <span class="required-marker" aria-hidden="true">*</span></span><input type="text" name="vorname" value="<?= e($values['vorname'] ?? '') ?>" required></label>
+                <label><span>Nachname <span class="required-marker" aria-hidden="true">*</span></span><input type="text" name="nachname" value="<?= e($values['nachname'] ?? '') ?>" required></label>
                 <label><span>Geburtsname</span><input type="text" name="geburtsname" value="<?= e($values['geburtsname'] ?? '') ?>"></label>
                 <label>
                     <span>Geschlecht</span>
@@ -92,7 +93,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                 </label>
                 <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($values['geburtstag'] ?? '') ?>"></label>
                 <label><span>Land</span><input type="text" name="land" value="<?= e($values['land'] ?? '') ?>"></label>
-                <div class="full-width">
+                <div class="full-width" role="group" aria-label="Tags">
                     <span>Tags</span>
                     <div class="tag-picker">
                         <?php foreach ($tags as $tag): ?>
@@ -123,8 +124,8 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                         <label><span>Ort</span><input type="text" name="ort" value="<?= e($values['ort'] ?? '') ?>"></label>
                         <label class="full-width">
                             <span>Profilbild</span>
-                            <input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp">
-                            <small class="field-hint">Erlaubt sind JPG, PNG und WEBP bis 2 MB.</small>
+                            <input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp" aria-describedby="photoHint">
+                            <small class="field-hint" id="photoHint">Erlaubt sind JPG, PNG und WEBP bis 2 MB.</small>
                         </label>
                         <label class="full-width"><span>Notizen</span><textarea name="notizen" rows="4"><?= e($values['notizen'] ?? '') ?></textarea></label>
                     </div>
@@ -150,8 +151,8 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                 <div id="emailsRepeater">
                     <?php foreach (($values['emails'] ?? []) as $index => $email): ?>
                         <div class="repeater-row">
-                            <input type="text" name="emails[<?= e((string) $index) ?>][label]" value="<?= e($email['label'] ?? '') ?>" placeholder="Label, z. B. privat">
-                            <input type="text" inputmode="email" name="emails[<?= e((string) $index) ?>][email]" value="<?= e($email['email'] ?? '') ?>" placeholder="name@example.com">
+                            <input type="text" name="emails[<?= e((string) $index) ?>][label]" value="<?= e($email['label'] ?? '') ?>" placeholder="Label, z. B. privat" aria-label="Label für E-Mail-Adresse <?= e((string) ($index + 1)) ?>">
+                            <input type="text" inputmode="email" name="emails[<?= e((string) $index) ?>][email]" value="<?= e($email['email'] ?? '') ?>" placeholder="name@example.com" aria-label="E-Mail-Adresse <?= e((string) ($index + 1)) ?>">
                             <button
                                 type="button"
                                 class="danger-button icon-button"
@@ -181,12 +182,12 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                 <div id="phonesRepeater">
                     <?php foreach (($values['phones'] ?? []) as $index => $phone): ?>
                         <div class="repeater-row">
-                            <select name="phones[<?= e((string) $index) ?>][label]">
+                            <select name="phones[<?= e((string) $index) ?>][label]" aria-label="Art der Telefonnummer <?= e((string) ($index + 1)) ?>">
                                 <?php foreach ($phoneLabels as $label): ?>
                                     <option value="<?= e($label) ?>" <?= ($phone['label'] ?? '') === $label ? 'selected' : '' ?>><?= e($label) ?></option>
                                 <?php endforeach; ?>
                             </select>
-                            <input type="text" name="phones[<?= e((string) $index) ?>][phone]" value="<?= e($phone['phone'] ?? '') ?>" placeholder="+49 ...">
+                            <input type="text" name="phones[<?= e((string) $index) ?>][phone]" value="<?= e($phone['phone'] ?? '') ?>" placeholder="+49 ..." aria-label="Telefonnummer <?= e((string) ($index + 1)) ?>">
                             <button
                                 type="button"
                                 class="danger-button icon-button"
@@ -265,8 +266,8 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
 
 <template id="emailRowTemplate">
     <div class="repeater-row">
-        <input type="text" data-name="label" placeholder="Label, z. B. privat">
-        <input type="text" inputmode="email" data-name="email" placeholder="name@example.com">
+        <input type="text" data-name="label" placeholder="Label, z. B. privat" aria-label="Label für weitere E-Mail-Adresse">
+        <input type="text" inputmode="email" data-name="email" placeholder="name@example.com" aria-label="Weitere E-Mail-Adresse">
         <button
             type="button"
             class="danger-button icon-button"
@@ -279,12 +280,12 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
 
 <template id="phoneRowTemplate">
     <div class="repeater-row">
-        <select data-name="label">
+        <select data-name="label" aria-label="Art der weiteren Telefonnummer">
             <?php foreach ($phoneLabels as $label): ?>
                 <option value="<?= e($label) ?>"><?= e($label) ?></option>
             <?php endforeach; ?>
         </select>
-        <input type="text" data-name="phone" placeholder="+49 ...">
+        <input type="text" data-name="phone" placeholder="+49 ..." aria-label="Weitere Telefonnummer">
         <button
             type="button"
             class="danger-button icon-button"

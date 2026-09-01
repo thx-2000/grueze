@@ -10,7 +10,7 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
             <h2><?= $memberContactMode ? 'Nachricht wird verschickt' : 'Mailing wird verschickt' ?></h2>
             <p class="muted">Der Versand erfolgt einzeln und personalisiert. Du kannst auf dieser Seite den Fortschritt verfolgen.</p>
         </div>
-        <div class="selection-status" id="mailStatusBadge"><?= e((string) $processed) ?> / <?= e((string) $total) ?> verarbeitet</div>
+        <div class="selection-status" id="mailStatusBadge" role="status" aria-live="polite"><?= e((string) $processed) ?> / <?= e((string) $total) ?> verarbeitet</div>
     </div>
 </section>
 
@@ -22,9 +22,12 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
         </div>
     </div>
 
+    <?php $percentNow = $total > 0 ? (string) round(($processed / $total) * 100, 2) : '0'; ?>
     <div id="mailProgress" class="progress-panel">
-        <div class="progress-track"><div id="mailProgressBar" class="progress-bar" style="width: <?= $total > 0 ? e((string) round(($processed / $total) * 100, 2)) : '0' ?>%"></div></div>
-        <p id="mailProgressText"><?= e((string) $processed) ?> von <?= e((string) $total) ?> gesendet</p>
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<?= e($percentNow) ?>" aria-label="Versandfortschritt">
+            <div id="mailProgressBar" class="progress-bar" style="width: <?= e($percentNow) ?>%"></div>
+        </div>
+        <p id="mailProgressText" role="status" aria-live="polite"><?= e((string) $processed) ?> von <?= e((string) $total) ?> gesendet</p>
         <div id="mailResults" class="results-list">
             <?php foreach (($job['results'] ?? []) as $entry): ?>
                 <div><?= e(($entry['ok'] ? 'OK' : 'Fehler') . ': ' . $entry['name'] . ($entry['error'] ? ' (' . $entry['error'] . ')' : '')) ?></div>
