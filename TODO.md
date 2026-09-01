@@ -6,9 +6,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 ## Neu
 
 - **UX-Umbau – nächste Stufen** (Gerüst, Startseite, Suche, Rundmail,
-  Kontakte-Seite, Mobil-Navigation, Namensliste erledigt in v0.5.0–0.7.0):
-  - Feinschliff: Blickschutz-Knopf auf dem Handy evtl. nur als Icon;
-    leerer Raum im aufgeklappten Menü verkleinern.
+  Kontakte-Seite, Mobil-Navigation, Namensliste erledigt in v0.5.0–0.7.0;
+  Blickschutz-Icon + Menü-Feinschliff in v0.10.2):
   - später: gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
 - **Visueller Theme-Editor mit Live-Vorschau**: Der aktuelle Editor
@@ -62,6 +61,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Mobil-Feinschliff (v0.10.2): Blickschutz-Knopf (und die Auswahl-Aktionen)
+  in der schmalen Kopfleiste jetzt nur als Icon – Beschriftung bleibt für
+  Screenreader per visually-hidden erhalten, aktiver Zustand füllt den Knopf.
+  Aufgeklapptes Mobil-Menü ist nur noch so hoch wie sein Inhalt (die
+  Basis-Regel `height: calc(100vh …)` griff auch mobil und ließ unter
+  „Abmelden" eine große leere Fläche stehen → `height: auto`).
 - Dunkel-Theme Nachkontrolle (v0.10.1): Kompletter Seitendurchgang mit aktivem
   Dunkel-Theme. Gefunden und behoben: Häkchen, Radios und Slider zogen sich
   das OS-Standardblau (auf dem Rundmail-Empfängerdialog gut sichtbar) – jetzt

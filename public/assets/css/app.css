@@ -2233,6 +2233,28 @@ code {
         padding: 0.28rem 0.52rem;
     }
 
+    /* Werkzeug-Knöpfe (Blickschutz, Auswahl-Aktionen) nur als Icon –
+       spart Platz in der schmalen Kopfleiste, Beschriftung bleibt für
+       Screenreader erhalten. */
+    .signal-bar-tools .signal-bar-button {
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .signal-bar-tools .signal-bar-button span:not(.icon) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
     .page-shell {
         grid-template-columns: 1fr;
         padding: 0.65rem;
@@ -2245,6 +2267,10 @@ code {
         left: 0;
         right: 0;
         width: auto;
+        /* Nur so hoch wie der Inhalt – sonst reicht das Panel (Basis-Regel
+           height: calc(100vh …)) bis fast zum Bildschirmrand und lässt unter
+           „Abmelden" eine große leere Fläche stehen. */
+        height: auto;
         max-height: 100dvh;
         overflow-y: auto;
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
