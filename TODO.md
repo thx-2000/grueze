@@ -11,12 +11,6 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
     leerer Raum im aufgeklappten Menü verkleinern.
   - später: gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
-- **Theme-System – Feinschliff** (Grundgerüst erledigt in v0.8.0, erste
-  Tokenisierungsstufe in v0.9.0): Restliche fest hinterlegte Flächen-Effekte
-  (Detail-Verläufe, einzelne Glanzkanten) prüfen; ein echtes dunkles
-  Datei-Theme als Gegenprobe anlegen und dabei die noch nicht token-fähigen
-  Stellen aufspüren.
-
 - **Visueller Theme-Editor mit Live-Vorschau**: Der aktuelle Editor
   (`templates/settings/theme-edit.php`) ist ein Formular mit Farbfeldern und
   Vorschau-Kacheln. Wünschenswert: Änderungen sofort auf einer echten
@@ -68,6 +62,16 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Dunkles Theme + Feinschliff (v0.10.0): Mitgeliefertes Datei-Theme
+  `dunkel.php` (warmneutrale Dunkelfläche, Bernstein-Akzent). Beim Durchgehen
+  aller Seiten gefundene und behobene Stellen: Kopfleisten-Knöpfe und der
+  Hamburger („Menü") nutzen jetzt die automatische Kontrastfarbe der
+  Akzentfläche statt der Textfarbe (waren auf Dunkel unlesbar); Eingabefelder
+  haben eigene Tokens (`--field-bg` / `--field-border`) und heben sich in
+  beide Richtungen sichtbar von der Karte ab; `--edge-light` (Glaskante) und
+  der Überscroll-Bereich (`html`-Hintergrund) folgen jetzt dem Theme; `.toast`
+  nutzt Primär- statt „strong"-Farbe. `themes/README.md` um einen Abschnitt zu
+  dunklen Themes ergänzt.
 - Theme-Feinschliff, erste Stufe (v0.9.0): `app.css` durchgehend auf Tokens
   umgestellt – Flächen, Kanten und Schatten mischen sich jetzt per
   `color-mix` aus den Basis-Tokens (`--surface-veil`, `--surface-sunken`,

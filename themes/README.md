@@ -20,6 +20,8 @@ Mitgeliefert:
 
 - `grueze.php` – der ursprüngliche Look (gedämpftes Grün-Grau, Lindgrün-Akzent).
 - `hell.php` – Standard für neue Installationen (viel Weiß, warmer Orange-Akzent).
+- `dunkel.php` – dunkle Oberfläche mit Bernstein-Akzent. Zugleich die
+  Referenz dafür, wie ein dunkles Theme aussehen muss (siehe unten).
 
 ## Ein Datei-Theme anlegen
 
@@ -133,14 +135,36 @@ Prüfen z. B. mit dem Kontrast-Checker der Browser-DevTools oder
 
 ## Was das Theme steuert
 
-Vollständig themebar sind: Seitenhintergrund, Fließ- und Überschriftentext,
-Links, Primär- und Löschen-Buttons, Fokusrahmen, die Akzent-Kopfleiste,
-Umschalter (Tabelle/Kacheln) sowie Eckenradien und Schriften.
+Die gesamte Oberfläche speist sich aus den Tokens: Hintergründe, Text, Links,
+alle Buttons, Eingabefelder, Tabellen (inkl. Zebrastreifen und Hover),
+Fokusrahmen, die Akzent-Kopfleiste, Karten, Seitenleiste, Badges, Ecken und
+Schriften. Flächen, Kanten und Schatten mischen sich per `color-mix` aus den
+Basis-Tokens (`theme.css`), eine feste Ebene mehr muss man dafür nicht kennen.
 
-Einige feine Flächen-Effekte (leicht durchscheinende Karten- und
-Seitenleisten-Hintergründe, dezente Glanzkanten) sind noch fest hinterlegt und
-auf helle Themes ausgelegt. Sehr dunkle Themes sind daher aktuell nicht
-vorgesehen – der Editor deckt bewusst helle bis mittelhelle Paletten ab.
+Zwei Sonderfälle:
+
+- **Tag-Pillen** (`tag_style()` in `helpers.php`) nutzen eine feste bunte
+  Palette, unabhängig vom Theme – so bleiben einzelne Tags wiedererkennbar.
+- Text auf farbigen Flächen (Buttons, Kopfleiste) wird automatisch schwarz
+  oder weiß gesetzt (`readable_ink()`), je nach Kontrast. Man muss also nur
+  `color_primary` / `color_accent` / `color_danger` wählen, nicht die
+  Schriftfarbe darauf.
+
+## Dunkle Themes
+
+Werden unterstützt. `dunkel.php` ist die mitgelieferte Referenz. Worauf zu
+achten ist:
+
+- `color_bg` am dunkelsten, `color_surface` / `color_surface_strong` je eine
+  Stufe heller (Karten heben sich ab), `color_surface_soft` wieder dunkler.
+- `color_text` hell, `color_muted` klar darunter, aber noch ≥ 4.5:1 gegen
+  `color_surface`.
+- `color_border` als helle, halbtransparente Kante angeben
+  (`rgba(255, 255, 255, 0.15)` o. ä.), nicht als dunkle.
+- `color_primary` und `color_accent` so wählen, dass Schwarz **oder** Weiß
+  darauf ≥ 4.5:1 erreicht – die Automatik nimmt dann die bessere.
+- `color_primary_strong` (Linkfarbe) heller als `color_primary` setzen, damit
+  Links auf dunklen Flächen tragen.
 
 ## Aktives Theme
 

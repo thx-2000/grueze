@@ -46,10 +46,17 @@
 
     --edge-hairline: var(--color-border);
     --edge-strong: color-mix(in srgb, var(--color-text) 14%, transparent);
-    --edge-light: color-mix(in srgb, var(--color-surface-strong) 58%, transparent);
+    /* „Glaskante": auf hellen Themes ein heller Rand, auf dunklen eine leicht
+       aufgehellte Kante – beides aus der Kartenfläche selbst. */
+    --edge-light: var(--color-surface-strong);
 
     --fill-ghost: color-mix(in srgb, var(--color-text) 8%, transparent);
     --fill-ghost-strong: color-mix(in srgb, var(--color-text) 13%, transparent);
+
+    /* Eingabefelder: sichtbar gegen die Kartenfläche abgesetzt, in beide
+       Richtungen (heller Grund → nahezu weiß, dunkler Grund → aufgehellt). */
+    --field-bg: color-mix(in srgb, var(--color-surface-strong) 94%, var(--color-text));
+    --field-border: color-mix(in srgb, var(--color-text) 17%, transparent);
 
     --ink-shadow: color-mix(in srgb, var(--color-text) 10%, transparent);
     --shadow-soft: 0 20px 40px var(--ink-shadow);
