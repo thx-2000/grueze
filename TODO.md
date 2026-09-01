@@ -34,11 +34,11 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   `aria-live` für Toasts/Statusmeldungen, `prefers-reduced-motion`.
   Screenreader-Test (VoiceOver) an den Kern-Workflows.
 
-- **SEO machen**: Betrifft v. a. die (künftige) öffentliche Seite bzw.
-  White-Label-Landing – Title/Meta-Description pro Seite, Open-Graph/Twitter-
-  Cards, `lang`, kanonische URLs, `robots.txt` + Sitemap, strukturierte Daten
-  wo sinnvoll, sprechende URLs, saubere HTTP-Statuscodes. Der eingeloggte
-  Bereich soll `noindex` bleiben.
+- **SEO – Rest**: Grundausstattung erledigt (v0.16.0, siehe unten). Offen und
+  erst sinnvoll, sobald es eine echte öffentliche Seite / White-Label-Landing
+  gibt: Meta-Description je Seite mit echtem Inhalt, Open-Graph/Twitter-Cards,
+  strukturierte Daten, Sitemap. Diese Seite müsste ihr `noindex` dann selbst
+  wieder aufheben (aktuell sperrt der Layout-Head alles).
 
 ## Aus der ursprünglichen Übergabe (ChatGPT), noch offen
 
@@ -62,6 +62,16 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- SEO-Grundausstattung (v0.16.0): Die App hat keine öffentlichen Inhalte,
+  daher defensiv statt offensiv. `public/robots.txt` (`Disallow: /`),
+  `<meta name="robots" content="noindex, nofollow">` im Layout-Head plus
+  `X-Robots-Tag`-Header über `.htaccess` (greift auch für PDF/CSV). Neu:
+  sprechende `<title>` je Seite (`Abschnitt · Instanzname`) über
+  `page_title()` bzw. die Render-Variable `$pageTitle`; `<link rel="canonical">`
+  und eine generische `<meta name="description">`. Saubere Fehlerseiten:
+  `render_error_page()` liefert für 404 (Router) und den 500-Fallback
+  (`index.php`) eine eigenständige Seite mit korrektem Statuscode – der
+  500-Fall verrät die Exception-Meldung nur noch bei `debug = true`.
 - Distribution vorbereitet (v0.15.0): Instanz- und serverspezifische Reste
   aus Repo, Doku und History entfernt – Deploy-Ziel kommt jetzt aus
   `scripts/deploy.env` (lokal, nicht im Repo; Vorlage `deploy.env.example`),

@@ -7,3 +7,8 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
 
+# Interne Anwendung ohne öffentliche Inhalte: nichts indexieren. Greift zusätzlich
+# zu robots.txt und dem <meta robots> auch für Nicht-HTML-Antworten (PDF, CSV …).
+<IfModule mod_headers.c>
+    Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>

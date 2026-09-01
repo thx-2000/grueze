@@ -41,8 +41,7 @@ final class Router
         $handler = $this->routes[$request->method()][$request->path()] ?? null;
 
         if (!$handler) {
-            http_response_code(404);
-            echo 'Seite nicht gefunden.';
+            \render_error_page(404, 'Seite nicht gefunden', 'Die aufgerufene Adresse existiert nicht.');
             return;
         }
 

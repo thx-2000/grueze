@@ -1,0 +1,4 @@
+# Interne Anwendung. Es gibt keine öffentlichen Inhalte – nichts soll
+# in Suchmaschinen erscheinen.
+User-agent: *
+Disallow: /

@@ -314,6 +314,8 @@ try {
 
     $router->dispatch(new Request());
 } catch (Throwable $exception) {
-    http_response_code(500);
-    echo '<h1>Fehler</h1><p>' . e($exception->getMessage()) . '</p>';
+    $detail = (bool) config('app.debug', false)
+        ? $exception->getMessage()
+        : 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.';
+    render_error_page(500, 'Serverfehler', $detail);
 }

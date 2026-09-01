@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.15.0';
+    return '0.16.0';
 }
 
 function system_label(): string
@@ -261,6 +261,101 @@ function system_label(): string
 function product_url(): string
 {
     return trim(branding_default('product_url', 'https://github.com/GitteHubertus/grueze'));
+}
+
+/**
+ * Kurzer Abschnittsname für den <title>. Ergibt zusammen mit dem Instanznamen
+ * einen sprechenden Tab-/Verlaufseintrag. Rein intern – die Seite ist nicht
+ * für Suchmaschinen bestimmt (noindex). Templates dürfen über die
+ * Render-Variable $pageTitle einen genaueren Titel setzen (z. B. Kontaktname).
+ */
+function page_title(string $path): string
+{
+    $path = rtrim($path, '/') ?: '/';
+
+    $exact = [
+        '/'                          => 'Start',
+        '/login'                     => 'Anmeldung',
+        '/forgot-password'           => 'Passwort vergessen',
+        '/reset-password'            => 'Neues Passwort',
+        '/setup/admin'               => 'Ersteinrichtung',
+        '/kontakte'                  => 'Kontakte',
+        '/search'                    => 'Suche',
+        '/contacts/create'           => 'Neuer Kontakt',
+        '/contacts/edit'             => 'Kontakt bearbeiten',
+        '/contacts/import'           => 'Kontakte importieren',
+        '/rundmail'                  => 'Rundmail',
+        '/mail/compose'              => 'Rundmail schreiben',
+        '/mail/status'               => 'Versandstatus',
+        '/namensliste'               => 'Namensliste',
+        '/verwaltung'                => 'Verwaltung',
+        '/verwaltung/kategorien-tags' => 'Kategorien & Tags',
+        '/users'                     => 'Benutzer',
+        '/account'                   => 'Mein Konto',
+        '/security/passkeys'         => 'Passkeys',
+        '/impressum'                 => 'Impressum',
+        '/datenschutz'               => 'Datenschutz',
+        '/admin/migrations'          => 'Migrationen',
+        '/admin/backup'              => 'Datensicherung',
+        '/admin/legal/impressum'     => 'Impressum bearbeiten',
+        '/admin/legal/datenschutz'   => 'Datenschutz bearbeiten',
+        '/logs/audit'                => 'Änderungsprotokoll',
+        '/logs/mail'                 => 'Versandprotokoll',
+        '/settings/branding'         => 'Branding',
+        '/settings/themes'           => 'Themes',
+        '/settings/themes/bearbeiten' => 'Theme bearbeiten',
+        '/settings/mail-footer'      => 'Mail-Einstellungen',
+        '/settings/visibility'       => 'Sichtbarkeiten',
+        '/settings/permissions'      => 'Berechtigungen',
+    ];
+
+    return $exact[$path] ?? '';
+}
+
+/**
+ * Eigenständige, abhängigkeitsfreie Fehlerseite (kein Theme, keine DB nötig) mit
+ * korrektem HTTP-Status. Für 404 und den letzten 500-Fallback, damit auch der
+ * Fehlerfall einen sauberen Statuscode und kein nacktes Text-Fragment liefert.
+ */
+function render_error_page(int $status, string $heading, string $message): void
+{
+    if (!headers_sent()) {
+        http_response_code($status);
+        header('Content-Type: text/html; charset=UTF-8');
+        header('X-Robots-Tag: noindex, nofollow');
+    }
+
+    $heading = e($heading);
+    $message = e($message);
+    $home = e(url('/'));
+
+    echo <<<HTML
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{$heading}</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+    font: 1rem/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f3f5f0; color: #181a15; padding: 2rem; }
+  main { max-width: 32rem; text-align: center; }
+  h1 { font-size: 2.5rem; margin: 0 0 .5rem; }
+  p { margin: 0 0 1.5rem; color: #5d6258; }
+  a { color: #2d3128; font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>{$status}</h1>
+<p><strong>{$heading}</strong><br>{$message}</p>
+<p><a href="{$home}">Zur Startseite</a></p>
+</main>
+</body>
+</html>
+HTML;
 }
 
 function format_date(?string $value): string

@@ -17,13 +17,28 @@ $logoPath = trim((string) ($branding['branding_logo_path'] ?? ''));
 $appVersion = system_version();
 $systemLabel = system_label();
 $themeStyle = branding_theme_style();
+
+// Seiten-Titel: Template darf via $pageTitle einen genaueren Wert vorgeben
+// (z. B. Kontaktname), sonst greift die zentrale Abschnittsliste.
+$sectionTitle = trim((string) ($pageTitle ?? '')) !== ''
+    ? trim((string) $pageTitle)
+    : page_title($currentPath);
+$documentTitle = $sectionTitle !== '' ? $sectionTitle . ' · ' . $appName : $appName;
+$canonicalPath = rtrim($currentPath, '/') ?: '/';
+$metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
 ?>
 <!doctype html>
 <html lang="de">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= e($appName) ?></title>
+    <title><?= e($documentTitle) ?></title>
+    <?php /* Interne Anwendung: keine öffentlichen Inhalte, nie indexieren. */ ?>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="<?= e(url($canonicalPath)) ?>">
+    <?php if ($metaDescription !== ''): ?>
+        <meta name="description" content="<?= e($metaDescription) ?>">
+    <?php endif; ?>
     <link rel="icon" href="<?= e(theme_favicon()) ?>">
     <script>
         // Blickschutz-Zustand vor dem ersten Paint setzen, damit Kontaktdaten nicht kurz aufblitzen.
