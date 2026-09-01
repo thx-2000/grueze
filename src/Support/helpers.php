@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.11.3';
+    return '0.11.4';
 }
 
 function system_label(): string

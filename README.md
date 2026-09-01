@@ -8,7 +8,7 @@ Eine mobile-first PHP-Web-App für die Verwaltung von Kontaktdaten einer Abi-Stu
 2. `config/config.example.php` oder `config/config.production-template.php` nach `config/config.php` kopieren und Datenbank, Basis-URL sowie SMTP-Zugangsdaten eintragen.
 3. `database/schema.sql` in die MySQL- oder MariaDB-Datenbank importieren.
 4. Per Composer `phpmailer/phpmailer` installieren, wenn SMTP-Versand genutzt werden soll. Ohne PHPMailer fällt die App auf `mail()` zurück.
-5. Sicherstellen, dass `assets/uploads/` und `storage/tmp/` beschreibbar sind.
+5. Sicherstellen, dass `public/assets/uploads/` und `storage/tmp/` beschreibbar sind.
 6. Einen ersten Admin-Datensatz in `users` anlegen. Die zugehörige `role_id` ist die `admin`-Rolle aus `roles`.
 7. Über `security.contact_detail_visibility` kann pro Datenfeld gesteuert werden, welche Rollen Adresse, E-Mail, Telefon, Geburtstag, Notizen und Login sehen dürfen. Fehlt diese Matrix, greift `security.private_contact_detail_roles` als Rückfall.
 8. Unter `/contacts/import` können Admins eine XLSX-Liste mit den Spalten `Vorname`, `Geburtsname`, `Nachname akt.`, `Mail`, `Ort` und `Handy` importieren.
@@ -51,8 +51,8 @@ Das Skript synchronisiert das Projekt per `rsync` auf den Server und schließt s
 - `public/`: Einstiegspunkt und Rewrite-Regeln
 - `src/`: PHP-Logik, Controller, Repositories und Services
 - `templates/`: Server-seitig gerenderte Ansichten
-- `assets/css/`: Theming und Layout
-- `assets/js/`: Vanilla-JS für Copy, Auswahl, dynamische Felder und Mail-Batches
+- `public/assets/css/`: Theming und Layout
+- `public/assets/js/`: Vanilla-JS für Copy, Auswahl, dynamische Felder und Mail-Batches
 - `database/`: Datenbankschema
 - `storage/tmp/`: temporäre Mail-Anhänge
 

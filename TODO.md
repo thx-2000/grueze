@@ -55,6 +55,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Toter Asset-Baum entfernt (v0.11.4): Der nicht ausgelieferte Top-Level-Ordner
+  `assets/` (veraltete `css/`, `js/`, leeres `uploads/`) ist gelöscht. Ausgeliefert
+  wird ausschließlich `public/assets/`; `asset_url()` löst ohnehin immer gegen
+  `public/` auf. `.gitignore`, `.rsyncignore` und `.dockerignore` von den
+  `assets/uploads/*`-Regeln bereinigt (die `public/assets/uploads/*`-Regeln
+  bleiben). README-Ordnerliste auf `public/assets/…` korrigiert.
 - Mitgeliefertes Theme „grueze" → „Signalfarbe" (v0.11.3): Das Datei-Theme
   `themes/signalfarbe.php` heißt jetzt `themes/signalfarbe.php` / „Signalfarbe" –
   „GRUEZE" ist ein instanzspezifischer Name und gehört nicht in die neutrale

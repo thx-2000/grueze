@@ -6,8 +6,5 @@ storage/tmp/*
 public/assets/uploads/*
 !public/assets/uploads/.gitkeep
 !public/assets/uploads/.htaccess
-assets/uploads/*
-!assets/uploads/.gitkeep
-!assets/uploads/.htaccess
 config/config.php
 vendor

@@ -12,9 +12,6 @@ config/config.production-template.php
 storage/tmp/*
 !storage/tmp/.gitkeep
 !storage/tmp/.htaccess
-assets/uploads/*
-!assets/uploads/.gitkeep
-!assets/uploads/.htaccess
 public/assets/uploads/*
 !public/assets/uploads/.gitkeep
 !public/assets/uploads/.htaccess

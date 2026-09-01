@@ -9,9 +9,6 @@
 /public/assets/uploads/*
 !/public/assets/uploads/.htaccess
 !/public/assets/uploads/.gitkeep
-/assets/uploads/*
-!/assets/uploads/.htaccess
-!/assets/uploads/.gitkeep
 /storage/tmp/*
 !/storage/tmp/.htaccess
 !/storage/tmp/.gitkeep
