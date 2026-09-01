@@ -55,6 +55,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Mitgeliefertes Theme „grueze" → „Signalfarbe" (v0.11.3): Das Datei-Theme
+  `themes/signalfarbe.php` heißt jetzt `themes/signalfarbe.php` / „Signalfarbe" –
+  „GRUEZE" ist ein instanzspezifischer Name und gehört nicht in die neutrale
+  Distribution. Look identisch (gleiche Token-Werte). Migration
+  `2026-09-01-theme-signalfarbe` zieht `active_theme` von `signalfarbe` auf
+  `signalfarbe`; ein Alt-Slug-Alias in `ThemeService::activeSlug()` fängt das
+  Fenster zwischen Deploy und Migration ab. Wer den Namen „GRUEZE" in der
+  Oberfläche will: „Signalfarbe" kopieren, Kopie „GRUEZE" nennen, aktivieren.
 - Theme-Bearbeiten auffindbar (v0.11.1): Auf jeder Theme-Kachel gibt es jetzt
   einen sichtbaren Bearbeiten-Zugang. Bei den Vorlagen (grueze/hell/dunkel)
   heißt der Knopf „Kopieren & bearbeiten" (legt eine Kopie an und öffnet den

@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS themes (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Laufende Instanz auf dem bisherigen Look halten. Neue Installationen ohne
+-- Laufende Instanz auf dem bisherigen Look halten (Datei-Theme "signalfarbe",
+-- früher "signalfarbe" – siehe Migration 2026-09-01). Neue Installationen ohne
 -- diesen Wert starten mit dem Standard-Theme "hell".
 INSERT IGNORE INTO app_settings (setting_key, setting_value) VALUES ('active_theme', 'signalfarbe');

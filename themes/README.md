@@ -24,7 +24,8 @@ bzw. 3:1). Ein leeres Feld lässt den Token unverändert.
 
 Mitgeliefert:
 
-- `grueze.php` – der ursprüngliche Look (gedämpftes Grün-Grau, Lindgrün-Akzent).
+- `signalfarbe.php` – gedämpftes Grün-Grau mit Lindgrün-Signalfarbe. Zugleich
+  die Basis, auf die nicht gesetzte Tokens zurückfallen.
 - `hell.php` – Standard für neue Installationen (viel Weiß, warmer Orange-Akzent).
 - `dunkel.php` – dunkle Oberfläche mit Bernstein-Akzent. Zugleich die
   Referenz dafür, wie ein dunkles Theme aussehen muss (siehe unten).
@@ -52,8 +53,8 @@ return [
 Das Theme wird beim nächsten Seitenaufruf automatisch in der Übersicht
 angeboten – kein Cache, keine Migration nötig.
 
-**Nicht gesetzte Tokens** fallen automatisch auf die Werte des `signalfarbe`-Themes
-zurück. Man muss also nur die Tokens angeben, die abweichen.
+**Nicht gesetzte Tokens** fallen automatisch auf die Werte des
+`signalfarbe`-Themes zurück. Man muss also nur die Tokens angeben, die abweichen.
 
 ## Verfügbare Tokens
 
@@ -176,4 +177,4 @@ achten ist:
 
 Steht in `app_settings` unter dem Schlüssel `active_theme` (Wert = Slug). Ist
 kein Wert gesetzt, verwendet eine frische Installation `hell`, eine bestehende
-Instanz bleibt bis zur Theme-Migration auf `signalfarbe`.
+Instanz bleibt auf `signalfarbe` (dem früheren `signalfarbe`).

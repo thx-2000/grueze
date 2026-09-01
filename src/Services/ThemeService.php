@@ -24,9 +24,9 @@ final class ThemeService
 
     /**
      * Solange in app_settings kein aktives Theme steht, bleibt es beim
-     * bisherigen Look. Frische Installationen setzen "hell" beim Anlegen des
-     * ersten Admin-Kontos (SetupController), Bestandsinstanzen bekommen
-     * ihren Wert per Theme-Migration.
+     * bisherigen Look (Datei-Theme "signalfarbe"). Frische Installationen
+     * setzen "hell" beim Anlegen des ersten Admin-Kontos (SetupController),
+     * Bestandsinstanzen bekommen ihren Wert per Theme-Migration.
      */
     private const UNSET_DEFAULT_SLUG = 'signalfarbe';
 
@@ -58,7 +58,7 @@ final class ThemeService
         'radius_xl'           => ['--radius-xl', 'Ecken sehr groß', 'Ecken', 'length'],
     ];
 
-    /** Ultimativer Fallback, falls ein Theme einen Token nicht setzt (= Instanzwerte). */
+    /** Ultimativer Fallback, falls ein Theme einen Token nicht setzt (= Werte des Themes "signalfarbe"). */
     private const DEFAULTS = [
         'font_display'        => '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
         'font_body'          => '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
@@ -161,6 +161,12 @@ final class ThemeService
 
         if ($slug === '') {
             $slug = self::UNSET_DEFAULT_SLUG;
+        }
+
+        // Alt-Slug "signalfarbe" -> "signalfarbe" (Datei umbenannt). Fängt das
+        // Fenster zwischen Deploy und Migration 2026-09-01 ab.
+        if ($slug === 'signalfarbe' && !isset($all['signalfarbe']) && isset($all['signalfarbe'])) {
+            $slug = 'signalfarbe';
         }
 
         if (isset($all[$slug])) {

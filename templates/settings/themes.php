@@ -6,7 +6,7 @@ $swatchKeys = ['color_bg', 'color_surface', 'color_primary', 'color_accent', 'co
         <p class="eyebrow">Verwaltung</p>
         <h2>Themes</h2>
         <p class="muted">Ein Theme bündelt Farben, Schriften und Eckenradien unter einem Namen. Die
-            mitgelieferten Vorlagen (signalfarbe, hell, dunkel) lassen sich nicht direkt ändern – der
+            mitgelieferten Vorlagen (Signalfarbe, Hell, Dunkel) lassen sich nicht direkt ändern – der
             Knopf „Kopieren &amp; bearbeiten" legt eine eigene Kopie an und öffnet sie sofort im
             Editor mit Live-Vorschau, Farbwähler und Kontrasthinweisen. Eigene Themes lassen sich
             frei bearbeiten, umbenennen und löschen.</p>

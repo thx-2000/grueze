@@ -1,12 +1,12 @@
 <?php
 
-// Der ursprüngliche Look der Adress-Zentrale: gedämpftes Grün-Grau,
-// Lindgrün als Signalfarbe, cremeweiße, leicht durchscheinende Flächen.
-// Aufbau eines Themes: siehe themes/README.md
+// Gedämpftes Grün-Grau mit Lindgrün als Signalfarbe, cremeweiße, leicht
+// durchscheinende Flächen. Zugleich die Basis, auf die nicht gesetzte Tokens
+// zurückfallen. Aufbau eines Themes: siehe themes/README.md
 
 return [
-    'name' => 'GRUEZE',
-    'description' => 'Ruhiges Grün-Grau mit Lindgrün-Akzent – der erste Look der Adress-Zentrale.',
+    'name' => 'Signalfarbe',
+    'description' => 'Ruhiges Grün-Grau mit kräftigem Lindgrün als Signalfarbe.',
     'tokens' => [
         'font_display'         => '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
         'font_body'            => '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
