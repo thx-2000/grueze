@@ -26,12 +26,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   bestehenden Datenbestand einspielen, ohne ihn zu löschen – mit Dedup und
   ID-Konfliktbehandlung. Deutlich aufwändiger, daher separat.
 
-- **Barrierefreiheit – Rest**: Grunddurchgang erledigt (v0.17.0, siehe unten).
-  Noch offen: echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows;
-  Kontrast-Check der UI-Zustände (Hover/aktiv/deaktiviert – die Themes selbst
-  sind geprüft); Fokus-Falle im aufgeklappten Mobil-Menü (aktuell nur
-  Fokus-Verschiebung + Esc, kein echtes Trap); `alt`-Texte an nutzerseitig
-  hochgeladenen Logos/Profilbildern prüfen.
+- **Barrierefreiheit – Rest**: Durchgang abgeschlossen (v0.17.0 + v0.17.1).
+  Offen bleibt nur ein echter Screenreader-Test (VoiceOver/NVDA) an den
+  Kern-Workflows – das lässt sich nur manuell am Gerät machen, nicht im Code.
+  Optional später: Feld-genaue Fehlermeldungen (`aria-invalid` +
+  `aria-describedby` statt Sammel-Hinweis oben) – dafür müssten die
+  Controller wissen, welches Feld betroffen ist.
 
 - **SEO – Rest**: Grundausstattung erledigt (v0.16.0, siehe unten). Offen und
   erst sinnvoll, sobald es eine echte öffentliche Seite / White-Label-Landing
@@ -61,6 +61,15 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Barrierefreiheit, Abschluss (v0.17.1): Echte Fokus-Falle im aufgeklappten
+  Mobil-Menü (Tab/Shift+Tab bleiben im Menü inkl. Hamburger-Knopf, Esc
+  schließt). Inline-Links in Fließtext jetzt unterstrichen (WCAG 1.4.1 – vorher
+  nur per Farbe vom Text unterscheidbar, Farbe fast identisch). Deckender
+  Fokus-Ring auch auf Eingabefeldern bei Tastatur-Fokus (die Akzent-Aura
+  allein trug den 3:1-Kontrast nicht auf allen Themes). Platzhaltertext mit
+  `--color-muted` statt blassem Browser-Default. Fehlerhinweis nach
+  fehlgeschlagener Aktion bekommt den Fokus. Seitenleiste von `<aside>`
+  (irreführendes „complementary") zu `<div>`, `<nav aria-label="Hauptnavigation">`.
 - Barrierefreiheit, Grunddurchgang (v0.17.0): Skip-Link + `<main id="main">`,
   durchgehender `:focus-visible`-Ring (statt UA-Default / `outline: none`),
   `@media (prefers-reduced-motion)`. Live-Regionen: Toast (`role="status"`),

@@ -706,11 +706,41 @@ if (navToggle && pageSidebar) {
         el.addEventListener('click', () => setNavOpen(false));
     });
 
+    // Fokus im aufgeklappten Mobil-Menü halten (Tab-Falle). Der Hamburger-Knopf
+    // gehört mit zum Kreis, damit man ihn nicht „verliert".
+    const trapNavFocus = (event) => {
+        if (event.key !== 'Tab' || !document.body.classList.contains('nav-open')) {
+            return;
+        }
+
+        const focusables = [
+            navToggle,
+            ...pageSidebar.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+        ].filter((el) => el.offsetParent !== null || el === navToggle);
+
+        if (focusables.length === 0) {
+            return;
+        }
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+
+        if (event.shiftKey && (active === first || !focusables.includes(active))) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && active === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    };
+
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && document.body.classList.contains('nav-open')) {
             setNavOpen(false);
             navToggle.focus();
         }
+        trapNavFocus(event);
     });
 
     // Beim Wechsel auf Desktop-Breite den Overlay-Zustand zuruecksetzen.
@@ -719,6 +749,14 @@ if (navToggle && pageSidebar) {
             setNavOpen(false);
         }
     });
+}
+
+// Nach einer fehlgeschlagenen Aktion den Fehlerhinweis in den Fokus holen,
+// damit Screenreader ihn ansagen und Tastaturnutzer direkt dort sind.
+const errorFlash = document.querySelector('.content .flash-error');
+if (errorFlash) {
+    errorFlash.setAttribute('tabindex', '-1');
+    errorFlash.focus({ preventScroll: false });
 }
 
 // Generischer Kopieren-Knopf: [data-copy="#ziel"] kopiert den Wert/Text des Ziels.

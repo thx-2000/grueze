@@ -109,7 +109,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
     </div>
     <div class="nav-backdrop" hidden></div>
     <div class="page-shell">
-        <aside class="sidebar" id="pageSidebar">
+        <div class="sidebar" id="pageSidebar">
             <a class="sidebar-brand" href="<?= e(url('/')) ?>">
                 <?php if ($logoPath !== ''): ?>
                     <span class="brand-mark brand-mark-image">
@@ -134,7 +134,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                     || str_starts_with($currentPath, '/settings') || str_starts_with($currentPath, '/admin')
                     || str_starts_with($currentPath, '/users') || str_starts_with($currentPath, '/logs');
                 ?>
-                <nav class="nav">
+                <nav class="nav" aria-label="Hauptnavigation">
                     <?php if (($currentUser['role_name'] ?? '') === 'stufenmitglied' && $publicSiteUrl !== ''): ?>
                         <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= icon('globe') ?><span><?= e($publicSiteLabel !== '' ? $publicSiteLabel : 'Startseite') ?></span></a>
                     <?php endif; ?>
@@ -165,7 +165,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
-        </aside>
+        </div>
 
         <main class="content" id="main">
             <header class="content-topbar">

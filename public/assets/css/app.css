@@ -196,6 +196,23 @@ a {
     text-decoration: none;
 }
 
+/* Links in Fließtext dürfen sich nicht allein über die Farbe vom Text
+   unterscheiden (WCAG 1.4.1) – daher hier unterstrichen. Buttons, Nav und
+   Karten-Links (eigene Klassen) bleiben ausgenommen. */
+.content p a:not([class]),
+.content li a:not([class]),
+.field-hint a,
+.detail-hint a,
+.legal-copy a,
+.link-row a,
+.site-footer a,
+.flash a,
+.workflow-list a,
+.compact-help-list a {
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+}
+
 small {
     display: block;
 }
@@ -296,6 +313,21 @@ textarea:focus {
     outline: none;
     border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 24%, transparent);
+}
+
+/* Bei Tastatur-Fokus zusätzlich ein deckender Ring – die Akzent-Aura allein
+   trägt auf manchen Themes den 3:1-Kontrast (WCAG 1.4.11) nicht. */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+}
+
+/* Platzhaltertext mit ausreichendem Kontrast (Browser-Default ist oft zu blass). */
+::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
 }
 
 /* Häkchen, Radios und Slider in Themefarbe – sonst OS-Standardblau. */

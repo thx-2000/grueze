@@ -98,7 +98,7 @@ foreach (['color_primary' => '--color-on-primary', 'color_danger' => '--color-on
         </div>
     </form>
 
-    <aside class="theme-preview-shell">
+    <aside class="theme-preview-shell" aria-label="Live-Vorschau des Themes">
         <div class="theme-preview" id="themePreview" style="<?= e($previewStyle) ?>">
             <div class="theme-preview-bar">
                 <strong><?= e($theme['name']) ?></strong>
