@@ -66,5 +66,20 @@ abgeleiteter Standardtext verwendet.
 
 Ein neuer Upload darf vorhandene Daten nie überschreiben. Instanzspezifische
 Werte liegen in `app_settings` (Branding, Rechtstexte, Mail-Vorlagen) und in
-`config/config.php` – beide werden vom Deploy nicht angefasst. Nach dem Upload
-`/admin/migrations` aufrufen; die Migrationen sind additiv und idempotent.
+`config/config.php` – beide werden vom Deploy nicht angefasst.
+
+Ablauf:
+
+1. Neue Dateien hochladen (`bash scripts/deploy.sh` oder per FTP; `config/config.php`
+   und `storage/` bleiben unberührt).
+2. In der App **Verwaltung → Aktualisieren** öffnen. Steht ein Update aus,
+   erscheint dort (und als Hinweisstreifen oben) die Liste der offenen
+   Migrationen.
+3. **Jetzt aktualisieren** klicken. Die Checkbox „Vorher eine Datensicherung
+   anlegen" ist standardmäßig an – das ZIP landet unter `storage/backups/`
+   (die letzten drei bleiben liegen). Alle Migrationen laufen der Reihe nach,
+   danach wird die Version vermerkt und ein Protokolleintrag geschrieben.
+
+Migrationen sind additiv und idempotent. Wer den Schritt ganz automatisieren
+will, setzt `app.auto_migrate` in der config auf `true` – dann laufen offene
+Migrationen beim ersten Request nach dem Upload selbst (ohne Sicherung).

@@ -17,7 +17,7 @@ $groups = [
     ],
     'System' => [
         ['users.manage', '/admin/backup', 'archive', 'Datensicherung', 'Voll-Backup herunterladen oder wiederherstellen.'],
-        ['users.manage', '/admin/migrations', 'history', 'Migrationen', 'Stand der Datenbank-Migrationen einsehen.'],
+        ['users.manage', '/admin/aktualisieren', 'upload', 'Aktualisieren', 'Nach einem Upload die Datenbank auf den neuen Stand bringen.'],
         ['audit.view', '/logs/audit', 'history', 'Änderungsprotokoll', 'Wer hat wann welchen Kontakt geändert.'],
         ['mail.view_log', '/logs/mail', 'mail', 'Versandprotokoll', 'Welche Mails wurden verschickt, was schlug fehl.'],
     ],

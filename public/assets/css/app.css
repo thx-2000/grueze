@@ -2037,6 +2037,77 @@ td {
     color: var(--color-danger);
 }
 
+/* ---- Update-/Aktualisieren-Bereich ---- */
+
+.update-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.7rem 0.95rem;
+    border-radius: var(--radius-md);
+    background: var(--accent-veil);
+    border: 1px solid var(--accent-edge);
+    font-weight: 600;
+}
+
+.update-banner span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.update-banner .button-link {
+    padding: 0.5rem 0.9rem;
+    flex: 0 0 auto;
+}
+
+.version-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 999px;
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
+    font-family: var(--font-display);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.version-badge-to {
+    color: var(--color-primary-strong);
+}
+
+.update-migration-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.update-migration-list li {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-sunken);
+}
+
+.changelog-block {
+    margin: 0;
+    padding: 0.9rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-sunken);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
 .site-footer {
     padding: 1rem 0 2rem;
     color: var(--color-muted);

@@ -13,6 +13,10 @@ return [
         'session_timeout' => 1800,
         'force_https' => true,
         'debug' => false,
+        // Offene DB-Migrationen nach einem Upload automatisch anwenden. Standard
+        // aus: im Normalfall macht das ein Admin bewusst über
+        // "Verwaltung → Aktualisieren" (dort mit optionaler Vorab-Sicherung).
+        'auto_migrate' => false,
     ],
 
     // Startwerte für Name, Links und Texte. Auflösung: Admin-Oberfläche

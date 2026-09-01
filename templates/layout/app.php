@@ -174,6 +174,12 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                     <p class="topbar-title"><a href="<?= e(url('/')) ?>"><?= e($appName) ?></a></p>
                 </div>
             </header>
+            <?php if (!empty($currentUser) && can('users.manage') && $currentPath !== '/admin/aktualisieren' && system_update_pending()): ?>
+                <div class="update-banner" role="status">
+                    <span><?= icon('upload') ?> Nach dem letzten Upload steht noch ein Datenbank-Update aus.</span>
+                    <a class="button-link" href="<?= e(url('/admin/aktualisieren')) ?>">Jetzt aktualisieren</a>
+                </div>
+            <?php endif; ?>
             <?php foreach ($flashes as $type => $message): ?>
                 <?php if ($message): ?>
                     <div class="flash flash-<?= e($type) ?>" role="<?= $type === 'error' ? 'alert' : 'status' ?>"><?= e($message) ?></div>

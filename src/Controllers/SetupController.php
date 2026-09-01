@@ -88,6 +88,9 @@ final class SetupController extends BaseController
             $this->settings->set('active_theme', ThemeService::FALLBACK_SLUG);
         }
 
+        // Ausgangsversion festhalten – damit spätere Uploads als Update erkannt werden.
+        $this->settings->set('app_version', system_version());
+
         flash('success', 'Das erste Admin-Konto wurde angelegt. Du kannst dich jetzt anmelden.');
         Redirect::to('/login');
     }

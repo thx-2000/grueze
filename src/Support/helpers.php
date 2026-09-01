@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.17.1';
+    return '0.18.0';
 }
 
 function system_label(): string
@@ -261,6 +261,20 @@ function system_label(): string
 function product_url(): string
 {
     return trim(branding_default('product_url', 'https://github.com/thx-2000/grueze'));
+}
+
+/**
+ * Steht nach einem Datei-Upload noch ein DB-Update aus? Nur für den
+ * Admin-Hinweisstreifen im Layout gedacht; Fehler (z. B. DB nicht erreichbar)
+ * werden geschluckt.
+ */
+function system_update_pending(): bool
+{
+    try {
+        return App\Core\Container::get(App\Services\UpdateService::class)->updatePending();
+    } catch (Throwable) {
+        return false;
+    }
 }
 
 /**

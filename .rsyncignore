@@ -10,6 +10,9 @@ config/config.php
 storage/tmp/*
 !storage/tmp/.gitkeep
 !storage/tmp/.htaccess
+storage/backups/*
+!storage/backups/.gitkeep
+!storage/backups/.htaccess
 public/assets/uploads/*
 !public/assets/uploads/.gitkeep
 !public/assets/uploads/.htaccess

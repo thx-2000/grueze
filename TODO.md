@@ -52,15 +52,27 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
    administrierbar machen.
 4. Admin-Einstellungsbereich weiter strukturieren (Branding / Mail-Versand /
    Sichtbarkeiten-Rollen / ggf. System-Backup später).
-5. Vorbereitung für neutrale Distribution: Installer-Konzept,
-   Update-Konzept. (Backup/Restore erledigt in v0.4.0; konfigurierbare
-   Startwerte + Setup-Doku erledigt in v0.12.0.)
-6. Update-Konzept: wie kommt eine bestehende Instanz sauber auf eine neue
-   Version (Migrationen anwenden ist manuell – reicht das, oder braucht es
-   einen „Jetzt aktualisieren"-Knopf?).
+5. Vorbereitung für neutrale Distribution: Installer-Konzept.
+   (Backup/Restore erledigt in v0.4.0; konfigurierbare Startwerte + Setup-Doku
+   erledigt in v0.12.0; Update-Konzept erledigt in v0.18.0.)
+6. Update-Konzept: **erledigt in v0.18.0** – „Verwaltung → Aktualisieren"
+   wendet offene Migrationen per Klick an, mit optionaler Vorab-Sicherung,
+   Versionsanzeige und Admin-Hinweisstreifen. Optional `app.auto_migrate`.
 
 ## Erledigt
 
+- Update-Konzept (v0.18.0): Neue Seite **Verwaltung → Aktualisieren**
+  (`/admin/aktualisieren`, löst die alte „Migrationen"-Seite ab). Zeigt
+  installierte vs. Code-Version (`app_settings.app_version`), „Zuletzt
+  aktualisiert", offene Migrationen mit Kurzbeschreibung (erste `--`-Zeile der
+  `.sql`) und einen **„Jetzt aktualisieren"-Knopf**: optionale Vorab-Sicherung
+  nach `storage/backups/` (letzte 3 bleiben), dann alle offenen Migrationen
+  der Reihe nach, Version + Zeitstempel setzen. Datei-Lock gegen Doppel-Läufe.
+  Admin-Hinweisstreifen im Layout, wenn ein Update aussteht. Einzelanwendung
+  bleibt als Fallback (eingeklappt). Optional `config('app.auto_migrate')`
+  (Standard aus) wendet offene Migrationen beim ersten Request nach dem Upload
+  automatisch an. Neu: `CHANGELOG.md`, wird auf der Seite ausschnittsweise
+  angezeigt. `MigrationService`/`UpdateService` sauber getrennt.
 - Barrierefreiheit, Abschluss (v0.17.1): Echte Fokus-Falle im aufgeklappten
   Mobil-Menü (Tab/Shift+Tab bleiben im Menü inkl. Hamburger-Knopf, Esc
   schließt). Inline-Links in Fließtext jetzt unterstrichen (WCAG 1.4.1 – vorher

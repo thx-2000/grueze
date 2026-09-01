@@ -43,8 +43,10 @@ Das Skript synchronisiert das Projekt per `rsync` auf den Server und schließt s
 
 - `config/config.php`
 - Upload-Inhalte
-- temporäre Dateien
+- temporäre Dateien und `storage/backups/`
 - Git-Metadaten
+
+Nach dem Upload in der App **Verwaltung → Aktualisieren** öffnen und *Jetzt aktualisieren* klicken – das wendet offene Datenbank-Migrationen an und legt vorher eine Sicherung an. Details: [docs/NEUE-INSTANZ.md](docs/NEUE-INSTANZ.md).
 
 ## Wichtige Ordner
 

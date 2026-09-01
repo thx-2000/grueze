@@ -12,4 +12,7 @@
 /storage/tmp/*
 !/storage/tmp/.htaccess
 !/storage/tmp/.gitkeep
+/storage/backups/*
+!/storage/backups/.gitkeep
+!/storage/backups/.htaccess
 scripts/deploy.env

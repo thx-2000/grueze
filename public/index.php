@@ -41,6 +41,7 @@ use App\Services\MailService;
 use App\Services\MigrationService;
 use App\Services\PasswordResetService;
 use App\Services\ThemeService;
+use App\Services\UpdateService;
 use App\Services\UploadService;
 use App\Services\WebAuthnService;
 use App\Services\XlsxReader;
@@ -120,9 +121,15 @@ try {
     Container::factory(WebAuthnService::class, static fn () => new WebAuthnService());
     Container::factory(MigrationService::class, static fn () => new MigrationService(Container::get(PDO::class)));
     Container::factory(BackupService::class, static fn () => new BackupService(Container::get(PDO::class)));
+    Container::factory(UpdateService::class, static fn () => new UpdateService(
+        Container::get(SettingRepository::class),
+        Container::get(MigrationService::class),
+        Container::get(BackupService::class)
+    ));
     Container::factory(AdminController::class, static fn () => new AdminController(
         Container::get(Auth::class),
-        Container::get(MigrationService::class)
+        Container::get(MigrationService::class),
+        Container::get(UpdateService::class)
     ));
     Container::factory(BackupController::class, static fn () => new BackupController(
         Container::get(Auth::class),
@@ -217,6 +224,16 @@ try {
         Container::get(UserRepository::class)
     ));
 
+    // Optional: offene Migrationen beim ersten Request nach einem Upload selbst
+    // anwenden. Standard aus – im Normalfall macht das ein Admin bewusst über
+    // "Verwaltung → Aktualisieren" (mit Backup).
+    if ((bool) config('app.auto_migrate', false)) {
+        $updateService = Container::get(UpdateService::class);
+        if ($updateService->updatePending() && !$updateService->locked()) {
+            $updateService->run(false);
+        }
+    }
+
     $router = new Router();
     $router->get('/', [StartController::class, 'index']);
     $router->get('/kontakte', [ContactController::class, 'index']);
@@ -285,6 +302,8 @@ try {
     $router->get('/mail/status', [MailController::class, 'status']);
     $router->post('/mail/batch', [MailController::class, 'batch']);
 
+    $router->get('/admin/aktualisieren', [AdminController::class, 'update']);
+    $router->post('/admin/aktualisieren', [AdminController::class, 'runUpdate']);
     $router->get('/admin/migrations', [AdminController::class, 'migrations']);
     $router->post('/admin/migrations/apply', [AdminController::class, 'applyMigration']);
     $router->get('/admin/backup', [BackupController::class, 'index']);
