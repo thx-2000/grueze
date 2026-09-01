@@ -1,10 +1,9 @@
 # Neue Instanz aufsetzen (White-Label)
 
 Das Produkt heißt **GRUEZE** (Grüß-Zentrale). Jede Installation ist eine
-**Instanz** davon und bekommt einen eigenen Namen (bei uns: „GRUEZE
-Adress-Zentrale"). Eine frische Installation startet markenneutral mit
-generischen Texten und dem Theme `hell`; alles Instanzspezifische wird
-danach eingestellt, nicht im Code geändert.
+**Instanz** davon und bekommt einen eigenen Namen. Eine frische Installation
+startet markenneutral mit generischen Texten und dem Theme `hell`; alles
+Instanzspezifische wird danach eingestellt, nicht im Code geändert.
 
 Der Produktname GRUEZE bleibt sichtbar (Footer, Seitenleiste „läuft mit
 GRUEZE"). Nur wer das Produkt selbst umlabeln will, setzt
@@ -63,9 +62,9 @@ Verwaltung → Mail-Einstellungen: Absender/Mailserver, Betreff-Präfixe und der
 Mail-Fuß. Bleibt der Mail-Fuß leer, wird ein knapper, aus dem Branding
 abgeleiteter Standardtext verwendet.
 
-## Hinweis zur Instanz
+## Bestehende Instanz aktualisieren
 
-Die laufende Instanz zieht ihre Werte aus `app_settings` (per Migration
-`2026-09-01-white-label-seed` gesichert) bzw. aus
-`config/config.production-template.php`. Sie ist damit ein normaler
-White-Label-Fall – nichts am Code ist auf sie zugeschnitten.
+Ein neuer Upload darf vorhandene Daten nie überschreiben. Instanzspezifische
+Werte liegen in `app_settings` (Branding, Rechtstexte, Mail-Vorlagen) und in
+`config/config.php` – beide werden vom Deploy nicht angefasst. Nach dem Upload
+`/admin/migrations` aufrufen; die Migrationen sind additiv und idempotent.

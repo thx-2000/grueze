@@ -12,7 +12,7 @@ final class Session
             return;
         }
 
-        session_name((string) Config::get('app.session_name', 'abi_app'));
+        session_name((string) Config::get('app.session_name', 'grueze_session'));
         session_set_cookie_params([
             'lifetime' => 0,
             'path' => '/',

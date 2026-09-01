@@ -5,5 +5,5 @@ cd "$ROOT_DIR"
 docker compose up -d --build
 echo ""
 echo "App:      http://localhost:8095"
-echo "Adminer:  http://localhost:8096  (System: MySQL, Server: db, Benutzer: abi_user, Passwort: abi_local_pw, Datenbank: abi_adress_zentrale)"
+echo "Adminer:  http://localhost:8096  (System: MySQL, Server: db, Benutzer: grueze_user, Passwort: grueze_dev_pw, Datenbank: grueze)"
 echo "Erster Admin: http://localhost:8095/setup/admin"

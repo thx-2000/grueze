@@ -1,13 +1,13 @@
 # GRUEZE
 
-**GRUEZE** (Grüß-Zentrale) ist eine mobile-first PHP-Web-App für Adress-, Kontakt- und Mailing-Verwaltung – mit Rollen, CSV-Export, Copy-to-Clipboard, Audit-Log und personalisiertem Mailversand. Sie ist White-Label-fähig: jede Installation ist eine eigene **Instanz** mit eigenem Namen. Die Instanz „Adress-Zentrale" läuft unter `example.org`.
+**GRUEZE** (Grüß-Zentrale) ist eine mobile-first PHP-Web-App für Adress-, Kontakt- und Mailing-Verwaltung – mit Rollen, CSV-Export, Copy-to-Clipboard, Audit-Log und personalisiertem Mailversand. Sie ist White-Label-fähig: jede Installation ist eine eigene **Instanz** mit eigenem Namen, Branding und Theme.
 
 Eine neue Instanz aufsetzen: siehe **[docs/NEUE-INSTANZ.md](docs/NEUE-INSTANZ.md)**.
 
 ## Setup
 
 1. Webspace so konfigurieren, dass `public/` der Webroot ist.
-2. `config/config.example.php` oder `config/config.production-template.php` nach `config/config.php` kopieren und Datenbank, Basis-URL sowie SMTP-Zugangsdaten eintragen.
+2. `config/config.example.php` nach `config/config.php` kopieren und Datenbank, Basis-URL sowie SMTP-Zugangsdaten eintragen.
 3. `database/schema.sql` in die MySQL- oder MariaDB-Datenbank importieren.
 4. Per Composer `phpmailer/phpmailer` installieren, wenn SMTP-Versand genutzt werden soll. Ohne PHPMailer fällt die App auf `mail()` zurück.
 5. Sicherstellen, dass `public/assets/uploads/` und `storage/tmp/` beschreibbar sind.
@@ -17,7 +17,7 @@ Eine neue Instanz aufsetzen: siehe **[docs/NEUE-INSTANZ.md](docs/NEUE-INSTANZ.md
 
 Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufrufen. Dort lässt sich genau ein erstes Admin-Konto über die Anwendung anlegen, solange noch kein Admin existiert.
 
-## Hinweise für all-inkl
+## Hinweise für Shared Hosting
 
 - Die Anwendung ist für Shared Hosting mit klassischem PHP ohne Build-Prozess aufgebaut.
 - Für SMTP über PHPMailer muss auf dem Server `vendor/autoload.php` vorhanden sein. Die App bindet diese Datei automatisch ein, sobald Composer-Dependencies installiert wurden.
@@ -26,14 +26,12 @@ Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufr
 
 ## Deploy per rsync
 
-Für den Upload auf den all-inkl-Webspace liegt ein Skript unter `scripts/deploy.sh` bereit.
+Für den Upload auf einen Webspace liegt ein Skript unter `scripts/deploy.sh` bereit.
 
 Voraussetzungen:
 
 - SSH-Zugang ist lokal eingerichtet
-- Zielserver: `example.org`
-- SSH-User: `ssh-user`
-- Zielpfad: `/pfad/zum/webroot`
+- `scripts/deploy.env.example` nach `scripts/deploy.env` kopieren und `REMOTE_HOST`, `REMOTE_USER` und `REMOTE_PATH` eintragen (die Datei bleibt lokal, sie ist per `.gitignore` ausgeschlossen)
 
 Aufruf:
 

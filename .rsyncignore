@@ -7,11 +7,10 @@
 OPEN_TERMINAL_API_KEY
 WEBUI_SECRET_KEY
 config/config.php
-config/config.production-template.php
 storage/tmp/*
 !storage/tmp/.gitkeep
 !storage/tmp/.htaccess
 public/assets/uploads/*
 !public/assets/uploads/.gitkeep
 !public/assets/uploads/.htaccess
-
+scripts/deploy.env

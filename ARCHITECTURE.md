@@ -54,13 +54,13 @@ Zwei feste Regeln für alle künftigen Änderungen:
 
 2. **Bestandsdaten dürfen bei einem Upload nie kaputtgehen.** Wenn ein
    Code-Default neutralisiert wird, sichert vorher eine Migration die alten
-   Werte per `INSERT IGNORE` in `app_settings` (Beispiel:
-   `2026-09-01-white-label-seed`). Neue Tabellen werden zusätzlich lazy per
-   `CREATE TABLE IF NOT EXISTS` im Repository angelegt, damit ein Feature auch
-   vor der Migration trägt. Umbenennungen bekommen einen Alias im Code für das
-   Fenster zwischen Deploy und Migration (Beispiel: alter Theme-Slug `signalfarbe`
-   → `signalfarbe` in `ThemeService::activeSlug()`). Migrationen sind additiv
-   und idempotent; `app_settings`-Werte, die schon existieren, bleiben unberührt.
+   Werte per `INSERT IGNORE` in `app_settings`. Neue Tabellen werden zusätzlich
+   lazy per `CREATE TABLE IF NOT EXISTS` im Repository angelegt, damit ein
+   Feature auch vor der Migration trägt. Umbenennungen (Slugs, Setting-Keys)
+   bekommen für das Fenster zwischen Deploy und Migration einen Alias im Code
+   und eine `UPDATE`-Migration, die den alten Wert mitzieht. Migrationen sind
+   additiv und idempotent; `app_settings`-Werte, die schon existieren, bleiben
+   unberührt.
 
 ## Sicherheitsentscheidungen
 

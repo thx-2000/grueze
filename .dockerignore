@@ -7,4 +7,5 @@ public/assets/uploads/*
 !public/assets/uploads/.gitkeep
 !public/assets/uploads/.htaccess
 config/config.php
+scripts/deploy.env
 vendor

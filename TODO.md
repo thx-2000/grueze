@@ -1,6 +1,6 @@
 # Offene Punkte / Backlog
 
-Laufende Sammlung offener Ideen und Aufgaben für die Adress-Zentrale.
+Laufende Sammlung offener Ideen und Aufgaben für GRUEZE.
 Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
@@ -62,17 +62,26 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
-- Tooling-Spuren entfernt (v0.14.1): `CLAUDE_HANDOFF_PROMPT.md` gelöscht
-  (Inhalt war veraltet, die noch nützlichen Punkte stehen jetzt in
-  `ARCHITECTURE.md` → „Weiterarbeit"), `.rsyncignore`-Eintrag entfernt,
-  Commit-Historie um die Co-Authored-By-Zeilen bereinigt (force-push).
+- Distribution vorbereitet (v0.15.0): Instanz- und serverspezifische Reste
+  aus Repo, Doku und History entfernt – Deploy-Ziel kommt jetzt aus
+  `scripts/deploy.env` (lokal, nicht im Repo; Vorlage `deploy.env.example`),
+  `config.production-template.php` und die instanzspezifischen Seed-/Rename-
+  Migrationen sind raus, Docker-Namen (`grueze_*`, DB `grueze`) und
+  `localStorage`-Schlüssel (`grueze_*`) vereinheitlicht, Session-Default-Name
+  `grueze_session`, README/ARCHITECTURE/docs markenneutral.
+  **Lokale Dev-Umgebung:** einmalig `bash scripts/docker-down.sh` mit
+  Volume-Reset und `config/config.php` auf DB `grueze` / User `grueze_user`
+  umstellen, dann neu hochfahren.
+- Projektunterlagen aufgeräumt (v0.14.1): veraltetes Übergabe-Dokument
+  gelöscht (nützliche Punkte jetzt in `ARCHITECTURE.md` → „Weiterarbeit"),
+  `.rsyncignore` bereinigt, Commit-Historie geglättet (force-push).
 - GRUEZE als Produktname + Repo-Umbenennung (v0.14.0): GRUEZE ist der
   Produktname (nicht Instanz-Branding) und bleibt auch im White-Label
   sichtbar – im Footer (`GRUEZE v0.14.0`, jetzt ohne den Punkt hinter dem v,
   wie der GitHub-Tag) und dezent in der Seitenleiste („läuft mit GRUEZE",
   Link auf `product_url`). `system_label` ist wieder ein reiner config-Wert
   (Default `GRUEZE`), kein Branding-Feld mehr; „Footer-Kürzel" aus der
-  Branding-Seite entfernt. GitHub-Repo `grueze` → `grueze`.
+  Branding-Seite entfernt. GitHub-Repo auf `grueze` umbenannt.
   Neue Prinzipien-Sektion in `ARCHITECTURE.md`: White-Label zuerst denken,
   Bestandsdaten bei einem Upload nie kaputt.
 - Gespeicherte Empfängerlisten (v0.13.0): Eine benannte Momentaufnahme einer
@@ -91,32 +100,30 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   waren übermäßig hoch. `align-content: start` stellt das ab.
 - White-Label abgeschlossen (v0.12.0): Die Code-Defaults sind jetzt neutral
   („Adress-Zentrale", „Interner Bereich", `[Verteiler]`, Rechtstext-Gerüst,
-  knapper Mail-Fuß). Die bisherigen Instanzwerte (Branding, `system_label`,
+  knapper Mail-Fuß). Bestehende Instanzwerte (Branding, `system_label`,
   Login-Überschrift, Impressum, Datenschutzerklärung, Mail-Fuß,
-  Betreff-Präfix) sichert die Migration `2026-09-01-white-label-seed` per
-  `INSERT IGNORE` in `app_settings` – die laufende Instanz bleibt nach dem
-  Anwenden identisch. Neu: Branding-Felder „Login-Überschrift" und
-  „Footer-Kürzel"; `system_label` jetzt über die Oberfläche pflegbar (leer =
-  nur Version im Footer). `config.example.php` komplett neutral,
-  `config.production-template.php` als GRUEZE-Referenz. Anleitung:
-  `docs/NEUE-INSTANZ.md`. **Auf Prod die Migration direkt nach dem Deploy
-  anwenden** (bis dahin zeigt die Instanz kurz die neutralen Defaults).
+  Betreff-Präfix) sichert eine Seed-Migration per `INSERT IGNORE` in
+  `app_settings` – die laufende Instanz bleibt nach dem Anwenden identisch.
+  Neu: Branding-Felder „Login-Überschrift" und „Footer-Kürzel";
+  `system_label` jetzt über die Oberfläche pflegbar (leer = nur Version im
+  Footer). `config.example.php` komplett neutral. Anleitung:
+  `docs/NEUE-INSTANZ.md`. **Nach dem Deploy die Migration direkt anwenden**
+  (bis dahin zeigen bestehende Instanzen kurz die neutralen Defaults).
 - Toter Asset-Baum entfernt (v0.11.4): Der nicht ausgelieferte Top-Level-Ordner
   `assets/` (veraltete `css/`, `js/`, leeres `uploads/`) ist gelöscht. Ausgeliefert
   wird ausschließlich `public/assets/`; `asset_url()` löst ohnehin immer gegen
   `public/` auf. `.gitignore`, `.rsyncignore` und `.dockerignore` von den
   `assets/uploads/*`-Regeln bereinigt (die `public/assets/uploads/*`-Regeln
   bleiben). README-Ordnerliste auf `public/assets/…` korrigiert.
-- Mitgeliefertes Theme „grueze" → „Signalfarbe" (v0.11.3): Das Datei-Theme
-  `themes/signalfarbe.php` heißt jetzt `themes/signalfarbe.php` / „Signalfarbe" –
-  „GRUEZE" ist ein instanzspezifischer Name und gehört nicht in die neutrale
-  Distribution. Look identisch (gleiche Token-Werte). Migration
-  `2026-09-01-theme-signalfarbe` zieht `active_theme` von `signalfarbe` auf
-  `signalfarbe`; ein Alt-Slug-Alias in `ThemeService::activeSlug()` fängt das
-  Fenster zwischen Deploy und Migration ab. Wer den Namen „GRUEZE" in der
-  Oberfläche will: „Signalfarbe" kopieren, Kopie „GRUEZE" nennen, aktivieren.
+- Mitgeliefertes Theme neutral benannt (v0.11.3): Das Datei-Theme heißt jetzt
+  `themes/signalfarbe.php` / „Signalfarbe" (vorher ein instanzspezifischer
+  Name, der nicht in die neutrale Distribution gehört). Look identisch
+  (gleiche Token-Werte). Eine Rename-Migration zog `active_theme` bestehender
+  Instanzen mit; ein Alt-Slug-Alias fing das Fenster zwischen Deploy und
+  Migration ab (beide in v0.15.0 wieder entfernt, weil abgeschlossen). Wer
+  einen eigenen Namen will: „Signalfarbe" kopieren, umbenennen, aktivieren.
 - Theme-Bearbeiten auffindbar (v0.11.1): Auf jeder Theme-Kachel gibt es jetzt
-  einen sichtbaren Bearbeiten-Zugang. Bei den Vorlagen (grueze/hell/dunkel)
+  einen sichtbaren Bearbeiten-Zugang. Bei den Vorlagen (signalfarbe/hell/dunkel)
   heißt der Knopf „Kopieren & bearbeiten" (legt eine Kopie an und öffnet den
   Editor); eigene Themes haben „Bearbeiten". Vorher zeigte nur „Duplizieren"
   auf den Editor – ohne dass das erkennbar war. Intro-Text entsprechend
@@ -140,8 +147,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 - Dunkel-Theme Nachkontrolle (v0.10.1): Kompletter Seitendurchgang mit aktivem
   Dunkel-Theme. Gefunden und behoben: Häkchen, Radios und Slider zogen sich
   das OS-Standardblau (auf dem Rundmail-Empfängerdialog gut sichtbar) – jetzt
-  global `accent-color: var(--color-secondary)` (grueze Bernstein, hell Petrol,
-  dunkel Hellblau). Rest (Login, Start, Kontaktliste + Blickschutz, Rundmail,
+  global `accent-color: var(--color-secondary)` (signalfarbe Bernstein, hell
+  Petrol, dunkel Hellblau). Rest (Login, Start, Kontaktliste + Blickschutz, Rundmail,
   Verwaltung, Theme-Editor, Mobil-Menü) auf Dunkel geprüft und in Ordnung.
 - Dunkles Theme + Feinschliff (v0.10.0): Mitgeliefertes Datei-Theme
   `dunkel.php` (warmneutrale Dunkelfläche, Bernstein-Akzent). Beim Durchgehen
@@ -168,15 +175,16 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   „Themes" (`/settings/themes`): Kachelübersicht mit Farbstreifen, aktives
   Theme wechseln, duplizieren, eigene Themes bearbeiten (gruppierter
   Token-Editor mit Farbvorschau), umbenennen, löschen. Datei-Themes im Ordner
-  `themes/` (`grueze.php`, `hell.php`) bieten sich automatisch als Vorlage an;
-  Doku in `themes/README.md`. Der bisherige Look heißt jetzt **GRUEZE**, neuer
-  Standard für frische Installationen ist **Hell** (viel Weiß, Orange-Akzent).
+  `themes/` (`signalfarbe.php`, `hell.php`) bieten sich automatisch als Vorlage
+  an; Doku in `themes/README.md`. Der bisherige Look heißt jetzt
+  **Signalfarbe**, neuer Standard für frische Installationen ist **Hell**
+  (viel Weiß, Orange-Akzent).
   „Design & Branding" ist in **Branding** (Name/Texte/Logo) und **Themes**
   aufgeteilt; die alten Farb-/Font-Felder auf der Branding-Seite sind weg.
   `app.css` in den sichtbaren Kern-Elementen (Buttons, Text, Links, Fokus,
-  Umschalter, Kopfleiste) auf Tokens umgestellt. Laufende Instanz bleibt
+  Umschalter, Kopfleiste) auf Tokens umgestellt. Bestehende Instanzen bleiben
   optisch unverändert (aktives Theme = `signalfarbe`).
-  **Auf Prod unter Verwaltung → Migrationen `2026-08-31-themes` anwenden.**
+  **Nach dem Deploy unter Verwaltung → Migrationen `2026-08-31-themes` anwenden.**
 - Namensliste erweitert (v0.7.2): Filter „nur ohne Mailadresse" / „nur ohne
   Handynummer" (die Namensliste ist damit auch die Lückenliste). Versand jetzt
   zweistufig: „Als Rundmail an eine Gruppe" reicht die Liste als
@@ -218,7 +226,7 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   Schreiben-Dialog. „Neue Mail an alle" aus dem Signalbalken entfernt (jetzt
   über Rundmail → „Alle mit Mailadresse").
 - BUG behoben (v0.5.4): Kontakt mit `mailto:`-Präfix in der Adresse (Alt-
-  Importdaten, z. B. Vorname Nachname) ließ sich nicht speichern – das
+  Importdaten) ließ sich nicht speichern – das
   `<input type="email">` blockte das Absenden ohne sichtbare Meldung.
   Fix: E-Mail-Felder im Kontaktformular auf `type="text" inputmode="email"`,
   `mailto:`/`tel:`-Präfixe werden beim Speichern automatisch entfernt, und die
@@ -252,11 +260,9 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   optional abwählbar. Merge-Modus noch offen (siehe Backlog).
 - White-Label-Vorbereitung, Schritt 1 (v0.3.1): Branding-Standardwerte
   (Name, Kurzname, Links, Support-Mail, Login-/Sidebar-Texte, `system_label`
-  „GRUEZE") kommen jetzt über `config('branding.*')` mit Instanzwerten als
-  eingebautem Fallback. Dokumentierte `branding`-Sektion in
-  `config/config.example.php` und `config.production-template.php`.
-  Hartcodierte `kontakt@example.org`- und `[Verteiler]`-Fallbacks in Templates entfernt.
-  Instanz unverändert (ihre config hat keine `branding`-Sektion).
+  „GRUEZE") kommen jetzt über `config('branding.*')` mit eingebautem Fallback.
+  Dokumentierte `branding`-Sektion in `config/config.example.php`.
+  Hartcodierte instanzspezifische Mail-/Präfix-Fallbacks in Templates entfernt.
 - Blickschutz-Knopf (v0.3.0): clientseitiger Toggle im Signalbalken, der alle
   personenbezogenen Kontaktfelder (E-Mail, Telefon, Adresse, Geburtstag,
   Notizen, verknüpfte Login-Mail) in Liste, Karten, Suche und Empfängerliste

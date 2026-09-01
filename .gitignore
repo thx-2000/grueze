@@ -12,3 +12,4 @@
 /storage/tmp/*
 !/storage/tmp/.htaccess
 !/storage/tmp/.gitkeep
+scripts/deploy.env

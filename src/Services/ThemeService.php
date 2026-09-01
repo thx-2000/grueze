@@ -163,12 +163,6 @@ final class ThemeService
             $slug = self::UNSET_DEFAULT_SLUG;
         }
 
-        // Alt-Slug "signalfarbe" -> "signalfarbe" (Datei umbenannt). Fängt das
-        // Fenster zwischen Deploy und Migration 2026-09-01 ab.
-        if ($slug === 'signalfarbe' && !isset($all['signalfarbe']) && isset($all['signalfarbe'])) {
-            $slug = 'signalfarbe';
-        }
-
         if (isset($all[$slug])) {
             return $slug;
         }

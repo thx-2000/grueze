@@ -1,11 +1,10 @@
 # Lokale Docker-Testumgebung
 
-Bildet den all-inkl-KAS-Produktivstand (`example.org`) möglichst nah
-nach, damit sich Änderungen vor dem Deploy per `scripts/deploy.sh` lokal
-prüfen lassen. Exakte Server-Versionen sind ohne KAS-Zugriff nicht zu
-verifizieren; die Werte unten sind eine begründete Annäherung (siehe unten)
-und lassen sich in `docker/Dockerfile` / `docker-compose.yml` anpassen,
-sobald der tatsächliche KAS-Stand bekannt ist.
+Bildet einen typischen Shared-Hosting-Produktivstand möglichst nah nach,
+damit sich Änderungen vor dem Deploy per `scripts/deploy.sh` lokal prüfen
+lassen. Die Werte unten sind eine begründete Annäherung an gängige
+all-inkl-/KAS-Umgebungen und lassen sich in `docker/Dockerfile` /
+`docker-compose.yml` an den eigenen Hoster anpassen.
 
 - **PHP 8.2** mit Apache/mod_php (klassisches Shared-Hosting-Setup, kein
   PHP-FPM), `public/` als Document Root, `.htaccess`/`mod_rewrite` aktiv.
@@ -36,8 +35,8 @@ Nach dem Start:
 - App: http://localhost:8095
 - Ersten Admin anlegen: http://localhost:8095/setup/admin
 - Adminer (DB-Ansicht): http://localhost:8096
-  (System: MySQL, Server: `db`, Benutzer: `abi_user`, Passwort: `abi_local_pw`,
-  Datenbank: `abi_adress_zentrale`)
+  (System: MySQL, Server: `db`, Benutzer: `grueze_user`, Passwort: `grueze_dev_pw`,
+  Datenbank: `grueze`)
 
 Die lokale `config/config.php` (nicht versioniert, siehe `.gitignore`) zeigt
 auf diese Container und ist bereits fertig eingerichtet

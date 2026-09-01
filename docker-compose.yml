@@ -4,10 +4,10 @@ services:
     container_name: grueze_db
     restart: "no"
     environment:
-      MYSQL_DATABASE: abi_adress_zentrale
-      MYSQL_USER: abi_user
-      MYSQL_PASSWORD: abi_local_pw
-      MYSQL_ROOT_PASSWORD: abi_root_pw
+      MYSQL_DATABASE: grueze
+      MYSQL_USER: grueze_user
+      MYSQL_PASSWORD: grueze_dev_pw
+      MYSQL_ROOT_PASSWORD: grueze_root_pw
       TZ: Europe/Berlin
     volumes:
       - grueze_db_data:/var/lib/mysql

@@ -177,4 +177,4 @@ achten ist:
 
 Steht in `app_settings` unter dem Schlüssel `active_theme` (Wert = Slug). Ist
 kein Wert gesetzt, verwendet eine frische Installation `hell`, eine bestehende
-Instanz bleibt auf `signalfarbe` (dem früheren `signalfarbe`).
+Instanz ohne gesetzten Wert fällt auf `signalfarbe` zurück.
