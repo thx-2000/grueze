@@ -55,6 +55,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Theme-Bearbeiten auffindbar (v0.11.1): Auf jeder Theme-Kachel gibt es jetzt
+  einen sichtbaren Bearbeiten-Zugang. Bei den Vorlagen (grueze/hell/dunkel)
+  heißt der Knopf „Kopieren & bearbeiten" (legt eine Kopie an und öffnet den
+  Editor); eigene Themes haben „Bearbeiten". Vorher zeigte nur „Duplizieren"
+  auf den Editor – ohne dass das erkennbar war. Intro-Text entsprechend
+  umformuliert (und die `<strong>`-Zeilenumbrüche darin entfernt).
 - Visueller Theme-Editor (v0.11.0): Der Token-Editor
   (`templates/settings/theme-edit.php`) hat jetzt zwei Spalten – links die
   Felder (jedes Farbfeld mit nativem Farbwähler + Textfeld), rechts eine
