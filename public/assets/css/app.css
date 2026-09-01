@@ -427,6 +427,7 @@ label span {
     grid-column: 2;
     padding: 0.1rem 0.25rem 1rem;
     display: grid;
+    align-content: start;
     gap: 1.2rem;
     min-width: 0;
 }
@@ -2541,12 +2542,7 @@ code {
     }
 
     .start-actions {
-        flex-direction: column;
-    }
-
-    .start-actions > a,
-    .start-actions button {
-        width: 100%;
+        grid-template-columns: 1fr;
     }
 
     .start-search input[type="search"] {
@@ -2666,11 +2662,11 @@ code {
     background: var(--color-primary-strong);
 }
 
-/* Alle drei Aktionen als gleich hohe, gleich geformte Knöpfe. */
+/* Drei gleich geformte Aktions-Kacheln – kräftig, mit Icon-Plakette. */
 .start-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 0.7rem;
 }
 
 .start-actions form {
@@ -2681,18 +2677,35 @@ code {
 .start-actions button {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.55rem;
-    min-height: 3.1rem;
-    padding: 0 1.5rem;
-    border-radius: var(--radius-sm);
+    justify-content: flex-start;
+    gap: 0.8rem;
+    min-height: 0;
+    padding: 1rem 1.15rem;
+    border-radius: var(--radius-md);
     font-weight: 700;
+    font-size: 1rem;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+.start-actions > a:hover,
+.start-actions button:hover {
+    transform: translateY(-2px);
+}
+
+/* Icon in einer runden Plakette, damit die Kacheln „knopfiger" wirken. */
 .start-actions .icon {
-    width: 1.05rem;
-    height: 1.05rem;
-    flex: 0 0 1.05rem;
+    box-sizing: content-box;
+    width: 1.4rem;
+    height: 1.4rem;
+    flex: 0 0 1.4rem;
+    padding: 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.start-actions .ghost-button .icon {
+    color: var(--color-primary);
 }
 
 .start-stats {

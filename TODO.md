@@ -66,6 +66,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Startseite: Aktions-Kacheln + Layout (v0.12.1): Die drei Aktionen („Neuen
+  Kontakt anlegen" / „Rundmail schreiben" / „Alle Kontakte") sind jetzt
+  kräftige Kacheln mit Icon-Plakette und Schatten statt dünner Pillen.
+  Nebenbei ein alter Layout-Fehler behoben: `.content` (Grid) streckte auf
+  kurzen Seiten die Zeilen auf volle Höhe → Hero-Karte und Kennzahlen-Kacheln
+  waren übermäßig hoch. `align-content: start` stellt das ab.
 - White-Label abgeschlossen (v0.12.0): Die Code-Defaults sind jetzt neutral
   („Adress-Zentrale", „Interner Bereich", `[Verteiler]`, Rechtstext-Gerüst,
   knapper Mail-Fuß). Die bisherigen Instanzwerte (Branding, `system_label`,
