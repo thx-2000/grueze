@@ -62,6 +62,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Dunkel-Theme Nachkontrolle (v0.10.1): Kompletter Seitendurchgang mit aktivem
+  Dunkel-Theme. Gefunden und behoben: Häkchen, Radios und Slider zogen sich
+  das OS-Standardblau (auf dem Rundmail-Empfängerdialog gut sichtbar) – jetzt
+  global `accent-color: var(--color-secondary)` (grueze Bernstein, hell Petrol,
+  dunkel Hellblau). Rest (Login, Start, Kontaktliste + Blickschutz, Rundmail,
+  Verwaltung, Theme-Editor, Mobil-Menü) auf Dunkel geprüft und in Ordnung.
 - Dunkles Theme + Feinschliff (v0.10.0): Mitgeliefertes Datei-Theme
   `dunkel.php` (warmneutrale Dunkelfläche, Bernstein-Akzent). Beim Durchgehen
   aller Seiten gefundene und behobene Stellen: Kopfleisten-Knöpfe und der
