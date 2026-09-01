@@ -260,7 +260,7 @@ function system_label(): string
 
 function product_url(): string
 {
-    return trim(branding_default('product_url', 'https://github.com/GitteHubertus/grueze'));
+    return trim(branding_default('product_url', 'https://github.com/thx-2000/grueze'));
 }
 
 /**

@@ -26,7 +26,7 @@ return [
         'app_name' => 'Adress-Zentrale',
         'short_name' => 'Adress-Zentrale',
         'system_label' => 'GRUEZE',
-        'product_url' => 'https://github.com/GitteHubertus/grueze',
+        'product_url' => 'https://github.com/thx-2000/grueze',
         'public_site_label' => '',
         'public_site_url' => '',
         'support_email' => '',
