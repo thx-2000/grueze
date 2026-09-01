@@ -28,6 +28,28 @@ Das Mailing nutzt einen zweistufigen Ablauf:
 
 Das reduziert Timeout-Risiken auf Shared Hosting und macht eine Fortschrittsanzeige im Browser möglich. Wenn PHPMailer vorhanden ist, wird SMTP genutzt; andernfalls gibt es einen einfachen Fallback über `mail()`.
 
+## White-Label und Upgrades
+
+Zwei feste Regeln für alle künftigen Änderungen:
+
+1. **White-Label zuerst.** Das Produkt (GRUEZE) wird vertrieben. Neue
+   Defaults, Texte und Beispiele werden markenneutral gedacht; alles
+   Instanzspezifische lebt in `config/config.php` (`branding.*`, `defaults.*`)
+   oder in `app_settings` (Branding-Seite, Rechtstexte, Mail-Vorlagen).
+   Keine Instanz-Namen, Personendaten oder festen URLs im Code.
+   - Ausnahme: `system_label` / `product_url` – der **Produktname** GRUEZE ist
+     kein Instanz-Branding und bleibt der Standard.
+
+2. **Bestandsdaten dürfen bei einem Upload nie kaputtgehen.** Wenn ein
+   Code-Default neutralisiert wird, sichert vorher eine Migration die alten
+   Werte per `INSERT IGNORE` in `app_settings` (Beispiel:
+   `2026-09-01-white-label-seed`). Neue Tabellen werden zusätzlich lazy per
+   `CREATE TABLE IF NOT EXISTS` im Repository angelegt, damit ein Feature auch
+   vor der Migration trägt. Umbenennungen bekommen einen Alias im Code für das
+   Fenster zwischen Deploy und Migration (Beispiel: alter Theme-Slug `signalfarbe`
+   → `signalfarbe` in `ThemeService::activeSlug()`). Migrationen sind additiv
+   und idempotent; `app_settings`-Werte, die schon existieren, bleiben unberührt.
+
 ## Sicherheitsentscheidungen
 
 - PDO mit Prepared Statements für alle Datenbankzugriffe

@@ -1,9 +1,14 @@
 # Neue Instanz aufsetzen (White-Label)
 
-Die Anwendung ist markenneutral. „GRUEZE" ist nur der Name **einer** Instanz.
-Eine frische Installation startet mit generischen Texten und dem Theme
-`hell`; alles Instanzspezifische wird danach eingestellt, nicht im Code
-geändert.
+Das Produkt heißt **GRUEZE** (Grüß-Zentrale). Jede Installation ist eine
+**Instanz** davon und bekommt einen eigenen Namen (bei uns: „GRUEZE
+Adress-Zentrale"). Eine frische Installation startet markenneutral mit
+generischen Texten und dem Theme `hell`; alles Instanzspezifische wird
+danach eingestellt, nicht im Code geändert.
+
+Der Produktname GRUEZE bleibt sichtbar (Footer, Seitenleiste „läuft mit
+GRUEZE"). Nur wer das Produkt selbst umlabeln will, setzt
+`branding.system_label` in der config um oder leer.
 
 ## 1. Grundinstallation
 
@@ -24,19 +29,21 @@ geändert.
 
 | Schlüssel            | Bedeutung                                            |
 |----------------------|-----------------------------------------------------|
-| `app_name`           | voller Name (Titel, Kopfzeile)                       |
+| `app_name`           | voller Name DIESER Instanz (Titel, Kopfzeile)        |
 | `short_name`         | Kurzname / Logo-Text                                 |
-| `system_label`       | technisches Kürzel im Footer (leer = nur Version)    |
 | `login_headline`     | Überschrift auf der Login-Seite                      |
 | `login_intro`        | Fließtext darunter                                   |
 | `public_site_label` / `public_site_url` | Link auf die öffentliche Seite    |
 | `login_public_hint`  | Hinweistext zu diesem Link                           |
 | `sidebar_copy`       | Text unter dem Logo in der Seitenleiste              |
 | `support_email`      | Kontakt-/Absenderadresse für Hinweise                |
+| `system_label`       | Produktname (Standard `GRUEZE`) – nur zum Umlabeln   |
+| `product_url`        | Ziel des „läuft mit …"-Links in der Seitenleiste     |
 
 Auflösung: **Verwaltung → Branding** (`app_settings`) schlägt die config, die
-config schlägt die eingebauten Defaults. Name, Kurzname, Login-Texte, Logo und
-Support-Mail lassen sich also auch komplett über die Oberfläche pflegen.
+config schlägt die eingebauten Defaults. Instanz-Name, Kurzname, Login-Texte,
+Logo und Support-Mail lassen sich auch komplett über die Oberfläche pflegen;
+`system_label` und `product_url` nur über die config.
 
 ## 3. Aussehen
 

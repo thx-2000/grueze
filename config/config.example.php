@@ -16,13 +16,17 @@ return [
     ],
 
     // Startwerte für Name, Links und Texte. Auflösung: Admin-Oberfläche
-    // (app_settings) > diese Sektion > eingebaute neutrale Defaults. Einzelne
-    // Schlüssel dürfen fehlen; leere Strings zählen als "nicht gesetzt".
+    // (app_settings) > diese Sektion > eingebaute Defaults. Einzelne Schlüssel
+    // dürfen fehlen; leere Strings zählen als "nicht gesetzt".
+    // - app_name / short_name: der Name DIESER Instanz.
+    // - system_label / product_url: der Produktname (GRUEZE). Nur für eine
+    //   vollständig eigene Marke überschreiben bzw. leeren.
     // Farben, Schriften und Ecken stecken im Theme-System (Ordner themes/).
     'branding' => [
         'app_name' => 'Adress-Zentrale',
         'short_name' => 'Adress-Zentrale',
-        'system_label' => '',
+        'system_label' => 'GRUEZE',
+        'product_url' => 'https://github.com/GitteHubertus/grueze',
         'public_site_label' => '',
         'public_site_url' => '',
         'support_email' => '',

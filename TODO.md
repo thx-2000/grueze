@@ -62,6 +62,15 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- GRUEZE als Produktname + Repo-Umbenennung (v0.14.0): GRUEZE ist der
+  Produktname (nicht Instanz-Branding) und bleibt auch im White-Label
+  sichtbar – im Footer (`GRUEZE v0.14.0`, jetzt ohne den Punkt hinter dem v,
+  wie der GitHub-Tag) und dezent in der Seitenleiste („läuft mit GRUEZE",
+  Link auf `product_url`). `system_label` ist wieder ein reiner config-Wert
+  (Default `GRUEZE`), kein Branding-Feld mehr; „Footer-Kürzel" aus der
+  Branding-Seite entfernt. GitHub-Repo `grueze` → `grueze`.
+  Neue Prinzipien-Sektion in `ARCHITECTURE.md`: White-Label zuerst denken,
+  Bestandsdaten bei einem Upload nie kaputt.
 - Gespeicherte Empfängerlisten (v0.13.0): Eine benannte Momentaufnahme einer
   Kontaktauswahl. Im Schreiben-Dialog einer Rundmail „Diese Empfänger als
   Liste speichern" (per fetch, ohne den Entwurf zu verlieren). Im

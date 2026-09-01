@@ -1,6 +1,8 @@
-# Abi Adress Zentrale
+# GRUEZE
 
-Eine mobile-first PHP-Web-App für die Verwaltung von Kontaktdaten einer Abi-Stufe mit Rollen, CSV-Export, Copy-to-Clipboard-Funktion, Audit-Log und personalisiertem Mailversand.
+**GRUEZE** (Grüß-Zentrale) ist eine mobile-first PHP-Web-App für Adress-, Kontakt- und Mailing-Verwaltung – mit Rollen, CSV-Export, Copy-to-Clipboard, Audit-Log und personalisiertem Mailversand. Sie ist White-Label-fähig: jede Installation ist eine eigene **Instanz** mit eigenem Namen. Die Instanz „Adress-Zentrale" läuft unter `example.org`.
+
+Eine neue Instanz aufsetzen: siehe **[docs/NEUE-INSTANZ.md](docs/NEUE-INSTANZ.md)**.
 
 ## Setup
 
@@ -14,8 +16,6 @@ Eine mobile-first PHP-Web-App für die Verwaltung von Kontaktdaten einer Abi-Stu
 8. Unter `/contacts/import` können Admins eine XLSX-Liste mit den Spalten `Vorname`, `Geburtsname`, `Nachname akt.`, `Mail`, `Ort` und `Handy` importieren.
 
 Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufrufen. Dort lässt sich genau ein erstes Admin-Konto über die Anwendung anlegen, solange noch kein Admin existiert.
-
-Die Anwendung ist markenneutral. Name, Texte, Rechtstexte, Theme und Mail-Vorlagen werden nach der Installation über die Oberfläche bzw. `config/config.php` eingestellt – siehe **[docs/NEUE-INSTANZ.md](docs/NEUE-INSTANZ.md)**.
 
 ## Hinweise für all-inkl
 

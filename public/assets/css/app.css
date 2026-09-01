@@ -398,6 +398,26 @@ label span {
     margin-top: auto;
 }
 
+.sidebar-product {
+    margin: 0.1rem 0 0;
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.sidebar-product a {
+    color: var(--color-primary-strong);
+    font-weight: 700;
+}
+
+.sidebar-product-version {
+    color: var(--color-muted);
+    opacity: 0.8;
+}
+
 .profile-chip {
     padding: 0.82rem 0.92rem;
     border-radius: var(--radius-md);

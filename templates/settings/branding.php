@@ -29,10 +29,6 @@
                     <input type="text" name="branding_login_headline" value="<?= e((string) ($branding['branding_login_headline'] ?? '')) ?>">
                 </label>
                 <label>
-                    <span>Footer-Kürzel (vor der Version)</span>
-                    <input type="text" name="branding_system_label" value="<?= e((string) ($branding['branding_system_label'] ?? '')) ?>">
-                </label>
-                <label>
                     <span>Öffentliche Seitenbezeichnung</span>
                     <input type="text" name="branding_public_site_label" value="<?= e((string) ($branding['branding_public_site_label'] ?? '')) ?>">
                 </label>

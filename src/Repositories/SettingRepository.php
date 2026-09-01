@@ -80,7 +80,6 @@ final class SettingRepository
         $defaults = [
             'branding_app_name' => 'Adress-Zentrale',
             'branding_short_name' => 'Adress-Zentrale',
-            'branding_system_label' => '',
             'branding_version' => '0.2.0',
             'branding_public_site_label' => '',
             'branding_public_site_url' => '',

@@ -91,7 +91,6 @@ function app_branding(): array
         $branding = [
             'branding_app_name' => branding_default('app_name', 'Adress-Zentrale'),
             'branding_short_name' => branding_default('short_name', 'Adress-Zentrale'),
-            'branding_system_label' => branding_default('system_label', ''),
             'branding_version' => '0.1.0',
             'branding_public_site_label' => branding_default('public_site_label', ''),
             'branding_public_site_url' => branding_default('public_site_url', ''),
@@ -248,14 +247,20 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.13.0';
+    return '0.14.0';
 }
 
 function system_label(): string
 {
-    // Technische Kennzeichnung vor der Versionsnummer im Footer. Leer = nur
-    // "v.x.y.z". Pflegbar über Verwaltung → Branding oder config('branding.system_label').
-    return trim((string) branding_value('branding_system_label', ''));
+    // Produktname (nicht der Instanzname). Steht so vor der Versionsnummer im
+    // Footer und als „läuft mit …" in der Seitenleiste. Für eine vollständig
+    // eigene Marke per config('branding.system_label') überschreib- oder leerbar.
+    return trim(branding_default('system_label', 'GRUEZE'));
+}
+
+function product_url(): string
+{
+    return trim(branding_default('product_url', 'https://github.com/GitteHubertus/grueze'));
 }
 
 function format_date(?string $value): string

@@ -140,6 +140,12 @@ $themeStyle = branding_theme_style();
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <button type="submit" class="ghost-button">Abmelden</button>
                     </form>
+                    <?php if ($systemLabel !== ''): ?>
+                        <p class="sidebar-product">läuft mit
+                            <a href="<?= e(product_url()) ?>" target="_blank" rel="noopener noreferrer"><?= e($systemLabel) ?></a>
+                            <span class="sidebar-product-version">v<?= e($appVersion) ?></span>
+                        </p>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </aside>
@@ -178,7 +184,7 @@ $themeStyle = branding_theme_style();
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
             <?php if ($appVersion !== ''): ?>
                 <span>|</span>
-                <span class="site-footer-version"<?= $systemLabel === 'GRUEZE' ? ' title="GRUEZE: Anspielung auf „Grüezi“ und Kurzform von „Grüß-Zentrale“"' : '' ?>><?= $systemLabel !== '' ? e($systemLabel) . ' ' : '' ?>v.<?= e($appVersion) ?></span>
+                <span class="site-footer-version"<?= $systemLabel === 'GRUEZE' ? ' title="GRUEZE: Anspielung auf „Grüezi“ und Kurzform von „Grüß-Zentrale“"' : '' ?>><?= $systemLabel !== '' ? e($systemLabel) . ' ' : '' ?>v<?= e($appVersion) ?></span>
             <?php endif; ?>
             <?php if ($publicSiteUrl !== ''): ?>
                 <span>|</span>
