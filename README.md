@@ -15,6 +15,8 @@ Eine mobile-first PHP-Web-App für die Verwaltung von Kontaktdaten einer Abi-Stu
 
 Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufrufen. Dort lässt sich genau ein erstes Admin-Konto über die Anwendung anlegen, solange noch kein Admin existiert.
 
+Die Anwendung ist markenneutral. Name, Texte, Rechtstexte, Theme und Mail-Vorlagen werden nach der Installation über die Oberfläche bzw. `config/config.php` eingestellt – siehe **[docs/NEUE-INSTANZ.md](docs/NEUE-INSTANZ.md)**.
+
 ## Hinweise für all-inkl
 
 - Die Anwendung ist für Shared Hosting mit klassischem PHP ohne Build-Prozess aufgebaut.

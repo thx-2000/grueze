@@ -1,35 +1,39 @@
 <?php
 
+// Vorlage für eine neue Instanz. Nach config/config.php kopieren und anpassen.
+// Instanzspezifische Texte (Name, Rechtstexte, Mail-Fuß) lassen sich nach dem
+// ersten Start auch über die Oberfläche pflegen (Verwaltung → Branding /
+// Rechtliches / Mail-Einstellungen). Siehe docs/NEUE-INSTANZ.md.
+
 return [
     'app' => [
         'name' => 'Adress-Zentrale',
         'base_url' => 'https://example.org',
-        'session_name' => 'abi_adress_zentrale',
+        'session_name' => 'adress_zentrale',
         'session_timeout' => 1800,
         'force_https' => true,
-        'debug' => true,
+        'debug' => false,
     ],
 
-    // White-Label: Startwerte für Name, Links und Texte einer Instanz.
-    // Reihenfolge der Auflösung: Admin-Oberfläche (app_settings) > diese Sektion
-    // > eingebaute Standardwerte. Für die Instanz kann die Sektion
-    // komplett entfallen. Einzelne Schlüssel dürfen fehlen; leere Strings zählen
-    // als "nicht gesetzt". Farben, Schriften und Ecken stecken im Theme-System
-    // (Ordner themes/ + Verwaltung -> Themes), nicht hier.
+    // Startwerte für Name, Links und Texte. Auflösung: Admin-Oberfläche
+    // (app_settings) > diese Sektion > eingebaute neutrale Defaults. Einzelne
+    // Schlüssel dürfen fehlen; leere Strings zählen als "nicht gesetzt".
+    // Farben, Schriften und Ecken stecken im Theme-System (Ordner themes/).
     'branding' => [
         'app_name' => 'Adress-Zentrale',
-        'short_name' => 'GRUEZE',
-        'system_label' => 'GRUEZE',
-        'public_site_label' => 'example.org',
-        'public_site_url' => 'https://example.org',
-        'support_email' => 'kontakt@example.org',
+        'short_name' => 'Adress-Zentrale',
+        'system_label' => '',
+        'public_site_label' => '',
+        'public_site_url' => '',
+        'support_email' => '',
+        'login_headline' => 'Interner Bereich',
         'login_intro' => 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten an einem Ort.',
-        'login_public_hint' => 'Weitere Infos und die öffentliche Startseite findet ihr unter example.org.',
+        'login_public_hint' => 'Infos zur Gruppe und die öffentliche Startseite findet ihr hier.',
         'sidebar_copy' => 'Kontakte, Mailings und Organisation an einem Ort.',
     ],
 
     'database' => [
-        'dsn' => 'mysql:host=localhost;dbname=abi_adress_zentrale;charset=utf8mb4',
+        'dsn' => 'mysql:host=localhost;dbname=adress_zentrale;charset=utf8mb4',
         'username' => 'db_user',
         'password' => 'db_password',
         'options' => [
@@ -43,8 +47,8 @@ return [
         'batch_size' => 3,
         'send_delay_seconds' => 1,
         'max_attachment_size_total' => 10485760,
-        'default_sender_key' => 'orga',
-        'default_reply_to_key' => 'orga_reply',
+        'default_sender_key' => 'default',
+        'default_reply_to_key' => 'default_reply',
         'allowed_attachment_types' => [
             'application/pdf',
             'image/jpeg',
@@ -52,9 +56,11 @@ return [
             'image/webp',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ],
+        // Nur der erste Eintrag wird als Start-Identität übernommen; danach
+        // über Verwaltung → Mail-Einstellungen pflegbar.
         'identities' => [
             [
-                'key' => 'orga',
+                'key' => 'default',
                 'name' => 'Mailer',
                 'email' => 'mailer@example.org',
                 'smtp_host' => 'smtp.example.org',
@@ -77,14 +83,9 @@ return [
         ],
         'reply_to_options' => [
             [
-                'key' => 'orga_reply',
-                'name' => 'Orga-Team',
-                'email' => 'kontakt@example.org',
-            ],
-            [
-                'key' => 'orga',
-                'name' => 'Mailer',
-                'email' => 'mailer@example.org',
+                'key' => 'default_reply',
+                'name' => 'Team',
+                'email' => 'team@example.org',
             ],
         ],
     ],
@@ -110,10 +111,10 @@ return [
     ],
     'defaults' => [
         'country' => 'Deutschland',
-        'mail_footer' => "Du erhältst diese Nachricht, weil du auf dem Verteiler eingetragen bist.\nWir möchten den Mailverkehr möglichst gering halten und schreiben daher nur, wenn es wirklich etwas Relevantes gibt.\nAntworten auf diese Nachricht gehen an das Orga-Team.\nFalls unsere Nachrichten fälschlich als Spam erkannt werden, nimm bitte kontakt@example.org und mailer@example.org in dein Adressbuch auf.\nWenn du keine weiteren Nachrichten erhalten möchtest, schreibe bitte an kontakt@example.org. Wir nehmen dich dann aus dem Verteiler.",
-        'member_contact_footer' => "Diese Nachricht wurde von einem Stufenmitglied über die interne Kontaktfunktion versendet und stammt nicht vom Orga-Team.\nDu erhältst sie, weil deine Kontaktdaten in der Adress-Zentrale hinterlegt sind.\nAntworten auf diese Nachricht gehen direkt an die absendende Person.\nFalls unsere Nachrichten fälschlich als Spam erkannt werden, nimm bitte kontakt@example.org und mailer@example.org in dein Adressbuch auf.\nWenn du keine weiteren Kontaktanfragen über dieses System erhalten möchtest, schreibe bitte an kontakt@example.org. Wir prüfen das dann mit dir.",
+        // Leer lassen = die eingebauten (branding-abhängigen) Vorgaben nutzen.
+        // Über Verwaltung → Mail-Einstellungen / Rechtliches pflegbar.
+        'mail_footer' => '',
         'subject_prefixes' => ['[Verteiler]'],
-        'member_contact_subject_prefix' => '[Kontakt]',
         'phone_labels' => [
             'Mobil',
             'Mobil 2',

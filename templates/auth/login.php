@@ -4,12 +4,13 @@ $publicSiteLabel = trim((string) ($branding['branding_public_site_label'] ?? '')
 $publicSiteUrl = trim((string) ($branding['branding_public_site_url'] ?? ''));
 $loginIntro = trim((string) ($branding['branding_login_intro'] ?? ''));
 $loginPublicHint = trim((string) ($branding['branding_login_public_hint'] ?? ''));
+$loginHeadline = trim((string) ($branding['branding_login_headline'] ?? ''));
 ?>
 <section class="hero-card narrow">
     <div class="hero-row">
         <div>
             <p class="eyebrow">Anmeldung</p>
-            <h2>Adress-Backend für das Orga-Team</h2>
+            <h2><?= e($loginHeadline !== '' ? $loginHeadline : 'Interner Bereich') ?></h2>
             <p class="muted"><?= e($loginIntro !== '' ? $loginIntro : 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten.') ?></p>
         </div>
         <div class="floating-icon"><?= icon('mail-open') ?></div>

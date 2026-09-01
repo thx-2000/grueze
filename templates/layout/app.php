@@ -178,7 +178,7 @@ $themeStyle = branding_theme_style();
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
             <?php if ($appVersion !== ''): ?>
                 <span>|</span>
-                <span class="site-footer-version" title="GRUEZE: Anspielung auf „Grüezi“ und Kurzform von „Grüß-Zentrale“"><?= e($systemLabel) ?> v.<?= e($appVersion) ?></span>
+                <span class="site-footer-version"<?= $systemLabel === 'GRUEZE' ? ' title="GRUEZE: Anspielung auf „Grüezi“ und Kurzform von „Grüß-Zentrale“"' : '' ?>><?= $systemLabel !== '' ? e($systemLabel) . ' ' : '' ?>v.<?= e($appVersion) ?></span>
             <?php endif; ?>
             <?php if ($publicSiteUrl !== ''): ?>
                 <span>|</span>

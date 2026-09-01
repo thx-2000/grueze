@@ -90,14 +90,16 @@ function app_branding(): array
         // SettingRepository::brandingDefaults().
         $branding = [
             'branding_app_name' => branding_default('app_name', 'Adress-Zentrale'),
-            'branding_short_name' => branding_default('short_name', 'GRUEZE'),
+            'branding_short_name' => branding_default('short_name', 'Adress-Zentrale'),
+            'branding_system_label' => branding_default('system_label', ''),
             'branding_version' => '0.1.0',
-            'branding_public_site_label' => branding_default('public_site_label', 'example.org'),
-            'branding_public_site_url' => branding_default('public_site_url', 'https://example.org'),
+            'branding_public_site_label' => branding_default('public_site_label', ''),
+            'branding_public_site_url' => branding_default('public_site_url', ''),
+            'branding_login_headline' => branding_default('login_headline', 'Interner Bereich'),
             'branding_login_intro' => branding_default('login_intro', 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten an einem Ort.'),
-            'branding_login_public_hint' => branding_default('login_public_hint', 'Weitere Infos und die öffentliche Startseite findet ihr unter example.org.'),
+            'branding_login_public_hint' => branding_default('login_public_hint', 'Infos zur Gruppe und die öffentliche Startseite findet ihr hier.'),
             'branding_sidebar_copy' => branding_default('sidebar_copy', ''),
-            'branding_support_email' => branding_default('support_email', 'kontakt@example.org'),
+            'branding_support_email' => branding_default('support_email', ''),
             'branding_logo_path' => '',
         ];
     }
@@ -107,9 +109,8 @@ function app_branding(): array
 
 /**
  * Standardwert für ein Branding-Feld: bevorzugt config('branding.<key>'),
- * sonst der mitgegebene GRUEZE-Wert. Ermöglicht White-Label-Instanzen, Name,
- * Links und Texte zentral in der config zu setzen, ohne die laufende
- * Instanz zu verändern (die keine branding-Sektion konfiguriert hat).
+ * sonst den mitgegebenen (neutralen) Fallback. app_settings hat weiterhin
+ * Vorrang vor beidem (siehe SettingRepository::branding()).
  */
 function branding_default(string $key, string $fallback): string
 {
@@ -247,14 +248,14 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.11.4';
+    return '0.12.0';
 }
 
 function system_label(): string
 {
-    // Technische Kennzeichnung im Footer. Bewusst nicht über die Admin-Oberfläche
-    // änderbar; eine White-Label-Instanz setzt sie per config('branding.system_label').
-    return branding_default('system_label', 'GRUEZE');
+    // Technische Kennzeichnung vor der Versionsnummer im Footer. Leer = nur
+    // "v.x.y.z". Pflegbar über Verwaltung → Branding oder config('branding.system_label').
+    return trim((string) branding_value('branding_system_label', ''));
 }
 
 function format_date(?string $value): string

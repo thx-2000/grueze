@@ -30,31 +30,54 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   bestehenden Datenbestand einspielen, ohne ihn zu löschen – mit Dedup und
   ID-Konfliktbehandlung. Deutlich aufwändiger, daher separat.
 
+- **Barrierefrei machen**: Systematischer Durchgang nach WCAG 2.1 AA –
+  Landmarks/Skip-Link, Heading-Hierarchie, `alt`-Texte, Formular-Labels &
+  Fehlermeldungen (`aria-describedby`), Fokus-Reihenfolge und sichtbarer
+  Fokus, Tastaturbedienung (Mobil-Menü, Drawer, Blickschutz, Sammelauswahl),
+  Kontraste (die Themes sind schon geprüft, aber UI-Zustände nicht),
+  `aria-live` für Toasts/Statusmeldungen, `prefers-reduced-motion`.
+  Screenreader-Test (VoiceOver) an den Kern-Workflows.
+
+- **SEO machen**: Betrifft v. a. die (künftige) öffentliche Seite bzw.
+  White-Label-Landing – Title/Meta-Description pro Seite, Open-Graph/Twitter-
+  Cards, `lang`, kanonische URLs, `robots.txt` + Sitemap, strukturierte Daten
+  wo sinnvoll, sprechende URLs, saubere HTTP-Statuscodes. Der eingeloggte
+  Bereich soll `noindex` bleiben.
+
 ## Aus der ursprünglichen Übergabe (ChatGPT), noch offen
 
-1. White-Label-Vorbereitung vervollständigen, ohne die laufende Instanz
-   neutral umzubiegen. (Teil erledigt in v0.3.1: `config('branding.*')`-Sektion,
-   `system_label`, Template-Fallbacks. Offen: `defaultLegalText()` in
-   `SettingRepository` enthält noch reale Personendaten – erst Instanz-Rechtstexte
-   in `app_settings` seeden, dann Code-Default neutralisieren.)
-2. Noch verbleibende hartcodierte Instanz-Texte systematisch identifizieren und
-   auf konfigurierbare Defaults umstellen. (siehe Punkt 1; Rest: Standard-Mail-Fuß
-   und Betreff-Präfixe in `config/config.*` sind bereits `defaults.*`-basiert,
-   könnten in die `branding`-Logik integriert werden.)
-3. Rollen- und Rechtekonzept weiter schärfen, vor allem für spätere
+1. White-Label: **abgeschlossen in v0.12.0** – Code-Defaults sind neutral,
+   Instanzwerte per Seed-Migration in `app_settings`, `config.example.php`
+   neutral, `docs/NEUE-INSTANZ.md`. Restliche Feinheiten: „Orga-Team" im
+   Member-Kontakt-Fuß ist noch fix (generisch genug); Betreff-Präfix-Editor
+   könnte einen Hinweis auf `{shortname}` vertragen.
+2. Rollen- und Rechtekonzept weiter schärfen, vor allem für spätere
    "Kontakt kann optional Login haben"-Logik.
-4. Sichtbarkeit einzelner Kontaktfelder noch granularer pro Rolle
+3. Sichtbarkeit einzelner Kontaktfelder noch granularer pro Rolle
    administrierbar machen.
-5. Admin-Einstellungsbereich weiter strukturieren (Branding / Mail-Versand /
+4. Admin-Einstellungsbereich weiter strukturieren (Branding / Mail-Versand /
    Sichtbarkeiten-Rollen / ggf. System-Backup später).
-6. Vorbereitung für neutrale Distribution: Installer-Konzept,
-   Update-Konzept, konfigurierbare Startwerte. (Backup/Restore erledigt in
-   v0.4.0, siehe „Datensicherung" unter /admin/backup.)
-7. Saubere Migrationsstrategie überlegen, damit die Instanz später ohne
-   manuelle Neueingabe auf eine neutralisierte, bessere Fassung wechseln kann.
+5. Vorbereitung für neutrale Distribution: Installer-Konzept,
+   Update-Konzept. (Backup/Restore erledigt in v0.4.0; konfigurierbare
+   Startwerte + Setup-Doku erledigt in v0.12.0.)
+6. Update-Konzept: wie kommt eine bestehende Instanz sauber auf eine neue
+   Version (Migrationen anwenden ist manuell – reicht das, oder braucht es
+   einen „Jetzt aktualisieren"-Knopf?).
 
 ## Erledigt
 
+- White-Label abgeschlossen (v0.12.0): Die Code-Defaults sind jetzt neutral
+  („Adress-Zentrale", „Interner Bereich", `[Verteiler]`, Rechtstext-Gerüst,
+  knapper Mail-Fuß). Die bisherigen Instanzwerte (Branding, `system_label`,
+  Login-Überschrift, Impressum, Datenschutzerklärung, Mail-Fuß,
+  Betreff-Präfix) sichert die Migration `2026-09-01-white-label-seed` per
+  `INSERT IGNORE` in `app_settings` – die laufende Instanz bleibt nach dem
+  Anwenden identisch. Neu: Branding-Felder „Login-Überschrift" und
+  „Footer-Kürzel"; `system_label` jetzt über die Oberfläche pflegbar (leer =
+  nur Version im Footer). `config.example.php` komplett neutral,
+  `config.production-template.php` als GRUEZE-Referenz. Anleitung:
+  `docs/NEUE-INSTANZ.md`. **Auf Prod die Migration direkt nach dem Deploy
+  anwenden** (bis dahin zeigt die Instanz kurz die neutralen Defaults).
 - Toter Asset-Baum entfernt (v0.11.4): Der nicht ausgelieferte Top-Level-Ordner
   `assets/` (veraltete `css/`, `js/`, leeres `uploads/`) ist gelöscht. Ausgeliefert
   wird ausschließlich `public/assets/`; `asset_url()` löst ohnehin immer gegen
