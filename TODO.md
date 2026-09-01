@@ -5,10 +5,6 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **UX-Umbau – nächste Stufen** (Gerüst, Startseite, Suche, Rundmail,
-  Kontakte-Seite, Mobil-Navigation, Namensliste erledigt in v0.5.0–0.7.0;
-  Blickschutz-Icon + Menü-Feinschliff in v0.10.2):
-  - später: gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
@@ -66,6 +62,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Gespeicherte Empfängerlisten (v0.13.0): Eine benannte Momentaufnahme einer
+  Kontaktauswahl. Im Schreiben-Dialog einer Rundmail „Diese Empfänger als
+  Liste speichern" (per fetch, ohne den Entwurf zu verlieren). Im
+  Empfängerkreis-Dialog neue Option „Gespeicherte Liste" (zeigt, wie viele
+  Mitglieder aktuell noch eine Mailadresse haben); ein aufklappbarer Bereich
+  „Gespeicherte Listen verwalten" zum Umbenennen/Löschen. Neue Tabelle
+  `mail_recipient_lists` (Migration `2026-09-02-empfaengerlisten`, lazy
+  angelegt, greift also auch vor der Migration).
 - Startseite: Aktions-Kacheln + Layout (v0.12.1): Die drei Aktionen („Neuen
   Kontakt anlegen" / „Rundmail schreiben" / „Alle Kontakte") sind jetzt
   kräftige Kacheln mit Icon-Plakette und Schatten statt dünner Pillen.

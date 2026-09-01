@@ -3344,3 +3344,43 @@ input[type="color"].token-swatch::-moz-color-swatch {
         order: -1;
     }
 }
+
+/* ----------------------------------------- Empfänger als Liste speichern (Schreiben-Dialog) */
+
+.save-list-row {
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--edge-hairline);
+    display: grid;
+    gap: 0.5rem;
+}
+
+.save-list-row label {
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+}
+
+.save-list-fields {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.save-list-fields input[type="text"] {
+    flex: 1 1 16rem;
+    width: auto;
+    padding: 0.55rem 0.7rem;
+}
+
+.save-list-feedback {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-success);
+}
+
+.save-list-feedback.is-error {
+    color: var(--color-danger);
+}

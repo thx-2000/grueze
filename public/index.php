@@ -189,6 +189,7 @@ try {
         Container::get(Auth::class),
         Container::get(SettingRepository::class)
     ));
+    Container::factory(\App\Repositories\RecipientListRepository::class, static fn () => new \App\Repositories\RecipientListRepository(Container::get(PDO::class)));
     Container::factory(MailController::class, static fn () => new MailController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
@@ -197,7 +198,8 @@ try {
         Container::get(MailService::class),
         Container::get(UploadService::class),
         Container::get(CategoryRepository::class),
-        Container::get(TagRepository::class)
+        Container::get(TagRepository::class),
+        Container::get(\App\Repositories\RecipientListRepository::class)
     ));
     Container::factory(SettingsController::class, static fn () => new SettingsController(
         Container::get(Auth::class),
@@ -269,6 +271,9 @@ try {
 
     $router->get('/rundmail', [MailController::class, 'rundmail']);
     $router->post('/rundmail', [MailController::class, 'rundmailStart']);
+    $router->post('/rundmail/liste-speichern', [MailController::class, 'saveRecipientList']);
+    $router->post('/rundmail/liste-umbenennen', [MailController::class, 'renameRecipientList']);
+    $router->post('/rundmail/liste-loeschen', [MailController::class, 'deleteRecipientList']);
     $router->get('/namensliste', [MailController::class, 'namensliste']);
     $router->post('/namensliste', [MailController::class, 'namenslisteSend']);
     $router->post('/namensliste/rundmail', [MailController::class, 'namenslisteToRundmail']);

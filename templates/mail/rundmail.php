@@ -48,6 +48,25 @@
             </span>
         </label>
 
+        <?php if ($recipientLists !== []): ?>
+            <label class="rundmail-option">
+                <input type="radio" name="mode" value="list">
+                <span class="rundmail-option-body">
+                    <span class="rundmail-option-title">Gespeicherte Liste</span>
+                    <span class="rundmail-sub">
+                        <select name="list_id">
+                            <option value="">Liste wählen …</option>
+                            <?php foreach ($recipientLists as $list): ?>
+                                <option value="<?= e((string) $list['id']) ?>">
+                                    <?= e($list['name']) ?> (<?= e((string) $list['reachable']) ?><?php if ($list['reachable'] !== $list['total']): ?> von <?= e((string) $list['total']) ?><?php endif; ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </span>
+                </span>
+            </label>
+        <?php endif; ?>
+
         <?php if ($tags !== []): ?>
             <label class="rundmail-option">
                 <input type="radio" name="mode" value="tags">
@@ -72,6 +91,33 @@
         </div>
     </form>
 </section>
+
+<?php if ($recipientLists !== []): ?>
+    <section class="panel stack">
+        <details class="admin-drawer">
+            <summary><?= icon('archive') ?> Gespeicherte Listen verwalten</summary>
+            <div class="admin-drawer-body stack">
+                <p class="detail-hint">Neue Listen legst du beim Schreiben einer Rundmail an („Diese Empfänger als Liste speichern"). Die Zahl zeigt, wie viele davon aktuell noch eine Mailadresse haben.</p>
+                <?php foreach ($recipientLists as $list): ?>
+                    <div class="taxo-edit">
+                        <form method="post" action="<?= e(url('/rundmail/liste-umbenennen')) ?>" class="inline-form">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="id" value="<?= e((string) $list['id']) ?>">
+                            <input type="text" name="name" value="<?= e($list['name']) ?>" required aria-label="Listenname">
+                            <button type="submit" class="ghost-button compact-action">Umbenennen</button>
+                        </form>
+                        <span class="taxo-count"><?= e((string) $list['reachable']) ?> erreichbar</span>
+                        <form method="post" action="<?= e(url('/rundmail/liste-loeschen')) ?>" onsubmit="return confirm('Liste „<?= e(addslashes($list['name'])) ?>“ löschen?');">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="id" value="<?= e((string) $list['id']) ?>">
+                            <button type="submit" class="danger-button icon-button" title="Löschen" aria-label="Löschen"><?= icon('trash') ?></button>
+                        </form>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </details>
+    </section>
+<?php endif; ?>
 
 <script>
     (function () {

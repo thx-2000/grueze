@@ -19,6 +19,17 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
         </div>
         <div class="selection-status"><?= count($contacts) ?> Empfänger ausgewählt</div>
     </div>
+
+    <?php if (!$memberContactMode && count($contacts) > 1): ?>
+        <div class="save-list-row" id="saveRecipientList" data-url="<?= e(url('/rundmail/liste-speichern')) ?>">
+            <label for="saveListName">Diese Empfänger als Liste speichern</label>
+            <div class="save-list-fields">
+                <input type="text" id="saveListName" placeholder="Listenname, z. B. „Chor + Orga"" autocomplete="off">
+                <button type="button" class="ghost-button compact-action"><?= icon('archive') ?><span>Speichern</span></button>
+            </div>
+            <p class="save-list-feedback" role="status" hidden></p>
+        </div>
+    <?php endif; ?>
 </section>
 
 <section class="panel">
@@ -154,3 +165,52 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
         <?php endforeach; ?>
     </div>
 </section>
+
+<?php if (!$memberContactMode && count($contacts) > 1): ?>
+<script>
+(function () {
+    const box = document.getElementById('saveRecipientList');
+    if (!box) return;
+    const nameInput = box.querySelector('#saveListName');
+    const button = box.querySelector('button');
+    const feedback = box.querySelector('.save-list-feedback');
+    const form = document.getElementById('mailComposeForm');
+
+    const show = (msg, ok) => {
+        feedback.textContent = msg;
+        feedback.hidden = false;
+        feedback.classList.toggle('is-error', !ok);
+    };
+
+    button.addEventListener('click', async () => {
+        const name = nameInput.value.trim();
+        if (name === '') { nameInput.focus(); return; }
+        const ids = [...form.querySelectorAll('input[name="contact_ids[]"]')].map((i) => i.value);
+        const body = new URLSearchParams();
+        body.set('_csrf', (window.APP && window.APP.csrfToken) || form.querySelector('input[name="_csrf"]').value);
+        body.set('name', name);
+        ids.forEach((id) => body.append('contact_ids[]', id));
+
+        button.disabled = true;
+        try {
+            const res = await fetch(box.dataset.url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'fetch' },
+                body,
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.ok) {
+                show('Liste „' + data.name + '" gespeichert (' + data.count + ' Kontakte).', true);
+                nameInput.value = '';
+            } else {
+                show(data.error || 'Speichern fehlgeschlagen.', false);
+            }
+        } catch (e) {
+            show('Speichern fehlgeschlagen (Netzwerk).', false);
+        } finally {
+            button.disabled = false;
+        }
+    });
+})();
+</script>
+<?php endif; ?>

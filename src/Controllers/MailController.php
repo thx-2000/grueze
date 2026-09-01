@@ -8,6 +8,7 @@ use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\ContactRepository;
 use App\Repositories\LogRepository;
+use App\Repositories\RecipientListRepository;
 use App\Repositories\SettingRepository;
 use App\Services\MailService;
 use App\Services\UploadService;
@@ -24,7 +25,8 @@ final class MailController extends BaseController
         private MailService $mailer,
         private UploadService $uploads,
         private \App\Repositories\CategoryRepository $categories,
-        private \App\Repositories\TagRepository $tags
+        private \App\Repositories\TagRepository $tags,
+        private RecipientListRepository $recipientLists
     ) {
         parent::__construct($auth);
     }
@@ -215,15 +217,28 @@ final class MailController extends BaseController
         $filterIds = $fromFilter ? $this->contacts->recipientIds($filters) : [];
         $_SESSION['rundmail_filter_ids'] = $filterIds;
 
+        $withEmail = $this->contacts->recipientIds([]);
+        $recipientLists = array_map(function (array $list) use ($withEmail): array {
+            $active = array_values(array_intersect($withEmail, $list['contact_ids']));
+
+            return [
+                'id' => $list['id'],
+                'name' => $list['name'],
+                'total' => count($list['contact_ids']),
+                'reachable' => count($active),
+            ];
+        }, $this->recipientLists->all());
+
         $this->render('mail/rundmail', [
             'categories' => $categories,
             'tags' => $tags,
             'categoryCounts' => $categoryCounts,
             'tagCounts' => $tagCounts,
-            'totalWithEmail' => count($this->contacts->recipientIds([])),
+            'totalWithEmail' => count($withEmail),
             'fromFilter' => $fromFilter,
             'filterCount' => count($filterIds),
             'filterSummary' => $fromFilter ? $this->filterSummary($filters, $categories, $tags) : '',
+            'recipientLists' => $recipientLists,
         ]);
     }
 
@@ -236,6 +251,13 @@ final class MailController extends BaseController
 
         if ($mode === 'filter') {
             $ids = array_map('intval', (array) ($_SESSION['rundmail_filter_ids'] ?? []));
+        } elseif ($mode === 'list') {
+            $list = $this->recipientLists->find((int) $request->input('list_id'));
+            if ($list === null) {
+                flash('error', 'Gespeicherte Liste nicht gefunden.');
+                Redirect::to('/rundmail');
+            }
+            $ids = array_values(array_intersect($this->contacts->recipientIds([]), $list['contact_ids']));
         } else {
             $filters = match ($mode) {
                 'all' => [],
@@ -262,6 +284,75 @@ final class MailController extends BaseController
 
         $_GET['contact_ids'] = $ids;
         $this->compose(new Request());
+    }
+
+    // ----------------------------------------------- Gespeicherte Empfängerlisten
+
+    /** Wird per fetch() vom Schreiben-Dialog aufgerufen; antwortet JSON. */
+    public function saveRecipientList(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        $name = trim((string) $request->input('name'));
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', (array) $request->input('contact_ids', [])),
+            static fn (int $n): bool => $n > 0
+        )));
+
+        if ($name === '') {
+            $this->json(['ok' => false, 'error' => 'Bitte einen Namen für die Liste angeben.'], 422);
+        }
+        if ($ids === []) {
+            $this->json(['ok' => false, 'error' => 'Keine Empfänger zum Speichern.'], 422);
+        }
+        if ($this->recipientLists->nameExists($name)) {
+            $this->json(['ok' => false, 'error' => 'Eine Liste mit diesem Namen gibt es schon.'], 409);
+        }
+
+        $user = $this->auth->user();
+        $id = $this->recipientLists->create($name, $ids, isset($user['id']) ? (int) $user['id'] : null);
+
+        $this->json(['ok' => true, 'name' => $name, 'count' => count($ids), 'id' => $id]);
+    }
+
+    private function json(array $payload, int $status = 200): never
+    {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        exit;
+    }
+
+    public function renameRecipientList(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        $id = (int) $request->input('id');
+        $name = trim((string) $request->input('name'));
+        if ($name === '' || $this->recipientLists->find($id) === null) {
+            flash('error', 'Liste oder Name fehlt.');
+            Redirect::to('/rundmail');
+        }
+        if ($this->recipientLists->nameExists($name, $id)) {
+            flash('error', 'Eine Liste mit diesem Namen gibt es schon.');
+            Redirect::to('/rundmail');
+        }
+
+        $this->recipientLists->rename($id, $name);
+        flash('success', 'Liste umbenannt.');
+        Redirect::to('/rundmail');
+    }
+
+    public function deleteRecipientList(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        $this->recipientLists->delete((int) $request->input('id'));
+        flash('success', 'Liste gelöscht.');
+        Redirect::to('/rundmail');
     }
 
     private function filterSummary(array $filters, array $categories, array $tags): string
