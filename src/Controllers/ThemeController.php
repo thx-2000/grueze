@@ -114,12 +114,17 @@ final class ThemeController extends BaseController
 
         $theme = $this->ownTheme((string) $request->input('slug'));
 
-        $incoming = [];
+        // Leeres Feld = diesen Token unverändert lassen (nicht auf den globalen
+        // Standard zurücksetzen). Der Platzhalter zeigt den Standard nur an.
+        $tokens = $this->themes->normalizeTokens($theme['tokens'] ?? []);
         foreach (array_keys($this->themes->tokenDefinitions()) as $key) {
-            $incoming[$key] = (string) $request->input('token_' . $key, '');
+            $value = trim((string) $request->input('token_' . $key, ''));
+            if ($value !== '') {
+                $tokens[$key] = $value;
+            }
         }
 
-        $this->themeRepo->updateTokens((int) $theme['id'], $this->themes->normalizeTokens($incoming));
+        $this->themeRepo->updateTokens((int) $theme['id'], $this->themes->normalizeTokens($tokens));
         flash('success', 'Theme gespeichert.');
         Redirect::to(self::BASE . '/bearbeiten?slug=' . rawurlencode($theme['slug'] ?? ''));
     }

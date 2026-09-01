@@ -10,12 +10,6 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   Blickschutz-Icon + Menü-Feinschliff in v0.10.2):
   - später: gespeicherte Empfängerlisten (wenn sich das als praktisch zeigt).
 
-- **Visueller Theme-Editor mit Live-Vorschau**: Der aktuelle Editor
-  (`templates/settings/theme-edit.php`) ist ein Formular mit Farbfeldern und
-  Vorschau-Kacheln. Wünschenswert: Änderungen sofort auf einer echten
-  Beispielansicht sehen (Buttons, Karten, Tabelle, Kopfleiste), Farbwähler
-  statt Texteingabe, evtl. Kontrast-Warnung direkt am Feld.
-
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
   Endpunkt, SQL-/Template-Injection, Datei-Uploads (XLSX-Import, Logo),
@@ -61,6 +55,16 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Visueller Theme-Editor (v0.11.0): Der Token-Editor
+  (`templates/settings/theme-edit.php`) hat jetzt zwei Spalten – links die
+  Felder (jedes Farbfeld mit nativem Farbwähler + Textfeld), rechts eine
+  klebende **Live-Vorschau** (Kopfleiste, Karte, Buttons, Eingabefeld,
+  Badges, Mini-Tabelle) im bearbeiteten Theme, unabhängig vom aktiven Theme.
+  Änderungen greifen sofort in der Vorschau, gespeichert wird erst mit „Theme
+  speichern". **Kontrasthinweise** direkt am Feld (WCAG-Verhältnis, Warnung
+  rot unter 4.5:1) – Rechenweg wie `readable_ink()` serverseitig, in
+  `public/assets/js/theme-editor.js`. Nebenbei: ein leeres Feld lässt den
+  Token jetzt unverändert (vorher: Reset auf den globalen Standard).
 - Mobil-Feinschliff (v0.10.2): Blickschutz-Knopf (und die Auswahl-Aktionen)
   in der schmalen Kopfleiste jetzt nur als Icon – Beschriftung bleibt für
   Screenreader per visually-hidden erhalten, aktiver Zustand füllt den Knopf.

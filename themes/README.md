@@ -16,6 +16,12 @@ Datei-Themes lassen sich nicht direkt ändern. Um sie als Ausgangspunkt zu nutze
 in der Oberfläche (Verwaltung → Themes) **duplizieren** – die Kopie landet als
 eigenes Theme in der Datenbank und ist frei editierbar.
 
+Der Editor für eigene Themes hat einen **Farbwähler pro Feld**, eine
+**Live-Vorschau** (Kopfleiste, Karte, Buttons, Eingabefeld, Badges, Tabelle –
+aktualisiert sofort, gespeichert wird erst mit „Theme speichern") und
+**Kontrasthinweise** direkt am Feld (WCAG-Verhältnis, Warnung unter 4.5:1
+bzw. 3:1). Ein leeres Feld lässt den Token unverändert.
+
 Mitgeliefert:
 
 - `grueze.php` – der ursprüngliche Look (gedämpftes Grün-Grau, Lindgrün-Akzent).

@@ -3076,3 +3076,258 @@ code {
 .theme-editor .subsection-card {
     margin-bottom: 1rem;
 }
+
+/* --------------------------------------------------- Theme-Editor mit Vorschau */
+
+.theme-editor-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 22rem);
+    gap: 1.2rem;
+    align-items: start;
+}
+
+.theme-editor-fields {
+    min-width: 0;
+}
+
+.theme-editor-fields .subsection-card {
+    margin-bottom: 1rem;
+}
+
+.token-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.85rem 1rem;
+    margin-top: 0.35rem;
+}
+
+.token-field {
+    display: grid;
+    gap: 0.3rem;
+    align-content: start;
+}
+
+.token-field label {
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--color-muted);
+}
+
+.token-input-row {
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+}
+
+.token-input-row input[type="text"] {
+    min-width: 0;
+    flex: 1 1 auto;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.86rem;
+}
+
+input[type="color"].token-swatch {
+    flex: 0 0 2.2rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    border: 1px solid var(--edge-strong);
+    border-radius: var(--radius-sm);
+    background: none;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+input[type="color"].token-swatch::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+
+input[type="color"].token-swatch::-webkit-color-swatch {
+    border: 0;
+    border-radius: calc(var(--radius-sm) - 2px);
+}
+
+input[type="color"].token-swatch::-moz-color-swatch {
+    border: 0;
+    border-radius: calc(var(--radius-sm) - 2px);
+}
+
+.contrast-note {
+    margin: 0;
+    font-size: 0.76rem;
+    line-height: 1.3;
+    color: var(--color-muted);
+}
+
+.contrast-note.is-warn {
+    color: var(--color-danger);
+    font-weight: 700;
+}
+
+/* Klebende Vorschau-Spalte */
+.theme-preview-shell {
+    position: sticky;
+    top: 5.6rem;
+    display: grid;
+    gap: 0.6rem;
+}
+
+.theme-preview-shell .detail-hint {
+    font-size: 0.82rem;
+}
+
+/* Der Vorschau-Container trägt die Token als Inline-Style; alles darin
+   nutzt sie über die normalen Regeln bzw. die abgeleiteten color-mix-Token. */
+.theme-preview {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+}
+
+.theme-preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.6rem 0.85rem;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-weight: 800;
+    font-family: var(--font-display);
+}
+
+.theme-preview-chip {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.16rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-on-accent) 14%, transparent);
+}
+
+.theme-preview-card {
+    margin: 0.85rem;
+    padding: 0.95rem;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    border: 1px solid var(--edge-light);
+    display: grid;
+    gap: 0.7rem;
+}
+
+.theme-preview-card h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+}
+
+.theme-preview-card p {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.theme-preview-card a {
+    color: var(--color-primary-strong);
+    font-weight: 700;
+}
+
+.theme-preview-muted {
+    color: var(--color-muted);
+}
+
+.theme-preview-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.theme-preview-actions button {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+    box-shadow: none;
+}
+
+.theme-preview-card input[type="text"] {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.85rem;
+}
+
+.theme-preview-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.theme-preview-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.16rem 0.5rem;
+    border-radius: 999px;
+}
+
+.theme-preview-badge.accent {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+}
+
+.theme-preview-badge.success {
+    background: var(--success-veil);
+    color: color-mix(in srgb, var(--color-success) 55%, var(--color-text));
+}
+
+.theme-preview-badge.danger {
+    background: var(--danger-veil);
+    color: var(--color-danger);
+}
+
+.theme-preview-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.82rem;
+    border: 1px solid var(--edge-hairline);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.theme-preview-table th,
+.theme-preview-table td {
+    padding: 0.4rem 0.55rem;
+    text-align: left;
+    border-bottom: 1px solid var(--edge-hairline);
+    background: var(--color-surface-strong);
+}
+
+.theme-preview-table thead th {
+    background: var(--surface-raised);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.theme-preview-table tbody tr:nth-child(even) td {
+    background: var(--surface-sunken);
+}
+
+.theme-preview-table tbody tr.is-hover td {
+    background: var(--accent-veil);
+}
+
+.theme-preview-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+@media (max-width: 900px) {
+    .theme-editor-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .theme-preview-shell {
+        position: static;
+        order: -1;
+    }
+}
