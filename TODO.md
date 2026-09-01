@@ -62,6 +62,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Tooling-Spuren entfernt (v0.14.1): `CLAUDE_HANDOFF_PROMPT.md` gelöscht
+  (Inhalt war veraltet, die noch nützlichen Punkte stehen jetzt in
+  `ARCHITECTURE.md` → „Weiterarbeit"), `.rsyncignore`-Eintrag entfernt,
+  Commit-Historie um die Co-Authored-By-Zeilen bereinigt (force-push).
 - GRUEZE als Produktname + Repo-Umbenennung (v0.14.0): GRUEZE ist der
   Produktname (nicht Instanz-Branding) und bleibt auch im White-Label
   sichtbar – im Footer (`GRUEZE v0.14.0`, jetzt ohne den Punkt hinter dem v,

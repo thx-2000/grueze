@@ -1,5 +1,17 @@
 # Architekturüberblick
 
+## Weiterarbeit
+
+- Bestehende Mechanismen erweitern, nicht parallel duplizieren.
+- Vor Änderungen die betroffenen Stellen lesen; Seiteneffekte prüfen.
+- Versionierung nachvollziehbar weiterführen (`system_version()` in
+  `src/Support/helpers.php`), pro Arbeitseinheit ein GitHub-Release.
+- Dokumentieren, was geändert wurde und was offen bleibt (`TODO.md`).
+- Zentrale Dateien: `public/index.php`, `src/Support/helpers.php`,
+  `src/Repositories/SettingRepository.php`, `src/Controllers/*`,
+  `src/Services/MailService.php`, `templates/layout/app.php`,
+  `public/assets/css/app.css`, `themes/`.
+
 ## Grundaufbau
 
 Die Anwendung ist als kleine SSR-PHP-App ohne Framework aufgebaut. `public/index.php` übernimmt Bootstrap, Dependency-Container und Routing. Controller bleiben schlank und delegieren Datenzugriffe an Repositories sowie Fachlogik an Services.
