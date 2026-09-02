@@ -79,9 +79,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   Adresse `mail_orga_address` oder alle aktiven Nutzer:innen mit Rolle
   `orga.contact_target` (Standard Team+Admin). Reply-To = Login-Mailadresse.
 
-- **Grüße-Pool mit Zufallsrotation**: 10–40 Standard-Wünsche (Geburtstag,
-  Weihnachten) hinterlegen und erweitern, beim Versand geshuffelt zuweisen –
-  assistiert (Admin prüft Batch) oder automatisch am Tag.
+- **Grüße-Pool mit Zufallsrotation**: **v1 in v0.35.0** – getrennte Listen
+  Geburtstag/Weihnachten, CRUD, 40 Seed-Texte, Weihnachts-Serienversand mit
+  Vorschau + „neu mischen" (assistiert). Offen:
+  - **v0.36:** Geburtstagsgrüße – Liste der heutigen/anstehenden Geburtstage
+    (Kontakte mit `geburtstag`), je Person Zufallstext, einzeln versenden.
+  - später ggf. „automatisch am Tag" (braucht Cron – aktuell kein Cron).
 
 - **Voll-Import: Merge-Modus** – **erledigt in v0.22.0**. Backup → „Zusammen-
   führen" spielt Kontakte ins bestehende System ein, dedupliziert über
@@ -123,6 +126,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Grüße-Pool v0.35.0: `greetings`-Tabelle (Migration `2026-09-08-gruesse-pool`,
+  40 Seeds, auch in `schema.sql` für Neuinstallationen),
+  `GreetingRepository::assign()` (Bag-Shuffle), `GreetingController`
+  (CRUD `/verwaltung/gruesse` + `/gruesse/weihnachten` Picker→Vorschau),
+  `MailController::sendGreetings` + `mail_job['per_contact_message']` in
+  `batch()`. Hub-Kachel + Link im Nachrichten-Screen.
 - „Orga-Team schreiben" v0.34.0: `OrgaController` (`/orga-team`),
   Berechtigung `orga.contact_target` (Gruppe „Orga-Team"), Setting
   `mail_orga_address` (Mail-Einstellungen), `SettingRepository::orgaContactRoles/

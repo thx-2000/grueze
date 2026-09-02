@@ -32,6 +32,9 @@ $option = static function (string $value, string $active): string {
     <p class="eyebrow">Nachrichten</p>
     <h1>Personalisierte E-Mail</h1>
     <p class="muted">Empfängerkreis wählen und Nachricht schreiben. Platzhalter: <code>{Anrede}</code>, <code>{Vorname}</code>, <code>{Nachname}</code><?= $eventId !== null ? ', <code>{Abstimmungslink}</code>' : '' ?>. Angeschrieben wird nur, wer eine Mailadresse hinterlegt hat.</p>
+    <?php if ($eventId === null && !$hasPreset): ?>
+        <p class="field-hint"><a href="<?= e(url('/gruesse/weihnachten')) ?>">Weihnachtsgrüße gemischt verschicken →</a></p>
+    <?php endif; ?>
 </header>
 
 <form id="mailComposeForm" method="post" action="<?= e(url('/mail/start')) ?>" enctype="multipart/form-data" class="contact-detail-form" data-message-form data-count-url="<?= e(url('/rundmail/anzahl')) ?>">

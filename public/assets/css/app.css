@@ -5564,3 +5564,80 @@ body { display: block; }
     height: 0.95rem;
     flex: 0 0 auto;
 }
+
+/* Grüße-Pool (v0.35) */
+.greeting-list {
+    list-style: none;
+    margin: 0.4rem 0 1rem;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.greeting-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    border: 1px solid var(--edge-hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-sunken);
+}
+
+.greeting-row.is-inactive {
+    opacity: 0.55;
+}
+
+.greeting-edit {
+    flex: 1;
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.greeting-edit textarea {
+    resize: vertical;
+}
+
+.greeting-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
+.greeting-add {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.greeting-add textarea {
+    flex: 1;
+    resize: vertical;
+}
+
+.greeting-add button {
+    flex: 0 0 auto;
+}
+
+.greeting-preview-table th[scope="row"] .muted {
+    display: block;
+    font-weight: 400;
+    font-size: 0.82rem;
+}
+
+.greeting-preview-table td {
+    white-space: normal;
+    min-width: 18rem;
+}
+
+.greeting-preview-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.greeting-preview-actions form {
+    margin: 0;
+}

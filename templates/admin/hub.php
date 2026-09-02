@@ -15,6 +15,7 @@ $groups = [
     'Werkzeuge' => [
         ['categories.manage', '/verwaltung/kategorien-tags', 'sliders', 'Kategorien & Tags', 'Kategorien und Tags anlegen, umbenennen und löschen.'],
         ['contacts.manage', '/vollstaendigkeit', 'check', 'Vollständigkeit', 'Datenlücken sehen, pro Person nachtragen, Namensliste zum Abgleich weitergeben.'],
+        ['settings.manage', '/verwaltung/gruesse', 'sparkles', 'Grüße-Pool', 'Standard-Wünsche für Geburtstag und Weihnachten pflegen; Weihnachtsgrüße gemischt verschicken.'],
     ],
     'System' => [
         ['users.manage', '/admin/backup', 'archive', 'Datensicherung', 'Voll-Backup herunterladen oder wiederherstellen.'],

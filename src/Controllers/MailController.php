@@ -527,6 +527,49 @@ final class MailController extends BaseController
         Redirect::to('/mail/status');
     }
 
+    /**
+     * Startet den Serienversand der Weihnachtsgrüße aus der vorbereiteten
+     * (und in der Vorschau gemischten) Zuordnung in der Session.
+     */
+    public function sendGreetings(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        $batch = $_SESSION['greeting_batch'] ?? null;
+        if (!is_array($batch) || empty($batch['assignments'])) {
+            flash('error', 'Keine vorbereiteten Grüße gefunden. Bitte erneut vorbereiten.');
+            Redirect::to('/gruesse/weihnachten');
+        }
+
+        $user = $this->auth->user();
+        $identity = $this->identityByKey((string) $batch['sender_key']) ?? $this->settings->mailIdentity();
+        $replyTo = $this->replyToByKey((string) $batch['reply_to_key'], false, $user);
+
+        $perContact = [];
+        foreach ((array) $batch['assignments'] as $contactId => $text) {
+            $perContact[(int) $contactId] = $this->composeMailBody((string) $text, false);
+        }
+
+        $_SESSION['mail_job'] = [
+            'contacts' => array_map('intval', array_keys($perContact)),
+            'subject' => $this->composeSubject((string) $batch['subject'], $this->settings->subjectPrefixOptions()[0] ?? '', false),
+            'message' => (string) (reset($perContact) ?: ''),
+            'per_contact_message' => $perContact,
+            'sender_key' => $identity['key'],
+            'reply_to_key' => $replyTo['key'] ?? (string) $batch['reply_to_key'],
+            'salutation_mode' => 'auto',
+            'member_contact_mode' => false,
+            'event_id' => null,
+            'event_tokens' => [],
+            'attachments' => [],
+            'offset' => 0,
+            'results' => [],
+        ];
+        unset($_SESSION['greeting_batch']);
+        Redirect::to('/mail/status');
+    }
+
     public function status(): void
     {
         $this->requireMailAccess();
@@ -567,7 +610,11 @@ final class MailController extends BaseController
         $userId = (int) $user['id'];
 
         foreach ($slice as $contact) {
-            [$subject, $message] = $this->applyVoteLink($job, (int) $contact['id']);
+            $perJob = $job;
+            if (isset($job['per_contact_message'][(int) $contact['id']])) {
+                $perJob['message'] = (string) $job['per_contact_message'][(int) $contact['id']];
+            }
+            [$subject, $message] = $this->applyVoteLink($perJob, (int) $contact['id']);
             $result = $this->mailer->sendMergedMail(
                 $identity,
                 $replyTo,

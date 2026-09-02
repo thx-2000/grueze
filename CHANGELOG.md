@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.35.0
+
+- **Grüße-Pool** (Verwaltung → Grüße-Pool): editierbare Standard-Wünsche,
+  **getrennte Listen für Geburtstag und Weihnachten**. Anlegen, Text ändern,
+  aktiv/inaktiv schalten, löschen. **40 mitgelieferte Texte** – kurz,
+  persönlich, mit „du". Platzhalter `{Anrede}`/`{Vorname}`/`{Nachname}`
+  werden beim Versand ersetzt.
+- **Weihnachtsgrüße als gemischter Serienversand.** Empfängerkreis wählen
+  (alle / Kategorie / Tags), dann **Vorschau**: jede Person bekommt zufällig
+  einen Text aus dem Pool – nicht die ganze Stufe dieselbe Mail. „Neu
+  mischen", bis es passt, dann senden (einzeln und personalisiert, über den
+  bekannten Stapel-Versand).
+- Geburtstagsgrüße (Liste der heutigen/anstehenden Geburtstage + Versand)
+  folgen in v0.36.
+- Migration `2026-09-08-gruesse-pool` (Tabelle `greetings` inkl. der 40 Texte).
+
 ## 0.34.0
 
 - **„Orga-Team schreiben"-Knopf.** Für jede eingeloggte Person – in der

@@ -8,6 +8,7 @@ use App\Controllers\BackupController;
 use App\Controllers\CategoryController;
 use App\Controllers\ContactController;
 use App\Controllers\EventController;
+use App\Controllers\GreetingController;
 use App\Controllers\LegalController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
@@ -31,6 +32,7 @@ use App\Core\Session;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
 use App\Repositories\EventRepository;
+use App\Repositories\GreetingRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\PasskeyRepository;
 use App\Repositories\RoleRepository;
@@ -214,6 +216,15 @@ try {
     ));
     Container::factory(\App\Repositories\RecipientListRepository::class, static fn () => new \App\Repositories\RecipientListRepository(Container::get(PDO::class)));
     Container::factory(EventRepository::class, static fn () => new EventRepository(Container::get(PDO::class)));
+    Container::factory(GreetingRepository::class, static fn () => new GreetingRepository(Container::get(PDO::class)));
+    Container::factory(GreetingController::class, static fn () => new GreetingController(
+        Container::get(Auth::class),
+        Container::get(GreetingRepository::class),
+        Container::get(ContactRepository::class),
+        Container::get(CategoryRepository::class),
+        Container::get(TagRepository::class),
+        Container::get(SettingRepository::class)
+    ));
     Container::factory(EventController::class, static fn () => new EventController(
         Container::get(Auth::class),
         Container::get(EventRepository::class),
@@ -327,6 +338,14 @@ try {
     $router->get('/vollstaendigkeit', [ContactController::class, 'completeness']);
     $router->post('/vollstaendigkeit/teilen', [ContactController::class, 'shareCompleteness']);
     $router->get('/namensliste', [ContactController::class, 'namenslisteMoved']);
+
+    $router->get('/verwaltung/gruesse', [GreetingController::class, 'manage']);
+    $router->post('/verwaltung/gruesse', [GreetingController::class, 'store']);
+    $router->post('/verwaltung/gruesse/bearbeiten', [GreetingController::class, 'update']);
+    $router->post('/verwaltung/gruesse/loeschen', [GreetingController::class, 'delete']);
+    $router->get('/gruesse/weihnachten', [GreetingController::class, 'christmasForm']);
+    $router->post('/gruesse/weihnachten/vorschau', [GreetingController::class, 'christmasPreview']);
+    $router->post('/mail/gruesse-senden', [MailController::class, 'sendGreetings']);
 
     $router->get('/termine', [EventController::class, 'index']);
     $router->get('/termine/neu', [EventController::class, 'createForm']);

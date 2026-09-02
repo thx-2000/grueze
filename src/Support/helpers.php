@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.34.0';
+    return '0.35.0';
 }
 
 function system_label(): string
@@ -334,6 +334,8 @@ function page_title(string $path): string
         '/contacts/edit'             => 'Kontakt',
         '/contacts/import'           => 'Kontakte importieren',
         '/rundmail'                  => 'Nachrichten',
+        '/verwaltung/gruesse'        => 'Grüße-Pool',
+        '/gruesse/weihnachten'       => 'Weihnachtsgrüße',
         '/mail/compose'              => 'Nachricht schreiben',
         '/mail/status'               => 'Versand',
         '/vollstaendigkeit'          => 'Vollständigkeit',
