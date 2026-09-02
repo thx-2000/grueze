@@ -44,10 +44,9 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   - Größter Schmerz: „wirkt zu überfrachtet". Ziel: cleaner, moderner, wertiger.
   - Self-Service gewünscht: jede:r ändert nur die eigenen Daten; Audit-Log muss
     alte Werte behalten (falsches Löschen/Ändern nachvollziehbar).
-  Stand: Richtung abgestimmt (`docs/REDESIGN.md`), Stufen 1–6 umgesetzt
-  (Palette/Schriften, Hülle, Start, Adressbuch, Kontakt-Detail, Nachrichten).
-  Offen: Vollständigkeit (löst Namensliste ab), Bereich „Termine",
-  „Mein Eintrag" (Handy), „Mail ans Orga-Team", Grüße-Pool.
+  Stand: Richtung abgestimmt (`docs/REDESIGN.md`), Stufen 1–8 + „Mein Eintrag"
+  umgesetzt. Offen: Verwaltung-Hub in 3 Gruppen (Zugänge · Erscheinungsbild ·
+  System), dann GitHub-Projektbeschreibung + Security-Audit.
 
 - **Selbst-Registrierung / Account-Anlage mit niedriger Berechtigung**:
   **Stufe 1 in v0.37.0, Stufe 2 in v0.38.0** – alle drei Wege umgesetzt:
@@ -143,6 +142,17 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- „Mein Eintrag" Selbst-Service v0.39.0: `/account` neu strukturiert (h1
+  „Mein Eintrag", führt mit „Das haben wir zu dir" = bearbeitbares Formular für
+  Stammdaten/Adresse/Kontaktwege, klebende Speichern-Leiste,
+  `[data-detail-form]`). `ContactController::updateOwnProfile` +
+  `sanitizeOwnProfilePayload` (POST `/mein-eintrag`) – nur eigene Felder,
+  Kategorie/Tags/Notizen/Login werden aus dem Bestand übernommen, Audit als
+  handelnde Person. Gate: `contacts.manage` ODER
+  `canViewContactField('address', ownContact)` (Selbst-Service-Schalter); sonst
+  Nur-Lese-Ansicht. `UserController::account` reicht `ownContact`/`canEditOwn`/
+  `phoneLabels` durch (ContactRepository injiziert). „Mein Konto" → „Mein
+  Eintrag" in allen sichtbaren Texten. Keine Migration.
 - Selbst-Registrierung Stufe 2 v0.38.0: Freigabe-Warteschlange
   (`createAwaitingApproval` / `approveRequest` / `rejectRequest`, optionale
   Notiz), Passkey-Option beim Anlegen (`mode=passkey` → Account + Redirect

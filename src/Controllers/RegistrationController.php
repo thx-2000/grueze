@@ -166,7 +166,7 @@ final class RegistrationController extends BaseController
             'name' => $name,
             'email' => (string) $invite['email'],
             // Bei Passkey ein zufälliges, unbrauchbares Passwort – der Passkey
-            // wird direkt danach unter „Mein Konto" eingerichtet.
+            // wird direkt danach unter „Mein Eintrag" eingerichtet.
             'password_hash' => password_hash($usePasskey ? bin2hex(random_bytes(24)) : $password, PASSWORD_DEFAULT),
             'role_id' => $roleId,
             'is_active' => 1,
@@ -180,7 +180,7 @@ final class RegistrationController extends BaseController
             Redirect::to('/account#passkeys');
         }
 
-        flash('success', 'Willkommen! Dein Zugang ist eingerichtet. Einen Passkey kannst du jederzeit unter „Mein Konto" hinzufügen.');
+        flash('success', 'Willkommen! Dein Zugang ist eingerichtet. Einen Passkey kannst du jederzeit unter „Mein Eintrag" hinzufügen.');
         Redirect::to('/account');
     }
 

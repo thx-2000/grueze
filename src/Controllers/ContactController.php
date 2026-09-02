@@ -309,6 +309,52 @@ final class ContactController extends BaseController
         Redirect::to('/contacts/edit?id=' . $id);
     }
 
+    /**
+     * Selbst-Service („Mein Eintrag"): Eine angemeldete Person pflegt Stammdaten,
+     * Adresse und Kontaktwege im eigenen verknüpften Kontakt. Kategorie, Tags,
+     * Notizen und Login bleiben unberührt – die ändert nur die Verwaltung.
+     */
+    public function updateOwnProfile(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+
+        $user = $this->auth->user();
+        $contactId = (int) ($user['contact_id'] ?? 0);
+        $existing = $contactId > 0 ? $this->contacts->find($contactId) : null;
+        if (!$existing) {
+            flash('error', 'Für dich ist noch kein Eintrag im Adressbuch verknüpft.');
+            Redirect::to('/account');
+        }
+
+        // „Eigenen Eintrag bearbeiten" folgt derselben Regel wie das Ansehen der
+        // eigenen Daten (Rollen-Sichtbarkeit oder der Selbst-Service-Schalter).
+        if (!can('contacts.manage') && !can_view_contact_field('address', $existing)) {
+            flash('error', 'Deine Daten pflegt zurzeit das Orga-Team.');
+            Redirect::to('/account');
+        }
+
+        $data = $this->sanitizeOwnProfilePayload($request, $existing);
+        $errors = Validator::validate($data, [
+            'vorname' => ['required'],
+            'nachname' => ['required'],
+        ]);
+        if ($errors !== []) {
+            $_SESSION['_errors'] = $errors;
+            $_SESSION['_old'] = $request->all();
+            Redirect::to('/account');
+        }
+
+        $this->contacts->update($contactId, $data, (int) $user['id']);
+        $changes = $this->contactChanges($existing, $data);
+        $summary = $changes === []
+            ? 'Eigener Eintrag gespeichert, keine Feldänderung.'
+            : 'Selbst gepflegt: ' . implode(', ', array_keys($changes)) . '.';
+        $this->logs->addAudit((int) $user['id'], $contactId, 'updated', $summary, $changes);
+        flash('success', 'Deine Angaben wurden gespeichert – danke fürs Aktuell-Halten.');
+        Redirect::to('/account');
+    }
+
     public function delete(Request $request): void
     {
         $this->requirePermission('contacts.delete');
@@ -453,6 +499,51 @@ final class ContactController extends BaseController
             'login_enabled' => $loginEnabled,
             'login_email' => $loginEmail,
             'role_id' => (int) $request->input('role_id'),
+        ];
+    }
+
+    /**
+     * Beschnittene Variante von sanitizePayload() für den Selbst-Service: nur die
+     * Felder, die eine Person am eigenen Eintrag ändern darf. Kategorie, Tags,
+     * Notizen und Bild werden aus dem Bestand übernommen, damit contacts.update()
+     * sie nicht leert.
+     */
+    private function sanitizeOwnProfilePayload(Request $request, array $existing): array
+    {
+        $emails = [];
+        foreach (($request->input('emails', []) ?: []) as $entry) {
+            $email = $this->cleanEmail((string) ($entry['email'] ?? ''));
+            $label = trim((string) ($entry['label'] ?? ''));
+            if ($email !== '') {
+                $emails[] = ['email' => $email, 'label' => $label];
+            }
+        }
+
+        $phones = [];
+        foreach (($request->input('phones', []) ?: []) as $entry) {
+            $phone = trim((string) preg_replace('/^\s*tel:\s*/i', '', (string) ($entry['phone'] ?? '')));
+            $label = trim((string) ($entry['label'] ?? 'Sonstige'));
+            if ($phone !== '') {
+                $phones[] = ['phone' => $phone, 'label' => $label];
+            }
+        }
+
+        return [
+            'vorname' => trim((string) $request->input('vorname')),
+            'nachname' => trim((string) $request->input('nachname')),
+            'geburtsname' => trim((string) $request->input('geburtsname')),
+            'geschlecht' => $this->normalizeGeschlecht((string) $request->input('geschlecht')),
+            'geburtstag' => (string) $request->input('geburtstag'),
+            'strasse' => trim((string) $request->input('strasse')),
+            'plz' => trim((string) $request->input('plz')),
+            'ort' => trim((string) $request->input('ort')),
+            'land' => trim((string) $request->input('land', (string) config('defaults.country', 'Deutschland'))),
+            'category_id' => (string) ($existing['category_id'] ?? ''),
+            'notizen' => (string) ($existing['notizen'] ?? ''),
+            'photo_path' => (string) ($existing['photo_path'] ?? ''),
+            'tag_ids' => array_map(static fn (array $tag): int => (int) $tag['id'], $existing['tags'] ?? []),
+            'emails' => $emails,
+            'phones' => $phones,
         ];
     }
 

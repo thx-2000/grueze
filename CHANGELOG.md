@@ -3,6 +3,24 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.39.0
+
+- **„Mein Eintrag" – Selbst-Service.** Die persönliche Seite (Wortmarke unten
+  links „Mein Eintrag") führt jetzt mit den **eigenen Angaben**: „Das haben wir
+  zu dir" zeigt Stammdaten, Adresse und Kontaktwege als bearbeitbares Formular
+  mit klebender Speichern-Leiste – dieselbe Bedienung wie die Kontakt-Detailseite.
+  - Änderbar sind nur eigene Felder; **Kategorie, Tags, interne Notizen und der
+    Login** bleiben unberührt (die pflegt die Verwaltung). Notizen sind hier
+    bewusst gar nicht sichtbar.
+  - Jede Selbst-Änderung landet im **Änderungsverlauf** des Kontakts (alt → neu).
+  - Ist der Selbst-Service-Schalter („Eigene Kontaktdaten sichtbar") aus, gibt es
+    statt des Formulars eine Nur-Lese-Übersicht mit Verweis aufs Orga-Team; ohne
+    verknüpften Kontakt ein kurzer Hinweis + „Orga-Team schreiben".
+  - Darunter unverändert: **offene Abstimmungen**, dann **Zugang & Sicherheit**
+    (Login-Adresse, Rolle, Passwort, Passkeys, Orga-Team schreiben).
+- „Mein Konto" heißt an allen sichtbaren Stellen jetzt „Mein Eintrag".
+- Keine Migration.
+
 ## 0.38.0
 
 - **Selbst-Registrierung, Stufe 2.**

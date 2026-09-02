@@ -1,4 +1,4 @@
-<p class="detail-backlink"><a href="<?= e(url('/account')) ?>"><?= icon('chevron-right') ?>Zurück zu „Mein Konto"</a></p>
+<p class="detail-backlink"><a href="<?= e(url('/account')) ?>"><?= icon('chevron-right') ?>Zurück zu „Mein Eintrag"</a></p>
 
 <header class="contact-detail-head">
     <p class="eyebrow">Orga-Team</p>

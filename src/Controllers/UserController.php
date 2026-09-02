@@ -21,7 +21,8 @@ final class UserController extends BaseController
         private LogRepository $logs,
         private PasswordResetService $passwordResets,
         private PasskeyRepository $passkeys,
-        private \App\Repositories\EventRepository $events
+        private \App\Repositories\EventRepository $events,
+        private \App\Repositories\ContactRepository $contacts
     ) {
         parent::__construct($auth);
     }
@@ -55,8 +56,15 @@ final class UserController extends BaseController
         }
 
         $contactId = (int) ($user['contact_id'] ?? 0);
+        $ownContact = $contactId > 0 ? $this->contacts->find($contactId) : null;
+        $canEditOwn = $ownContact !== null
+            && ($this->auth->can('contacts.manage') || $this->auth->canViewContactField('address', $ownContact));
+
         $this->render('account/index', [
             'accountUser' => $user,
+            'ownContact' => $ownContact,
+            'canEditOwn' => $canEditOwn,
+            'phoneLabels' => config('defaults.phone_labels', []),
             'passkeysAvailable' => $this->passkeys->isAvailable(),
             'passkeys' => $this->passkeys->byUserId((int) $user['id']),
             'openEvents' => $contactId > 0 ? $this->events->openEventsForContact($contactId) : [],

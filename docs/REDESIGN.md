@@ -52,8 +52,12 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
 - v0.37–0.38: Selbst-Registrierung (Einladungslinks · Selbst-Anmeldung ·
   Freigabe-Warteschlange · Passkey beim Anlegen) – erledigt.
 - v0.38: Footer/Seitenleiste aufgeräumt (Impressum/Datenschutz in den Balken).
-- offen: „Mein Eintrag" (Handy-Redesign), Verwaltung-Hub in 3 Gruppen,
-  GitHub-Projektbeschreibung für Public-Release, dann Security-Audit.
+- v0.39: **Mein Eintrag** – `/account` führt jetzt mit den eigenen Angaben
+  („Das haben wir zu dir", bearbeitbar wie die Kontakt-Detailseite), darunter
+  offene Abstimmungen + Zugang & Sicherheit. Selbst-Änderungen im
+  Änderungsverlauf; ohne Selbst-Service-Schalter Nur-Lese-Ansicht.
+- offen: Verwaltung-Hub in 3 Gruppen, GitHub-Projektbeschreibung für
+  Public-Release, dann Security-Audit.
 
 ## Screen-Entscheidungen
 
@@ -84,9 +88,11 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   festlegen" → Zusagen-Liste. Teilnehmerkreis = Empfänger = Zusagen, alles
   aus dem Adressbuch. „✉ an Teilnehmer" → Nachrichten mit vorbelegtem Kreis
   (alle / nur Zusagen / nur Offene).
-- **Mobil: Mein Eintrag:** „Das haben wir zu dir", „Ändern" je Zeile, nur
-  eigene Daten, Notizen unsichtbar. **„Orga-Team schreiben"-Knopf** (→ alle
-  mit Admin-/Orga-Rolle; feste Extra-Adresse als Ausnahme konfigurierbar).
+- **Mobil: Mein Eintrag:** „Das haben wir zu dir", nur eigene Daten, Notizen
+  unsichtbar. **„Orga-Team schreiben"-Knopf** (→ alle mit Admin-/Orga-Rolle;
+  feste Extra-Adresse als Ausnahme konfigurierbar). — *umgesetzt v0.39 (ganze
+  Karte bearbeitbar mit klebender Speichern-Leiste, wie Kontakt-Detail;
+  Selbst-Änderungen im Änderungsverlauf)*
 - **Mobil: Abstimmen (ohne Login):** personalisierter **Token-Link** je
   Person, Name vorbelegt. Tool erkennt, wer geklickt hat / ob mehrfach über
   einen Link. Fremder Link → sichtbare Warnung „du änderst einen fremden

@@ -102,7 +102,7 @@
                             <td colspan="8" class="user-detail-cell">
                                 <div class="user-admin-actions">
                                     <?php if ((int) $user['id'] === $currentUserId): ?>
-                                        <a class="ghost-button compact-action" href="<?= e(url('/account')) ?>"><?= icon('user') ?><span>Mein Konto</span></a>
+                                        <a class="ghost-button compact-action" href="<?= e(url('/account')) ?>"><?= icon('user') ?><span>Mein Eintrag</span></a>
                                     <?php elseif ((int) $user['id'] === $originalUserId): ?>
                                         <span class="muted">Steuerndes Admin-Konto</span>
                                     <?php else: ?>

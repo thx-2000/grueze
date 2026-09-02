@@ -175,7 +175,8 @@ try {
         Container::get(LogRepository::class),
         Container::get(PasswordResetService::class),
         Container::get(PasskeyRepository::class),
-        Container::get(EventRepository::class)
+        Container::get(EventRepository::class),
+        Container::get(ContactRepository::class)
     ));
     Container::factory(PasskeyController::class, static fn () => new PasskeyController(
         Container::get(Auth::class),
@@ -331,6 +332,7 @@ try {
     $router->post('/verwaltung/kategorien-tags/tag/loeschen', [TaxonomyController::class, 'deleteTag']);
     $router->get('/users', [UserController::class, 'index']);
     $router->get('/account', [UserController::class, 'account']);
+    $router->post('/mein-eintrag', [ContactController::class, 'updateOwnProfile']);
     $router->get('/orga-team', [OrgaController::class, 'form']);
     $router->post('/orga-team', [OrgaController::class, 'send']);
     $router->post('/account/password', [UserController::class, 'updateOwnPassword']);
