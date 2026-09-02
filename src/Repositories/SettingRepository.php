@@ -303,9 +303,9 @@ final class SettingRepository
         $supportEmail = trim((string) ($b['branding_support_email'] ?? ''));
         $contactLine = $supportEmail !== ''
             ? "Falls unsere Nachrichten fälschlich als Spam erkannt werden, nimm bitte {$supportEmail} in dein Adressbuch auf.\nWenn du keine weiteren Kontaktanfragen über dieses System erhalten möchtest, schreibe bitte an {$supportEmail}. Wir prüfen das dann mit dir."
-            : "Falls du keine weiteren Kontaktanfragen über dieses System erhalten möchtest, wende dich bitte ans Orga-Team.";
+            : "Wenn du keine weiteren Kontaktanfragen über dieses System erhalten möchtest, wende dich bitte an die Verwaltung von {$appName}.";
 
-        return "Diese Nachricht wurde von einem {$shortName}-Stufenmitglied über die interne Kontaktfunktion versendet und stammt nicht vom Orga-Team.\nDu erhältst sie, weil deine Kontaktdaten in der {$appName} hinterlegt sind.\nAntworten auf diese Nachricht gehen direkt an die absendende Person.\n{$contactLine}";
+        return "Diese Nachricht wurde über die interne Kontaktfunktion von {$shortName} versendet und stammt von einer einzelnen Person, nicht von der Verwaltung.\nDu erhältst sie, weil deine Kontaktdaten in der {$appName} hinterlegt sind.\nAntworten auf diese Nachricht gehen direkt an die absendende Person.\n{$contactLine}";
     }
 
     public function memberContactSubjectPrefix(): string

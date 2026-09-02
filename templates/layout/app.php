@@ -135,7 +135,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                     || str_starts_with($currentPath, '/users') || str_starts_with($currentPath, '/logs');
                 ?>
                 <nav class="nav" aria-label="Hauptnavigation">
-                    <?php if (($currentUser['role_name'] ?? '') === 'stufenmitglied' && $publicSiteUrl !== ''): ?>
+                    <?php if ($publicSiteUrl !== '' && !can('contacts.manage') && can('mail.contact_single')): ?>
                         <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= icon('globe') ?><span><?= e($publicSiteLabel !== '' ? $publicSiteLabel : 'Startseite') ?></span></a>
                     <?php endif; ?>
                     <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('home') ?><span>Start</span></a>

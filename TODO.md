@@ -41,11 +41,9 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Aus der ursprünglichen Übergabe (ChatGPT), noch offen
 
-1. White-Label: **abgeschlossen in v0.12.0** – Code-Defaults sind neutral,
-   Instanzwerte per Seed-Migration in `app_settings`, `config.example.php`
-   neutral, `docs/NEUE-INSTANZ.md`. Restliche Feinheiten: „Orga-Team" im
-   Member-Kontakt-Fuß ist noch fix (generisch genug); Betreff-Präfix-Editor
-   könnte einen Hinweis auf `{shortname}` vertragen.
+1. White-Label: **abgeschlossen in v0.12.0**, Mail-Feinschliff in **v0.19.0**
+   (Platzhalter `{name}`/`{kurzname}` in Mail-Fuß + Betreff-Präfixen, neutrale
+   Standard-Texte, Member-Modus über Berechtigung statt Rollenname).
 2. Rollen- und Rechtekonzept weiter schärfen, vor allem für spätere
    "Kontakt kann optional Login haben"-Logik.
 3. Sichtbarkeit einzelner Kontaktfelder noch granularer pro Rolle
@@ -61,6 +59,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- White-Label-Feinschliff Mail (v0.19.0): Platzhalter `{name}` / `{kurzname}`
+  in Mail-Fuß und Betreff-Präfixen (`apply_branding_placeholders()`), ersetzt
+  beim Versand in `MailController`. Neutrale Standard-Texte ohne „Orga-Team".
+  „Eingeschränkte Kontaktaufnahme" (`isMemberContactMode`) läuft jetzt über
+  `mail.contact_single && !mail.send && !contacts.manage` statt über den
+  festen Rollennamen `stufenmitglied`; ebenso der Public-Site-Link in der Nav.
 - Update-Konzept (v0.18.0): Neue Seite **Verwaltung → Aktualisieren**
   (`/admin/aktualisieren`, löst die alte „Migrationen"-Seite ab). Zeigt
   installierte vs. Code-Version (`app_settings.app_version`), „Zuletzt

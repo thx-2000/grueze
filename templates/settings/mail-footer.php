@@ -15,13 +15,13 @@
                 <label>
                     <span>Mail-Fuß</span>
                     <textarea name="mail_footer" rows="10" required><?= e($mailFooter) ?></textarea>
-                    <small class="field-hint">Im Mail-Kompositionsfenster wird dieser Abschnitt als Vorschau angezeigt, aber getrennt von der eigentlichen Nachricht gepflegt.</small>
+                    <small class="field-hint">Im Mail-Kompositionsfenster wird dieser Abschnitt als Vorschau angezeigt, aber getrennt von der eigentlichen Nachricht gepflegt. Platzhalter <code>{name}</code> (Instanzname) und <code>{kurzname}</code> werden beim Versand ersetzt.</small>
                 </label>
 
                 <label>
                     <span>Betreff-Präfixe</span>
                     <textarea name="subject_prefixes" rows="4" required><?= e($subjectPrefixes) ?></textarea>
-                    <small class="field-hint">Ein Präfix pro Zeile. Die erste Zeile ist der Standard, zum Beispiel <code><?= e($defaultSubjectPrefix) ?></code>.</small>
+                    <small class="field-hint">Ein Präfix pro Zeile. Die erste Zeile ist der Standard, zum Beispiel <code><?= e($defaultSubjectPrefix) ?></code>. Platzhalter <code>{kurzname}</code> / <code>{name}</code> werden beim Versand ersetzt – z. B. <code>[{kurzname}]</code>.</small>
                 </label>
             </div>
 

@@ -121,8 +121,10 @@ return [
         'country' => 'Deutschland',
         // Leer lassen = die eingebauten (branding-abhängigen) Vorgaben nutzen.
         // Über Verwaltung → Mail-Einstellungen / Rechtliches pflegbar.
+        // In mail_footer und subject_prefixes werden {name} (Instanzname) und
+        // {kurzname} beim Versand ersetzt.
         'mail_footer' => '',
-        'subject_prefixes' => ['[Verteiler]'],
+        'subject_prefixes' => ['[{kurzname}]'],
         'phone_labels' => [
             'Mobil',
             'Mobil 2',

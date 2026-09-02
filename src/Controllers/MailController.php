@@ -402,7 +402,7 @@ final class MailController extends BaseController
         }
 
         if ($memberContactMode && count($contacts) !== 1) {
-            flash('error', 'Stufenmitglieder können immer nur eine einzelne Person kontaktieren.');
+            flash('error', 'In diesem Modus kann immer nur eine einzelne Person kontaktiert werden.');
             Redirect::to('/kontakte');
         }
 
@@ -450,7 +450,7 @@ final class MailController extends BaseController
         $contactIds = array_map('intval', (array) ($request->input('contact_ids', []) ?: ($_SESSION['mail_draft_contact_ids'] ?? [])));
         $contacts = $this->contacts->findManyByIds($contactIds);
         $user = $this->auth->user();
-        $memberContactMode = $this->isMemberContactMode($user);
+        $memberContactMode = $this->isMemberContactMode();
         $identity = $this->identityByKey($memberContactMode
             ? $this->settings->defaultMailSenderKey()
             : (string) $request->input('sender_key'));
@@ -462,7 +462,7 @@ final class MailController extends BaseController
         }
 
         if ($memberContactMode && count($contacts) !== 1) {
-            flash('error', 'Stufenmitglieder können immer nur eine einzelne Person kontaktieren.');
+            flash('error', 'In diesem Modus kann immer nur eine einzelne Person kontaktiert werden.');
             Redirect::to('/kontakte');
         }
 
@@ -516,7 +516,7 @@ final class MailController extends BaseController
         $salutationMode = $this->normalizeSalutationMode((string) $request->input('salutation_mode', 'auto'));
         $contactIds = array_map('intval', (array) $request->input('contact_ids', []));
         if ($memberContactMode && count($contactIds) !== 1) {
-            flash('error', 'Stufenmitglieder können immer nur eine einzelne Person kontaktieren.');
+            flash('error', 'In diesem Modus kann immer nur eine einzelne Person kontaktiert werden.');
             Redirect::to('/kontakte');
         }
         $senderKey = $memberContactMode
@@ -688,7 +688,7 @@ final class MailController extends BaseController
                 : $this->settings->defaultSubjectPrefix();
         }
 
-        $normalizedPrefix = trim($prefix);
+        $normalizedPrefix = trim(apply_branding_placeholders($prefix));
 
         return $normalizedPrefix === '' ? $subject : $normalizedPrefix . ' ' . $subject;
     }
@@ -708,11 +708,17 @@ final class MailController extends BaseController
         Redirect::to('/kontakte');
     }
 
-    private function isMemberContactMode(?array $user = null): bool
+    /**
+     * „Eingeschränkte" Kontaktaufnahme: darf einzelne Personen anschreiben,
+     * aber keine Sammel-Mailings und keine Kontakte verwalten. Über
+     * Berechtigungen gesteuert statt an einen festen Rollennamen gebunden.
+     * Bezieht sich immer auf den aktuell angemeldeten Nutzer.
+     */
+    private function isMemberContactMode(): bool
     {
-        $currentUser = $user ?? $this->auth->user();
-
-        return (string) ($currentUser['role_name'] ?? '') === 'stufenmitglied';
+        return $this->auth->can('mail.contact_single')
+            && !$this->auth->can('mail.send')
+            && !$this->auth->can('contacts.manage');
     }
 
     private function memberReplyTo(?array $user): ?array
@@ -723,18 +729,18 @@ final class MailController extends BaseController
 
         return [
             'key' => 'member_reply',
-            'name' => (string) ($user['name'] ?? branding_value('branding_short_name', 'Stufenmitglied') . '-Stufenmitglied'),
+            'name' => (string) ($user['name'] ?? 'Interne Kontaktaufnahme'),
             'email' => (string) $user['email'],
         ];
     }
 
     private function mailFooter(bool $memberContactMode = false): string
     {
-        if ($memberContactMode) {
-            return (string) config('defaults.member_contact_footer', $this->settings->memberContactFooter());
-        }
+        $footer = $memberContactMode
+            ? (string) config('defaults.member_contact_footer', $this->settings->memberContactFooter())
+            : $this->settings->mailFooter();
 
-        return $this->settings->mailFooter();
+        return apply_branding_placeholders($footer);
     }
 
     private function defaultSubjectPrefix(bool $memberContactMode = false): string

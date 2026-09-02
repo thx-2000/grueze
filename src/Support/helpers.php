@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.18.0';
+    return '0.19.0';
 }
 
 function system_label(): string
@@ -261,6 +261,22 @@ function system_label(): string
 function product_url(): string
 {
     return trim(branding_default('product_url', 'https://github.com/thx-2000/grueze'));
+}
+
+/**
+ * Ersetzt Branding-Platzhalter in Mail-Texten und Betreff-Präfixen.
+ * `{name}` → Instanzname, `{kurzname}` / `{shortname}` → Kurzname.
+ * So kann eine Vorlage instanzneutral geschrieben werden (z. B. `[{kurzname}]`).
+ */
+function apply_branding_placeholders(string $text): string
+{
+    $branding = app_branding();
+
+    return strtr($text, [
+        '{name}'      => trim((string) ($branding['branding_app_name'] ?? '')),
+        '{kurzname}'  => trim((string) ($branding['branding_short_name'] ?? '')),
+        '{shortname}' => trim((string) ($branding['branding_short_name'] ?? '')),
+    ]);
 }
 
 /**

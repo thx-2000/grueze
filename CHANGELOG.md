@@ -3,6 +3,14 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.19.0
+
+- White-Label-Feinschliff bei Mail-Texten: Platzhalter `{name}` (Instanzname)
+  und `{kurzname}` in Mail-Fuß und Betreff-Präfixen, werden beim Versand
+  ersetzt (z. B. `[{kurzname}]`). Standard-Texte ohne feste Team-Bezeichnung.
+  „Eingeschränkte Kontaktaufnahme" wird über Berechtigungen erkannt statt über
+  einen festen Rollennamen.
+
 ## 0.18.0
 
 - Update-Ablauf für bestehende Instanzen: neue Seite **Verwaltung →
