@@ -298,7 +298,7 @@ try {
     $router->post('/passkeys/delete', [PasskeyController::class, 'delete']);
 
     $router->get('/rundmail', [MailController::class, 'rundmail']);
-    $router->post('/rundmail', [MailController::class, 'rundmailStart']);
+    $router->get('/rundmail/anzahl', [MailController::class, 'recipientCount']);
     $router->post('/rundmail/liste-speichern', [MailController::class, 'saveRecipientList']);
     $router->post('/rundmail/liste-umbenennen', [MailController::class, 'renameRecipientList']);
     $router->post('/rundmail/liste-loeschen', [MailController::class, 'deleteRecipientList']);

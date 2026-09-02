@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.28.0';
+    return '0.29.0';
 }
 
 function system_label(): string
@@ -333,9 +333,9 @@ function page_title(string $path): string
         '/contacts/create'           => 'Neuer Kontakt',
         '/contacts/edit'             => 'Kontakt',
         '/contacts/import'           => 'Kontakte importieren',
-        '/rundmail'                  => 'Rundmail',
-        '/mail/compose'              => 'Rundmail schreiben',
-        '/mail/status'               => 'Versandstatus',
+        '/rundmail'                  => 'Nachrichten',
+        '/mail/compose'              => 'Nachricht schreiben',
+        '/mail/status'               => 'Versand',
         '/namensliste'               => 'Namensliste',
         '/verwaltung'                => 'Verwaltung',
         '/verwaltung/kategorien-tags' => 'Kategorien & Tags',

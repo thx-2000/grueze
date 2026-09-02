@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.29.0
+
+- **Neuer Look, Stufe 6 – Nachrichten.** Empfängerkreis und Text auf **einem**
+  Screen statt in zwei Schritten. Oben der Empfängerkreis (Alle · Kategorie ·
+  Tags · gespeicherte Liste · aktuelle Auswahl), **„Alle mit Mailadresse"
+  vorgewählt**, mit **live aktualisierter Empfängerzahl** (auch unten an der
+  Senden-Leiste). „Diesen Empfängerkreis als Liste speichern" direkt im
+  Empfänger-Block. Darunter Absender, Betreff, Anrede, Nachricht, Mail-Fuß,
+  Anhänge. Klebende Senden-Leiste mit „Testmail an mich" und „Versand starten".
+- Aus dem Adressbuch (Auswählen → E-Mail verfassen) landet man auf demselben
+  Screen, Empfängerkreis auf „Ausgewählte Kontakte" vorbelegt.
+- Menüpunkte/Seitentitel: „Rundmail" → **Nachrichten**.
+- Die frühere getrennte Empfänger-Seite (`mail/rundmail.php`) entfällt; die
+  Einzelkontakt-Aufnahme für Mitglieder bleibt unverändert.
+- Keine Migration.
+
 ## 0.28.0
 
 - **Neuer Look, Stufe 5 – Kontakt-Detail.** Ansehen und Bearbeiten auf

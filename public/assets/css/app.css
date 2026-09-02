@@ -4662,3 +4662,127 @@ body { display: block; }
         justify-content: center;
     }
 }
+
+/* ============================================================
+   Nachrichten – Empfängerkreis + Text auf einem Screen (Stufe 6)
+   ============================================================ */
+
+.msg-head {
+    display: grid;
+    gap: 0.4rem;
+    padding: 0.2rem 0.1rem 0;
+}
+
+.msg-head h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    line-height: 1.15;
+}
+
+.msg-head .muted {
+    max-width: 60ch;
+    font-size: 0.92rem;
+}
+
+.recipient-options {
+    display: grid;
+    gap: 0.55rem;
+    margin-bottom: 1rem;
+}
+
+.recipient-option {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+    cursor: pointer;
+}
+
+.recipient-option.is-active {
+    border-color: var(--color-primary);
+    background: var(--color-highlight);
+}
+
+.recipient-option > input[type="radio"] {
+    width: auto;
+    flex: 0 0 auto;
+    margin-top: 0.15rem;
+}
+
+.recipient-option-body {
+    display: grid;
+    gap: 0.3rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.recipient-option-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.recipient-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.7rem;
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.recipient-option-hint {
+    color: var(--color-muted);
+    font-size: 0.88rem;
+}
+
+.recipient-option-sub {
+    margin-top: 0.35rem;
+    display: block;
+}
+
+.recipient-option-sub select {
+    max-width: 24rem;
+}
+
+.recipient-option:not(.is-active) .recipient-option-sub {
+    opacity: 0.5;
+}
+
+.mail-preview-block {
+    display: grid;
+    gap: 0.35rem;
+}
+
+/* Sende-Leiste: klebt unten, zeigt die Live-Empfängerzahl. */
+.message-send-bar {
+    position: sticky;
+    bottom: 0.8rem;
+}
+
+.message-send-count {
+    font-weight: 600;
+    color: var(--color-primary-strong);
+}
+
+.message-send-count strong {
+    display: inline;
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+    .message-send-bar {
+        bottom: 0;
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+}

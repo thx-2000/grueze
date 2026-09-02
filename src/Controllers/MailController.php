@@ -217,73 +217,82 @@ final class MailController extends BaseController
         $filterIds = $fromFilter ? $this->contacts->recipientIds($filters) : [];
         $_SESSION['rundmail_filter_ids'] = $filterIds;
 
-        $withEmail = $this->contacts->recipientIds([]);
-        $recipientLists = array_map(function (array $list) use ($withEmail): array {
-            $active = array_values(array_intersect($withEmail, $list['contact_ids']));
+        // Entwurf einmalig übernehmen (z. B. aus der Namensliste).
+        $draft = (array) ($_SESSION['mail_draft'] ?? []);
+        unset($_SESSION['mail_draft']);
 
-            return [
-                'id' => $list['id'],
-                'name' => $list['name'],
-                'total' => count($list['contact_ids']),
-                'reachable' => count($active),
-            ];
-        }, $this->recipientLists->all());
-
-        $this->render('mail/rundmail', [
+        $this->render('mail/nachricht', array_merge($this->messageComposeData(), [
+            'presetContacts' => [],
+            'draft' => $draft,
             'categories' => $categories,
             'tags' => $tags,
             'categoryCounts' => $categoryCounts,
             'tagCounts' => $tagCounts,
-            'totalWithEmail' => count($withEmail),
+            'totalWithEmail' => count($this->contacts->recipientIds([])),
             'fromFilter' => $fromFilter,
             'filterCount' => count($filterIds),
             'filterSummary' => $fromFilter ? $this->filterSummary($filters, $categories, $tags) : '',
-            'recipientLists' => $recipientLists,
-        ]);
+            'recipientLists' => $this->reachableRecipientLists(),
+        ]));
     }
 
-    public function rundmailStart(Request $request): void
+    /**
+     * Empfänger-IDs aus dem gewählten Empfängerkreis („recipient_mode").
+     * Nur für die neue Nachrichten-Seite; die Einzelkontakt-Aufnahme läuft
+     * weiter über `contact_ids[]` ohne Modus.
+     *
+     * @return list<int>
+     */
+    private function resolveRecipientIds(Request $request): array
+    {
+        $mode = (string) $request->input('recipient_mode', 'all');
+        $withEmail = $this->contacts->recipientIds([]);
+
+        return match ($mode) {
+            'selection' => array_values(array_unique(array_filter(
+                array_map('intval', (array) $request->input('contact_ids', [])),
+                static fn (int $n): bool => $n > 0
+            ))),
+            'filter' => array_values(array_intersect(
+                $withEmail,
+                array_map('intval', (array) ($_SESSION['rundmail_filter_ids'] ?? []))
+            )),
+            'list' => (function () use ($request, $withEmail): array {
+                $list = $this->recipientLists->find((int) $request->input('list_id'));
+
+                return $list === null ? [] : array_values(array_intersect($withEmail, $list['contact_ids']));
+            })(),
+            'category' => (string) $request->input('category_id', '') !== ''
+                ? $this->contacts->recipientIds(['category_id' => (string) $request->input('category_id')])
+                : [],
+            'tags' => ($tagIds = array_values(array_filter(array_map('intval', (array) $request->input('tag_ids', []))))) !== []
+                ? $this->contacts->recipientIds(['tag_ids' => $tagIds])
+                : [],
+            default => $withEmail,
+        };
+    }
+
+    /** Live-Empfängerzahl für die Nachrichten-Seite (JSON). */
+    public function recipientCount(Request $request): never
     {
         $this->requirePermission('mail.send');
-        Csrf::validate($request->input('_csrf'));
 
-        $mode = (string) $request->input('mode', '');
+        $this->json(['count' => count($this->resolveRecipientIds($request))]);
+    }
 
-        if ($mode === 'filter') {
-            $ids = array_map('intval', (array) ($_SESSION['rundmail_filter_ids'] ?? []));
-        } elseif ($mode === 'list') {
-            $list = $this->recipientLists->find((int) $request->input('list_id'));
-            if ($list === null) {
-                flash('error', 'Gespeicherte Liste nicht gefunden.');
-                Redirect::to('/rundmail');
-            }
-            $ids = array_values(array_intersect($this->contacts->recipientIds([]), $list['contact_ids']));
-        } else {
-            $filters = match ($mode) {
-                'all' => [],
-                'category' => ['category_id' => (string) $request->input('category_id', '')],
-                'tags' => ['tag_ids' => array_values(array_filter(array_map('intval', (array) $request->input('tag_ids', []))))],
-                default => null,
-            };
+    /** Gespeicherte Empfängerlisten inkl. „wie viele davon noch erreichbar". */
+    private function reachableRecipientLists(): array
+    {
+        $withEmail = $this->contacts->recipientIds([]);
 
-            if ($filters === null
-                || ($mode === 'category' && $filters['category_id'] === '')
-                || ($mode === 'tags' && $filters['tag_ids'] === [])
-            ) {
-                flash('error', 'Bitte einen Empfängerkreis auswählen.');
-                Redirect::to('/rundmail');
-            }
-
-            $ids = $this->contacts->recipientIds($filters);
-        }
-
-        if ($ids === []) {
-            flash('error', 'In dieser Auswahl hat niemand eine Mailadresse hinterlegt.');
-            Redirect::to('/rundmail');
-        }
-
-        $_GET['contact_ids'] = $ids;
-        $this->compose(new Request());
+        return array_map(static function (array $list) use ($withEmail): array {
+            return [
+                'id' => $list['id'],
+                'name' => $list['name'],
+                'total' => count($list['contact_ids']),
+                'reachable' => count(array_intersect($withEmail, $list['contact_ids'])),
+            ];
+        }, $this->recipientLists->all());
     }
 
     // ----------------------------------------------- Gespeicherte Empfängerlisten
@@ -295,10 +304,12 @@ final class MailController extends BaseController
         Csrf::validate($request->input('_csrf'));
 
         $name = trim((string) $request->input('name'));
-        $ids = array_values(array_unique(array_filter(
-            array_map('intval', (array) $request->input('contact_ids', [])),
-            static fn (int $n): bool => $n > 0
-        )));
+        $ids = $request->input('recipient_mode') !== null
+            ? $this->resolveRecipientIds($request)
+            : array_values(array_unique(array_filter(
+                array_map('intval', (array) $request->input('contact_ids', [])),
+                static fn (int $n): bool => $n > 0
+            )));
 
         if ($name === '') {
             $this->json(['ok' => false, 'error' => 'Bitte einen Namen für die Liste angeben.'], 422);
@@ -389,6 +400,25 @@ final class MailController extends BaseController
         return $parts === [] ? 'alle Kontakte' : implode(' · ', $parts);
     }
 
+    /**
+     * Gemeinsame Ansichtsdaten für den Schreiben-Teil (Absender, Antwortweg,
+     * Betreff-Präfixe, Mail-Fuß). memberContactMode ist hier immer falsch –
+     * die Einzelkontakt-Aufnahme nutzt weiterhin `mail/compose`.
+     */
+    private function messageComposeData(): array
+    {
+        return [
+            'identities' => $this->settings->mailIdentities(),
+            'replyToOptions' => $this->replyToOptions(false),
+            'mailFooter' => $this->mailFooter(false),
+            'subjectPrefixOptions' => $this->settings->subjectPrefixOptions(),
+            'defaultSubjectPrefix' => $this->defaultSubjectPrefix(false),
+            'defaultSalutationMode' => 'auto',
+            'defaultSenderKey' => $this->settings->defaultMailSenderKey(),
+            'defaultReplyToKey' => $this->settings->defaultMailReplyToKey(),
+        ];
+    }
+
     public function compose(Request $request): void
     {
         $this->requireMailAccess();
@@ -413,19 +443,50 @@ final class MailController extends BaseController
         $draft = (array) ($_SESSION['mail_draft'] ?? []);
         unset($_SESSION['mail_draft']);
 
-        $this->render('mail/compose', [
-            'contacts' => $contacts,
+        // Einzelkontakt-Aufnahme (Mitglieder) behält die schlanke Sonderansicht.
+        if ($memberContactMode) {
+            $this->render('mail/compose', [
+                'contacts' => $contacts,
+                'draft' => $draft,
+                'identities' => $this->settings->mailIdentities(),
+                'replyToOptions' => $this->replyToOptions(true),
+                'mailFooter' => $this->mailFooter(true),
+                'subjectPrefixOptions' => $this->settings->subjectPrefixOptions(),
+                'defaultSubjectPrefix' => $this->defaultSubjectPrefix(true),
+                'defaultSalutationMode' => 'auto',
+                'memberContactMode' => true,
+                'defaultSenderKey' => $this->settings->defaultMailSenderKey(),
+                'defaultReplyToKey' => $this->settings->defaultMailReplyToKey(),
+            ]);
+
+            return;
+        }
+
+        // Staff mit fester Auswahl landen auf der gemeinsamen Nachrichten-Seite,
+        // Empfängerkreis auf „diese Auswahl" vorbelegt.
+        [$categories, $tags] = [$this->categories->all(), $this->tags->all()];
+        $categoryCounts = [];
+        foreach ($categories as $category) {
+            $categoryCounts[(int) $category['id']] = count($this->contacts->recipientIds(['category_id' => (string) $category['id']]));
+        }
+        $tagCounts = [];
+        foreach ($tags as $tag) {
+            $tagCounts[(int) $tag['id']] = count($this->contacts->recipientIds(['tag_ids' => [(int) $tag['id']]]));
+        }
+
+        $this->render('mail/nachricht', array_merge($this->messageComposeData(), [
+            'presetContacts' => $contacts,
             'draft' => $draft,
-            'identities' => $this->settings->mailIdentities(),
-            'replyToOptions' => $this->replyToOptions($memberContactMode),
-            'mailFooter' => $this->mailFooter($memberContactMode),
-            'subjectPrefixOptions' => $this->settings->subjectPrefixOptions(),
-            'defaultSubjectPrefix' => $this->defaultSubjectPrefix($memberContactMode),
-            'defaultSalutationMode' => 'auto',
-            'memberContactMode' => $memberContactMode,
-            'defaultSenderKey' => $this->settings->defaultMailSenderKey(),
-            'defaultReplyToKey' => $this->settings->defaultMailReplyToKey(),
-        ]);
+            'categories' => $categories,
+            'tags' => $tags,
+            'categoryCounts' => $categoryCounts,
+            'tagCounts' => $tagCounts,
+            'totalWithEmail' => count($this->contacts->recipientIds([])),
+            'fromFilter' => false,
+            'filterCount' => 0,
+            'filterSummary' => '',
+            'recipientLists' => $this->reachableRecipientLists(),
+        ]));
     }
 
     public function composeAll(Request $request): void
@@ -447,7 +508,9 @@ final class MailController extends BaseController
     {
         $this->requireMailAccess();
         Csrf::validate($request->input('_csrf'));
-        $contactIds = array_map('intval', (array) ($request->input('contact_ids', []) ?: ($_SESSION['mail_draft_contact_ids'] ?? [])));
+        $contactIds = $request->input('recipient_mode') !== null
+            ? $this->resolveRecipientIds($request)
+            : array_map('intval', (array) ($request->input('contact_ids', []) ?: ($_SESSION['mail_draft_contact_ids'] ?? [])));
         $contacts = $this->contacts->findManyByIds($contactIds);
         $user = $this->auth->user();
         $memberContactMode = $this->isMemberContactMode();
@@ -490,6 +553,7 @@ final class MailController extends BaseController
             'fehlermeldung' => null,
         ]);
         flash('success', 'Testmail wurde an dein Konto gesendet.');
+        $recipientMode = (string) $request->input('recipient_mode', '');
         $_SESSION['mail_draft'] = [
             'contact_ids' => $contactIds,
             'subject' => (string) $request->input('subject'),
@@ -499,7 +563,15 @@ final class MailController extends BaseController
             'subject_prefix' => $memberContactMode ? $this->defaultSubjectPrefix(true) : (string) $request->input('subject_prefix'),
             'salutation_mode' => $salutationMode,
             'member_contact_mode' => $memberContactMode,
+            'recipient_mode' => $recipientMode,
+            'category_id' => (string) $request->input('category_id', ''),
+            'tag_ids' => array_values(array_filter(array_map('intval', (array) $request->input('tag_ids', [])))),
+            'list_id' => (string) $request->input('list_id', ''),
         ];
+
+        if ($recipientMode !== '' && $recipientMode !== 'selection') {
+            Redirect::to('/rundmail');
+        }
         Redirect::to('/mail/compose?contact_ids[]=' . implode('&contact_ids[]=', array_map('urlencode', array_map('strval', $contactIds))));
     }
 
@@ -514,10 +586,16 @@ final class MailController extends BaseController
         $user = $this->auth->user();
         $subjectPrefix = $memberContactMode ? $this->defaultSubjectPrefix(true) : (string) $request->input('subject_prefix');
         $salutationMode = $this->normalizeSalutationMode((string) $request->input('salutation_mode', 'auto'));
-        $contactIds = array_map('intval', (array) $request->input('contact_ids', []));
+        $contactIds = $request->input('recipient_mode') !== null
+            ? $this->resolveRecipientIds($request)
+            : array_map('intval', (array) $request->input('contact_ids', []));
         if ($memberContactMode && count($contactIds) !== 1) {
             flash('error', 'In diesem Modus kann immer nur eine einzelne Person kontaktiert werden.');
             Redirect::to('/kontakte');
+        }
+        if (!$memberContactMode && $contactIds === []) {
+            flash('error', 'In diesem Empfängerkreis hat niemand eine Mailadresse hinterlegt.');
+            Redirect::to('/rundmail');
         }
         $senderKey = $memberContactMode
             ? $this->settings->defaultMailSenderKey()

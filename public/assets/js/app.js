@@ -324,6 +324,117 @@ if (detailForm) {
     });
 }
 
+// Nachrichten-Seite: Empfängerkreis + Text auf einem Screen.
+const messageForm = document.querySelector('[data-message-form]');
+if (messageForm) {
+    const options = [...messageForm.querySelectorAll('.recipient-option')];
+    const countTargets = [...messageForm.querySelectorAll('[data-recipient-count]')];
+    const countUrl = messageForm.dataset.countUrl;
+
+    const syncOptions = () => {
+        options.forEach((option) => {
+            const radio = option.querySelector('input[type="radio"]');
+            const active = radio.checked;
+            option.classList.toggle('is-active', active);
+            option.querySelectorAll('.recipient-option-sub select, .recipient-option-sub input').forEach((field) => {
+                field.disabled = !active;
+            });
+        });
+    };
+
+    let countTimer = null;
+    const refreshCount = () => {
+        if (!countUrl) return;
+        window.clearTimeout(countTimer);
+        countTimer = window.setTimeout(async () => {
+            const params = new URLSearchParams();
+            const data = new FormData(messageForm);
+            for (const [key, value] of data.entries()) {
+                if (['recipient_mode', 'category_id', 'list_id'].includes(key)) params.set(key, value);
+                if (key === 'tag_ids[]') params.append('tag_ids[]', value);
+                if (key === 'contact_ids[]') params.append('contact_ids[]', value);
+            }
+            try {
+                const res = await fetch(`${countUrl}?${params.toString()}`, { headers: { 'X-Requested-With': 'fetch' } });
+                const json = await res.json();
+                const n = Number(json.count) || 0;
+                countTargets.forEach((el) => { el.textContent = String(n); });
+            } catch (error) {
+                countTargets.forEach((el) => { el.textContent = '?'; });
+            }
+        }, 200);
+    };
+
+    messageForm.querySelectorAll('input[name="recipient_mode"]').forEach((radio) => {
+        radio.addEventListener('change', () => { syncOptions(); refreshCount(); });
+    });
+    messageForm.querySelectorAll('.recipient-option-sub select, .recipient-option-sub input').forEach((field) => {
+        field.addEventListener('change', () => {
+            const radio = field.closest('.recipient-option').querySelector('input[type="radio"]');
+            radio.checked = true;
+            syncOptions();
+            refreshCount();
+        });
+    });
+
+    // Betreff-Vorschau (Präfix + Betreff) live.
+    const prefixField = messageForm.querySelector('#subjectPrefixField');
+    const subjectField = messageForm.querySelector('#subjectField');
+    const subjectPreview = document.getElementById('subjectPreview');
+    const updateSubjectPreview = () => {
+        if (!subjectPreview) return;
+        const prefix = prefixField ? prefixField.value.trim() : '';
+        const subject = subjectField ? subjectField.value.trim() : '';
+        subjectPreview.textContent = `${prefix ? prefix + ' ' : ''}${subject || 'Dein Betreff'}`.trim();
+    };
+    prefixField?.addEventListener('change', updateSubjectPreview);
+    subjectField?.addEventListener('input', updateSubjectPreview);
+
+    // „Als Liste speichern" – nutzt denselben Empfängerkreis.
+    const saveBox = document.getElementById('saveRecipientList');
+    if (saveBox) {
+        const nameInput = saveBox.querySelector('#saveListName');
+        const saveButton = saveBox.querySelector('button');
+        const feedback = saveBox.querySelector('.save-list-feedback');
+        const show = (message, ok) => {
+            feedback.textContent = message;
+            feedback.hidden = false;
+            feedback.classList.toggle('is-error', !ok);
+        };
+        saveButton.addEventListener('click', async () => {
+            const name = nameInput.value.trim();
+            if (name === '') { nameInput.focus(); return; }
+            const body = new URLSearchParams();
+            const data = new FormData(messageForm);
+            body.set('_csrf', messageForm.querySelector('input[name="_csrf"]').value);
+            body.set('name', name);
+            for (const [key, value] of data.entries()) {
+                if (['recipient_mode', 'category_id', 'list_id'].includes(key)) body.set(key, value);
+                if (key === 'tag_ids[]') body.append('tag_ids[]', value);
+                if (key === 'contact_ids[]') body.append('contact_ids[]', value);
+            }
+            saveButton.disabled = true;
+            try {
+                const res = await fetch(saveBox.dataset.url, { method: 'POST', headers: { 'X-Requested-With': 'fetch' }, body });
+                const json = await res.json().catch(() => ({}));
+                if (res.ok && json.ok) {
+                    show(`Liste „${json.name}“ gespeichert (${json.count} Kontakte).`, true);
+                    nameInput.value = '';
+                } else {
+                    show(json.error || 'Speichern fehlgeschlagen.', false);
+                }
+            } catch (error) {
+                show('Speichern fehlgeschlagen (Netzwerk).', false);
+            } finally {
+                saveButton.disabled = false;
+            }
+        });
+    }
+
+    syncOptions();
+    refreshCount();
+}
+
 const contactsTable = document.querySelector('.contacts-table');
 if (contactsTable) {
     const storageKey = 'grueze_visible_contact_columns';

@@ -36,7 +36,9 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
 - Stufe 4 (v0.26): **Adressbuch** – erledigt (Spalten-Menü v0.27).
 - Stufe 5 (v0.28): **Kontakt-Detail** – erledigt (eine Seite ansehen+bearbeiten,
   Änderungsverlauf mit Altwerten für Admins).
-- offen: Nachrichten, Vollständigkeit, Termine, Mein Eintrag.
+- Stufe 6 (v0.29): **Nachrichten** – erledigt (Empfängerkreis + Text auf einem
+  Screen, Live-Empfängerzahl, „Alle" vorgewählt).
+- offen: Vollständigkeit (löst Namensliste ab), Termine, Mein Eintrag.
 
 ## Screen-Entscheidungen
 
@@ -54,6 +56,7 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   klebende Speichern-Leiste)*
 - **Nachrichten:** Empfängerkreis + Text auf **einem** Screen, Empfängerzahl
   live. „Als Liste speichern" an der Senden-Zeile. „An alle" vorgewählt.
+  — *umgesetzt v0.29*
 - **Vollständigkeit** (löst „Namensliste" ab): Überblick (X gesamt · Y ohne
   Mail · Z ohne Tel.), pro Lücke „bearbeiten" / „diesen schreiben" /
   „als Text kopieren" / „Liste teilen". Kopier-Funktion bleibt, nicht mehr

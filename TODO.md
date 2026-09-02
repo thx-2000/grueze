@@ -90,6 +90,15 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Neuer Look, Stufe 6 – Nachrichten (v0.29.0): `templates/mail/nachricht.php`
+  vereint Empfängerkreis + Text auf einem Screen (`rundmail.php` entfällt,
+  `rundmailStart` weg). „Alle" vorgewählt, Live-Zahl via
+  `GET /rundmail/anzahl` (`MailController::recipientCount` +
+  `resolveRecipientIds`). `start()`/`test()`/`saveRecipientList()` lösen
+  Empfänger aus `recipient_mode` auf, wenn gesetzt. Adressbuch-Auswahl →
+  `compose()` rendert für Staff jetzt `nachricht` mit Modus „selection";
+  Mitglieder-Einzelkontakt bleibt auf `mail/compose`. `data-message-form`
+  in app.js (Optionen-Sync, Live-Count, Betreff-Vorschau, Als-Liste-Speichern).
 - Neuer Look, Stufe 5 – Kontakt-Detail (v0.28.0): `templates/contacts/detail.php`
   ersetzt `form.php` (gelöscht) für Ansehen+Bearbeiten und Neu-Anlegen.
   Ganze Seite editierbar, klebende Speichern-Leiste bei Änderung
