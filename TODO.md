@@ -44,9 +44,9 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   - Größter Schmerz: „wirkt zu überfrachtet". Ziel: cleaner, moderner, wertiger.
   - Self-Service gewünscht: jede:r ändert nur die eigenen Daten; Audit-Log muss
     alte Werte behalten (falsches Löschen/Ändern nachvollziehbar).
-  Stand: Richtung abgestimmt (`docs/REDESIGN.md`), Stufen 1–8 + „Mein Eintrag"
-  umgesetzt. Offen: Verwaltung-Hub in 3 Gruppen (Zugänge · Erscheinungsbild ·
-  System), dann GitHub-Projektbeschreibung + Security-Audit.
+  Stand: Richtung abgestimmt (`docs/REDESIGN.md`), Stufen 1–8 + „Mein Eintrag" +
+  Verwaltung-Hub in 3 Gruppen umgesetzt. Offen: GitHub-Projektbeschreibung,
+  dann Security-Audit.
 
 - **Selbst-Registrierung / Account-Anlage mit niedriger Berechtigung**:
   **Stufe 1 in v0.37.0, Stufe 2 in v0.38.0** – alle drei Wege umgesetzt:
@@ -142,6 +142,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Verwaltung-Hub in 3 Gruppen v0.40.0: `templates/admin/hub.php` – Gruppen
+  „Zugänge · Erscheinungsbild · System" (statt Personen & Zugänge / Erscheinungs-
+  bild & Texte / Werkzeuge / System). Kategorien & Tags + Grüße-Pool →
+  Erscheinungsbild, Vollständigkeit → System. Kopf jetzt `<h1>Einstellungen</h1>`
+  (`contact-detail-head` statt `hero-card`). `page_title('/verwaltung')` →
+  „Einstellungen". Reine Template-Änderung, keine Migration.
 - „Mein Eintrag" Selbst-Service v0.39.0: `/account` neu strukturiert (h1
   „Mein Eintrag", führt mit „Das haben wir zu dir" = bearbeitbares Formular für
   Stammdaten/Adresse/Kontaktwege, klebende Speichern-Leiste,

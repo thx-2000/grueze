@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.39.0';
+    return '0.40.0';
 }
 
 function system_label(): string
@@ -347,7 +347,7 @@ function page_title(string $path): string
         '/termine/neu'               => 'Neuer Termin',
         '/termine/detail'            => 'Termin',
         '/abstimmen'                 => 'Abstimmen',
-        '/verwaltung'                => 'Verwaltung',
+        '/verwaltung'                => 'Einstellungen',
         '/verwaltung/kategorien-tags' => 'Kategorien & Tags',
         '/users'                     => 'Benutzer',
         '/account'                   => 'Mein Eintrag',

@@ -24,7 +24,7 @@ Seitenleiste, für alle dieselbe App — die Rolle blendet aus:
 | **Adressbuch** | „Kontakte" | alle (Umfang je Rolle) |
 | **Nachrichten** | „Rundmail" | mail.send |
 | **Termine** | *neu* | anlegen: Admin/Orga (rollenfreischaltbar) |
-| **Verwaltung** | 12 Kacheln → 3 Gruppen (Zugänge · Erscheinungsbild · System) | Admin/Orga |
+| **Verwaltung** | 3 Gruppen: Zugänge · Erscheinungsbild · System (v0.40) | Admin/Orga |
 
 Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
 
@@ -56,8 +56,9 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   („Das haben wir zu dir", bearbeitbar wie die Kontakt-Detailseite), darunter
   offene Abstimmungen + Zugang & Sicherheit. Selbst-Änderungen im
   Änderungsverlauf; ohne Selbst-Service-Schalter Nur-Lese-Ansicht.
-- offen: Verwaltung-Hub in 3 Gruppen, GitHub-Projektbeschreibung für
-  Public-Release, dann Security-Audit.
+- v0.40: **Verwaltung** – vier Gruppen zu dreien zusammengefasst
+  (Zugänge · Erscheinungsbild · System), Kopf als `<h1>Einstellungen</h1>`.
+- offen: GitHub-Projektbeschreibung für Public-Release, dann Security-Audit.
 
 ## Screen-Entscheidungen
 
@@ -104,7 +105,7 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
    Warnhinweis, oder zusätzlich Mail-Bestätigung?
 2. **Grüße-Pool** (Geburtstag/Weihnachten, geshuffelt): eigener Screen unter
    „Nachrichten" — assistiert (Admin prüft Stapel) vs. automatisch am Tag.
-3. **Verwaltung** im Detail: 12 Kacheln → 3 Gruppen, eigener Durchgang.
+3. **Verwaltung** im Detail: 3 Gruppen – erledigt v0.40.
 4. **Reihenfolge:** Navigation + Optik-Grundlage zuerst → Adressbuch →
    Termine? Oder Termine vorziehen (nächstes Treffen)?
 

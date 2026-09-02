@@ -3,6 +3,15 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.40.0
+
+- **Verwaltung aufgeräumt.** Die Einstellungs-Seite hat statt vier nur noch
+  **drei Gruppen: Zugänge · Erscheinungsbild · System**. „Kategorien & Tags"
+  und „Grüße-Pool" sind zu Erscheinungsbild gewandert, „Vollständigkeit" zu
+  System; die Gruppe „Werkzeuge" ist weg. Kachel-Überschrift jetzt als echtes
+  `<h1>` („Einstellungen"), wie die übrigen Kernseiten.
+- Keine Migration.
+
 ## 0.39.0
 
 - **„Mein Eintrag" – Selbst-Service.** Die persönliche Seite (Wortmarke unten

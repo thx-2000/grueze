@@ -1,38 +1,34 @@
 <?php
 $groups = [
-    'Personen & Zugänge' => [
+    'Zugänge' => [
         ['users.manage', '/users', 'user', 'Benutzer', 'Zugänge anlegen, sperren, Passkeys zurücksetzen.'],
         ['users.manage', '/verwaltung/registrierung', 'key', 'Selbst-Registrierung', 'Einladungslinks, Selbst-Anmeldung freischalten, Standard-Rolle.'],
         ['users.manage', '/settings/roles', 'key', 'Rollen', 'Rollen anlegen, umbenennen und löschen.'],
         ['users.manage', '/settings/permissions', 'sliders', 'Berechtigungen', 'Festlegen, welche Rolle welche Aktionen ausführen darf.'],
         ['users.manage', '/settings/visibility', 'eye', 'Sichtbarkeit', 'Steuern, welche Rolle welche Kontaktfelder sieht.'],
     ],
-    'Erscheinungsbild & Texte' => [
-        ['users.manage', '/settings/themes', 'sparkles', 'Themes', 'Farben, Schriften und Ecken – Theme wechseln, duplizieren, anpassen.'],
+    'Erscheinungsbild' => [
         ['users.manage', '/settings/branding', 'sliders', 'Branding', 'Name, Kurzname, öffentliche Links, Login-Texte und Logo.'],
+        ['users.manage', '/settings/themes', 'sparkles', 'Themes', 'Farben, Schriften und Ecken – Theme wechseln, duplizieren, anpassen.'],
         ['settings.manage', '/settings/mail-footer', 'mail', 'Mail-Einstellungen', 'Absender, Mailserver, Betreff-Präfixe und Mail-Fuß.'],
         ['users.manage', '/admin/legal/impressum', 'sliders', 'Rechtliches', 'Impressum und Datenschutzerklärung bearbeiten.'],
-    ],
-    'Werkzeuge' => [
         ['categories.manage', '/verwaltung/kategorien-tags', 'sliders', 'Kategorien & Tags', 'Kategorien und Tags anlegen, umbenennen und löschen.'],
-        ['contacts.manage', '/vollstaendigkeit', 'check', 'Vollständigkeit', 'Datenlücken sehen, pro Person nachtragen, Namensliste zum Abgleich weitergeben.'],
         ['settings.manage', '/verwaltung/gruesse', 'sparkles', 'Grüße-Pool', 'Standard-Wünsche für Geburtstag und Weihnachten pflegen; Weihnachtsgrüße gemischt verschicken.'],
     ],
     'System' => [
-        ['users.manage', '/admin/backup', 'archive', 'Datensicherung', 'Voll-Backup herunterladen oder wiederherstellen.'],
         ['users.manage', '/admin/aktualisieren', 'upload', 'Aktualisieren', 'Nach einem Upload die Datenbank auf den neuen Stand bringen.'],
+        ['users.manage', '/admin/backup', 'archive', 'Datensicherung', 'Voll-Backup herunterladen oder wiederherstellen.'],
+        ['contacts.manage', '/vollstaendigkeit', 'check', 'Vollständigkeit', 'Datenlücken sehen, pro Person nachtragen, Namensliste zum Abgleich weitergeben.'],
         ['audit.view', '/logs/audit', 'history', 'Änderungsprotokoll', 'Wer hat wann welchen Kontakt geändert.'],
         ['mail.view_log', '/logs/mail', 'mail', 'Versandprotokoll', 'Welche Mails wurden verschickt, was schlug fehl.'],
     ],
 ];
 ?>
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Verwaltung</p>
-        <h2>Einstellungen & Systempflege</h2>
-        <p class="muted">Alles, was man selten braucht – gebündelt an einem Ort. Für die tägliche Arbeit reichen „Start" und „Kontakte".</p>
-    </div>
-</section>
+<header class="contact-detail-head">
+    <p class="eyebrow">Verwaltung</p>
+    <h1>Einstellungen</h1>
+    <p class="muted">Alles, was man selten braucht – gebündelt an einem Ort. Für die tägliche Arbeit reichen „Start" und „Adressbuch".</p>
+</header>
 
 <?php foreach ($groups as $groupTitle => $tiles): ?>
     <?php
