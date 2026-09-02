@@ -32,11 +32,34 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   - Größter Schmerz: „wirkt zu überfrachtet". Ziel: cleaner, moderner, wertiger.
   - Self-Service gewünscht: jede:r ändert nur die eigenen Daten; Audit-Log muss
     alte Werte behalten (falsches Löschen/Ändern nachvollziehbar).
-  Stand: Richtung abgestimmt (`docs/REDESIGN.md`), Stufen 1–4 umgesetzt
-  (Palette/Schriften, Hülle, Start, Adressbuch). Offen: Kontakt-Detail
-  (inline bearbeiten + Admin-Historie), Nachrichten (ein Screen),
-  Vollständigkeit (löst Namensliste ab), Bereich „Termine", „Mein Eintrag"
-  (Handy), „Mail ans Orga-Team", Grüße-Pool.
+  Stand: Richtung abgestimmt (`docs/REDESIGN.md`), Stufen 1–6 umgesetzt
+  (Palette/Schriften, Hülle, Start, Adressbuch, Kontakt-Detail, Nachrichten).
+  Offen: Vollständigkeit (löst Namensliste ab), Bereich „Termine",
+  „Mein Eintrag" (Handy), „Mail ans Orga-Team", Grüße-Pool.
+
+- **Selbst-Registrierung / Account-Anlage mit niedriger Berechtigung**:
+  Es soll leicht sein, sich einen (niedrig berechtigten) Account anzulegen.
+  Beim Anlegen legt die Person selbst ein Kennwort fest **oder** hinterlegt
+  einen Passkey. Drei Wege, je nach Ausgangslage:
+  1. **Einladungslink durch berechtigte Person** (Admin/Orga, ggf. per Rolle
+     freischaltbar): Wenn die Mailadresse schon bekannt ist, verschickt die
+     berechtigte Person – idealerweise direkt aus dem Tool – einen Link, der
+     genau diesen Kontakt zur Account-Anlage berechtigt. Link ist personen-
+     gebunden und einmalig / befristet.
+  2. **Selbst-Anmeldung mit bekannter Adresse**: Person trägt ihre Mailadresse
+     ein. Stimmt sie mit einer hinterlegten Kontakt-Mailadresse überein, ist
+     die Anlage grundsätzlich erlaubt – **aber erst nach Klick auf einen
+     Bestätigungslink**, der an genau diese Adresse geht (Double-Opt-in, kein
+     Account ohne Mail-Bestätigung).
+  3. **Selbst-Anmeldung mit unbekannter Adresse**: Adresse ist in keinem
+     Kontakt hinterlegt → Anlage erst nach **Freigabe durch Admin oder Orga**
+     (Freigabe-Warteschlange). Danach wie Weg 2 mit Bestätigungslink.
+  Offene Punkte: welche Rolle bekommen solche Accounts (Standard-Minimalrolle,
+  konfigurierbar?); Verknüpfung mit vorhandenem Kontakt vs. neuer Kontakt;
+  Ablauf/Frist der Links; Missbrauchsschutz (Rate-Limit, schon vergebene
+  Adresse); Zusammenspiel mit bestehendem Passwort-Reset und Passkey-Flow;
+  Sichtbarkeit der Warteschlange in der Verwaltung. Sicherheitsrelevant →
+  im Security-Audit mitdenken.
 
 - **Terminfindungs-/Abstimmungstool** für die ganze Stufe: Ja/Nein/Vielleicht
   je Vorschlag, ggf. mehrere Uhrzeiten pro Tag, ggf. weitere Abstimmungs-
