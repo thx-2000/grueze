@@ -5,6 +5,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **buymeacoffee:** das Projekt GRUEZE auf der eigenen buymeacoffee-Seite
+  ergänzen/beschreiben (Aktion von TH – nicht im Code). Link im Code:
+  `branding.product_donate_url` = `https://buymeacoffee.com/thomashageleit`.
+- **Lizenz-Feinheiten prüfen:** Name in `LICENSE` (Zeile „Licensor" / „Required
+  Notice") gegen den echten Namen abgleichen; ggf. `README` „Lizenz"-Absatz.
+
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
   Endpunkt, SQL-/Template-Injection, Datei-Uploads (XLSX-Import, Logo),
@@ -130,6 +136,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Lizenz + Spendenhinweis v0.43.0: `LICENSE` = PolyForm Noncommercial 1.0.0
+  (kanonischer Text von github.com/polyformproject/polyform-licenses Tag 1.0.0
+  + kurzer Kopf mit Licensor/Required-Notice/Klartext-Zusammenfassung).
+  README-Abschnitt „Lizenz". Helper `product_donate_url()` (config-only,
+  `branding.product_donate_url`, Standard buymeacoffee.com/thomashageleit,
+  `''` = aus), dezente `.hub-foot`-Zeile unten in `templates/admin/hub.php`
+  (nur wenn `system_label` und `product_donate_url` gesetzt). Doku in
+  `config.example.php` + `NEUE-INSTANZ.md`. Keine Migration.
 - GitHub-Projektbeschreibung v0.42.0: README neu (Kurzvorstellung, Screenshot-
   Galerie, Feature-Überblick, Systemvoraussetzungen, Docker-Schnellstart,
   Shared-Hosting-Kurzanleitung, dezenter Spendenhinweis

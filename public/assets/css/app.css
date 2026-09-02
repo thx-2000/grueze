@@ -3040,6 +3040,15 @@ code {
     line-height: 1.35;
 }
 
+.hub-foot {
+    margin-top: 0.4rem;
+    padding: 0 0.1rem;
+}
+.hub-foot p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
 /* ---------------------------------------------------------------- Suchseite */
 
 .search-bar-panel {

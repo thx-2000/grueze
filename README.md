@@ -140,6 +140,15 @@ docs/              NEUE-INSTANZ.md, REDESIGN.md, screenshots/
 Mehr zur Architektur: **[ARCHITECTURE.md](ARCHITECTURE.md)**,
 Änderungen je Version: **[CHANGELOG.md](CHANGELOG.md)**.
 
+## Lizenz
+
+[PolyForm Noncommercial License 1.0.0](LICENSE) – der Quellcode ist einsehbar
+und **für jede nicht‑kommerzielle Nutzung frei**. Das schließt das
+Selbst‑Hosten für Vereine, Familien, Jahrgänge und ähnliche Gruppen
+ausdrücklich ein. Wer GRUEZE (oder eine abgewandelte Version) kommerziell
+anbieten möchte – als kostenpflichtiges Produkt oder als Dienstleistung –
+braucht eine separate Lizenz; dafür bitte ein Issue im Repo eröffnen.
+
 ---
 
 <sub>GRUEZE entsteht in der Freizeit. Wenn es dir hilft, kannst du mir einen

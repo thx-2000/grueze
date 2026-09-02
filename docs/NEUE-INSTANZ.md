@@ -38,11 +38,12 @@ GRUEZE"). Nur wer das Produkt selbst umlabeln will, setzt
 | `support_email`      | Kontakt-/Absenderadresse für Hinweise                |
 | `system_label`       | Produktname (Standard `GRUEZE`) – nur zum Umlabeln   |
 | `product_url`        | Ziel des „läuft mit …"-Links in der Seitenleiste     |
+| `product_donate_url` | „Entwicklung unterstützen" dezent im Verwaltungs-Hub; `''` = aus |
 
 Auflösung: **Verwaltung → Branding** (`app_settings`) schlägt die config, die
 config schlägt die eingebauten Defaults. Instanz-Name, Kurzname, Login-Texte,
 Logo und Support-Mail lassen sich auch komplett über die Oberfläche pflegen;
-`system_label` und `product_url` nur über die config.
+`system_label`, `product_url` und `product_donate_url` nur über die config.
 
 ## 3. Aussehen
 

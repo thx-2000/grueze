@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.42.0';
+    return '0.43.0';
 }
 
 function system_label(): string
@@ -261,6 +261,16 @@ function system_label(): string
 function product_url(): string
 {
     return trim(branding_default('product_url', 'https://github.com/thx-2000/grueze'));
+}
+
+/**
+ * Optionaler „Entwicklung unterstützen"-Link des Produkts (nicht der Instanz).
+ * Nur im Admin-Bereich sichtbar. Per config('branding.product_donate_url') auf
+ * einen eigenen Wert setz- oder mit leerem String abschaltbar.
+ */
+function product_donate_url(): string
+{
+    return trim(branding_default('product_donate_url', 'https://buymeacoffee.com/thomashageleit'));
 }
 
 /**

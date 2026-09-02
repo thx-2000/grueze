@@ -52,3 +52,18 @@ $groups = [
         </div>
     </section>
 <?php endforeach; ?>
+
+<?php
+$productLabel = system_label();
+$donateUrl = product_donate_url();
+?>
+<?php if ($productLabel !== '' && $donateUrl !== ''): ?>
+    <footer class="hub-foot">
+        <p class="muted">
+            <?= e($productLabel) ?> entsteht in der Freizeit.
+            <a href="<?= e(product_url()) ?>" target="_blank" rel="noopener noreferrer">Projekt auf GitHub</a>
+            &middot;
+            <a href="<?= e($donateUrl) ?>" target="_blank" rel="noopener noreferrer">Entwicklung unterstützen <span aria-hidden="true">&#9749;</span></a>
+        </p>
+    </footer>
+<?php endif; ?>

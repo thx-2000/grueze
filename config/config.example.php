@@ -23,14 +23,17 @@ return [
     // (app_settings) > diese Sektion > eingebaute Defaults. Einzelne Schlüssel
     // dürfen fehlen; leere Strings zählen als "nicht gesetzt".
     // - app_name / short_name: der Name DIESER Instanz.
-    // - system_label / product_url: der Produktname (GRUEZE). Nur für eine
-    //   vollständig eigene Marke überschreiben bzw. leeren.
+    // - system_label / product_url / product_donate_url: alles zum Produkt
+    //   (GRUEZE) selbst. product_donate_url erscheint dezent unten im
+    //   Verwaltungs-Hub (nur Admins). Für eine eigene Marke überschreiben,
+    //   für kein Spendenlink product_donate_url auf '' setzen.
     // Farben, Schriften und Ecken stecken im Theme-System (Ordner themes/).
     'branding' => [
         'app_name' => 'Adress-Zentrale',
         'short_name' => 'Adress-Zentrale',
         'system_label' => 'GRUEZE',
         'product_url' => 'https://github.com/thx-2000/grueze',
+        'product_donate_url' => 'https://buymeacoffee.com/thomashageleit',
         'public_site_label' => '',
         'public_site_url' => '',
         'support_email' => '',

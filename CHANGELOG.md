@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.43.0
+
+- **Lizenz festgelegt:** [PolyForm Noncommercial License 1.0.0](LICENSE).
+  Quellcode einsehbar, jede nicht‑kommerzielle Nutzung (inkl. Selbst‑Hosten für
+  Vereine, Familien, Jahrgänge) frei; kommerzielle Nutzung braucht eine
+  separate Lizenz. Hinweis in der README.
+- **Spendenhinweis im Admin‑Bereich:** dezente Zeile unten im Verwaltungs‑Hub
+  („… entsteht in der Freizeit. Projekt auf GitHub · Entwicklung unterstützen").
+  Neuer config‑Wert `branding.product_donate_url` (Standard gesetzt, `''` = aus);
+  wie `product_url` bewusst nur über die config, nicht über die Oberfläche.
+- Keine Migration.
+
 ## 0.42.0
 
 - **Projektbeschreibung für den Public-Release.** README komplett neu:
