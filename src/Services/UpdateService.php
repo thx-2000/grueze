@@ -47,18 +47,19 @@ final class UpdateService
     }
 
     /**
-     * Trägt die Version bei einer bestehenden, bereits aktuellen Instanz
-     * einmalig nach. Solange noch Migrationen offen sind, bleibt sie leer –
-     * dann setzt sie erst der Update-Lauf.
+     * Wenn keine Migrationen offen sind, gibt es nach einem Upload nichts
+     * anzuwenden – dann wird die Version stillschweigend nachgezogen (auch bei
+     * einer reinen Code-Aktualisierung ohne DB-Änderung). Solange Migrationen
+     * offen sind, bleibt die Version stehen, bis der Update-Lauf sie setzt.
      */
     public function syncVersionIfClean(): void
     {
-        if ($this->installedVersion() !== null) {
+        if ($this->migrations->pending() !== []) {
             return;
         }
 
-        if ($this->migrations->pending() === []) {
-            $this->settings->set(self::VERSION_KEY, $this->codeVersion());
+        if ($this->installedVersion() !== $this->codeVersion()) {
+            $this->markInstalled();
         }
     }
 
@@ -75,10 +76,14 @@ final class UpdateService
         return $value !== '' ? $value : null;
     }
 
+    /**
+     * „Update aussteht" heißt: es gibt offene Migrationen. Eine reine
+     * Code-Aktualisierung ohne DB-Änderung braucht keinen Klick – die Version
+     * zieht `syncVersionIfClean()` still nach.
+     */
     public function updatePending(): bool
     {
-        return $this->migrations->pending() !== []
-            || ($this->installedVersion() !== null && $this->installedVersion() !== $this->codeVersion());
+        return $this->migrations->pending() !== [];
     }
 
     /**
