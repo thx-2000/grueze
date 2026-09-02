@@ -3,6 +3,15 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.27.0
+
+- **Adressbuch: Spalten wieder anpassbar.** Neben „Auswählen" ein Menü
+  **„Spalten"**: Tags, Adresse, Geburtstag, E-Mail, Telefon, Login lassen
+  sich einzeln zur Tabelle hinzuschalten. **Standard bleibt schlank**
+  (Name · Kategorie · Status); die Auswahl wird pro Gerät gemerkt. Nur in
+  der Tabellenansicht.
+- Keine Migration.
+
 ## 0.26.0
 
 - **Neuer Look, Stufe 4 – Adressbuch.** Das dichteste Fenster wird ruhig:

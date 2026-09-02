@@ -292,7 +292,8 @@ if (contactsTable) {
     const availableColumns = [...document.querySelectorAll('[data-column-toggle]')]
         .map((toggle) => toggle.dataset.columnToggle)
         .filter(Boolean);
-    const defaultColumns = availableColumns;
+    // Standard: keine Zusatzspalten – die Tabelle bleibt schlank
+    // (Name · Kategorie · Status). Zuschalten merkt sich das Gerät.
     const savedColumns = (() => {
         try {
             return JSON.parse(window.localStorage.getItem(storageKey) || 'null');
@@ -301,15 +302,11 @@ if (contactsTable) {
         }
     })();
 
-    const visibleColumns = Array.isArray(savedColumns) && savedColumns.length > 0
+    const visibleColumns = Array.isArray(savedColumns)
         ? savedColumns
             .map((column) => column === 'ort' ? 'adresse' : column)
             .filter((column) => availableColumns.includes(column))
-        : defaultColumns;
-
-    if (visibleColumns.length === 0) {
-        visibleColumns.push(...defaultColumns);
-    }
+        : [];
 
     function applyVisibleColumns() {
         document.querySelectorAll('[data-column-toggle]').forEach((toggle) => {
@@ -320,6 +317,10 @@ if (contactsTable) {
             const shouldShow = visibleColumns.includes(cell.dataset.col);
             cell.classList.toggle('is-hidden-column', !shouldShow);
         });
+
+        // Erst nach dem ersten Anwenden dürfen Zusatzspalten überhaupt
+        // sichtbar werden – so blitzen sie vor dem Skript nicht kurz auf.
+        contactsTable.classList.add('columns-managed');
     }
 
     document.querySelectorAll('[data-column-toggle]').forEach((toggle) => {

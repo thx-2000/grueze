@@ -13,6 +13,25 @@ $visibleContactFields = [
 ];
 $canViewPrivateDetails = in_array(true, $visibleContactFields, true);
 
+// Zusatzspalten der Tabelle. Standard: aus – zuschaltbar über „Spalten",
+// gemerkt pro Gerät (localStorage). Reihenfolge = Anzeigereihenfolge.
+$optionalColumns = ['tags' => 'Tags'];
+if ($visibleContactFields['address']) {
+    $optionalColumns['adresse'] = 'Adresse';
+}
+if ($visibleContactFields['birthday']) {
+    $optionalColumns['geburtstag'] = 'Geburtstag';
+}
+if ($visibleContactFields['emails']) {
+    $optionalColumns['emails'] = 'E-Mail';
+}
+if ($visibleContactFields['phones']) {
+    $optionalColumns['phones'] = 'Telefon';
+}
+if ($visibleContactFields['login']) {
+    $optionalColumns['login'] = 'Login / Rolle';
+}
+
 $canCopyVisibleEmails = $visibleContactFields['emails'] && can('contacts.copy_emails');
 $canSendRegularMail = can('mail.send');
 $canSendSingleContactMail = can('mail.contact_single');
@@ -269,11 +288,27 @@ $ownFields = $ownContact !== null ? [
             <button type="button" class="view-toggle-button is-active" data-view-toggle="desktop" aria-pressed="true">Tabelle</button>
             <button type="button" class="view-toggle-button" data-view-toggle="mobile" aria-pressed="false">Karten</button>
         </div>
-        <?php if ($canSelect): ?>
-            <button type="button" class="ghost-button select-mode-button" data-select-mode-toggle aria-pressed="false">
-                <?= icon('check-double') ?><span>Auswählen</span>
-            </button>
-        <?php endif; ?>
+        <div class="list-bar-right">
+            <?php if ($optionalColumns !== []): ?>
+                <details class="column-menu">
+                    <summary><?= icon('sliders') ?><span>Spalten</span></summary>
+                    <div class="column-menu-body">
+                        <p class="field-hint">Zusätzliche Spalten für die Tabelle. Bleibt auf diesem Gerät gespeichert.</p>
+                        <?php foreach ($optionalColumns as $colKey => $colLabel): ?>
+                            <label class="column-toggle">
+                                <input type="checkbox" data-column-toggle="<?= e($colKey) ?>">
+                                <span><?= e($colLabel) ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </details>
+            <?php endif; ?>
+            <?php if ($canSelect): ?>
+                <button type="button" class="ghost-button select-mode-button" data-select-mode-toggle aria-pressed="false">
+                    <?= icon('check-double') ?><span>Auswählen</span>
+                </button>
+            <?php endif; ?>
+        </div>
     </div>
 
     <?php if (!$canViewPrivateDetails): ?>
@@ -315,6 +350,12 @@ $ownFields = $ownContact !== null ? [
                         <th scope="col" aria-sort="<?= e($ariaSort('nachname')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('nachname')) ?>">Name</a></th>
                         <th scope="col" aria-sort="<?= e($ariaSort('category_name')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>">Kategorie</a></th>
                         <th scope="col">Status</th>
+                        <?php if (isset($optionalColumns['tags'])): ?><th data-col="tags" scope="col">Tags</th><?php endif; ?>
+                        <?php if (isset($optionalColumns['adresse'])): ?><th data-col="adresse" scope="col" aria-sort="<?= e($ariaSort('ort')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>">Adresse</a></th><?php endif; ?>
+                        <?php if (isset($optionalColumns['geburtstag'])): ?><th data-col="geburtstag" scope="col" aria-sort="<?= e($ariaSort('geburtstag')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>">Geburtstag</a></th><?php endif; ?>
+                        <?php if (isset($optionalColumns['emails'])): ?><th data-col="emails" scope="col">E-Mail</th><?php endif; ?>
+                        <?php if (isset($optionalColumns['phones'])): ?><th data-col="phones" scope="col">Telefon</th><?php endif; ?>
+                        <?php if (isset($optionalColumns['login'])): ?><th data-col="login" scope="col">Login / Rolle</th><?php endif; ?>
                         <?php if ($canManage): ?><th class="col-open" scope="col"><span class="visually-hidden">Öffnen</span></th><?php endif; ?>
                     </tr>
                 </thead>
@@ -336,6 +377,67 @@ $ownFields = $ownContact !== null ? [
                             </td>
                             <td><span class="table-pill"><?= e($contact['category_name'] ?: '—') ?></span></td>
                             <td><?= $renderChips($statusChips($contact)) ?></td>
+                            <?php if (isset($optionalColumns['tags'])): ?>
+                                <td data-col="tags">
+                                    <div class="tag-cluster">
+                                        <?php foreach ($contact['tags'] as $tag): ?>
+                                            <span class="tag tag-secondary" style="<?= e(tag_style($tag['name'])) ?>"><?= e($tag['name']) ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </td>
+                            <?php endif; ?>
+                            <?php if (isset($optionalColumns['adresse'])): ?>
+                                <td data-col="adresse">
+                                    <div class="table-stack is-guarded">
+                                        <span><?= e($contact['strasse']) ?></span>
+                                        <span><?= e(trim($contact['plz'] . ' ' . $contact['ort'])) ?></span>
+                                        <?php if (($contact['land'] ?? '') !== '' && $contact['land'] !== 'Deutschland'): ?>
+                                            <span class="muted"><?= e($contact['land']) ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            <?php endif; ?>
+                            <?php if (isset($optionalColumns['geburtstag'])): ?>
+                                <td data-col="geburtstag"><span class="is-guarded"><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : '—') ?></span></td>
+                            <?php endif; ?>
+                            <?php if (isset($optionalColumns['emails'])): ?>
+                                <td data-col="emails">
+                                    <?php if ($contact['emails'] !== []): ?>
+                                        <div class="table-stack is-guarded">
+                                            <?php foreach ($contact['emails'] as $email): ?>
+                                                <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e($email['email']) ?></a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="status-chip is-warn">Mail fehlt</span>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
+                            <?php if (isset($optionalColumns['phones'])): ?>
+                                <td data-col="phones">
+                                    <?php if ($contact['phones'] !== []): ?>
+                                        <div class="table-stack is-guarded">
+                                            <?php foreach ($contact['phones'] as $phone): ?>
+                                                <a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['phone']) ?></a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="muted">—</span>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
+                            <?php if (isset($optionalColumns['login'])): ?>
+                                <td data-col="login">
+                                    <?php if (!empty($contact['linked_user'])): ?>
+                                        <div class="table-stack">
+                                            <span class="is-guarded"><?= e($contact['linked_user']['email']) ?></span>
+                                            <span class="muted"><?= e(role_label((string) $contact['linked_user']['role_name'])) ?></span>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="muted">Kein Login</span>
+                                    <?php endif; ?>
+                                </td>
+                            <?php endif; ?>
                             <?php if ($canManage): ?>
                                 <td class="col-open">
                                     <a class="row-open" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>" aria-label="<?= e(trim($contact['vorname'] . ' ' . $contact['nachname']) . ' öffnen') ?>"><?= icon('chevron-right') ?></a>
@@ -344,7 +446,7 @@ $ownFields = $ownContact !== null ? [
                         </tr>
                     <?php endforeach; ?>
                     <?php if ($contacts === []): ?>
-                        <tr><td colspan="<?= $canManage ? 5 : 4 ?>" class="table-empty">Keine Kontakte für diese Ansicht.</td></tr>
+                        <tr><td colspan="<?= count($optionalColumns) + ($canManage ? 5 : 4) ?>" class="table-empty">Keine Kontakte für diese Ansicht.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

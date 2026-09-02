@@ -90,6 +90,11 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Adressbuch: Spalten-Menü (v0.27.0): Tags/Adresse/Geburtstag/E-Mail/
+  Telefon/Login einzeln zuschaltbar (`[data-column-toggle]`, `.column-menu`
+  in der `.list-bar`). Standard schlank (leeres Set), pro Gerät gemerkt
+  (`grueze_visible_contact_columns`); `applyVisibleColumns` setzt
+  `.columns-managed` gegen Aufblitzen.
 - Neuer Look, Stufe 4 – Adressbuch (v0.26.0): `templates/contacts/index.php`
   neu. Filter reduziert (Suche + Kategorie sichtbar, Rest hinter „Filter").
   Die vier Aufklapp-Bereiche zu einem „Auswählen"-Modus (`is-selecting`,
