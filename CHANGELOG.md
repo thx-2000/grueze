@@ -3,6 +3,14 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.21.0
+
+- **Eigene Kontaktdaten sichtbar**: Eingeloggte Personen mit verknüpftem
+  Kontakt sehen auf der Kontaktseite ein Feld „Deine Kontaktdaten" (Adresse,
+  Geburtstag, Mail, Telefon, Login) – auch wenn ihre Rolle sonst nichts sieht.
+  **Notizen bleiben ausgenommen** und folgen weiter der Rollen-Regel.
+  Abschaltbar unter Verwaltung → Sichtbarkeit (Standard: an). Keine Migration.
+
 ## 0.20.0
 
 - **Rollen frei verwaltbar** (Verwaltung → Rollen): Anzeigename und

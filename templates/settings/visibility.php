@@ -28,6 +28,15 @@
             </div>
         <?php endforeach; ?>
 
+        <div class="subsection-card stack">
+            <strong>Eigener Kontakt</strong>
+            <label class="inline-toggle">
+                <input type="checkbox" name="own_contact_visible" value="1" <?= !empty($ownContactVisible) ? 'checked' : '' ?>>
+                <span>Nutzer:innen sehen die Daten ihres eigenen verknüpften Kontakts immer</span>
+            </label>
+            <p class="field-hint">Zeigt eingeloggten Personen ihre eigenen Kontaktdaten (Adresse, Geburtstag, Mail, Telefon, Login) – auch wenn ihre Rolle sonst nichts sieht. <strong>Notizen bleiben ausgenommen</strong> und folgen weiter der Rollen-Regel oben.</p>
+        </div>
+
         <div class="toolbar-actions">
             <button type="submit">Sichtbarkeit speichern</button>
         </div>

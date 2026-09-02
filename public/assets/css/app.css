@@ -3237,6 +3237,36 @@ code {
     width: auto;
 }
 
+/* ---- Eigene Kontaktdaten ---- */
+
+.own-contact-card {
+    border-left: 3px solid var(--accent-edge);
+}
+
+.own-contact-list {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.9rem 1.4rem;
+}
+
+.own-contact-list > div {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.own-contact-list dt {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.own-contact-list dd {
+    margin: 0;
+}
+
 /* -------------------------------------------------------------------- Themes */
 
 .theme-grid {

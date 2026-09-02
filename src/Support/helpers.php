@@ -69,9 +69,9 @@ function can(string $permission): bool
     return auth()->can($permission);
 }
 
-function can_view_contact_field(string $field): bool
+function can_view_contact_field(string $field, ?array $contact = null): bool
 {
-    return auth()->canViewContactField($field);
+    return auth()->canViewContactField($field, $contact);
 }
 
 function app_branding(): array
@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.20.0';
+    return '0.21.0';
 }
 
 function system_label(): string

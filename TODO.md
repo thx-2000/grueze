@@ -48,8 +48,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
    anlegen/umbenennen/löschen (Verwaltung → Rollen), Rechte-/Sichtbarkeits-
    Seiten lesen alle Rollen aus der DB. Offen (falls je gewünscht): den
    internen Rollen-Schlüssel umbenennbar machen (aktuell fix).
-3. Sichtbarkeit einzelner Kontaktfelder: **in Arbeit (v0.21.0)** – „eigener
-   verknüpfter Kontakt immer sichtbar, außer Notizen".
+3. Sichtbarkeit einzelner Kontaktfelder: **erledigt in v0.21.0** – „eigener
+   verknüpfter Kontakt immer sichtbar (außer Notizen)", abschaltbar.
 4. Admin-Einstellungsbereich weiter strukturieren (Branding / Mail-Versand /
    Sichtbarkeiten-Rollen / ggf. System-Backup später).
 5. Vorbereitung für neutrale Distribution: Installer-Konzept.
@@ -61,6 +61,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Eigene Kontaktdaten sichtbar (v0.21.0): `Auth::canViewContactField($feld,
+  $kontakt=null)` – wenn ein Kontakt übergeben wird und es der eigene
+  verknüpfte ist, greift die Ausnahme (Notizen ausgenommen). Schalter
+  `security_own_contact_visible` (Standard an) auf der Sichtbarkeits-Seite.
+  Auf `/kontakte` rendert `contacts/index.php` für verknüpfte Nutzer:innen ein
+  Feld „Deine Kontaktdaten" (`ContactController::index` reicht `$ownContact`
+  durch). Keine Migration.
 - Volle Rollen-Verwaltung (v0.20.0): `roles`-Tabelle bekommt `label`
   (Anzeigename), interner `name` bleibt der fixe Rechte-Schlüssel. Neue Seite
   **Verwaltung → Rollen** (`RoleController`/`RoleRepository`,

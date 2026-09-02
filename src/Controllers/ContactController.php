@@ -46,12 +46,16 @@ final class ContactController extends BaseController
             'direction' => (string) $request->input('direction', 'asc'),
         ];
 
+        $ownContactId = (int) ($this->auth->user()['contact_id'] ?? 0);
+        $ownContact = $ownContactId > 0 ? $this->contacts->find($ownContactId) : null;
+
         $this->render('contacts/index', [
             'contacts' => $this->contacts->search($filters),
             'categories' => $this->categories->all(),
             'tags' => $this->tags->all(),
             'filters' => $filters,
             'phoneLabels' => config('defaults.phone_labels', []),
+            'ownContact' => $ownContact,
         ]);
     }
 

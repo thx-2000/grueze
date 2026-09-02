@@ -240,6 +240,7 @@ final class SettingsController extends BaseController
         $this->render('settings/visibility', [
             'visibility' => $this->settings->fieldVisibility(),
             'defaults' => $this->settings->fieldVisibilityDefaults(),
+            'ownContactVisible' => $this->settings->ownContactAlwaysVisible(),
             'roles' => $roles['names'],
             'roleLabels' => $roles['labels'],
             'fieldLabels' => [
@@ -266,6 +267,8 @@ final class SettingsController extends BaseController
             $fieldRoles = array_values(array_intersect((array) ($submitted[$field] ?? []), $allRoles));
             $this->settings->set('security_visibility_' . $field, implode(',', $fieldRoles));
         }
+
+        $this->settings->set('security_own_contact_visible', $request->input('own_contact_visible') === '1' ? '1' : '0');
 
         flash('success', 'Sichtbarkeits-Einstellungen wurden gespeichert.');
         Redirect::to('/settings/visibility');

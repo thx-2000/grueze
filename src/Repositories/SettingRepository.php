@@ -114,6 +114,15 @@ final class SettingRepository
         ];
     }
 
+    /**
+     * Sehen Nutzer:innen die Daten ihres eigenen verknüpften Kontakts immer
+     * (Notizen ausgenommen)? Standard: ja.
+     */
+    public function ownContactAlwaysVisible(): bool
+    {
+        return $this->get('security_own_contact_visible', '1') !== '0';
+    }
+
     public function fieldVisibility(): array
     {
         if ($this->fieldVisibilityCache !== null) {

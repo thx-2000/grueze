@@ -130,7 +130,13 @@ final class Auth
         return $this->resolvePermission($this->originalUser(), $permission);
     }
 
-    public function canViewContactField(string $field): bool
+    /**
+     * @param array<string,mixed>|null $contact Wenn übergeben, greift zusätzlich
+     *   die „eigener verknüpfter Kontakt"-Ausnahme: Nutzer:innen sehen die
+     *   Daten ihres eigenen Kontakts – Notizen bleiben davon ausgenommen und
+     *   folgen weiter der Rollenregel.
+     */
+    public function canViewContactField(string $field, ?array $contact = null): bool
     {
         $user = $this->user();
         if (!$user) {
@@ -141,6 +147,19 @@ final class Auth
             return true;
         }
 
+        if ($this->roleAllowsContactField($user, $field)) {
+            return true;
+        }
+
+        return $field !== 'notes'
+            && $contact !== null
+            && $this->settings->ownContactAlwaysVisible()
+            && isset($user['contact_id'], $contact['id'])
+            && (int) $user['contact_id'] === (int) $contact['id'];
+    }
+
+    private function roleAllowsContactField(array $user, string $field): bool
+    {
         $visibility = $this->settings->fieldVisibility();
         if (array_key_exists($field, $visibility)) {
             return in_array((string) $user['role_name'], $visibility[$field], true);
