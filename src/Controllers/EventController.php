@@ -153,6 +153,45 @@ final class EventController extends BaseController
         Redirect::to('/termine');
     }
 
+    /**
+     * „✉ an Teilnehmer": Empfängerkreis (alle / nur Zusagen / nur Offene) an den
+     * Nachrichten-Flow übergeben. Der Platzhalter {Abstimmungslink} wird beim
+     * Versand je Person durch den persönlichen Token-Link ersetzt.
+     */
+    public function messageParticipants(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        $id = (int) $request->input('id');
+        $event = $this->events->find($id);
+        if ($event === null) {
+            Redirect::to('/termine');
+        }
+
+        $filter = (string) $request->input('filter', 'all');
+        $filter = in_array($filter, ['all', 'confirmed', 'pending'], true) ? $filter : 'all';
+        $contactIds = $this->events->participantContactIds($id, $filter);
+
+        if ($contactIds === []) {
+            flash('error', 'In diesem Kreis ist niemand.');
+            Redirect::to('/termine/detail?id=' . $id);
+        }
+
+        $link = $event['status'] === 'decided'
+            ? "Der Termin steht: {Abstimmungslink}"
+            : "Bitte trag dich hier ein: {Abstimmungslink}";
+
+        $_SESSION['mail_draft'] = [
+            'contact_ids' => $contactIds,
+            'event_id' => $id,
+            'subject' => 'Termin: ' . $event['title'],
+            'message' => "{Anrede} {Vorname},\n\n" . $link . "\n\nDanke!",
+            'salutation_mode' => 'auto',
+        ];
+        Redirect::to('/rundmail');
+    }
+
     // --------------------------------------------------------- Abstimmen (Token)
 
     public function vote(Request $request): void

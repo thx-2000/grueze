@@ -5376,3 +5376,52 @@ body { display: block; }
         grid-column: 1 / 2;
     }
 }
+
+/* Termine v0.32: an Teilnehmer schreiben + Abstimmungs-Verlauf */
+.event-message-actions {
+    margin: 0 0 0.8rem;
+}
+
+.event-message-actions .field-hint {
+    margin-top: 0;
+}
+
+.event-log {
+    list-style: none;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.event-log li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 0.7rem;
+    padding: 0.5rem 0.15rem;
+    font-size: 0.9rem;
+}
+
+.event-log li + li {
+    border-top: 1px solid var(--edge-hairline);
+}
+
+.event-log-when {
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.82rem;
+}
+
+.event-log-who {
+    font-weight: 600;
+}
+
+.event-log-answer {
+    display: inline;
+    margin: 0;
+}
+
+.event-log-answer.is-yes { color: var(--color-success); }
+.event-log-answer.is-no { color: var(--color-danger); }
+.event-log-answer.is-maybe { color: var(--color-muted); }

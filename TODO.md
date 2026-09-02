@@ -64,9 +64,9 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 - **Terminfindungs-/Abstimmungstool** – **v1 in v0.31.0** (Bereich „Termine",
   Datumsabstimmung, Token-Links ohne Login, Ergebnismatrix, Ergebnis
   festlegen, Zusagen, Archiv). Offen:
-  - **v0.32:** Token-Links direkt per Nachricht verschicken (Platzhalter
-    `{Abstimmungslink}`); „✉ an Teilnehmer" mit Kreis-Filter (alle / nur
-    Zusagen / nur Offene); Abstimm-Historie/Änderungen für Admins.
+  - **v0.32 – erledigt:** Token-Links per Nachricht (`{Abstimmungslink}`),
+    „an Teilnehmer" mit Kreis-Filter (alle / nur Zusagen / nur Offene),
+    Abstimmungs-Verlauf für Admins.
   - **v0.33:** weitere Typen (fester Termin + reine Zusagen · reine
     Ja/Nein-Abstimmung ohne Datum); „Mein Eintrag"/Handy zeigt offene
     Abstimmungen; Ranking-Variante andenken.
@@ -120,6 +120,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Termine v0.32.0: „an Teilnehmer" (`EventController::messageParticipants`
+  + `participantContactIds($id, all|confirmed|pending)`) → Nachrichten-Screen
+  mit Preset. `{Abstimmungslink}` je Person im `MailController` ersetzt
+  (`applyVoteLink`, `mail_job['event_tokens']` via `EventRepository::tokensForEvent`;
+  auch in `test()`). Abstimmungs-Verlauf `event_response_log` (Migration
+  `2026-09-06-event-response-log`), `saveResponses` loggt nur echte
+  Änderungen, `responseLog()` auf der Detailseite.
 - Neuer Bereich „Termine", v1 (v0.31.0): `EventController` + `EventRepository`,
   Migration `2026-09-05-termine` (5 Tabellen). Übersicht `/termine`
   (Aktuell/Archiv), Detail (Eckdaten, Datumsoptionen `syncDateOptions`,

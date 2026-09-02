@@ -26,7 +26,8 @@ final class MailController extends BaseController
         private UploadService $uploads,
         private \App\Repositories\CategoryRepository $categories,
         private \App\Repositories\TagRepository $tags,
-        private RecipientListRepository $recipientLists
+        private RecipientListRepository $recipientLists,
+        private \App\Repositories\EventRepository $events
     ) {
         parent::__construct($auth);
     }
@@ -73,13 +74,19 @@ final class MailController extends BaseController
         $filterIds = $fromFilter ? $this->contacts->recipientIds($filters) : [];
         $_SESSION['rundmail_filter_ids'] = $filterIds;
 
-        // Entwurf einmalig übernehmen (z. B. aus der Namensliste).
+        // Entwurf einmalig übernehmen (z. B. aus der Vollständigkeit oder von
+        // „an Teilnehmer" eines Termins – dann mit fester Empfängerliste).
         $draft = (array) ($_SESSION['mail_draft'] ?? []);
         unset($_SESSION['mail_draft']);
 
+        $presetContacts = !empty($draft['contact_ids'])
+            ? $this->contacts->findManyByIds(array_map('intval', (array) $draft['contact_ids']))
+            : [];
+
         $this->render('mail/nachricht', array_merge($this->messageComposeData(), [
-            'presetContacts' => [],
+            'presetContacts' => $presetContacts,
             'draft' => $draft,
+            'eventId' => isset($draft['event_id']) ? (int) $draft['event_id'] : null,
             'categories' => $categories,
             'tags' => $tags,
             'categoryCounts' => $categoryCounts,
@@ -261,6 +268,30 @@ final class MailController extends BaseController
      * Betreff-Präfixe, Mail-Fuß). memberContactMode ist hier immer falsch –
      * die Einzelkontakt-Aufnahme nutzt weiterhin `mail/compose`.
      */
+    /**
+     * Ersetzt {Abstimmungslink} in Betreff und Text durch den persönlichen
+     * Token-Link des Kontakts – oder lässt beides unverändert, wenn der Job
+     * nicht zu einem Termin gehört.
+     *
+     * @return array{0: string, 1: string} [Betreff, Text]
+     */
+    private function applyVoteLink(array $job, int $contactId): array
+    {
+        $subject = (string) $job['subject'];
+        $message = (string) $job['message'];
+        if (empty($job['event_tokens'])) {
+            return [$subject, $message];
+        }
+
+        $token = (string) ($job['event_tokens'][$contactId] ?? '');
+        $link = $token !== '' ? url('/abstimmen?token=' . $token) : url('/termine');
+
+        return [
+            str_replace('{Abstimmungslink}', $link, $subject),
+            str_replace('{Abstimmungslink}', $link, $message),
+        ];
+    }
+
     private function messageComposeData(): array
     {
         return [
@@ -333,6 +364,7 @@ final class MailController extends BaseController
         $this->render('mail/nachricht', array_merge($this->messageComposeData(), [
             'presetContacts' => $contacts,
             'draft' => $draft,
+            'eventId' => isset($draft['event_id']) ? (int) $draft['event_id'] : null,
             'categories' => $categories,
             'tags' => $tags,
             'categoryCounts' => $categoryCounts,
@@ -388,11 +420,20 @@ final class MailController extends BaseController
         $sample = $contacts[0] ?? ['vorname' => 'Max', 'nachname' => 'Mustermann'];
         $salutationMode = $this->normalizeSalutationMode((string) $request->input('salutation_mode', 'auto'));
         $subject = $this->composeSubject((string) $request->input('subject'), (string) $request->input('subject_prefix'), $memberContactMode);
-        $message = $this->mailer->renderMessageTemplate(
-            $sample,
-            $this->composeMailBody((string) $request->input('message'), $memberContactMode),
-            $salutationMode
-        );
+        $rawTestMessage = $this->composeMailBody((string) $request->input('message'), $memberContactMode);
+
+        // {Abstimmungslink} in der Testmail mit dem Link der Beispielperson zeigen.
+        $eventId = (int) $request->input('event_id') ?: null;
+        if ($eventId !== null) {
+            $tokens = $this->events->tokensForEvent($eventId);
+            $link = ($token = $tokens[(int) ($sample['id'] ?? 0)] ?? '') !== ''
+                ? url('/abstimmen?token=' . $token)
+                : url('/termine');
+            $subject = str_replace('{Abstimmungslink}', $link, $subject);
+            $rawTestMessage = str_replace('{Abstimmungslink}', $link, $rawTestMessage);
+        }
+
+        $message = $this->mailer->renderMessageTemplate($sample, $rawTestMessage, $salutationMode);
         $this->mailer->sendSystemMail(
             $identity,
             $user['email'],
@@ -419,6 +460,7 @@ final class MailController extends BaseController
             'subject_prefix' => $memberContactMode ? $this->defaultSubjectPrefix(true) : (string) $request->input('subject_prefix'),
             'salutation_mode' => $salutationMode,
             'member_contact_mode' => $memberContactMode,
+            'event_id' => $eventId,
             'recipient_mode' => $recipientMode,
             'category_id' => (string) $request->input('category_id', ''),
             'tag_ids' => array_values(array_filter(array_map('intval', (array) $request->input('tag_ids', [])))),
@@ -457,6 +499,7 @@ final class MailController extends BaseController
             ? $this->settings->defaultMailSenderKey()
             : (string) $request->input('sender_key');
         $replyTo = $this->replyToByKey((string) $request->input('reply_to_key'), $memberContactMode, $user);
+        $eventId = (int) $request->input('event_id') ?: null;
         $_SESSION['mail_job'] = [
             'contacts' => $contactIds,
             'subject' => $this->composeSubject((string) $request->input('subject'), $subjectPrefix, $memberContactMode),
@@ -465,6 +508,8 @@ final class MailController extends BaseController
             'reply_to_key' => $replyTo['key'] ?? (string) $request->input('reply_to_key'),
             'salutation_mode' => $salutationMode,
             'member_contact_mode' => $memberContactMode,
+            'event_id' => $eventId,
+            'event_tokens' => $eventId !== null ? $this->events->tokensForEvent($eventId) : [],
             'attachments' => $attachments,
             'offset' => 0,
             'results' => [],
@@ -522,12 +567,13 @@ final class MailController extends BaseController
         $userId = (int) $user['id'];
 
         foreach ($slice as $contact) {
+            [$subject, $message] = $this->applyVoteLink($job, (int) $contact['id']);
             $result = $this->mailer->sendMergedMail(
                 $identity,
                 $replyTo,
                 $contact,
-                $job['subject'],
-                $job['message'],
+                $subject,
+                $message,
                 (string) ($job['salutation_mode'] ?? 'auto'),
                 $job['attachments'],
                 $userId

@@ -60,8 +60,75 @@ final class EventRepository
         $event['tally'] = $this->tally($id);
         $event['answered_count'] = $this->answeredParticipantCount($id);
         $event['token_stats'] = $this->tokenHitStats($id);
+        $event['response_log'] = $this->responseLog($id);
 
         return $event;
+    }
+
+    /** @return array<int, string> contact_id → token */
+    public function tokensForEvent(int $eventId): array
+    {
+        $stmt = $this->pdo->prepare('SELECT contact_id, token FROM event_participants WHERE event_id = :event_id');
+        $stmt->execute(['event_id' => $eventId]);
+
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $out[(int) $row['contact_id']] = (string) $row['token'];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Kontakt-IDs des Teilnehmerkreises nach Filter:
+     * - „all": alle Teilnehmer
+     * - „confirmed": „Ja" beim festgelegten Termin (sonst: mindestens einmal geantwortet)
+     * - „pending": noch keine Rückmeldung
+     *
+     * @return list<int>
+     */
+    public function participantContactIds(int $eventId, string $filter = 'all'): array
+    {
+        $event = $this->pdo->prepare('SELECT decided_option_id FROM events WHERE id = :id');
+        $event->execute(['id' => $eventId]);
+        $decidedOptionId = (int) ($event->fetchColumn() ?: 0);
+
+        $participants = $this->participantsForEvent($eventId);
+        $ids = [];
+        foreach ($participants as $participant) {
+            $keep = match ($filter) {
+                'confirmed' => $decidedOptionId > 0
+                    ? ($participant['answers'][$decidedOptionId] ?? '') === 'yes'
+                    : $participant['has_answered'],
+                'pending' => !$participant['has_answered'],
+                default => true,
+            };
+            if ($keep) {
+                $ids[] = (int) $participant['contact_id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /** @return list<array<string, mixed>> Verlauf, neueste zuerst */
+    public function responseLog(int $eventId, int $limit = 200): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT l.answer, l.via, l.created_at,
+                    c.vorname, c.nachname,
+                    eo.option_date, eo.option_time
+             FROM event_response_log l
+             JOIN event_participants ep ON ep.id = l.participant_id
+             JOIN contacts c ON c.id = ep.contact_id
+             JOIN event_options eo ON eo.id = l.option_id
+             WHERE ep.event_id = :event_id
+             ORDER BY l.created_at DESC, l.id DESC
+             LIMIT ' . (int) $limit
+        );
+        $stmt->execute(['event_id' => $eventId]);
+
+        return $stmt->fetchAll();
     }
 
     public function create(array $data, int $userId): int
@@ -267,10 +334,20 @@ final class EventRepository
         $validOptions->execute(['pid' => $participantId]);
         $allowed = array_map('intval', $validOptions->fetchAll(PDO::FETCH_COLUMN));
 
+        $currentStmt = $this->pdo->prepare('SELECT option_id, answer FROM event_responses WHERE participant_id = :pid');
+        $currentStmt->execute(['pid' => $participantId]);
+        $current = [];
+        foreach ($currentStmt->fetchAll() as $row) {
+            $current[(int) $row['option_id']] = $row['answer'];
+        }
+
         $insert = $this->pdo->prepare(
             'INSERT INTO event_responses (participant_id, option_id, answer, via)
              VALUES (:pid, :oid, :answer, :via)
              ON DUPLICATE KEY UPDATE answer = VALUES(answer), via = VALUES(via)'
+        );
+        $log = $this->pdo->prepare(
+            'INSERT INTO event_response_log (participant_id, option_id, answer, via) VALUES (:pid, :oid, :answer, :via)'
         );
         foreach ($answers as $optionId => $answer) {
             $optionId = (int) $optionId;
@@ -278,6 +355,9 @@ final class EventRepository
                 continue;
             }
             $insert->execute(['pid' => $participantId, 'oid' => $optionId, 'answer' => $answer, 'via' => $via]);
+            if (($current[$optionId] ?? null) !== $answer) {
+                $log->execute(['pid' => $participantId, 'oid' => $optionId, 'answer' => $answer, 'via' => $via]);
+            }
         }
     }
 

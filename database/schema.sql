@@ -206,6 +206,17 @@ CREATE TABLE event_token_hits (
     CONSTRAINT fk_event_token_hits_participant FOREIGN KEY (participant_id) REFERENCES event_participants(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE event_response_log (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    participant_id INT UNSIGNED NOT NULL,
+    option_id INT UNSIGNED NOT NULL,
+    answer ENUM('yes', 'maybe', 'no') NOT NULL,
+    via ENUM('token', 'login') NOT NULL DEFAULT 'token',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_event_response_log_participant (participant_id),
+    CONSTRAINT fk_event_response_log_participant FOREIGN KEY (participant_id) REFERENCES event_participants(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO roles (name, label, description) VALUES
 ('admin', 'Admin', 'Vollzugriff inklusive Benutzerverwaltung'),
 ('orga', 'Team', 'Verwaltet Kontakte, Mailings und Einstellungen'),

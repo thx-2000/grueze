@@ -221,13 +221,54 @@ ksort($byCategory);
 
 <?php if ($participants !== []): ?>
     <section class="detail-card">
-        <h2>Abstimmungs-Links</h2>
-        <p class="field-hint">Jede Person hat einen eigenen Link. Wer über einen fremden Link abstimmt, sieht eine Warnung. In v0.32 lassen sich die Links direkt per Nachricht verschicken.</p>
-        <div class="toolbar-actions">
-            <button type="button" class="ghost-button" data-copy="#allVoteLinks"><?= icon('copy') ?><span>Alle Links kopieren</span></button>
-        </div>
-        <textarea id="allVoteLinks" rows="6" readonly spellcheck="false"><?php foreach ($participants as $p): ?><?= trim($p['vorname'] . ' ' . $p['nachname']) ?>: <?= $voteBaseUrl . '?token=' . $p['token'] ?><?= "\n" ?><?php endforeach; ?></textarea>
+        <h2>Teilnehmer erreichen</h2>
+        <p class="field-hint">Jede Person hat einen eigenen Abstimmungs-Link. Wer über einen fremden Link abstimmt, sieht eine Warnung.</p>
+
+        <?php if (can('mail.send')): ?>
+            <form method="post" action="<?= e(url('/termine/nachricht')) ?>" class="event-message-actions">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
+                <p class="field-hint">Nachricht mit Platzhalter <code>{Abstimmungslink}</code> – der wird je Person durch den persönlichen Link ersetzt.</p>
+                <div class="toolbar-actions">
+                    <button type="submit" name="filter" value="all" class="button-link"><?= icon('mail') ?><span>An alle Teilnehmer</span></button>
+                    <?php if ($event['status'] === 'decided'): ?>
+                        <button type="submit" name="filter" value="confirmed" class="ghost-button">Nur an Zusagen</button>
+                    <?php endif; ?>
+                    <button type="submit" name="filter" value="pending" class="ghost-button">Nur an Offene</button>
+                </div>
+            </form>
+        <?php endif; ?>
+
+        <details class="admin-drawer">
+            <summary><span><?= icon('link') ?></span><span>Links einzeln kopieren</span></summary>
+            <div class="admin-drawer-body">
+                <div class="toolbar-actions">
+                    <button type="button" class="ghost-button" data-copy="#allVoteLinks"><?= icon('copy') ?><span>Alle Links kopieren</span></button>
+                </div>
+                <textarea id="allVoteLinks" rows="6" readonly spellcheck="false"><?php foreach ($participants as $p): ?><?= trim($p['vorname'] . ' ' . $p['nachname']) ?>: <?= $voteBaseUrl . '?token=' . $p['token'] ?><?= "\n" ?><?php endforeach; ?></textarea>
+            </div>
+        </details>
     </section>
+
+    <?php if (!empty($event['response_log'])): ?>
+        <section class="detail-card">
+            <h2>Verlauf der Abstimmung</h2>
+            <p class="muted">Jede gespeicherte Rückmeldung – neueste zuerst. Nur für die Verwaltung sichtbar.</p>
+            <ol class="event-log">
+                <?php foreach ($event['response_log'] as $entry): ?>
+                    <li>
+                        <span class="event-log-when"><?= e(format_datetime($entry['created_at'])) ?></span>
+                        <span class="event-log-who"><?= e(trim($entry['vorname'] . ' ' . $entry['nachname'])) ?></span>
+                        <span class="event-log-what">
+                            <?= e(format_weekday_date($entry['option_date'])) ?><?= trim((string) ($entry['option_time'] ?? '')) !== '' ? ', ' . e($entry['option_time']) : '' ?>:
+                            <strong class="event-log-answer is-<?= e($entry['answer']) ?>"><?= e($answerShort[$entry['answer']]) ?></strong>
+                            <?php if ($entry['via'] === 'token'): ?><span class="muted">(Link)</span><?php endif; ?>
+                        </span>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        </section>
+    <?php endif; ?>
 <?php endif; ?>
 
 <section class="detail-card detail-danger">

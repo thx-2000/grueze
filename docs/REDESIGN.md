@@ -42,8 +42,9 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   die Namensliste ab; Überblick + Lücken mit Bearbeiten/Schreiben je Person).
 - Stufe 8 (v0.31): **Termine v1** – erledigt (Datumsabstimmung, Token-Links
   ohne Login, Ergebnismatrix, Ergebnis festlegen, Zusagen, Archiv).
-  Offen für v0.32/0.33: Link-Versand per Nachricht, „an Teilnehmer",
-  weitere Termin-Typen, Abstimm-Historie.
+- Stufe 8b (v0.32): Termine – Link-Versand per Nachricht (`{Abstimmungslink}`),
+  „an Teilnehmer" (alle / nur Zusagen / nur Offene), Abstimmungs-Verlauf.
+  Offen für v0.33: weitere Termin-Typen, „Mein Eintrag" zeigt offene Abstimmungen.
 - offen: „Mein Eintrag" (Handy), „Mail ans Orga-Team", Grüße-Pool,
   Selbst-Registrierung, Verwaltung-Hub in 3 Gruppen, dann Security-Audit.
 

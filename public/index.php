@@ -221,7 +221,8 @@ try {
         Container::get(UploadService::class),
         Container::get(CategoryRepository::class),
         Container::get(TagRepository::class),
-        Container::get(\App\Repositories\RecipientListRepository::class)
+        Container::get(\App\Repositories\RecipientListRepository::class),
+        Container::get(EventRepository::class)
     ));
     Container::factory(SettingsController::class, static fn () => new SettingsController(
         Container::get(Auth::class),
@@ -325,6 +326,7 @@ try {
     $router->post('/termine/ergebnis', [EventController::class, 'decide']);
     $router->post('/termine/status', [EventController::class, 'setStatus']);
     $router->post('/termine/loeschen', [EventController::class, 'delete']);
+    $router->post('/termine/nachricht', [EventController::class, 'messageParticipants']);
     $router->get('/abstimmen', [EventController::class, 'vote']);
     $router->post('/abstimmen', [EventController::class, 'submitVote']);
     $router->post('/mail/compose', [MailController::class, 'compose']);

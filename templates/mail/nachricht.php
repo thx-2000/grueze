@@ -3,6 +3,7 @@ $draft = (array) ($draft ?? []);
 $presetContacts = $presetContacts ?? [];
 $hasPreset = $presetContacts !== [];
 $fromFilter = (bool) ($fromFilter ?? false);
+$eventId = isset($eventId) ? (int) $eventId : null;
 
 $branding = app_branding();
 $appName = (string) ($branding['branding_app_name'] ?? 'Adress-Zentrale');
@@ -30,11 +31,12 @@ $option = static function (string $value, string $active): string {
 <header class="msg-head">
     <p class="eyebrow">Nachrichten</p>
     <h1>Personalisierte E-Mail</h1>
-    <p class="muted">Empfängerkreis wählen und Nachricht schreiben. Platzhalter: <code>{Anrede}</code>, <code>{Vorname}</code>, <code>{Nachname}</code>. Angeschrieben wird nur, wer eine Mailadresse hinterlegt hat.</p>
+    <p class="muted">Empfängerkreis wählen und Nachricht schreiben. Platzhalter: <code>{Anrede}</code>, <code>{Vorname}</code>, <code>{Nachname}</code><?= $eventId !== null ? ', <code>{Abstimmungslink}</code>' : '' ?>. Angeschrieben wird nur, wer eine Mailadresse hinterlegt hat.</p>
 </header>
 
 <form id="mailComposeForm" method="post" action="<?= e(url('/mail/start')) ?>" enctype="multipart/form-data" class="contact-detail-form" data-message-form data-count-url="<?= e(url('/rundmail/anzahl')) ?>">
     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+    <?php if ($eventId !== null): ?><input type="hidden" name="event_id" value="<?= e((string) $eventId) ?>"><?php endif; ?>
 
     <section class="detail-card">
         <h2>Empfänger</h2>
@@ -187,7 +189,7 @@ $option = static function (string $value, string $active): string {
             <label class="full-width">
                 <span>Nachricht</span>
                 <textarea name="message" rows="10" required><?= e($draft['message'] ?? "{Anrede} {Vorname},\n\n") ?></textarea>
-                <small class="field-hint">Wird pro Person personalisiert und einzeln versendet.</small>
+                <small class="field-hint">Wird pro Person personalisiert und einzeln versendet.<?= $eventId !== null ? ' <code>{Abstimmungslink}</code> wird je Person durch den persönlichen Abstimmungs-Link ersetzt.' : '' ?></small>
             </label>
             <div class="mail-preview-block full-width">
                 <strong>Automatisch ergänzter Mail-Fuß</strong>

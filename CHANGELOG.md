@@ -3,6 +3,20 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.32.0
+
+- **Termine: Links per Nachricht verschicken.** Auf der Termin-Detailseite
+  neu **„Teilnehmer erreichen"**: „An alle Teilnehmer" / „Nur an Zusagen"
+  (wenn ein Termin festgelegt ist) / „Nur an Offene" führen direkt in den
+  Nachrichten-Screen mit vorbelegtem Empfängerkreis und Text. Der Platzhalter
+  **`{Abstimmungslink}`** wird beim Versand je Person durch den persönlichen
+  Token-Link ersetzt (auch in der Testmail). Die kopierbare Link-Liste bleibt,
+  jetzt eingeklappt.
+- **Abstimmungs-Verlauf** auf der Detailseite (nur Verwaltung): jede
+  gespeicherte oder geänderte Rückmeldung mit Zeitpunkt, Person, Vorschlag
+  und Antwort, neueste zuerst; Link-Stimmen sind als „(Link)" markiert.
+- Migration `2026-09-06-event-response-log` (Tabelle `event_response_log`).
+
 ## 0.31.0
 
 - **Neuer Bereich „Termine" – Terminfindung mit Datumsabstimmung.**
