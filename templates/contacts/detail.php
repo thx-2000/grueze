@@ -233,6 +233,20 @@ $actionLabel = static fn (string $a): string => match ($a) {
     </div>
 </form>
 
+<?php if ($editing && can('users.manage') && !$linkedUser && ($contact['emails'][0]['email'] ?? '') !== ''): ?>
+    <section class="detail-card">
+        <h2>Zugang per Einladung</h2>
+        <p class="muted">Statt ein Erstpasswort zu vergeben: einen Link an <strong><?= e($contact['emails'][0]['email']) ?></strong> schicken. Die Person setzt Name und Kennwort selbst und bekommt die Standard-Rolle (<a href="<?= e(url('/verwaltung/registrierung')) ?>">einstellbar</a>).</p>
+        <form method="post" action="<?= e(url('/verwaltung/einladung')) ?>">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <input type="hidden" name="contact_id" value="<?= e((string) $contact['id']) ?>">
+            <div class="toolbar-actions">
+                <button type="submit" class="button-link"><?= icon('mail') ?><span>Einladungslink erstellen &amp; schicken</span></button>
+            </div>
+        </form>
+    </section>
+<?php endif; ?>
+
 <?php if ($editing && can('audit.view')): ?>
     <section class="detail-card history-card">
         <h2>Änderungsverlauf</h2>

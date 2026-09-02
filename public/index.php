@@ -14,6 +14,7 @@ use App\Controllers\LogController;
 use App\Controllers\MailController;
 use App\Controllers\OrgaController;
 use App\Controllers\PasskeyController;
+use App\Controllers\RegistrationController;
 use App\Controllers\SearchController;
 use App\Controllers\SettingsController;
 use App\Controllers\SetupController;
@@ -35,6 +36,7 @@ use App\Repositories\EventRepository;
 use App\Repositories\GreetingRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\PasskeyRepository;
+use App\Repositories\RegistrationInviteRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\TagRepository;
@@ -217,6 +219,15 @@ try {
     Container::factory(\App\Repositories\RecipientListRepository::class, static fn () => new \App\Repositories\RecipientListRepository(Container::get(PDO::class)));
     Container::factory(EventRepository::class, static fn () => new EventRepository(Container::get(PDO::class)));
     Container::factory(GreetingRepository::class, static fn () => new GreetingRepository(Container::get(PDO::class)));
+    Container::factory(RegistrationInviteRepository::class, static fn () => new RegistrationInviteRepository(Container::get(PDO::class)));
+    Container::factory(RegistrationController::class, static fn () => new RegistrationController(
+        Container::get(Auth::class),
+        Container::get(RegistrationInviteRepository::class),
+        Container::get(UserRepository::class),
+        Container::get(ContactRepository::class),
+        Container::get(SettingRepository::class),
+        Container::get(MailService::class)
+    ));
     Container::factory(GreetingController::class, static fn () => new GreetingController(
         Container::get(Auth::class),
         Container::get(GreetingRepository::class),
@@ -288,6 +299,12 @@ try {
     $router->post('/forgot-password', [AuthController::class, 'sendReset']);
     $router->get('/reset-password', [AuthController::class, 'showResetPassword']);
     $router->post('/reset-password', [AuthController::class, 'resetPassword']);
+    $router->get('/registrieren', [RegistrationController::class, 'form']);
+    $router->post('/registrieren', [RegistrationController::class, 'submit']);
+    $router->get('/verwaltung/registrierung', [RegistrationController::class, 'settingsForm']);
+    $router->post('/verwaltung/registrierung', [RegistrationController::class, 'updateSettings']);
+    $router->post('/verwaltung/einladung', [RegistrationController::class, 'createInvite']);
+    $router->post('/verwaltung/einladung/zuruecknehmen', [RegistrationController::class, 'revokeInvite']);
     $router->get('/impressum', [LegalController::class, 'impressum']);
     $router->get('/datenschutz', [LegalController::class, 'datenschutz']);
     $router->get('/setup/admin', [SetupController::class, 'showAdminForm']);

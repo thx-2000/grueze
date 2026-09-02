@@ -3,6 +3,28 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.37.0
+
+- **Selbst-Registrierung, Stufe 1 – Einladungslinks.**
+  - Auf einem Kontakt (Karte „Login & Rolle" bzw. „Zugang per Einladung"):
+    **„Einladungslink erstellen & schicken"** → ein einmaliger, befristeter
+    Link geht an die hinterlegte Mailadresse (und wird als Fallback im
+    Hinweis angezeigt). Die Person setzt über den Link Name + Kennwort
+    selbst; der Account bekommt die **Standard-Rolle** (voreingestellt:
+    Mitglied) und wird mit dem Kontakt verknüpft, die Person ist direkt
+    eingeloggt.
+  - Neue Seite **Verwaltung → Selbst-Registrierung**: Standard-Rolle,
+    Link-Gültigkeit, Schalter **„Selbst-Anmeldung erlauben"** (Standard:
+    aus), Liste der offenen Einladungen zum Zurücknehmen.
+  - Bei aktiver Selbst-Anmeldung: `/registrieren` (Link auf der
+    Anmeldeseite) → Person trägt ihre bekannte Mailadresse ein → Link geht
+    an genau diese Adresse (Klick = Bestätigung). Neutrale Antwort, egal ob
+    die Adresse bekannt ist. Unbekannte Adressen (Freigabe-Weg) kommen in
+    Stufe 2.
+- Fix: Auf der Orga-Team-Seite steht jetzt **„Geht ans gesamte Orga-Team."**
+  statt einer (falschen) Personenzahl.
+- Migration `2026-09-09-registrierung` (Tabelle `registration_invites`).
+
 ## 0.36.0
 
 - **Geburtstagsgrüße.** Neue Seite `/gruesse/geburtstage` (Verwaltung →

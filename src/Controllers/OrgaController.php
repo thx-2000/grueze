@@ -115,10 +115,8 @@ final class OrgaController extends BaseController
             return 'Geht an die hinterlegte Orga-Adresse.';
         }
 
-        $count = count($this->recipients());
-
-        return $count === 0
-            ? 'Aktuell ist noch kein Orga-Team hinterlegt.'
-            : ($count === 1 ? 'Geht an 1 Person aus dem Orga-Team.' : 'Geht an ' . $count . ' Personen aus dem Orga-Team.');
+        return $this->recipients() === []
+            ? 'Aktuell ist noch kein Orga-Team hinterlegt – bitte an eine:n Admin wenden.'
+            : 'Geht ans gesamte Orga-Team.';
     }
 }

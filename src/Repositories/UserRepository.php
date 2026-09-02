@@ -106,6 +106,15 @@ final class UserRepository
         return $this->pdo->query('SELECT * FROM roles ORDER BY id')->fetchAll();
     }
 
+    public function roleIdByName(string $name): ?int
+    {
+        $stmt = $this->pdo->prepare('SELECT id FROM roles WHERE name = :name');
+        $stmt->execute(['name' => $name]);
+        $id = $stmt->fetchColumn();
+
+        return $id === false ? null : (int) $id;
+    }
+
     public function create(array $data): int
     {
         $stmt = $this->pdo->prepare(

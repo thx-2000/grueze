@@ -49,8 +49,11 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   **Bereich „Termine" damit funktional rund.**
 - v0.34: „Mail ans Orga-Team"-Knopf – erledigt.
 - v0.35–0.36: Grüße-Pool (Weihnachten + Geburtstag, geshuffelt) – erledigt.
-- offen: „Mein Eintrag" (Handy-Redesign), Selbst-Registrierung,
-  Verwaltung-Hub in 3 Gruppen, dann Security-Audit.
+- v0.37: Selbst-Registrierung Stufe 1 (Einladungslinks + Selbst-Anmeldung
+  mit bekannter Adresse) – erledigt. Stufe 2 (Freigabe-Warteschlange,
+  Passkey beim Anlegen) offen.
+- offen: „Mein Eintrag" (Handy-Redesign), Verwaltung-Hub in 3 Gruppen,
+  dann Security-Audit.
 
 ## Screen-Entscheidungen
 

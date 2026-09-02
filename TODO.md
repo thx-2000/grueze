@@ -38,6 +38,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   „Mein Eintrag" (Handy), „Mail ans Orga-Team", Grüße-Pool.
 
 - **Selbst-Registrierung / Account-Anlage mit niedriger Berechtigung**:
+  **Stufe 1 in v0.37.0** – Einladungslinks (Weg 1) + Selbst-Anmeldung mit
+  bekannter Adresse (Weg 2, per Schalter, Standard aus). Standard-Rolle
+  Mitglied, konfigurierbar. **Offen (Stufe 2, v0.38):**
+  - Weg 3: unbekannte Adresse → Freigabe-Warteschlange in der Verwaltung.
+  - Passkey schon beim Anlegen (statt/zusätzlich zum Kennwort).
+  - Rate-Limit auf `/registrieren` pro IP (bisher nur: eine offene
+    Einladung je Adresse, neutrale Antworten).
+  Ursprüngliche Anforderung zur Referenz:
   Es soll leicht sein, sich einen (niedrig berechtigten) Account anzulegen.
   Beim Anlegen legt die Person selbst ein Kennwort fest **oder** hinterlegt
   einen Passkey. Drei Wege, je nach Ausgangslage:
@@ -126,6 +134,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Selbst-Registrierung Stufe 1 v0.37.0: `registration_invites`-Tabelle
+  (Migration `2026-09-09-registrierung`), `RegistrationInviteRepository`
+  (Token-Hash wie Passwort-Reset), `RegistrationController` (`/registrieren`
+  GET/POST dispatch via `submit()`, `/verwaltung/registrierung` Settings +
+  offene Einladungen, `/verwaltung/einladung` von der Kontakt-Detailseite).
+  `SettingRepository::registrationSettings()`, `UserRepository::roleIdByName`,
+  `ContactRepository::findIdByEmail`. Login-Seite + Hub verlinken.
+  Nebenbei: Orga-Team-Seite „Geht ans gesamte Orga-Team." (statt Zahl).
 - Geburtstagsgrüße v0.36.0: `/gruesse/geburtstage` (`GreetingController::
   birthdayForm/birthdayPreview`, `birthdaysWithin($days)`),
   `ContactRepository::withBirthdays()`, Helper `birthday_countdown()`.

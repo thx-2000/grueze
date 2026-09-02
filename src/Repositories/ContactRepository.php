@@ -199,6 +199,18 @@ final class ContactRepository
         );
     }
 
+    /** Kontakt-ID zu einer Mailadresse (erste Übereinstimmung), sonst null. */
+    public function findIdByEmail(string $email): ?int
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT contact_id FROM contact_emails WHERE LOWER(TRIM(email)) = LOWER(TRIM(:email)) ORDER BY id LIMIT 1'
+        );
+        $stmt->execute(['email' => $email]);
+        $id = $stmt->fetchColumn();
+
+        return $id === false ? null : (int) $id;
+    }
+
     /**
      * Kontakte mit hinterlegtem Geburtstag (für die Geburtstagsgrüße).
      *

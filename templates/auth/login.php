@@ -57,6 +57,7 @@ $loginHeadline = trim((string) ($branding['branding_login_headline'] ?? ''));
 
     <div class="link-row">
         <p><a href="<?= e(url('/forgot-password')) ?>">Passwort vergessen?</a></p>
+        <p><a href="<?= e(url('/registrieren')) ?>">Noch keinen Zugang?</a></p>
         <?php if ($publicSiteUrl !== ''): ?>
             <p><a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer">Zur öffentlichen Seite</a></p>
         <?php endif; ?>

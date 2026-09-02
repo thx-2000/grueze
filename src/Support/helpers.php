@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.36.0';
+    return '0.37.0';
 }
 
 function system_label(): string
@@ -327,6 +327,8 @@ function page_title(string $path): string
         '/login'                     => 'Anmeldung',
         '/forgot-password'           => 'Passwort vergessen',
         '/reset-password'            => 'Neues Passwort',
+        '/registrieren'              => 'Zugang einrichten',
+        '/verwaltung/registrierung'  => 'Selbst-Registrierung',
         '/setup/admin'               => 'Ersteinrichtung',
         '/kontakte'                  => 'Adressbuch',
         '/search'                    => 'Suche',

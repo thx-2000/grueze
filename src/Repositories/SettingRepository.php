@@ -289,6 +289,21 @@ final class SettingRepository
         return trim((string) ($this->get('mail_orga_address') ?? ''));
     }
 
+    /**
+     * Selbst-Registrierung: ob die Selbst-Anmeldung (mit bekannter Adresse)
+     * offen ist, welche Rolle neue Accounts bekommen und wie lange ein Link gilt.
+     *
+     * @return array{self_enabled: bool, default_role: string, link_hours: int}
+     */
+    public function registrationSettings(): array
+    {
+        return [
+            'self_enabled' => (string) ($this->get('registration_self_enabled') ?? '0') === '1',
+            'default_role' => trim((string) ($this->get('registration_default_role') ?? '')) ?: 'stufenmitglied',
+            'link_hours' => max(1, (int) ($this->get('registration_link_hours') ?? 72)),
+        ];
+    }
+
     public function mailIdentity(): array
     {
         $settings = $this->mailSettings();
