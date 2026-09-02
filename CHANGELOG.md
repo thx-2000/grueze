@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.23.0
+
+- **Neuer Look, erste Stufe:** ruhigeres Waldgrün statt Leuchtgrün, viel Weiß,
+  neue Schriften. Fraunces für Überschriften, Hanken Grotesk für Oberfläche
+  und Text – beide **lokal eingebettet** (`public/assets/fonts/`,
+  `assets/css/fonts.css`), keine externen Requests.
+- Themes „Grün" (Slug bleibt `signalfarbe`) und „Dunkel" auf die neue
+  Designsprache umgestellt; `theme.css`-Fallback und `ThemeService::DEFAULTS`
+  angeglichen. Bestehende Instanzen auf diesem Theme bekommen den neuen Look
+  automatisch. Keine Migration.
+- Grundlage für den weiteren Umbau (Seitenleiste/Kopf, dann Screen für Screen).
+  Referenz: `docs/REDESIGN.md` + Hi-Fi-Entwurf „GRUEZE Oberfläche".
+
 ## 0.22.0
 
 - **Backup zusammenführen**: dritter Wiederherstellungs-Modus. Spielt nur die

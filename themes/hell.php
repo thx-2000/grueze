@@ -9,8 +9,8 @@ return [
     'name' => 'Hell',
     'description' => 'Viel Weiß, warmer Orange-Akzent, Teal als Zweitfarbe – der Standard für neue Installationen.',
     'tokens' => [
-        'font_display'         => '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
-        'font_body'            => '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
+        'font_display'         => '"Fraunces", "Iowan Old Style", Georgia, serif',
+        'font_body'            => '"Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         'color_bg'             => '#faf6f2',
         'color_bg_alt'         => '#f2e9e0',
         'color_surface'        => '#ffffff',

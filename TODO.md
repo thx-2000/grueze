@@ -85,6 +85,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Neuer Look, Stufe 1 (v0.23.0): Fraunces + Hanken Grotesk lokal eingebettet
+  (`public/assets/fonts/*.woff2`, `assets/css/fonts.css`, im Layout vor
+  theme.css verlinkt). Themes „Grün"/„Dunkel", `theme.css`-`:root` und
+  `ThemeService::DEFAULTS` auf die neue Palette (Waldgrün statt Leuchtgrün,
+  #f5f7f3-Grund, weiche Ecken). `h1–h4` global in der Display-Schrift.
+  Kein HTML-Umbau – nur Tokens + Schriften. Nächste Stufen laut
+  `docs/REDESIGN.md`: Seitenleiste/Kopf, dann Screens, dann „Termine".
 - Backup zusammenführen (v0.22.0): Dritter Restore-Modus `merge` in
   `BackupService::mergeContacts()`. Nur Kontakte + Mails/Telefone/Tags/
   Kategorien; Dedup über `ContactRepository::findImportMatch()` (Name +

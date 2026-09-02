@@ -48,6 +48,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
             }
         } catch (error) {}
     </script>
+    <link rel="stylesheet" href="<?= e(asset_url('/assets/css/fonts.css')) ?>">
     <link rel="stylesheet" href="<?= e(asset_url('/assets/css/theme.css')) ?>">
     <link rel="stylesheet" href="<?= e(asset_url('/assets/css/app.css')) ?>">
     <?php if ($themeStyle !== ''): ?>

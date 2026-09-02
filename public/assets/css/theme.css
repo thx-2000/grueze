@@ -1,39 +1,40 @@
 /*
  * Basis-Tokens. Diese Werte liefert das aktive Theme (ThemeService) zur
  * Laufzeit als Inline-Style im <head> nach; hier stehen die Standardwerte
- * (Theme "signalfarbe"), damit die Seite auch ohne Datenbank trägt.
+ * (Theme "Grün" / Slug "signalfarbe"), damit die Seite auch ohne Datenbank
+ * trägt. Schriften sind lokal eingebettet, siehe assets/css/fonts.css.
  */
 :root {
-    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-    --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-    --color-bg: #e8ebe5;
-    --color-bg-alt: #dde1da;
-    --color-surface: rgba(255, 255, 255, 0.82);
-    --color-surface-strong: rgba(255, 255, 255, 0.92);
-    --color-surface-soft: rgba(243, 245, 240, 0.92);
-    --color-text: #181a15;
-    --color-muted: #5d6258;
-    --color-primary: #2d3128;
-    --color-primary-strong: #141610;
-    --color-secondary: #f0a317;
-    --color-accent: #d8ef54;
-    --color-highlight: #eef4c5;
-    --color-border: rgba(38, 42, 32, 0.12);
-    --color-danger: #b64521;
-    --color-success: #3f7558;
-    --radius-sm: 0.45rem;
-    --radius-md: 0.7rem;
-    --radius-lg: 0.95rem;
-    --radius-xl: 1.2rem;
+    --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --font-body: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --color-bg: #f5f7f3;
+    --color-bg-alt: #eef1ea;
+    --color-surface: #ffffff;
+    --color-surface-strong: #ffffff;
+    --color-surface-soft: #f0f3ee;
+    --color-text: #19231d;
+    --color-muted: #586159;
+    --color-primary: #2e6b41;
+    --color-primary-strong: #245334;
+    --color-secondary: #2e6b41;
+    --color-accent: #2e6b41;
+    --color-highlight: #e6efe7;
+    --color-border: #e0e5db;
+    --color-danger: #a8532b;
+    --color-success: #2f6d43;
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.25rem;
 
     /*
      * Textfarbe auf farbigen Flächen. ThemeService berechnet diese Werte
      * automatisch aus der jeweiligen Fläche (Schwarz oder Weiß, je nach
-     * Kontrast). Die Angaben hier sind nur der Fallback für Theme "signalfarbe".
+     * Kontrast). Die Angaben hier sind nur der Fallback für Theme "Grün".
      */
-    --color-on-primary: #f7f8f4;
+    --color-on-primary: #ffffff;
     --color-on-danger: #ffffff;
-    --color-on-accent: #181a15;
+    --color-on-accent: #ffffff;
 
     /*
      * Abgeleitete Flächen, Kanten und Schatten. Bewusst NICHT vom Theme

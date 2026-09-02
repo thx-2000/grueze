@@ -429,6 +429,13 @@ label span .required-marker {
     color: var(--color-muted);
 }
 
+/* Überschriften durchgängig in der Display-Schrift (Fraunces). */
+h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.005em;
+}
+
 .sidebar h1,
 .hero-card h2,
 .panel h3 {

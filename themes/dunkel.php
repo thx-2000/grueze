@@ -1,33 +1,33 @@
 <?php
 
-// Dunkle, warmneutrale Oberfläche mit Bernstein-Akzent. Gedacht für Arbeit
-// bei wenig Umgebungslicht. Kontraste sind auf WCAG-AA ausgelegt.
+// Dunkle Fassung von „Grün": dieselbe Designsprache, tiefe grün-schwarze
+// Flächen, hellgrüne Aktionsfarbe. Für wenig Umgebungslicht.
 // Aufbau eines Themes: siehe themes/README.md
 
 return [
     'name' => 'Dunkel',
-    'description' => 'Warmneutrale Dunkelfläche mit Bernstein-Akzent – schont die Augen bei wenig Licht.',
+    'description' => 'Dunkle Fassung von „Grün" – tiefe grün-schwarze Flächen, schont die Augen.',
     'tokens' => [
-        'font_display'         => '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
-        'font_body'            => '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
-        'color_bg'             => '#15171b',
-        'color_bg_alt'         => '#1d2026',
-        'color_surface'        => '#23262d',
-        'color_surface_strong' => '#2b2f37',
-        'color_surface_soft'   => '#1b1e23',
-        'color_text'           => '#e9e7e1',
-        'color_muted'          => '#a6a298',
-        'color_border'         => 'rgba(233, 231, 225, 0.15)',
-        'color_primary'        => '#e0a35c',
-        'color_primary_strong' => '#f1c690',
-        'color_secondary'      => '#86b7d8',
-        'color_accent'         => '#e0a35c',
-        'color_highlight'      => '#38301f',
-        'color_danger'         => '#e6765d',
-        'color_success'        => '#68c49b',
-        'radius_sm'            => '0.45rem',
-        'radius_md'            => '0.7rem',
-        'radius_lg'            => '0.95rem',
-        'radius_xl'            => '1.2rem',
+        'font_display'         => '"Fraunces", "Iowan Old Style", Georgia, serif',
+        'font_body'            => '"Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        'color_bg'             => '#10140f',
+        'color_bg_alt'         => '#1e241b',
+        'color_surface'        => '#171c15',
+        'color_surface_strong' => '#1e241b',
+        'color_surface_soft'   => '#141813',
+        'color_text'           => '#e9ede6',
+        'color_muted'          => '#a2aa9f',
+        'color_border'         => '#2f362d',
+        'color_primary'        => '#6bbf7e',
+        'color_primary_strong' => '#82cf93',
+        'color_secondary'      => '#6bbf7e',
+        'color_accent'         => '#39804d',
+        'color_highlight'      => '#21301f',
+        'color_danger'         => '#d68a5c',
+        'color_success'        => '#6bbf7e',
+        'radius_sm'            => '0.5rem',
+        'radius_md'            => '0.75rem',
+        'radius_lg'            => '1rem',
+        'radius_xl'            => '1.25rem',
     ],
 ];
