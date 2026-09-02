@@ -128,7 +128,7 @@
                                     </form>
 
                                     <?php if (!empty($passkeysAvailable)): ?>
-                                        <form method="post" action="<?= e(url('/users/passkeys/reset')) ?>" onsubmit="return confirm('Alle Passkeys dieses Benutzers wirklich entfernen?');">
+                                        <form method="post" action="<?= e(url('/users/passkeys/reset')) ?>" data-confirm="Alle Passkeys dieses Benutzers wirklich entfernen?">
                                             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                                             <input type="hidden" name="user_id" value="<?= e((string) $user['id']) ?>">
                                             <button type="submit" class="danger-button compact-action"<?= $passkeyCount === 0 ? ' disabled' : '' ?>><?= icon('passkey') ?><span>Passkeys löschen</span></button>

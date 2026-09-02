@@ -289,7 +289,7 @@ ksort($byCategory);
                 <div class="toolbar-actions">
                     <button type="button" class="ghost-button" data-copy="#allVoteLinks"><?= icon('copy') ?><span>Alle Links kopieren</span></button>
                 </div>
-                <textarea id="allVoteLinks" rows="6" readonly spellcheck="false"><?php foreach ($participants as $p): ?><?= trim($p['vorname'] . ' ' . $p['nachname']) ?>: <?= $voteBaseUrl . '?token=' . $p['token'] ?><?= "\n" ?><?php endforeach; ?></textarea>
+                <textarea id="allVoteLinks" rows="6" readonly spellcheck="false"><?php foreach ($participants as $p): ?><?= e(trim($p['vorname'] . ' ' . $p['nachname'])) ?>: <?= e($voteBaseUrl . '?token=' . $p['token']) ?><?= "\n" ?><?php endforeach; ?></textarea>
             </div>
         </details>
     </section>
@@ -334,7 +334,7 @@ ksort($byCategory);
                 <button type="submit" class="ghost-button">Wieder öffnen</button>
             </form>
         <?php endif; ?>
-        <form method="post" action="<?= e(url('/termine/loeschen')) ?>" onsubmit="return confirm('Termin „<?= e($event['title']) ?>“ endgültig löschen?');">
+        <form method="post" action="<?= e(url('/termine/loeschen')) ?>" data-confirm="Termin „<?= e($event['title']) ?>“ endgültig löschen?">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
             <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
             <button type="submit" class="danger-button"><?= icon('trash') ?><span>Löschen</span></button>

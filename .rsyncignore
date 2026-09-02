@@ -6,9 +6,15 @@
 .codex/
 docs/
 docker/
+docker-compose.yml
+.dockerignore
+scripts/docker-up.sh
+scripts/docker-down.sh
+scripts/docker-logs.sh
 README.md
 ARCHITECTURE.md
 TODO.md
+SECURITY.md
 # CHANGELOG.md wird von der Update-Seite gelesen und bleibt daher dabei.
 OPEN_TERMINAL_API_KEY
 WEBUI_SECRET_KEY

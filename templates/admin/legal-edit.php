@@ -1,10 +1,10 @@
-<header class="page-head">
-    <p class="eyebrow">Rechtliches &rsaquo; <?= e($pageLabel) ?></p>
-    <h1><?= e($pageLabel) ?> bearbeiten</h1>
-    <p class="muted">Der Inhalt wird als HTML gespeichert und direkt auf der &ouml;ffentlichen Seite angezeigt.</p>
-</div>
-<div>
-    <a href="<?= e(url('/' . ($page === 'impressum' ? 'impressum' : 'datenschutz'))) ?>" class="button-secondary">Vorschau</a>
+<header class="page-head page-head--split">
+    <div>
+        <p class="eyebrow">Rechtliches &rsaquo; <?= e($pageLabel) ?></p>
+        <h1><?= e($pageLabel) ?> bearbeiten</h1>
+        <p class="muted">Der Inhalt wird als HTML gespeichert und direkt auf der &ouml;ffentlichen Seite angezeigt. Erlaubt sind nur einfache Textauszeichnungen &ndash; Skripte und andere aktive Inhalte werden beim Speichern entfernt.</p>
+    </div>
+    <a href="<?= e(url('/' . ($page === 'impressum' ? 'impressum' : 'datenschutz'))) ?>" class="ghost-button">Vorschau</a>
 </header>
 
 <section class="panel narrow">
@@ -16,8 +16,8 @@
             <p class="field-hint">Standard-HTML wie &lt;h3&gt;, &lt;h4&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;a&gt; usw. ist erlaubt.</p>
         </div>
         <div class="form-actions">
-            <button type="submit" class="button-primary">Speichern</button>
-            <a href="<?= e(url('/' . ($page === 'impressum' ? 'impressum' : 'datenschutz'))) ?>" class="button-secondary">Abbrechen</a>
+            <button type="submit">Speichern</button>
+            <a href="<?= e(url('/' . ($page === 'impressum' ? 'impressum' : 'datenschutz'))) ?>" class="ghost-button">Abbrechen</a>
         </div>
     </form>
 </section>
@@ -28,6 +28,6 @@
     <form method="post" action="<?= e(url('/admin/legal/' . $page)) ?>">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <input type="hidden" name="_action" value="reset">
-        <button type="submit" class="button-secondary" onclick="return confirm('Eigene Änderungen verwerfen und Standardinhalt wiederherstellen?')">Standard wiederherstellen</button>
+        <button type="submit" class="ghost-button" data-confirm="Eigene Änderungen verwerfen und Standardinhalt wiederherstellen?">Standard wiederherstellen</button>
     </form>
 </section>

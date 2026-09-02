@@ -399,6 +399,7 @@ final class MailController extends BaseController
         $contactIds = $request->input('recipient_mode') !== null
             ? $this->resolveRecipientIds($request)
             : array_map('intval', (array) ($request->input('contact_ids', []) ?: ($_SESSION['mail_draft_contact_ids'] ?? [])));
+        $this->guardMassSend($request, $contactIds);
         $contacts = $this->contacts->findManyByIds($contactIds);
         $user = $this->auth->user();
         $memberContactMode = $this->isMemberContactMode();
@@ -487,6 +488,7 @@ final class MailController extends BaseController
         $contactIds = $request->input('recipient_mode') !== null
             ? $this->resolveRecipientIds($request)
             : array_map('intval', (array) $request->input('contact_ids', []));
+        $this->guardMassSend($request, $contactIds);
         if ($memberContactMode && count($contactIds) !== 1) {
             flash('error', 'In diesem Modus kann immer nur eine einzelne Person kontaktiert werden.');
             Redirect::to('/kontakte');
@@ -732,6 +734,29 @@ final class MailController extends BaseController
         }
 
         flash('error', 'Dafür fehlen die nötigen Rechte.');
+        Redirect::to('/kontakte');
+    }
+
+    /**
+     * Alles außer „genau eine ausgewählte Person" ist ein Sammelversand und
+     * braucht `mail.send` – unabhängig davon, ob jemand über `contacts.manage`
+     * gerade nicht im „nur Einzelkontakt"-Modus steckt.
+     *
+     * @param list<int> $contactIds
+     */
+    private function guardMassSend(Request $request, array $contactIds): void
+    {
+        if ($this->auth->can('mail.send')) {
+            return;
+        }
+
+        $mode = (string) $request->input('recipient_mode', '');
+        $singlePick = ($mode === '' || $mode === 'selection') && count($contactIds) <= 1;
+        if ($singlePick) {
+            return;
+        }
+
+        flash('error', 'Für einen Sammelversand fehlt die Berechtigung „Nachrichten senden".');
         Redirect::to('/kontakte');
     }
 

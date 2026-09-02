@@ -1035,3 +1035,19 @@ document.querySelectorAll('[data-copy]').forEach((button) => {
         }
     });
 });
+
+// Bestätigungs-Rückfrage vor dem Absenden – ersetzt inline onsubmit/onclick
+// "return confirm(...)", damit die Content-Security-Policy ohne 'unsafe-inline'
+// auskommt. data-confirm kann auf dem <form> oder auf einem Button/Link stehen.
+document.querySelectorAll('[data-confirm]').forEach((el) => {
+    const message = el.dataset.confirm;
+    if (el.tagName === 'FORM') {
+        el.addEventListener('submit', (event) => {
+            if (!window.confirm(message)) event.preventDefault();
+        });
+    } else {
+        el.addEventListener('click', (event) => {
+            if (!window.confirm(message)) event.preventDefault();
+        });
+    }
+});

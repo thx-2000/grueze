@@ -66,8 +66,24 @@ final class MailService
         );
     }
 
+    /** Adressen dürfen keine Zeilenumbrüche enthalten (Header-Injection). */
+    private function safeAddress(string $value): string
+    {
+        $clean = trim((string) preg_replace('/[\r\n\x00].*/s', '', $value));
+        if ($clean === '' || preg_match('/[\r\n]/', $value)) {
+            throw new RuntimeException('Ungültige Mailadresse.');
+        }
+
+        return $clean;
+    }
+
     private function sendRaw(array $identity, string $to, string $subject, string $body, string $replyTo, array $attachments): void
     {
+        $to = $this->safeAddress($to);
+        $replyTo = $this->safeAddress($replyTo);
+        $identity['email'] = $this->safeAddress((string) ($identity['email'] ?? ''));
+        $identity['name'] = trim((string) preg_replace('/[\r\n]+/', ' ', (string) ($identity['name'] ?? '')));
+
         if (class_exists(\PHPMailer\PHPMailer\PHPMailer::class)) {
             $mailer = new \PHPMailer\PHPMailer\PHPMailer(true);
             $mailer->isSMTP();
@@ -179,7 +195,22 @@ final class MailService
     {
         $scheme = ($streamConfig['encryption'] ?? 'ssl') === 'ssl' ? 'ssl' : 'tcp';
         $address = sprintf('%s://%s:%d', $scheme, $streamConfig['host'], (int) $streamConfig['port']);
-        $stream = @stream_socket_client($address, $errorCode, $errorMessage, 10);
+        $context = stream_context_create([
+            'ssl' => [
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+                'SNI_enabled' => true,
+                'peer_name' => (string) $streamConfig['host'],
+            ],
+        ]);
+        $stream = @stream_socket_client(
+            $address,
+            $errorCode,
+            $errorMessage,
+            10,
+            STREAM_CLIENT_CONNECT,
+            $context
+        );
 
         if (!$stream) {
             return false;
@@ -275,7 +306,7 @@ final class MailService
             default => 'ssl',
         };
 
-        return sprintf('{%s:%d/imap/%s/novalidate-cert}%s', $config['host'], (int) $config['port'], $flag, $mailbox);
+        return sprintf('{%s:%d/imap/%s/validate-cert}%s', $config['host'], (int) $config['port'], $flag, $mailbox);
     }
 
     private function imapQuote(string $value): string

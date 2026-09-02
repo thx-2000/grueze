@@ -41,6 +41,7 @@ final class Session
             $_SESSION = [];
             session_destroy();
             session_start();
+            session_regenerate_id(true);
         }
 
         $_SESSION['_last_activity'] = time();

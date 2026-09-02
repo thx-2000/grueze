@@ -287,7 +287,7 @@ $actionLabel = static fn (string $a): string => match ($a) {
     <section class="detail-card detail-danger">
         <h2>Kontakt löschen</h2>
         <p class="muted">Entfernt den Kontakt dauerhaft. Ein verknüpfter Login wird deaktiviert.</p>
-        <form method="post" action="<?= e(url('/contacts/delete')) ?>" onsubmit="return confirm('Kontakt „<?= e($fullName) ?>“ wirklich löschen?');">
+        <form method="post" action="<?= e(url('/contacts/delete')) ?>" data-confirm="Kontakt „<?= e($fullName) ?>“ wirklich löschen?">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
             <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
             <button type="submit" class="danger-button"><?= icon('trash') ?><span>Kontakt löschen</span></button>

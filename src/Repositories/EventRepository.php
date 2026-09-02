@@ -434,6 +434,25 @@ final class EventRepository
         )->execute(['pid' => $participantId, 'hash' => $sourceHash]);
     }
 
+    /**
+     * Pseudonyme Quell-Hashes sind nur solange interessant, wie eine Abstimmung
+     * läuft. Alte Einträge (Standard: 120 Tage) werden entfernt.
+     */
+    public function pruneTokenHits(int $days = 120): int
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                'DELETE FROM event_token_hits WHERE created_at < DATE_SUB(NOW(), INTERVAL :days DAY)'
+            );
+            $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->rowCount();
+        } catch (\Throwable) {
+            return 0;
+        }
+    }
+
     // ------------------------------------------------------------------ intern
 
     private function optionsForEvent(int $eventId): array

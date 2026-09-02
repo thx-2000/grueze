@@ -102,6 +102,7 @@ return [
     ],
     'security' => [
         'login_max_attempts' => 5,
+        'login_max_attempts_ip' => 20,
         'login_lock_minutes' => 10,
         'password_reset_expires_minutes' => 60,
         'private_contact_detail_roles' => ['admin', 'orga'],
@@ -114,6 +115,15 @@ return [
             'login' => ['admin', 'orga'],
         ],
         'photo_max_size' => 2097152,
+        'import_max_size' => 5242880,
+        // Aufbewahrung (Tage): Login-Versuche und pseudonyme Abstimmungs-
+        // Quellhashes werden nach dieser Zeit automatisch gelöscht.
+        'login_attempts_retention_days' => 30,
+        'token_hit_retention_days' => 120,
+        // Beliebige zufällige Zeichenkette. Macht die pseudonymen IP-Hashes
+        // (Rate-Limits, „mehrere Geräte"-Erkennung) unumkehrbar. Leer lassen
+        // heißt: schwächere, aber funktionierende Hashes.
+        'hash_pepper' => '',
         'allowed_photo_types' => [
             'image/jpeg',
             'image/png',

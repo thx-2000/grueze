@@ -174,10 +174,19 @@ final class XlsxReader
         return $value;
     }
 
+    /** Deckel gegen aufgeblähte/„Zip-Bomben"-XML im XLSX. */
+    private const MAX_XML_BYTES = 41943040; // 40 MB entpackt
+
     private function xpath(string $xml, array $namespaces = []): DOMXPath
     {
+        if (strlen($xml) > self::MAX_XML_BYTES) {
+            throw new RuntimeException('Die XLSX-Datei ist zu groß bzw. zu komplex.');
+        }
+
         $document = new DOMDocument();
-        $document->loadXML($xml);
+        // Kein Netzwerkzugriff, keine externen Entities (XXE-Härtung, auch wenn
+        // moderne libxml das per Default nicht mehr auflöst).
+        $document->loadXML($xml, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
         $xpath = new DOMXPath($document);
         $xpath->registerNamespace('main', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
         foreach ($namespaces as $prefix => $namespace) {

@@ -53,7 +53,7 @@ $swatchKeys = ['color_bg', 'color_surface', 'color_primary', 'color_accent', 'co
                                 <input type="hidden" name="slug" value="<?= e($slug) ?>">
                                 <button type="submit" class="ghost-button compact-action"><?= icon('copy') ?><span>Duplizieren</span></button>
                             </form>
-                            <form method="post" action="<?= e(url('/settings/themes/loeschen')) ?>" onsubmit="return confirm('Theme „<?= e(addslashes($theme['name'])) ?>“ wirklich löschen?<?= $isActive ? ' Es ist gerade aktiv – danach wird auf „Hell“ gewechselt.' : '' ?>');">
+                            <form method="post" action="<?= e(url('/settings/themes/loeschen')) ?>" data-confirm="Theme „<?= e($theme['name']) ?>“ wirklich löschen?<?= $isActive ? ' Es ist gerade aktiv – danach wird auf „Hell“ gewechselt.' : '' ?>">
                                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                                 <input type="hidden" name="slug" value="<?= e($slug) ?>">
                                 <button type="submit" class="danger-button icon-button" title="Löschen" aria-label="Löschen"><?= icon('trash') ?></button>

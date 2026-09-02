@@ -104,12 +104,12 @@ foreach (['color_primary' => '--color-on-primary', 'color_danger' => '--color-on
             </div>
             <div class="theme-preview-card">
                 <h3>Überschrift</h3>
-                <p>Fließtext auf der Kartenfläche. <a href="#" onclick="return false;">Ein Link</a> zeigt die
+                <p>Fließtext auf der Kartenfläche. <span class="preview-link">Ein Link</span> zeigt die
                     Linkfarbe. <span class="theme-preview-muted">Gedämpfter Hinweis daneben.</span></p>
                 <div class="theme-preview-actions">
-                    <button type="button" onclick="return false;">Primär</button>
-                    <button type="button" class="ghost-button" onclick="return false;">Sekundär</button>
-                    <button type="button" class="danger-button" onclick="return false;">Löschen</button>
+                    <button type="button">Primär</button>
+                    <button type="button" class="ghost-button">Sekundär</button>
+                    <button type="button" class="danger-button">Löschen</button>
                 </div>
                 <input type="text" value="Eingabefeld" readonly aria-label="Vorschau-Eingabefeld">
                 <div class="theme-preview-badges">

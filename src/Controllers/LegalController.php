@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Csrf;
 use App\Repositories\SettingRepository;
+use App\Support\Redirect;
 
 final class LegalController extends BaseController
 {
@@ -15,12 +17,12 @@ final class LegalController extends BaseController
 
     public function impressum(): void
     {
-        $this->render('legal/impressum', ['content' => $this->settings->legalText('impressum')]);
+        $this->render('legal/impressum', ['content' => sanitize_rich_html($this->settings->legalText('impressum'))]);
     }
 
     public function datenschutz(): void
     {
-        $this->render('legal/datenschutz', ['content' => $this->settings->legalText('datenschutz')]);
+        $this->render('legal/datenschutz', ['content' => sanitize_rich_html($this->settings->legalText('datenschutz'))]);
     }
 
     public function editImpressum(): void
@@ -57,16 +59,17 @@ final class LegalController extends BaseController
     private function updateLegal(string $page): void
     {
         $this->requirePermission('users.manage');
+        Csrf::validate($_POST['_csrf'] ?? null);
 
         if (($_POST['_action'] ?? '') === 'reset') {
             $this->settings->set('legal_' . $page, '');
             flash('success', 'Standardinhalt wiederhergestellt.');
         } else {
-            $content = trim((string) ($_POST['content'] ?? ''));
+            $content = sanitize_rich_html((string) ($_POST['content'] ?? ''));
             $this->settings->set('legal_' . $page, $content);
             flash('success', 'Inhalt gespeichert.');
         }
 
-        redirect(url('/admin/legal/' . $page));
+        Redirect::to('/admin/legal/' . $page);
     }
 }

@@ -3747,9 +3747,12 @@ input[type="color"].token-swatch::-moz-color-swatch {
     line-height: 1.5;
 }
 
-.theme-preview-card a {
+.theme-preview-card a,
+.theme-preview-card .preview-link {
     color: var(--color-primary-strong);
     font-weight: 700;
+    text-decoration: underline;
+    cursor: default;
 }
 
 .theme-preview-muted {

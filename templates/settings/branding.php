@@ -55,8 +55,8 @@
             <div class="branding-logo-grid">
                 <label>
                     <span>Logo hochladen</span>
-                    <input type="file" name="branding_logo" accept=".png,.jpg,.jpeg,.webp,.svg">
-                    <small class="field-hint">Empfohlen: transparentes PNG oder SVG. Das Logo wird für die Anwendungsschale vorbereitet.</small>
+                    <input type="file" name="branding_logo" accept=".png,.jpg,.jpeg,.webp">
+                    <small class="field-hint">Empfohlen: transparentes PNG. Das Logo wird für die Anwendungsschale vorbereitet.</small>
                 </label>
                 <div class="branding-logo-preview">
                     <span class="branding-logo-preview-title">Aktuelles Logo</span>

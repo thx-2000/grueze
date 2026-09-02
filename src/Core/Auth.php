@@ -11,6 +11,9 @@ final class Auth
 {
     private const CONTACT_DETAIL_FIELDS = ['address', 'birthday', 'emails', 'phones', 'notes', 'login'];
 
+    /** Pro Request gecacht: [aktive User-ID => User-Array|null]. */
+    private array $userCache = [];
+
     public function __construct(private UserRepository $users, private SettingRepository $settings)
     {
     }
@@ -22,9 +25,13 @@ final class Auth
             return null;
         }
 
+        if (array_key_exists($userId, $this->userCache)) {
+            return $this->userCache[$userId];
+        }
+
         $user = $this->users->findById($userId);
         if ($user && (bool) $user['is_active']) {
-            return $user;
+            return $this->userCache[$userId] = $user;
         }
 
         if ($this->isImpersonating()) {
@@ -32,7 +39,7 @@ final class Auth
             return $this->originalUser();
         }
 
-        return null;
+        return $this->userCache[$userId] = null;
     }
 
     public function originalUser(): ?array
@@ -61,6 +68,10 @@ final class Auth
     {
         $user = $this->users->findByEmail($email);
         if (!$user || !(bool) $user['is_active']) {
+            // Gegen Benutzer-Enumeration über die Antwortzeit: immer einen
+            // Hash-Vergleich rechnen, auch wenn es das Konto nicht gibt.
+            password_verify($password, '$2y$10$PIEi38KRWEQrrJHRr/syo.Nz0axOmZksjfptdM7XJ7o6NNyESXg3K');
+
             return false;
         }
 
@@ -69,6 +80,8 @@ final class Auth
         }
 
         $_SESSION['user_id'] = $user['id'];
+        $this->userCache = [];
+        unset($_SESSION['_csrf']);
         Session::regenerate();
         $this->users->touchLogin((int) $user['id']);
 
@@ -83,7 +96,8 @@ final class Auth
         }
 
         $_SESSION['user_id'] = (int) $user['id'];
-        unset($_SESSION['impersonated_user_id']);
+        unset($_SESSION['impersonated_user_id'], $_SESSION['_csrf']);
+        $this->userCache = [];
         Session::regenerate();
         $this->users->touchLogin((int) $user['id']);
 
@@ -103,6 +117,7 @@ final class Auth
         }
 
         $_SESSION['impersonated_user_id'] = (int) $target['id'];
+        $this->userCache = [];
         Session::regenerate();
 
         return true;
@@ -111,11 +126,13 @@ final class Auth
     public function stopImpersonation(): void
     {
         unset($_SESSION['impersonated_user_id']);
+        $this->userCache = [];
         Session::regenerate();
     }
 
     public function logout(): void
     {
+        $this->userCache = [];
         $_SESSION = [];
         session_destroy();
     }

@@ -47,14 +47,14 @@ $installedLabel = $installedVersion !== null ? 'v' . $installedVersion : 'unbeka
             <?php endforeach; ?>
         </ul>
 
-        <form method="post" action="<?= e(url('/admin/aktualisieren')) ?>" class="stack update-run-form">
+        <form method="post" action="<?= e(url('/admin/aktualisieren')) ?>" class="stack update-run-form" data-confirm="Update jetzt anwenden? Alle offenen Migrationen werden ausgeführt.">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
             <label class="inline-toggle">
                 <input type="checkbox" name="with_backup" value="1" checked>
                 <span>Vorher eine Datensicherung anlegen (empfohlen – landet in <code>storage/backups/</code>)</span>
             </label>
             <div class="toolbar-actions">
-                <button type="submit" onclick="return confirm('Update jetzt anwenden? Alle offenen Migrationen werden ausgeführt.')">
+                <button type="submit">
                     <?= icon('upload') ?><span>Jetzt aktualisieren</span>
                 </button>
             </div>
@@ -100,7 +100,7 @@ $installedLabel = $installedVersion !== null ? 'v' . $installedVersion : 'unbeka
                             <form method="post" action="<?= e(url('/admin/migrations/apply')) ?>" class="toolbar-actions" style="margin-top:0.6rem">
                                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                                 <input type="hidden" name="migration" value="<?= e($migration['name']) ?>">
-                                <button type="submit" class="ghost-button" onclick="return confirm('Migration <?= e(addslashes($migration['name'])) ?> einzeln anwenden?')">Nur diese anwenden</button>
+                                <button type="submit" class="ghost-button" data-confirm="Migration <?= e($migration['name']) ?> einzeln anwenden?">Nur diese anwenden</button>
                             </form>
                         </div>
                     <?php endforeach; ?>

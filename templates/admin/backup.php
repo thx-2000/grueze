@@ -55,7 +55,7 @@ $tableLabels = [
     </div>
     <div class="subsection-card">
         <strong>Wichtig</strong>
-        <p class="detail-hint">Das Backup enthält Passwort-Hashes, Passkey-Daten und die hinterlegten Mailserver-Zugangsdaten. Bitte nur an einem sicheren Ort aufbewahren und nicht unverschlüsselt weitergeben.</p>
+        <p class="detail-hint">Das Backup enthält Passwort-Hashes, Passkey-Daten und alle personenbezogenen Daten. Die Mailserver-Passwörter sind bewusst <em>nicht</em> enthalten – die musst du nach einer Wiederherstellung neu eintragen. Bitte nur an einem sicheren Ort aufbewahren und nicht unverschlüsselt weitergeben.</p>
     </div>
     <form method="post" action="<?= e(url('/admin/backup/export')) ?>" class="stack" style="margin-top:0.9rem">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
@@ -111,7 +111,7 @@ $tableLabels = [
             <input type="text" name="confirm" autocomplete="off" placeholder="<?= e($restoreKeyword) ?>">
         </label>
         <div class="toolbar-actions">
-            <button type="submit" class="danger-button" onclick="return confirm('Import jetzt starten? Bei „Alles ersetzen“ gehen die aktuellen Daten verloren.');">
+            <button type="submit" class="danger-button" data-confirm="Import jetzt starten? Bei „Alles ersetzen“ gehen die aktuellen Daten verloren.">
                 <?= icon('upload') ?><span>Import starten</span>
             </button>
         </div>

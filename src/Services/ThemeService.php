@@ -112,12 +112,48 @@ final class ThemeService
     public function normalizeTokens(array $tokens): array
     {
         $clean = [];
-        foreach (array_keys(self::TOKENS) as $key) {
+        foreach (self::TOKENS as $key => [, , , $type]) {
             $value = trim((string) ($tokens[$key] ?? ''));
-            $clean[$key] = $value !== '' ? $value : self::DEFAULTS[$key];
+            $clean[$key] = ($value !== '' && self::tokenValueIsValid($type, $value))
+                ? $value
+                : self::DEFAULTS[$key];
         }
 
         return $clean;
+    }
+
+    /**
+     * Prüft einen Token-Wert, bevor er (roh) in das <style>:root{…} des Layouts
+     * wandert. Alles mit `; { } < > ( )`-Missbrauch, Kommentaren oder `url(…)`
+     * fällt durch und wird durch den Standardwert ersetzt.
+     */
+    private static function tokenValueIsValid(string $type, string $value): bool
+    {
+        if (mb_strlen($value) > 120
+            || preg_match('/[<>{}]/', $value)
+            || str_contains($value, ';')
+            || str_contains($value, '/*')
+            || stripos($value, 'url(') !== false
+            || stripos($value, 'expression') !== false
+            || stripos($value, '@import') !== false) {
+            return false;
+        }
+
+        return match ($type) {
+            'color' => (bool) preg_match(
+                '/^(#[0-9a-f]{3,8}'
+                . '|rgb\(\s*[\d.\s,%\/]+\)'
+                . '|rgba\(\s*[\d.\s,%\/]+\)'
+                . '|hsl\(\s*[\d.\s,%\/deg]+\)'
+                . '|hsla\(\s*[\d.\s,%\/deg]+\)'
+                . '|[a-z]{3,20})$/i',
+                $value
+            ),
+            'length' => (bool) preg_match('/^-?\d*\.?\d+(px|rem|em|%|vw|vh|pt|ch|0)?$/i', $value)
+                || $value === '0',
+            'font' => (bool) preg_match('/^[\p{L}\p{N}\s,."\'\-]+$/u', $value),
+            default => false,
+        };
     }
 
     /**

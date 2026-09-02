@@ -59,16 +59,17 @@ final class UploadService
             throw new RuntimeException('Das Logo ist zu groß.');
         }
 
+        // SVG bewusst nicht erlaubt: kann Skripte enthalten und würde beim
+        // direkten Aufruf als Dokument im App-Kontext ausgeführt.
         $mime = mime_content_type($file['tmp_name']);
-        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'], true)) {
-            throw new RuntimeException('Das Logo muss JPG, PNG, WEBP oder SVG sein.');
+        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+            throw new RuntimeException('Das Logo muss JPG, PNG oder WEBP sein.');
         }
 
         $extension = match ($mime) {
             'image/jpeg' => 'jpg',
             'image/png' => 'png',
             'image/webp' => 'webp',
-            'image/svg+xml' => 'svg',
             default => throw new RuntimeException('Unbekannter Logotyp.'),
         };
 

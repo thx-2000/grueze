@@ -64,9 +64,29 @@ Zwei feste Regeln für alle künftigen Änderungen:
 
 ## Sicherheitsentscheidungen
 
-- PDO mit Prepared Statements für alle Datenbankzugriffe
-- CSRF-Schutz für zustandsändernde Formulare
-- Session-Härtung mit `httponly`, `secure`, `SameSite=Strict` und Inaktivitäts-Timeout
-- Rate-Limit über `login_attempts`
-- serverseitige Datei- und MIME-Prüfung für Fotos und Anhänge
-- sensible Konfiguration bewusst außerhalb von Git durch `config.php`
+- PDO mit Prepared Statements für alle Datenbankzugriffe (`EMULATE_PREPARES` aus)
+- CSRF-Schutz auf jedem zustandsändernden Endpunkt (`Csrf::validate`)
+- Session-Härtung: `httponly`, `secure`, `SameSite=Strict`, Inaktivitäts-Timeout,
+  `session_regenerate_id` bei Login/Rollenwechsel/Timeout, CSRF-Token frisch nach Login
+- Content-Security-Policy (nonce-basiert, `csp_nonce()`) + `X-Frame-Options`,
+  `nosniff`, `Referrer-Policy`, HSTS – gesetzt in `send_security_headers()`
+  (`public/index.php`). Keine Inline-Event-Handler; Rückfragen über `data-confirm`.
+- Login-Ratelimit je (E-Mail, IP) **und** je IP; konstante Antwortzeit
+  (Dummy-`password_verify`) gegen Konten-Enumeration
+- Passwort-Reset: Token als bcrypt-Hash, 1 Mail je Konto / 5 min,
+  Audit-Eintrag, alte Tokens werden beim Zurücksetzen verbraucht
+- Datei-Uploads: Inhalts-MIME-Prüfung, Zufallsnamen, `php_flag engine off` +
+  `RemoveHandler` im Upload-Ordner; kein SVG-Logo; Backup-Restore nur mit
+  Bild-Dateinamen-Allowlist
+- Vom Admin eingegebenes HTML (Impressum/Datenschutz) läuft durch
+  `sanitize_rich_html()` (DOM-Allowlist); Theme-Token-Werte durch
+  `ThemeService::tokenValueIsValid()`, bevor sie ins Seiten-CSS wandern
+- E-Mail-Adressen werden von Steuerzeichen befreit; `MailService::safeAddress()`
+  weist Adressen mit Zeilenumbruch ab; IMAP-Verbindung mit Zertifikatsprüfung
+- Aufbewahrung: `login_attempts`, abgelaufene `password_resets` und alte
+  `event_token_hits` werden probabilistisch (`index.php`, GC) gelöscht;
+  pseudonyme IP-Hashes über `source_hash()` mit optionalem
+  `security.hash_pepper`
+- sensible Konfiguration (`config.php`, `deploy.env`) außerhalb von Git und
+  rsync-Deploy
+- Vollständiger Audit-Bericht: `docs/SECURITY-AUDIT.md`

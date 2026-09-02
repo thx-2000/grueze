@@ -317,9 +317,7 @@ final class EventController extends BaseController
 
     private function sourceHash(): string
     {
-        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
-
-        return hash('sha256', $ip . '|grueze-termine-quelle');
+        return source_hash('termine-quelle');
     }
 
     private function currentPersonName(): string

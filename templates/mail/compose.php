@@ -167,7 +167,7 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
 </section>
 
 <?php if (!$memberContactMode && count($contacts) > 1): ?>
-<script>
+<script nonce="<?= e(csp_nonce()) ?>">
 (function () {
     const box = document.getElementById('saveRecipientList');
     if (!box) return;

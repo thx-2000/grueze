@@ -3,6 +3,57 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.0.0
+
+Erste stabile Version. Schwerpunkt: der komplette **Security-Audit**
+(`docs/SECURITY-AUDIT.md`) ist abgearbeitet – 2 hohe, 10 mittlere und 12
+niedrige Befunde plus ein Bug.
+
+**Sicherheit**
+
+- **Backup-Wiederherstellung gehärtet:** ein manipuliertes Backup-ZIP kann
+  keine `.htaccess`/`.php` mehr in den Upload-Ordner schreiben und keine
+  Spaltennamen ins SQL schmuggeln.
+- **Content-Security-Policy** und weitere Schutz-Header (`X-Frame-Options`,
+  `nosniff`, `Referrer-Policy`, HSTS bei HTTPS). Alle Inline-Skripte laufen über
+  einen Nonce; die „Wirklich löschen?"-Rückfragen liefen vorher über
+  `onsubmit`-Attribute und sind jetzt JavaScript.
+- **Kein CSRF-Loch mehr:** „Impressum/Datenschutz speichern" war ungeschützt.
+  Der Rechtstext wird zusätzlich durch einen HTML-Allowlist-Filter geschickt
+  (nur `p`, `a`, `ul`, `h2` … – keine Skripte).
+- **Theme-Editor:** Farb-/Schrift-Werte werden geprüft, bevor sie ins Seiten-CSS
+  wandern (kein Ausbruch aus `<style>` mehr).
+- **E-Mail-Adressen** werden von Steuerzeichen befreit (verhinderte
+  Header-Injection über den `mail()`-Fallback). CSV-Export neutralisiert
+  Excel-Formeln (`=`, `+`, …).
+- **Mailserver-Zugangsdaten** landen nicht mehr im Backup-ZIP. Die IMAP-„Kopie
+  in Gesendet"-Verbindung prüft jetzt das TLS-Zertifikat.
+- **Logins:** zusätzliche IP-weite Bremse gegen Credential Stuffing;
+  konstantere Antwortzeit gegen Konten-Enumeration.
+- **Passwort-Reset:** höchstens eine Mail pro Konto alle 5 Minuten, Eintrag im
+  Änderungsprotokoll, alte Links werden beim Zurücksetzen ungültig.
+- **Aufbewahrung:** alte Login-Versuche (30 Tage), abgelaufene Reset-Links und
+  Abstimmungs-Quellhashes (120 Tage) werden automatisch gelöscht. IP-Hashes
+  lassen sich mit `security.hash_pepper` unumkehrbar machen.
+- Logo-Upload ohne SVG. XLSX-Import mit 5-MB-Grenze und gehärtetem XML-Parser.
+- Kleinkram: Session-ID-Wechsel nach Timeout und Passwortänderung, CSRF-Token
+  frisch nach Login, „Als Benutzer angemeldet"-Aktionen im Protokoll dem Admin
+  zugeordnet, `Auth::user()` pro Request gecacht.
+
+**Behoben**
+
+- „Impressum/Datenschutz speichern" endete durch einen Aufruf einer nicht
+  existierenden Funktion in einem 500 (der Text wurde trotzdem gespeichert).
+- Die Bearbeiten-Seite für die Rechtstexte hatte kaputtes Markup und nicht
+  vorhandene Button-Klassen.
+
+**Sonstiges**
+
+- `SECURITY.md` (Meldeweg für Sicherheitslücken, Betriebshinweise).
+- Migration `2026-09-11-security-haertung` (`password_resets.created_at`).
+- Neue optionale config-Schlüssel unter `security.*` (siehe
+  `config.example.php`).
+
 ## 0.43.0
 
 - **Lizenz festgelegt:** [PolyForm Noncommercial License 1.0.0](LICENSE).

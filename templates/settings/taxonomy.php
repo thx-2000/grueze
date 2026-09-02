@@ -11,7 +11,7 @@ $renderRows = static function (array $items, string $saveAction, string $deleteA
                 <span class="taxo-count"><?= e((string) $count) ?> <?= $count === 1 ? 'Kontakt' : 'Kontakte' ?></span>
                 <button type="submit" class="ghost-button compact-action">Speichern</button>
             </form>
-            <form method="post" action="<?= e(url($deleteAction)) ?>" onsubmit="return confirm('<?= e($singular) ?> „<?= e(addslashes($item['name'])) ?>“ wirklich löschen?');">
+            <form method="post" action="<?= e(url($deleteAction)) ?>" data-confirm="<?= e($singular) ?> „<?= e($item['name']) ?>“ wirklich löschen?">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="id" value="<?= e((string) $item['id']) ?>">
                 <button type="submit" class="danger-button icon-button" title="Löschen" aria-label="Löschen"><?= icon('trash') ?></button>

@@ -38,13 +38,14 @@ final class AuthController extends BaseController
         $password = (string) $request->input('password');
         $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
-        $attempts = $this->logs->recentFailedAttempts(
-            $email,
-            $ip,
-            (int) config('security.login_lock_minutes', 10)
-        );
+        $lockMinutes = (int) config('security.login_lock_minutes', 10);
+        $attempts = $this->logs->recentFailedAttempts($email, $ip, $lockMinutes);
+        $ipAttempts = $this->logs->recentFailedAttemptsByIp($ip, $lockMinutes);
 
-        if ($attempts >= (int) config('security.login_max_attempts', 5)) {
+        if (
+            $attempts >= (int) config('security.login_max_attempts', 5)
+            || $ipAttempts >= (int) config('security.login_max_attempts_ip', 20)
+        ) {
             flash('error', 'Zu viele Fehlversuche. Bitte später erneut versuchen.');
             Redirect::to('/login');
         }

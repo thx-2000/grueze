@@ -36,7 +36,7 @@
     </form>
 </section>
 
-<script>
+<script nonce="<?= e(csp_nonce()) ?>">
 (function () {
     const form = document.querySelector('[data-register-form]');
     if (!form) return;

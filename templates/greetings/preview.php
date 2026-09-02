@@ -43,7 +43,7 @@
         <?php endforeach; ?>
         <button type="submit" class="ghost-button"><?= icon('reset') ?><span>Neu mischen</span></button>
     </form>
-    <form method="post" action="<?= e(url('/mail/gruesse-senden')) ?>" onsubmit="return confirm('<?= e((string) count($rows)) ?> Grüße jetzt verschicken?');">
+    <form method="post" action="<?= e(url('/mail/gruesse-senden')) ?>" data-confirm="<?= e((string) count($rows)) ?> Grüße jetzt verschicken?">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <button type="submit" class="button-link"><?= icon('message-send') ?><span>Jetzt verschicken</span></button>
     </form>

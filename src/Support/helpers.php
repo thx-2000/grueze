@@ -247,7 +247,69 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.43.0';
+    return '1.0.0';
+}
+
+/**
+ * Pseudonymer Quell-Hash (für Rate-Limits und die „mehrere Geräte"-Erkennung
+ * beim Abstimmen). Mit gesetztem `security.hash_pepper` in der config ist der
+ * Hash nicht mehr per IPv4-Brute-Force rückrechenbar; ohne bleibt das bisherige
+ * (kontextspezifische) Verhalten erhalten.
+ */
+function source_hash(string $context): string
+{
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    $pepper = trim((string) config('security.hash_pepper', ''));
+
+    return $pepper !== ''
+        ? hash('sha256', $pepper . '|' . $context . '|' . $ip)
+        : hash('sha256', $ip . '|grueze-' . $context);
+}
+
+/**
+ * Pro Request ein zufälliger Nonce für die Content-Security-Policy. Wird im
+ * CSP-Header (public/index.php) und an jedem Inline-<script> im Layout gesetzt.
+ */
+function csp_nonce(): string
+{
+    static $nonce = null;
+    if ($nonce === null) {
+        $nonce = rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
+    }
+
+    return $nonce;
+}
+
+/**
+ * Setzt CSP und die übrigen Sicherheits-Header. Einmal früh im Request-Zyklus
+ * aufrufen (vor jeglicher Ausgabe).
+ */
+function send_security_headers(): void
+{
+    if (headers_sent()) {
+        return;
+    }
+
+    $nonce = csp_nonce();
+    header(
+        "Content-Security-Policy: default-src 'self'; "
+        . "script-src 'self' 'nonce-{$nonce}'; "
+        . "style-src 'self' 'unsafe-inline'; "
+        . "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
+        . "form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
+    );
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: same-origin');
+    header('Cross-Origin-Opener-Policy: same-origin');
+
+    $https = ($_SERVER['HTTPS'] ?? '') === 'on'
+        || ($_SERVER['REQUEST_SCHEME'] ?? '') === 'https'
+        || (int) ($_SERVER['SERVER_PORT'] ?? 0) === 443
+        || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    if ($https) {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
 }
 
 function system_label(): string
@@ -306,6 +368,102 @@ function apply_branding_placeholders(string $text): string
         '{kurzname}'  => trim((string) ($branding['branding_short_name'] ?? '')),
         '{shortname}' => trim((string) ($branding['branding_short_name'] ?? '')),
     ]);
+}
+
+/**
+ * Reduziert vom Admin eingegebenes „Rich HTML" (Impressum, Datenschutz) auf
+ * eine kleine, sichere Allowlist. Entfernt Skripte, Styles, Event-Handler und
+ * aktive Inhalte – auch bei bereits gespeicherten Altwerten (wird beim Rendern
+ * angewandt). Gibt bei ungültiger Eingabe die escapte Rohfassung zurück.
+ */
+function sanitize_rich_html(string $html): string
+{
+    $html = trim($html);
+    if ($html === '') {
+        return '';
+    }
+
+    static $allowedTags = [
+        'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'sub', 'sup',
+        'ul', 'ol', 'li', 'h2', 'h3', 'h4', 'h5', 'a', 'blockquote', 'hr',
+        'span', 'div', 'section', 'article', 'address', 'figure', 'figcaption',
+        'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'caption',
+    ];
+    static $allowedAttr = [
+        'a' => ['href', 'title'],
+        'td' => ['colspan', 'rowspan'],
+        'th' => ['colspan', 'rowspan', 'scope'],
+    ];
+
+    $previous = libxml_use_internal_errors(true);
+    $doc = new DOMDocument('1.0', 'UTF-8');
+    $ok = $doc->loadHTML(
+        '<?xml encoding="UTF-8"><div id="__root__">' . $html . '</div>',
+        LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING
+    );
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+
+    if (!$ok) {
+        return e($html);
+    }
+
+    $root = $doc->getElementById('__root__');
+    if (!$root instanceof DOMElement) {
+        return e($html);
+    }
+
+    $walker = static function (DOMNode $node) use (&$walker, $allowedTags, $allowedAttr): void {
+        foreach (iterator_to_array($node->childNodes) as $child) {
+            if ($child instanceof DOMElement) {
+                $tag = strtolower($child->tagName);
+                if (in_array($tag, ['script', 'style', 'noscript', 'template', 'iframe', 'object', 'embed'], true)) {
+                    // Aktive Inhalte komplett entfernen, auch den Textinhalt.
+                    $node->removeChild($child);
+                    continue;
+                }
+                if (!in_array($tag, $allowedTags, true)) {
+                    // Sonstiger nicht erlaubter Tag: Inhalt behalten, Hülle entfernen.
+                    while ($child->firstChild !== null) {
+                        $node->insertBefore($child->firstChild, $child);
+                    }
+                    $node->removeChild($child);
+                    continue;
+                }
+
+                $permitted = $allowedAttr[$tag] ?? [];
+                foreach (iterator_to_array($child->attributes) as $attr) {
+                    $name = strtolower($attr->nodeName);
+                    if (!in_array($name, $permitted, true)) {
+                        $child->removeAttribute($attr->nodeName);
+                        continue;
+                    }
+                    if ($name === 'href') {
+                        $href = trim($attr->nodeValue);
+                        if (!preg_match('#^(https?:|mailto:|tel:|/|\#)#i', $href)) {
+                            $child->removeAttribute($attr->nodeName);
+                        }
+                    }
+                }
+                if ($tag === 'a' && $child->getAttribute('href') !== '') {
+                    $child->setAttribute('rel', 'noopener noreferrer nofollow');
+                }
+
+                $walker($child);
+            } elseif ($child instanceof DOMComment
+                || ($child instanceof DOMProcessingInstruction)) {
+                $node->removeChild($child);
+            }
+        }
+    };
+    $walker($root);
+
+    $out = '';
+    foreach (iterator_to_array($root->childNodes) as $child) {
+        $out .= $doc->saveHTML($child);
+    }
+
+    return trim($out);
 }
 
 /**

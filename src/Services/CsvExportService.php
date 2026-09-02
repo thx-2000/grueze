@@ -6,6 +6,21 @@ namespace App\Services;
 
 final class CsvExportService
 {
+    /**
+     * Neutralisiert Zellen, die eine Tabellenkalkulation als Formel deuten
+     * würde (führendes = + - @ oder Tab/CR). Ein vorangestelltes Hochkomma
+     * zwingt Excel/Calc zur Textinterpretation.
+     */
+    private function safeCell(mixed $value): string
+    {
+        $value = (string) $value;
+        if ($value !== '' && preg_match('/^[=+\-@\t\r]/', $value)) {
+            return "'" . $value;
+        }
+
+        return $value;
+    }
+
     public function stream(array $contacts): never
     {
         header('Content-Type: text/csv; charset=UTF-8');
@@ -33,7 +48,7 @@ final class CsvExportService
                 $contact['tags'] ?? []
             ));
 
-            fputcsv($out, [
+            fputcsv($out, array_map([$this, 'safeCell'], [
                 $contact['vorname'],
                 $contact['nachname'],
                 $contact['geburtsname'],
@@ -47,7 +62,7 @@ final class CsvExportService
                 $emails,
                 $phones,
                 $contact['notizen'],
-            ], ';');
+            ]), ';');
         }
 
         fclose($out);

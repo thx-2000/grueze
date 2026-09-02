@@ -532,7 +532,7 @@ final class BackupService
     private function restoreMergePhoto(ZipArchive $zip, string $photoPath, array &$stats): ?string
     {
         $base = basename(trim($photoPath));
-        if ($base === '' || str_contains($base, '..')) {
+        if (!$this->isSafeUploadName($base)) {
             return null;
         }
         $contents = $zip->getFromName('uploads/' . $base);
@@ -570,10 +570,20 @@ final class BackupService
         return (int) $stmt->fetchColumn() > 0;
     }
 
+    /** Diese app_settings gehören nicht ins Backup (Klartext-Geheimnisse). */
+    private const SECRET_SETTINGS = ['mail_smtp_password', 'mail_imap_password'];
+
     private function exportTable(string $table): array
     {
         $binary = self::BINARY_COLUMNS[$table] ?? [];
         $rows = $this->pdo->query('SELECT * FROM `' . $table . '`')->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($table === 'app_settings') {
+            $rows = array_values(array_filter(
+                $rows,
+                static fn (array $r): bool => !in_array((string) ($r['setting_key'] ?? ''), self::SECRET_SETTINGS, true)
+            ));
+        }
 
         foreach ($rows as &$row) {
             foreach ($row as $column => $value) {
@@ -603,6 +613,10 @@ final class BackupService
             return 0;
         }
 
+        // Nur echte Spalten der Zieltabelle zulassen – Spaltennamen aus der
+        // Backup-JSON dürfen nicht in das INSERT-Statement wandern.
+        $realColumns = $this->columnsOf($table);
+
         $count = 0;
         $stmt = null;
         $lastColumns = null;
@@ -611,12 +625,19 @@ final class BackupService
             if (!is_array($row) || $row === []) {
                 continue;
             }
+            $row = array_intersect_key($row, array_flip($realColumns));
+            if ($row === []) {
+                continue;
+            }
             $columns = array_keys($row);
             if ($columns !== $lastColumns) {
                 $placeholders = implode(', ', array_fill(0, count($columns), '?'));
-                $columnList = '`' . implode('`, `', $columns) . '`';
+                $columnList = '`' . implode('`, `', array_map(
+                    static fn (string $c): string => str_replace('`', '``', $c),
+                    $columns
+                )) . '`';
                 $stmt = $this->pdo->prepare(
-                    'INSERT INTO `' . $table . '` (' . $columnList . ') VALUES (' . $placeholders . ')'
+                    'INSERT INTO `' . str_replace('`', '``', $table) . '` (' . $columnList . ') VALUES (' . $placeholders . ')'
                 );
                 $lastColumns = $columns;
             }
@@ -635,6 +656,35 @@ final class BackupService
         }
 
         return $count;
+    }
+
+    /** @return list<string> Spaltennamen der Tabelle */
+    private function columnsOf(string $table): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT column_name FROM information_schema.columns
+             WHERE table_schema = DATABASE() AND table_name = :name'
+        );
+        $stmt->execute(['name' => $table]);
+
+        return array_map('strval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    /**
+     * Nur Dateinamen, die zum eigenen Upload-Schema passen (Zufalls-Hex plus
+     * Bild-Endung). Wehrt manipulierte Backups ab, die z. B. `.htaccess` oder
+     * `*.php` in den Upload-Ordner schreiben wollen.
+     */
+    private function isSafeUploadName(string $name): bool
+    {
+        if ($name === '' || str_contains($name, '/') || str_contains($name, '\\') || str_contains($name, "\0")) {
+            return false;
+        }
+        if (str_starts_with($name, '.') || substr_count($name, '.') !== 1) {
+            return false;
+        }
+
+        return (bool) preg_match('/^[A-Za-z0-9_-]{1,80}\.(jpe?g|png|gif|webp)$/i', $name);
     }
 
     private function resyncAutoIncrement(string $table): void
@@ -699,7 +749,7 @@ final class BackupService
                 continue;
             }
             $name = basename($entry);
-            if ($name === '' || str_contains($name, '..')) {
+            if (!$this->isSafeUploadName($name)) {
                 continue;
             }
             $contents = $zip->getFromIndex($i);

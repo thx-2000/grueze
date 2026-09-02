@@ -92,6 +92,7 @@ try {
         ini_set('display_startup_errors', '1');
     }
     Session::start();
+    send_security_headers();
 
     Container::factory(PDO::class, static fn () => Database::connect());
     Container::factory(UserRepository::class, static fn () => new UserRepository(Container::get(PDO::class)));
@@ -125,7 +126,8 @@ try {
         Container::get(PDO::class),
         Container::get(UserRepository::class),
         Container::get(MailService::class),
-        Container::get(SettingRepository::class)
+        Container::get(SettingRepository::class),
+        Container::get(LogRepository::class)
     ));
     Container::factory(WebAuthnService::class, static fn () => new WebAuthnService());
     Container::factory(MigrationService::class, static fn () => new MigrationService(Container::get(PDO::class)));
@@ -285,6 +287,21 @@ try {
         $updateService = Container::get(UpdateService::class);
         if ($updateService->updatePending() && !$updateService->locked()) {
             $updateService->run(false);
+        }
+    }
+
+    // Leichtgewichtige Aufbewahrungs-Bereinigung (ohne Cron): mit kleiner
+    // Wahrscheinlichkeit je Request alte Protokoll-/Token-Daten löschen.
+    if (random_int(1, 100) === 1) {
+        try {
+            $logs = Container::get(LogRepository::class);
+            $logs->pruneLoginAttempts((int) config('security.login_attempts_retention_days', 30));
+            $logs->pruneExpiredPasswordResets();
+            Container::get(EventRepository::class)->pruneTokenHits(
+                (int) config('security.token_hit_retention_days', 120)
+            );
+        } catch (\Throwable) {
+            // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
         }
     }
 

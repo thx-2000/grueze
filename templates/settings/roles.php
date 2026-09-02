@@ -33,7 +33,7 @@
                 <?php elseif ((int) $role['user_count'] > 0): ?>
                     <span class="role-lock" title="Erst Benutzer umziehen"><?= icon('lock') ?></span>
                 <?php else: ?>
-                    <form method="post" action="<?= e(url('/settings/roles/delete')) ?>" onsubmit="return confirm('Rolle „<?= e(addslashes((string) ($role['label'] ?: $role['name']))) ?>“ wirklich löschen?');">
+                    <form method="post" action="<?= e(url('/settings/roles/delete')) ?>" data-confirm="Rolle „<?= e((string) ($role['label'] ?: $role['name'])) ?>“ wirklich löschen?">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <input type="hidden" name="id" value="<?= e((string) $role['id']) ?>">
                         <button type="submit" class="danger-button icon-button" title="Rolle löschen" aria-label="Rolle löschen"><?= icon('trash') ?></button>

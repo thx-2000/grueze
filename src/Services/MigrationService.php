@@ -74,6 +74,9 @@ final class MigrationService
         if (!isset($files[$name])) {
             return 'Migration nicht gefunden: ' . $name;
         }
+        if (!array_key_exists($name, $this->pending())) {
+            return 'Migration ist bereits angewendet: ' . $name;
+        }
 
         $sql = file_get_contents($files[$name]);
         if ($sql === false || trim($sql) === '') {

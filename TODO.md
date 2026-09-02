@@ -11,12 +11,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 - **Lizenz-Feinheiten prüfen:** Name in `LICENSE` (Zeile „Licensor" / „Required
   Notice") gegen den echten Namen abgleichen; ggf. `README` „Lizenz"-Absatz.
 
-- **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
-  u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
-  Endpunkt, SQL-/Template-Injection, Datei-Uploads (XLSX-Import, Logo),
-  Passwort-Reset, Speicherung von Mailserver-Zugangsdaten, Deploy-Hygiene
-  (rsync spielt aktuell auch Dev-Dateien wie `docker/`, `tests/`,
-  `*_HANDOFF_*` auf den Webspace). Ergebnis mit Priorisierung dokumentieren.
+Ideen, falls es weitergeht (kein Muss – v1.0.0 ist erreicht, Backlog leer):
+- Echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows – nur am
+  Gerät machbar.
+- Termine: Ranking-Variante; „Grüße automatisch am Tag" (braucht Cron).
+- Reset-Token ins Pfad-Segment statt Query (kosmetische Härtung, siehe L8).
+- Optionale Verschlüsselung von Backup-ZIPs / Mail-Zugangsdaten „at rest".
 
 - **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
   neu gruppieren und klarer benennen, Gesamtbedienung eleganter und
@@ -136,6 +136,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- **Security-Audit + alle Fixes → v1.0.0**: vollständiger Code-Durchgang
+  dokumentiert in `docs/SECURITY-AUDIT.md` (2 hoch / 10 mittel / 12 niedrig +
+  1 Bug), anschließend komplett abgearbeitet (Tabelle „Umsetzung in 1.0.0" im
+  Dokument). Neue config `security.*`, `SECURITY.md`, Migration
+  `2026-09-11-security-haertung` (`password_resets.created_at`). Bug B1
+  (`redirect()` → `Redirect::to()`) behoben.
 - Lizenz + Spendenhinweis v0.43.0: `LICENSE` = PolyForm Noncommercial 1.0.0
   (kanonischer Text von github.com/polyformproject/polyform-licenses Tag 1.0.0
   + kurzer Kopf mit Licensor/Required-Notice/Klartext-Zusammenfassung).

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Repositories\LogRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\UserRepository;
 use PDO;
@@ -14,7 +15,8 @@ final class PasswordResetService
         private PDO $pdo,
         private UserRepository $users,
         private MailService $mailer,
-        private SettingRepository $settings
+        private SettingRepository $settings,
+        private LogRepository $logs
     )
     {
     }
@@ -23,6 +25,21 @@ final class PasswordResetService
     {
         $user = $this->users->findByEmail($email);
         if (!$user) {
+            // Etwas Arbeit auch für unbekannte Adressen, damit die Antwortzeit
+            // nicht verrät, ob ein Konto existiert.
+            password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
+
+            return;
+        }
+
+        // Anti-Spam: pro Konto höchstens alle paar Minuten eine neue Reset-Mail.
+        $recent = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM password_resets
+             WHERE user_id = :id AND used_at IS NULL
+             AND created_at >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)'
+        );
+        $recent->execute(['id' => $user['id']]);
+        if ((int) $recent->fetchColumn() > 0) {
             return;
         }
 
@@ -86,8 +103,18 @@ final class PasswordResetService
                     'id' => $user['id'],
                 ]);
 
-                $this->pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE id = :id')
-                    ->execute(['id' => $reset['id']]);
+                // Diesen und alle anderen offenen Tokens des Kontos verbrauchen.
+                $this->pdo->prepare(
+                    'UPDATE password_resets SET used_at = NOW()
+                     WHERE user_id = :id AND used_at IS NULL'
+                )->execute(['id' => $user['id']]);
+
+                $this->logs->addAudit(
+                    (int) $user['id'],
+                    null,
+                    'updated',
+                    'Passwort über den „Passwort vergessen"-Link neu gesetzt.'
+                );
 
                 return true;
             }

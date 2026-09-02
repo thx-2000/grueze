@@ -35,7 +35,7 @@ $groups = [
                             <button type="submit" class="ghost-button">Speichern</button>
                         </div>
                     </form>
-                    <form method="post" action="<?= e(url('/verwaltung/gruesse/loeschen')) ?>" onsubmit="return confirm('Diesen Gruß löschen?');">
+                    <form method="post" action="<?= e(url('/verwaltung/gruesse/loeschen')) ?>" data-confirm="Diesen Gruß löschen?">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <input type="hidden" name="id" value="<?= e((string) $item['id']) ?>">
                         <button type="submit" class="danger-button icon-button" title="Löschen" aria-label="Löschen"><?= icon('trash') ?></button>

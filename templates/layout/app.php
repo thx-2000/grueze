@@ -40,7 +40,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
         <meta name="description" content="<?= e($metaDescription) ?>">
     <?php endif; ?>
     <link rel="icon" href="<?= e(theme_favicon()) ?>">
-    <script>
+    <script nonce="<?= e(csp_nonce()) ?>">
         // Blickschutz-Zustand vor dem ersten Paint setzen, damit Kontaktdaten nicht kurz aufblitzen.
         try {
             if (window.localStorage.getItem('grueze_privacy_guard') === 'on') {
@@ -213,7 +213,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
     <?php endif; ?>
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-    <script>
+    <script nonce="<?= e(csp_nonce()) ?>">
         window.APP = {
             csrfToken: <?= json_encode($csrfToken, JSON_THROW_ON_ERROR) ?>,
             batchUrl: <?= json_encode(url('/mail/batch'), JSON_THROW_ON_ERROR) ?>

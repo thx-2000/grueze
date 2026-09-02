@@ -156,6 +156,9 @@ final class RegistrationController extends BaseController
         }
 
         $roleName = $this->settings->registrationSettings()['default_role'];
+        if ($roleName === 'admin') {
+            $roleName = 'stufenmitglied';
+        }
         $roleId = $this->users->roleIdByName($roleName) ?? $this->users->roleIdByName('stufenmitglied');
         if ($roleId === null) {
             flash('error', 'Es ist keine passende Rolle hinterlegt. Bitte an das Orga-Team wenden.');
@@ -232,8 +235,18 @@ final class RegistrationController extends BaseController
         $this->requirePermission('users.manage');
         Csrf::validate($request->input('_csrf'));
 
+        // Standard-Rolle für neue Zugänge: muss eine echte Rolle sein und darf
+        // niemals „admin" sein – sonst würde jede Selbst-Registrierung ein
+        // Admin-Konto anlegen.
+        $requestedRole = trim((string) $request->input('default_role'));
+        $validRoles = array_column(array_filter(
+            $this->users->roles(),
+            static fn (array $r): bool => (string) $r['name'] !== 'admin'
+        ), 'name');
+        $defaultRole = in_array($requestedRole, $validRoles, true) ? $requestedRole : 'stufenmitglied';
+
         $this->settings->set('registration_self_enabled', $request->input('self_enabled') !== null ? '1' : '0');
-        $this->settings->set('registration_default_role', trim((string) $request->input('default_role')) ?: 'stufenmitglied');
+        $this->settings->set('registration_default_role', $defaultRole);
         $this->settings->set('registration_link_hours', (string) max(1, min(720, (int) $request->input('link_hours', 72))));
 
         flash('success', 'Einstellungen gespeichert.');
@@ -296,7 +309,7 @@ final class RegistrationController extends BaseController
 
     private function sourceHash(): string
     {
-        return hash('sha256', ((string) ($_SERVER['REMOTE_ADDR'] ?? '')) . '|grueze-registrierung');
+        return source_hash('registrierung');
     }
 
     private function sendInviteMail(string $email, string $token, int $hours): string

@@ -49,14 +49,70 @@ final class ContactController extends BaseController
         $ownContactId = (int) ($this->auth->user()['contact_id'] ?? 0);
         $ownContact = $ownContactId > 0 ? $this->contacts->find($ownContactId) : null;
 
+        $contacts = $this->contacts->search($filters);
+        $this->redactHiddenFields($contacts, $ownContactId);
+
         $this->render('contacts/index', [
-            'contacts' => $this->contacts->search($filters),
+            'contacts' => $contacts,
             'categories' => $this->categories->all(),
             'tags' => $this->tags->all(),
             'filters' => $filters,
             'phoneLabels' => config('defaults.phone_labels', []),
             'ownContact' => $ownContact,
         ]);
+    }
+
+    /**
+     * Entfernt personenbezogene Feldwerte aus der Kontaktliste, die die aktuelle
+     * Rolle nicht sehen darf – bevor die Daten überhaupt an die View gehen.
+     * Zeilen bleiben erhalten (Status „Mail/Tel. fehlt" braucht die Anzahl),
+     * nur die Werte werden geleert. Der eigene verknüpfte Kontakt bleibt
+     * unberührt (die Seite zeigt ihn separat, Notizen ausgenommen).
+     *
+     * @param array<int,array<string,mixed>> $contacts
+     */
+    private function redactHiddenFields(array &$contacts, int $ownContactId): void
+    {
+        $show = [
+            'address'  => can_view_contact_field('address'),
+            'birthday' => can_view_contact_field('birthday'),
+            'emails'   => can_view_contact_field('emails'),
+            'phones'   => can_view_contact_field('phones'),
+            'login'    => can_view_contact_field('login'),
+            'notes'    => can_view_contact_field('notes'),
+        ];
+        if (!in_array(false, $show, true)) {
+            return;
+        }
+
+        foreach ($contacts as &$contact) {
+            if ((int) ($contact['id'] ?? 0) === $ownContactId && $ownContactId > 0) {
+                continue;
+            }
+            if (!$show['emails']) {
+                foreach (($contact['emails'] ?? []) as $i => $_) {
+                    $contact['emails'][$i] = ['email' => '', 'label' => ''];
+                }
+            }
+            if (!$show['phones']) {
+                foreach (($contact['phones'] ?? []) as $i => $_) {
+                    $contact['phones'][$i] = ['phone' => '', 'label' => ''];
+                }
+            }
+            if (!$show['address']) {
+                $contact['strasse'] = $contact['plz'] = $contact['ort'] = $contact['land'] = '';
+            }
+            if (!$show['birthday']) {
+                $contact['geburtstag'] = null;
+            }
+            if (!$show['notes']) {
+                $contact['notizen'] = '';
+            }
+            if (!$show['login']) {
+                $contact['linked_user'] = null;
+            }
+        }
+        unset($contact);
     }
 
     /**
@@ -187,6 +243,11 @@ final class ContactController extends BaseController
         $filename = (string) ($file['name'] ?? '');
         if (!str_ends_with(strtolower($filename), '.xlsx')) {
             flash('error', 'Bitte eine Datei im XLSX-Format hochladen.');
+            Redirect::to('/contacts/import');
+        }
+
+        if ((int) ($file['size'] ?? 0) > (int) config('security.import_max_size', 5242880)) {
+            flash('error', 'Die Datei ist zu groß (max. 5 MB).');
             Redirect::to('/contacts/import');
         }
 
@@ -449,10 +510,16 @@ final class ContactController extends BaseController
         Redirect::to('/kontakte');
     }
 
-    /** Entfernt fuehrende "mailto:"-Praefixe (Alt-Importdaten) und trimmt. */
+    /**
+     * Entfernt fuehrende "mailto:"-Praefixe (Alt-Importdaten), Steuerzeichen
+     * (u. a. CR/LF – sonst E-Mail-Header-Injection beim Versand) und trimmt.
+     */
     private function cleanEmail(string $value): string
     {
-        return trim((string) preg_replace('/^\s*mailto:\s*/i', '', $value));
+        $value = (string) preg_replace('/^\s*mailto:\s*/i', '', $value);
+        $value = (string) preg_replace('/[\x00-\x1F\x7F]+/', '', $value);
+
+        return trim($value);
     }
 
     private function sanitizePayload(Request $request): array
@@ -468,7 +535,7 @@ final class ContactController extends BaseController
 
         $phones = [];
         foreach (($request->input('phones', []) ?: []) as $entry) {
-            $phone = trim((string) preg_replace('/^\s*tel:\s*/i', '', (string) ($entry['phone'] ?? '')));
+            $phone = trim((string) preg_replace(['/^\s*tel:\s*/i', '/[\x00-\x1F\x7F]+/'], '', (string) ($entry['phone'] ?? '')));
             $label = trim((string) ($entry['label'] ?? 'Sonstige'));
             if ($phone !== '') {
                 $phones[] = ['phone' => $phone, 'label' => $label];
@@ -521,7 +588,7 @@ final class ContactController extends BaseController
 
         $phones = [];
         foreach (($request->input('phones', []) ?: []) as $entry) {
-            $phone = trim((string) preg_replace('/^\s*tel:\s*/i', '', (string) ($entry['phone'] ?? '')));
+            $phone = trim((string) preg_replace(['/^\s*tel:\s*/i', '/[\x00-\x1F\x7F]+/'], '', (string) ($entry['phone'] ?? '')));
             $label = trim((string) ($entry['label'] ?? 'Sonstige'));
             if ($phone !== '') {
                 $phones[] = ['phone' => $phone, 'label' => $label];

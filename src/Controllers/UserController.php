@@ -218,6 +218,7 @@ final class UserController extends BaseController
         }
 
         $this->users->updatePasswordHash((int) $user['id'], password_hash($newPassword, PASSWORD_DEFAULT));
+        \App\Core\Session::regenerate();
         $this->logs->addAudit(
             (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
             null,

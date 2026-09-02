@@ -19,6 +19,15 @@ final class LogRepository
      */
     public function addAudit(int $userId, ?int $contactId, string $action, string $details, array $changes = []): void
     {
+        // Läuft die Aktion unter „Als Benutzer anmelden"? Dann festhalten, wer
+        // wirklich am Steuer sitzt – sonst würde die Aktion dem Zielkonto
+        // zugeschrieben.
+        $impersonated = (int) ($_SESSION['impersonated_user_id'] ?? 0);
+        $original = (int) ($_SESSION['user_id'] ?? 0);
+        if ($impersonated > 0 && $original > 0 && $impersonated !== $original && $userId === $impersonated) {
+            $details = trim($details . ' [ausgeführt über „Als Benutzer angemeldet" durch Konto #' . $original . ']');
+        }
+
         if ($this->changesColumnAvailable()) {
             $stmt = $this->pdo->prepare(
                 'INSERT INTO audit_log (user_id, contact_id, action, details, changes)
@@ -152,6 +161,50 @@ final class LogRepository
         $stmt->execute();
 
         return (int) $stmt->fetchColumn();
+    }
+
+    /** Fehlversuche von dieser IP über alle Konten – gegen Credential Stuffing. */
+    public function recentFailedAttemptsByIp(string $ip, int $minutes): int
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM login_attempts
+             WHERE ip_address = :ip AND successful = 0
+             AND attempted_at >= DATE_SUB(NOW(), INTERVAL :minutes MINUTE)'
+        );
+        $stmt->bindValue(':ip', $ip);
+        $stmt->bindValue(':minutes', $minutes, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /** Älter als N Tage aus dem Login-Versuchs-Log entfernen. */
+    public function pruneLoginAttempts(int $days = 30): int
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                'DELETE FROM login_attempts WHERE attempted_at < DATE_SUB(NOW(), INTERVAL :days DAY)'
+            );
+            $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->rowCount();
+        } catch (\Throwable) {
+            return 0;
+        }
+    }
+
+    /** Verbrauchte / abgelaufene Passwort-Reset-Zeilen aufräumen. */
+    public function pruneExpiredPasswordResets(): int
+    {
+        try {
+            return (int) $this->pdo->exec(
+                'DELETE FROM password_resets
+                 WHERE used_at IS NOT NULL OR expires_at < DATE_SUB(NOW(), INTERVAL 1 DAY)'
+            );
+        } catch (\Throwable) {
+            return 0;
+        }
     }
 }
 

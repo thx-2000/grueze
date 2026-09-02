@@ -56,7 +56,7 @@
                                 <?php endif; ?>
                             </p>
                         </div>
-                        <form method="post" action="<?= e(url('/passkeys/delete')) ?>" onsubmit="return confirm('Diesen Passkey wirklich entfernen?');">
+                        <form method="post" action="<?= e(url('/passkeys/delete')) ?>" data-confirm="Diesen Passkey wirklich entfernen?">
                             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                             <input type="hidden" name="passkey_id" value="<?= e((string) $passkey['id']) ?>">
                             <button type="submit" class="danger-button compact-action"><?= icon('trash') ?><span>Passkey entfernen</span></button>
