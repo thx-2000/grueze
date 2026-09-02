@@ -32,6 +32,11 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   - Größter Schmerz: „wirkt zu überfrachtet". Ziel: cleaner, moderner, wertiger.
   - Self-Service gewünscht: jede:r ändert nur die eigenen Daten; Audit-Log muss
     alte Werte behalten (falsches Löschen/Ändern nachvollziehbar).
+  Stand: Richtung abgestimmt (`docs/REDESIGN.md`), Stufen 1–4 umgesetzt
+  (Palette/Schriften, Hülle, Start, Adressbuch). Offen: Kontakt-Detail
+  (inline bearbeiten + Admin-Historie), Nachrichten (ein Screen),
+  Vollständigkeit (löst Namensliste ab), Bereich „Termine", „Mein Eintrag"
+  (Handy), „Mail ans Orga-Team", Grüße-Pool.
 
 - **Terminfindungs-/Abstimmungstool** für die ganze Stufe: Ja/Nein/Vielleicht
   je Vorschlag, ggf. mehrere Uhrzeiten pro Tag, ggf. weitere Abstimmungs-
@@ -85,6 +90,15 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Neuer Look, Stufe 4 – Adressbuch (v0.26.0): `templates/contacts/index.php`
+  neu. Filter reduziert (Suche + Kategorie sichtbar, Rest hinter „Filter").
+  Die vier Aufklapp-Bereiche zu einem „Auswählen"-Modus (`is-selecting`,
+  `data-select-mode-toggle` in app.js) mit Aktionsleiste vereint,
+  Spalten-Toggle entfällt. Tabelle nur Name/Kategorie/Status, Status als
+  Chip. Tabelle↔Karten für alle Rollen, pro Gerät gemerkt, am Handy Karten.
+- Neuer Look, Stufe 3 – Startseite (v0.25.0): „Steht an"-To-do-Liste statt
+  drei Kennzahl-Kacheln (`.start-board`/`.start-todo`), großes Suchfeld,
+  zwei Schnellaktionen. Erste Seite mit echtem `<h1>`.
 - Neuer Look, Stufe 1 (v0.23.0): Fraunces + Hanken Grotesk lokal eingebettet
   (`public/assets/fonts/*.woff2`, `assets/css/fonts.css`, im Layout vor
   theme.css verlinkt). Themes „Grün"/„Dunkel", `theme.css`-`:root` und
