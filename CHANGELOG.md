@@ -3,6 +3,15 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.22.0
+
+- **Backup zusammenführen**: dritter Wiederherstellungs-Modus. Spielt nur die
+  Kontakte (+ Mailadressen, Telefonnummern, Tags, Kategorien) aus einem Backup
+  ins bestehende System ein, ohne etwas zu löschen. Gleiche Personen werden
+  über Name/Geburtsname erkannt und nur um fehlende Angaben und leere Felder
+  ergänzt. Alles über natürliche Schlüssel aufgelöst – keine ID-Konflikte.
+  Benutzer, Rollen, Einstellungen, Protokolle bleiben unberührt. Keine Migration.
+
 ## 0.21.0
 
 - **Eigene Kontaktdaten sichtbar**: Eingeloggte Personen mit verknüpftem

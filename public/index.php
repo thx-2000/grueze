@@ -122,7 +122,10 @@ try {
     ));
     Container::factory(WebAuthnService::class, static fn () => new WebAuthnService());
     Container::factory(MigrationService::class, static fn () => new MigrationService(Container::get(PDO::class)));
-    Container::factory(BackupService::class, static fn () => new BackupService(Container::get(PDO::class)));
+    Container::factory(BackupService::class, static fn () => new BackupService(
+        Container::get(PDO::class),
+        Container::get(ContactRepository::class)
+    ));
     Container::factory(UpdateService::class, static fn () => new UpdateService(
         Container::get(SettingRepository::class),
         Container::get(MigrationService::class),

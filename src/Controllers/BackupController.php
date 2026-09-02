@@ -83,7 +83,23 @@ final class BackupController extends BaseController
         try {
             $result = $this->backups->restoreArchive($tmp, $mode);
         } catch (Throwable $e) {
-            flash('error', 'Wiederherstellung fehlgeschlagen: ' . $e->getMessage());
+            flash('error', ($mode === 'merge' ? 'Zusammenführen' : 'Wiederherstellung') . ' fehlgeschlagen: ' . $e->getMessage());
+            Redirect::to('/admin/backup');
+        }
+
+        if ($mode === 'merge') {
+            $m = $result['merge'] ?? [];
+            flash('success', sprintf(
+                'Zusammenführen abgeschlossen: %d neue Kontakte, %d Kontakte ergänzt (+%d Mailadressen, +%d Telefonnummern, +%d Tags). %d Kategorien und %d Tags neu angelegt, %d Fotos übernommen.',
+                $m['new_contacts'] ?? 0,
+                $m['updated_contacts'] ?? 0,
+                $m['added_emails'] ?? 0,
+                $m['added_phones'] ?? 0,
+                $m['added_tags'] ?? 0,
+                $m['new_categories'] ?? 0,
+                $m['new_tags'] ?? 0,
+                $m['restored_photos'] ?? 0,
+            ));
             Redirect::to('/admin/backup');
         }
 

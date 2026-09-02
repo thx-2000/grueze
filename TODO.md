@@ -21,10 +21,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   eindeutigen Schritten erledigt sind. Menüstruktur, Benennung, Seitenlayout
   und Einstiegspunkte daran ausrichten.
 
-- **Voll-Import: Merge-/Zusammenführen-Modus** (v0.4.0 liefert Export +
-  Wiederherstellung „Alles ersetzen" / „Nur wenn leer"). Offen: Backup in einen
-  bestehenden Datenbestand einspielen, ohne ihn zu löschen – mit Dedup und
-  ID-Konfliktbehandlung. Deutlich aufwändiger, daher separat.
+- **Voll-Import: Merge-Modus** – **erledigt in v0.22.0**. Backup → „Zusammen-
+  führen" spielt Kontakte ins bestehende System ein, dedupliziert über
+  Name/Geburtsname, ergänzt nur fehlende Angaben. Offen falls je nötig: auch
+  Benutzer/Rollen mergen (bewusst ausgelassen, zu heikel).
 
 - **Barrierefreiheit – Rest**: Durchgang abgeschlossen (v0.17.0 + v0.17.1).
   Offen bleibt nur ein echter Screenreader-Test (VoiceOver/NVDA) an den
@@ -61,6 +61,15 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Backup zusammenführen (v0.22.0): Dritter Restore-Modus `merge` in
+  `BackupService::mergeContacts()`. Nur Kontakte + Mails/Telefone/Tags/
+  Kategorien; Dedup über `ContactRepository::findImportMatch()` (Name +
+  Geburtsname); bestehende Kontakte werden nur ergänzt (fehlende Mails/
+  Telefone/Tags, leere Stammdatenfelder), nie überschrieben. Kategorien/Tags
+  über Namen aufgelöst/angelegt, Kontaktfotos aus dem ZIP übernommen. Alles
+  über natürliche Schlüssel → keine ID-Konflikte. Transaktional. UI:
+  `templates/admin/backup.php` mit „Zusammenführen" als Standard-Modus,
+  ohne Bestätigungswort (nicht destruktiv). Keine Migration.
 - Eigene Kontaktdaten sichtbar (v0.21.0): `Auth::canViewContactField($feld,
   $kontakt=null)` – wenn ein Kontakt übergeben wird und es der eigene
   verknüpfte ist, greift die Ausnahme (Notizen ausgenommen). Schalter

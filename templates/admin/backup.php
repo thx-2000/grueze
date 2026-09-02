@@ -80,8 +80,12 @@ $tableLabels = [
     </div>
 
     <div class="subsection-card">
-        <strong>Achtung</strong>
-        <p class="detail-hint"><strong>Alles ersetzen</strong> löscht den kompletten aktuellen Datenbestand unwiderruflich und ersetzt ihn durch den Inhalt des Backups – inklusive Benutzerkonten und Anmeldedaten. Danach ist ggf. eine neue Anmeldung nötig. <strong>Nur wenn leer</strong> funktioniert ausschließlich auf einer frischen Instanz ohne Kontakte.</p>
+        <strong>Die drei Modi</strong>
+        <ul class="detail-hint" style="margin:0.4rem 0 0;padding-left:1.1rem">
+            <li><strong>Zusammenführen</strong> spielt nur die <em>Kontakte</em> aus dem Backup ins bestehende System ein – ohne etwas zu löschen. Gleiche Personen (Vor- und Nachname, ggf. Geburtsname) werden erkannt und nur um fehlende Mailadressen, Telefonnummern, Tags und leere Felder ergänzt. Benutzer, Rollen, Einstellungen und Protokolle bleiben unberührt.</li>
+            <li><strong>Nur wenn leer</strong> befüllt eine frische Instanz vollständig – nur auf einem System ohne Kontakte.</li>
+            <li><strong>Alles ersetzen</strong> löscht den kompletten aktuellen Datenbestand unwiderruflich und ersetzt ihn durch das Backup, inklusive Benutzerkonten. Danach ist ggf. eine neue Anmeldung nötig.</li>
+        </ul>
     </div>
 
     <form method="post" action="<?= e(url('/admin/backup/restore')) ?>" enctype="multipart/form-data" class="stack" style="margin-top:0.9rem">
@@ -92,7 +96,11 @@ $tableLabels = [
         </label>
         <fieldset class="stack" style="border:0;padding:0;margin:0">
             <label class="inline-toggle">
-                <input type="radio" name="mode" value="fill" checked>
+                <input type="radio" name="mode" value="merge" checked>
+                <span><strong>Zusammenführen</strong> – Kontakte ins bestehende System einspielen, nichts löschen</span>
+            </label>
+            <label class="inline-toggle">
+                <input type="radio" name="mode" value="fill">
                 <span><strong>Nur wenn leer</strong> – frische Instanz erstbefüllen</span>
             </label>
             <label class="inline-toggle">
@@ -105,8 +113,8 @@ $tableLabels = [
             <input type="text" name="confirm" autocomplete="off" placeholder="<?= e($restoreKeyword) ?>">
         </label>
         <div class="toolbar-actions">
-            <button type="submit" class="danger-button" onclick="return confirm('Wiederherstellung jetzt starten? Bei „Alles ersetzen“ gehen die aktuellen Daten verloren.');">
-                <?= icon('upload') ?><span>Wiederherstellung starten</span>
+            <button type="submit" class="danger-button" onclick="return confirm('Import jetzt starten? Bei „Alles ersetzen“ gehen die aktuellen Daten verloren.');">
+                <?= icon('upload') ?><span>Import starten</span>
             </button>
         </div>
     </form>
