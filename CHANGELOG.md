@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.42.0
+
+- **Projektbeschreibung für den Public-Release.** README komplett neu:
+  Kurzvorstellung, Screenshot-Galerie (`docs/screenshots/`, neutrale
+  Demo-Instanz „Chor Nordwind"), Feature-Überblick, Systemvoraussetzungen,
+  Docker-Schnellstart, verschlankte Shared-Hosting-Anleitung, dezenter
+  Spendenhinweis.
+- `.rsyncignore`: `docs/`, `docker/` und die reinen Doku-`*.md` (außer
+  CHANGELOG.md, das die Update-Seite liest) landen nicht mehr auf dem Webspace.
+- Nur Doku – keine funktionale Änderung, keine Migration.
+
 ## 0.41.1
 
 - Blickschutz-Auge oben rechts saß nicht mittig im Kreis (der Knopf hatte

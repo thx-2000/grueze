@@ -5,19 +5,6 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-
-- **GitHub-Projektbeschreibung für den Public-Release**: bevor das Repo
-  öffentlich geht, braucht die README / Projektseite:
-  - **aktuelle Screenshots** (Adressbuch, Kontakt-Detail, Nachrichten,
-    Termine, Grüße-Pool, Mobil-Ansicht) – das Redesign ist inzwischen weit
-    weg von allen alten Bildern.
-  - **Beschreibung der Möglichkeiten** (White-Label-Adressbuch, Rundmails,
-    Terminfindung mit Token-Links, Grüße-Pool, Selbst-Registrierung,
-    Rollen/Rechte, Passkeys, Themes, Backup/Restore, Update-Ablauf).
-  - **Systemvoraussetzungen** (PHP 8.3, MariaDB/MySQL, Composer optional,
-    ein SMTP-Postfach; Docker-Compose als schneller Start).
-  - **Spendenlink** von mir.
-
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
   Endpunkt, SQL-/Template-Injection, Datei-Uploads (XLSX-Import, Logo),
@@ -44,9 +31,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   - Größter Schmerz: „wirkt zu überfrachtet". Ziel: cleaner, moderner, wertiger.
   - Self-Service gewünscht: jede:r ändert nur die eigenen Daten; Audit-Log muss
     alte Werte behalten (falsches Löschen/Ändern nachvollziehbar).
-  Stand: Richtung abgestimmt (`docs/REDESIGN.md`), Stufen 1–8 + „Mein Eintrag" +
-  Verwaltung-Hub in 3 Gruppen umgesetzt. Offen: GitHub-Projektbeschreibung,
-  dann Security-Audit.
+  Stand: Richtung abgestimmt (`docs/REDESIGN.md`), Redesign-Stufen +
+  „Mein Eintrag" + Verwaltung-Hub + Konsistenz-Durchgang + README umgesetzt.
+  Redesign damit im Wesentlichen durch. Offen aus dem Gesamt-Backlog: nur noch
+  der Security-Audit.
 
 - **Selbst-Registrierung / Account-Anlage mit niedriger Berechtigung**:
   **Stufe 1 in v0.37.0, Stufe 2 in v0.38.0** – alle drei Wege umgesetzt:
@@ -142,6 +130,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- GitHub-Projektbeschreibung v0.42.0: README neu (Kurzvorstellung, Screenshot-
+  Galerie, Feature-Überblick, Systemvoraussetzungen, Docker-Schnellstart,
+  Shared-Hosting-Kurzanleitung, dezenter Spendenhinweis
+  buymeacoffee.com/thomashageleit). Neutrale Demo-Instanz „Chor Nordwind"
+  (12 Kontakte, 2 Termine) per SQL in `/tmp` – Screenshots mit playwright-core +
+  gecachtem Chromium unter `docs/screenshots/*.png` (Desktop 2x + 1 mobil).
+  `.rsyncignore` um `docs/`, `docker/`, Doku-`*.md` erweitert (CHANGELOG.md
+  bleibt, wird von der Update-Seite gelesen). Nur Doku.
 - Konsistenz-Durchgang alle Seiten v0.41.0: Login ohne floating-icon-Kasten
   (`page-head` + `panel`). Neuer einheitlicher `.page-head`/`.page-head--split`
   löst die uneinheitlichen `hero-card`/`hero-row`/`floating-icon`-Köpfe ab –

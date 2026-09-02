@@ -58,7 +58,12 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   Änderungsverlauf; ohne Selbst-Service-Schalter Nur-Lese-Ansicht.
 - v0.40: **Verwaltung** – vier Gruppen zu dreien zusammengefasst
   (Zugänge · Erscheinungsbild · System), Kopf als `<h1>Einstellungen</h1>`.
-- offen: GitHub-Projektbeschreibung für Public-Release, dann Security-Audit.
+- v0.41: Konsistenz-Durchgang über alle Seiten – Login ohne Icon-Kasten,
+  einheitlicher `.page-head` (genau ein `<h1>` je Seite), `strong` wieder
+  inline im Fließtext. v0.41.1 Blickschutz-Knopf zentriert.
+- v0.42: README / Projektbeschreibung für den Public-Release, Screenshots
+  (`docs/screenshots/`).
+- offen: Security-Audit.
 
 ## Screen-Entscheidungen
 

@@ -4,6 +4,12 @@
 **/.DS_Store
 .agents/
 .codex/
+docs/
+docker/
+README.md
+ARCHITECTURE.md
+TODO.md
+# CHANGELOG.md wird von der Update-Seite gelesen und bleibt daher dabei.
 OPEN_TERMINAL_API_KEY
 WEBUI_SECRET_KEY
 config/config.php

@@ -1,67 +1,146 @@
 # GRUEZE
 
-**GRUEZE** (Grüß-Zentrale) ist eine mobile-first PHP-Web-App für Adress-, Kontakt- und Mailing-Verwaltung – mit Rollen, CSV-Export, Copy-to-Clipboard, Audit-Log und personalisiertem Mailversand. Sie ist White-Label-fähig: jede Installation ist eine eigene **Instanz** mit eigenem Namen, Branding und Theme.
+**GRUEZE** (Grüß‑Zentrale) ist eine kleine, ruhige Web‑App zum Verwalten von
+Kontakten, Rundmails und Terminen – gedacht für Gruppen, die sich selbst
+organisieren: Vereine, Familien, Abschlussjahrgänge, Chöre, JGA‑Runden, kleine
+Firmen. Kein Framework, kein Build‑Schritt, läuft auf klassischem PHP‑Webspace.
 
-Eine neue Instanz aufsetzen: siehe **[docs/NEUE-INSTANZ.md](docs/NEUE-INSTANZ.md)**.
+Die App ist **White‑Label**: jede Installation ist eine eigene Instanz mit
+eigenem Namen, eigenen Texten und eigenem Farb‑Theme. Zwei Nutzungsarten, eine
+App: Admin/Orga verwalten alles am Rechner, alle anderen sehen am Handy eine
+schlanke Ansicht mit ihren eigenen Daten und den offenen Abstimmungen.
 
-## Setup
+## Screenshots
 
-1. Webspace so konfigurieren, dass `public/` der Webroot ist.
-2. `config/config.example.php` nach `config/config.php` kopieren und Datenbank, Basis-URL sowie SMTP-Zugangsdaten eintragen.
-3. `database/schema.sql` in die MySQL- oder MariaDB-Datenbank importieren.
-4. Per Composer `phpmailer/phpmailer` installieren, wenn SMTP-Versand genutzt werden soll. Ohne PHPMailer fällt die App auf `mail()` zurück.
-5. Sicherstellen, dass `public/assets/uploads/` und `storage/tmp/` beschreibbar sind.
-6. Einen ersten Admin-Datensatz in `users` anlegen. Die zugehörige `role_id` ist die `admin`-Rolle aus `roles`.
-7. Über `security.contact_detail_visibility` kann pro Datenfeld gesteuert werden, welche Rollen Adresse, E-Mail, Telefon, Geburtstag, Notizen und Login sehen dürfen. Fehlt diese Matrix, greift `security.private_contact_detail_roles` als Rückfall.
-8. Unter `/contacts/import` können Admins eine XLSX-Liste mit den Spalten `Vorname`, `Geburtsname`, `Nachname akt.`, `Mail`, `Ort` und `Handy` importieren.
+| | |
+|---|---|
+| ![Adressbuch](docs/screenshots/adressbuch.png) | ![Kontakt bearbeiten](docs/screenshots/kontakt-detail.png) |
+| **Adressbuch** – ruhige Liste, Status je Person, Tabelle ↔ Karten | **Kontakt** – ansehen und bearbeiten auf einer Seite |
+| ![Nachrichten](docs/screenshots/nachrichten.png) | ![Termine](docs/screenshots/termine.png) |
+| **Nachrichten** – Empfängerkreis + Text, Empfängerzahl live | **Termine** – Datumsabstimmung mit Ergebnismatrix |
+| ![Grüße-Pool](docs/screenshots/gruesse.png) | ![Mein Eintrag (mobil)](docs/screenshots/mobil-mein-eintrag.png) |
+| **Grüße‑Pool** – Geburtstags-/Weihnachtswünsche, zufällig gezogen | **Mein Eintrag** – am Handy die eigenen Daten pflegen |
 
-Alternativ kannst du nach dem ersten Deploy direkt die Seite `/setup/admin` aufrufen. Dort lässt sich genau ein erstes Admin-Konto über die Anwendung anlegen, solange noch kein Admin existiert.
+## Was GRUEZE kann
 
-## Hinweise für Shared Hosting
+**Kontakte**
+- Stammdaten, mehrere Mailadressen und Telefonnummern je Person, Kategorien und
+  Tags, Geburtsname („ehem. …"), Profilbild
+- Statusanzeige „vollständig / Mail fehlt / Tel. fehlt", eigene Übersichtsseite
+  **Vollständigkeit** zum gezielten Nachtragen
+- Suche über Name, Geburtsname und Ort, CSV‑Export, Sammelbearbeitung
+- **Blickschutz**: alle personenbezogenen Werte auf Knopfdruck unkenntlich
+- XLSX‑Import einer bestehenden Namens- und Adressliste (Abgleich am Namen)
 
-- Die Anwendung ist für Shared Hosting mit klassischem PHP ohne Build-Prozess aufgebaut.
-- Für SMTP über PHPMailer muss auf dem Server `vendor/autoload.php` vorhanden sein. Die App bindet diese Datei automatisch ein, sobald Composer-Dependencies installiert wurden.
-- Ohne Composer fällt der Mailversand auf `mail()` zurück. Anhänge sind dann bewusst nicht verfügbar.
-- `.htaccess` in `public/` leitet HTTP auf HTTPS um und schickt alle nicht vorhandenen Pfade auf `public/index.php`.
+**Nachrichten**
+- Personalisierter Serienversand (`{Anrede}`, `{Vorname}`, `{Nachname}`)
+- Empfängerkreis: alle · eine Kategorie · bestimmte Tags · gefilterte Liste ·
+  gespeicherte Empfängerliste – mit Live‑Empfängerzahl
+- Versand in kleinen Batches mit Fortschrittsanzeige (kein Timeout auf Shared
+  Hosting), jede Mail landet im Versandprotokoll
+- **Grüße‑Pool**: kuratierte Kurztexte für Geburtstag und Weihnachten, beim
+  Verschicken je Person zufällig gezogen (nicht alle bekommen dieselbe Mail)
+- **„Orga‑Team schreiben"**‑Knopf für Mitglieder
 
-## Deploy per rsync
+**Termine**
+- Drei Typen: Datumsabstimmung, fester Termin (mit Zu-/Absagen), Abstimmung ohne
+  Datum
+- Abstimmen **ohne Login** über einen persönlichen Token‑Link je Person; das Tool
+  erkennt Mehrfachnutzung und warnt bei fremden Links
+- Ergebnismatrix, „Ergebnis als Termin festlegen", Verlauf der Abstimmung,
+  Archiv
+- Abstimmungslink direkt aus den Nachrichten mitverschicken (`{Abstimmungslink}`)
 
-Für den Upload auf einen Webspace liegt ein Skript unter `scripts/deploy.sh` bereit.
+**Zugänge & Sicherheit**
+- Rollen frei anlegen/umbenennen, Rechte‑ und Sichtbarkeitsmatrix pro Feld
+- **Passkeys** (Face ID / Touch ID / Windows Hello / Sicherheitsschlüssel) neben
+  Passwort, Passwort‑Reset per Mail, Brute‑Force‑Bremse
+- **Selbst‑Registrierung**: Einladungslinks, Selbst‑Anmeldung mit bekannter
+  Adresse (Bestätigung per Klick), Freigabe‑Warteschlange für unbekannte Adressen
+- CSRF‑Schutz, gehärtete Sessions, PDO‑Prepared‑Statements durchgängig
 
-Voraussetzungen:
+**Betrieb**
+- White‑Label über Oberfläche und `config.php` (Name, Logo, Texte, Rechtstexte)
+- **Themes**: 15 Farben, 2 Schriften, Eckenradien – Editor mit Live‑Vorschau und
+  Kontrastprüfung; drei Vorlagen mitgeliefert
+- Voll‑Backup als ZIP, Wiederherstellung in drei Modi (ersetzen / nur wenn leer /
+  zusammenführen)
+- **Update per Klick**: „Verwaltung → Aktualisieren" wendet offene
+  Datenbank‑Migrationen an und legt vorher eine Sicherung an
+- Zugänglich nach WCAG 2.1 AA (Tastaturbedienung, Fokus, Kontraste, Live‑Regionen)
 
-- SSH-Zugang ist lokal eingerichtet
-- `scripts/deploy.env.example` nach `scripts/deploy.env` kopieren und `REMOTE_HOST`, `REMOTE_USER` und `REMOTE_PATH` eintragen (die Datei bleibt lokal, sie ist per `.gitignore` ausgeschlossen)
+## Systemvoraussetzungen
 
-Aufruf:
+- **PHP 8.2** oder neuer, mit `pdo_mysql` und `zip` (für den XLSX‑Import)
+- **MariaDB 10.4+** oder **MySQL 8.0+**
+- Ein **SMTP‑Postfach** für den Mailversand. Ohne
+  [PHPMailer](https://github.com/PHPMailer/PHPMailer) (per Composer) fällt der
+  Versand auf `mail()` zurück – dann ohne Anhänge.
+- Apache mit `mod_rewrite` und erlaubtem `.htaccess`, `public/` als Webroot.
+  Kein Node, kein Build‑Schritt.
+
+## Schnellstart mit Docker
+
+Bildet einen typischen Shared‑Hosting‑Stand nach (PHP 8.2 + Apache + MariaDB).
 
 ```bash
-bash scripts/deploy.sh
+git clone https://github.com/thx-2000/grueze.git
+cd grueze
+cp config/config.example.php config/config.php   # Standardwerte passen für Docker
+docker compose up -d
 ```
 
-Das Skript synchronisiert das Projekt per `rsync` auf den Server und schließt sensible oder serverlokale Dateien über `.rsyncignore` aus, insbesondere:
+- App: <http://localhost:8095> → dort **`/setup/admin`** aufrufen und das erste
+  Admin‑Konto anlegen
+- Datenbank‑Oberfläche (Adminer): <http://localhost:8096>
+  (Server `db`, Benutzer `grueze_user`, Passwort `grueze_dev_pw`, DB `grueze`)
 
-- `config/config.php`
-- Upload-Inhalte
-- temporäre Dateien und `storage/backups/`
-- Git-Metadaten
+Das Schema wird beim ersten Start automatisch aus `database/schema.sql`
+importiert. Stoppen mit `docker compose down` (die Daten bleiben im Volume).
 
-Nach dem Upload in der App **Verwaltung → Aktualisieren** öffnen und *Jetzt aktualisieren* klicken – das wendet offene Datenbank-Migrationen an und legt vorher eine Sicherung an. Details: [docs/NEUE-INSTANZ.md](docs/NEUE-INSTANZ.md).
+## Produktiv auf Shared Hosting
 
-## Wichtige Ordner
+Ausführlich in **[docs/NEUE-INSTANZ.md](docs/NEUE-INSTANZ.md)**. Kurz:
 
-- `public/`: Einstiegspunkt und Rewrite-Regeln
-- `src/`: PHP-Logik, Controller, Repositories und Services
-- `templates/`: Server-seitig gerenderte Ansichten
-- `public/assets/css/`: Theming und Layout
-- `public/assets/js/`: Vanilla-JS für Copy, Auswahl, dynamische Felder und Mail-Batches
-- `database/`: Datenbankschema
-- `storage/tmp/`: temporäre Mail-Anhänge
+1. `public/` als Webroot einrichten.
+2. `config/config.example.php` → `config/config.php` kopieren und `app.*`,
+   `database.*`, `mail.*` eintragen.
+3. `database/schema.sql` importieren.
+4. Optional `phpmailer/phpmailer` per Composer installieren.
+5. `public/assets/uploads/` und `storage/tmp/` beschreibbar machen.
+6. `/setup/admin` aufrufen und das erste Admin‑Konto anlegen.
+7. Danach in der App unter **Verwaltung** Branding, Theme, Rollen, Mail‑Texte und
+   die **Rechtstexte** (Impressum, Datenschutz – Pflicht) einstellen.
 
-## Manuell noch zu erledigen
+### Updaten
 
-- `config/config.php` mit echten Zugangsdaten anlegen
-- Datenbank importieren
-- Ersten Admin erzeugen
-- Optional Composer samt PHPMailer installieren
-- DSGVO-Text im Layout ersetzen
+Neue Dateien hochladen (`config/config.php` und `storage/` bleiben unberührt),
+dann in der App **Verwaltung → Aktualisieren → „Jetzt aktualisieren"**. Das
+wendet offene Migrationen an und sichert vorher. Migrationen sind additiv und
+idempotent – Bestandsdaten bleiben erhalten.
+
+Für den Upload per `rsync` liegt `scripts/deploy.sh` bereit
+(`scripts/deploy.env` mit Zielserver anlegen, siehe `.example`).
+
+## Projektstruktur
+
+```
+public/            Webroot: index.php (Bootstrap + Routing), Assets
+src/Controllers/   schlanke Controller
+src/Repositories/  Datenzugriff (PDO)
+src/Services/      Fachlogik (Mail, Backup, Migrationen, Themes …)
+src/Support/       Helper, u. a. system_version()
+templates/         serverseitig gerenderte Ansichten
+themes/            mitgelieferte Farb-/Schrift-Vorlagen
+database/          schema.sql + migrations/
+config/            config.example.php
+docs/              NEUE-INSTANZ.md, REDESIGN.md, screenshots/
+```
+
+Mehr zur Architektur: **[ARCHITECTURE.md](ARCHITECTURE.md)**,
+Änderungen je Version: **[CHANGELOG.md](CHANGELOG.md)**.
+
+---
+
+<sub>GRUEZE entsteht in der Freizeit. Wenn es dir hilft, kannst du mir einen
+Kaffee ausgeben: [buymeacoffee.com/thomashageleit](https://buymeacoffee.com/thomashageleit) – ganz ohne Verpflichtung.</sub>
