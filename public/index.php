@@ -11,6 +11,7 @@ use App\Controllers\EventController;
 use App\Controllers\LegalController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
+use App\Controllers\OrgaController;
 use App\Controllers\PasskeyController;
 use App\Controllers\SearchController;
 use App\Controllers\SettingsController;
@@ -204,6 +205,13 @@ try {
         Container::get(Auth::class),
         Container::get(SettingRepository::class)
     ));
+    Container::factory(OrgaController::class, static fn () => new OrgaController(
+        Container::get(Auth::class),
+        Container::get(UserRepository::class),
+        Container::get(SettingRepository::class),
+        Container::get(MailService::class),
+        Container::get(LogRepository::class)
+    ));
     Container::factory(\App\Repositories\RecipientListRepository::class, static fn () => new \App\Repositories\RecipientListRepository(Container::get(PDO::class)));
     Container::factory(EventRepository::class, static fn () => new EventRepository(Container::get(PDO::class)));
     Container::factory(EventController::class, static fn () => new EventController(
@@ -293,6 +301,8 @@ try {
     $router->post('/verwaltung/kategorien-tags/tag/loeschen', [TaxonomyController::class, 'deleteTag']);
     $router->get('/users', [UserController::class, 'index']);
     $router->get('/account', [UserController::class, 'account']);
+    $router->get('/orga-team', [OrgaController::class, 'form']);
+    $router->post('/orga-team', [OrgaController::class, 'send']);
     $router->post('/account/password', [UserController::class, 'updateOwnPassword']);
     $router->post('/users/store', [UserController::class, 'store']);
     $router->post('/users/set-password', [UserController::class, 'setPassword']);

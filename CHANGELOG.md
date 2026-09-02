@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.34.0
+
+- **„Orga-Team schreiben"-Knopf.** Für jede eingeloggte Person – in der
+  Seitenleiste und unter „Mein Konto". Betreff + Nachricht, Antworten gehen
+  an die eigene Login-Mailadresse. Ziel: eine fest hinterlegte Orga-Adresse
+  (Verwaltung → Mail-Einstellungen) oder – ohne feste Adresse – alle aktiven
+  Nutzer:innen mit der neuen Berechtigung **„Orga-Team"** (Standard:
+  Team + Admin, in den Rollen-Berechtigungen anpassbar).
+- Fix: Die Schnellauswahl-Knöpfe („Alle", „Keine", „+ Kategorie") im
+  Teilnehmerkreis eines Termins waren durch eine globale Regel weiß auf hell
+  und kaum lesbar – jetzt als klare Chips.
+
 ## 0.33.0
 
 - **Termine: drei Typen.** Beim Anlegen wählt man jetzt zwischen

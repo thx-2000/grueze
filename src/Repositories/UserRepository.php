@@ -51,6 +51,31 @@ final class UserRepository
         )->fetchAll();
     }
 
+    /**
+     * Aktive Nutzer:innen mit einer der angegebenen Rollen – z. B. das
+     * Orga-Team für den Kontakt-Knopf.
+     *
+     * @param list<string> $roleNames
+     * @return list<array{id:int,name:string,email:string}>
+     */
+    public function activeByRoleNames(array $roleNames): array
+    {
+        if ($roleNames === []) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($roleNames), '?'));
+        $stmt = $this->pdo->prepare(
+            "SELECT users.id, users.name, users.email
+             FROM users
+             JOIN roles ON roles.id = users.role_id
+             WHERE users.is_active = 1 AND roles.name IN ($placeholders)
+             ORDER BY users.name ASC"
+        );
+        $stmt->execute(array_values($roleNames));
+
+        return $stmt->fetchAll();
+    }
+
     public function search(string $query, int $limit = 12): array
     {
         $term = '%' . trim($query) . '%';

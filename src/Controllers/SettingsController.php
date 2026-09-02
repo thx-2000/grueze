@@ -300,6 +300,9 @@ final class SettingsController extends BaseController
                 'Termine' => [
                     'events.manage' => 'Termine anlegen und die Abstimmung verwalten',
                 ],
+                'Orga-Team' => [
+                    'orga.contact_target' => 'Bekommt Nachrichten über den „Orga-Team schreiben"-Knopf',
+                ],
                 'Administration' => [
                     'users.manage'    => 'Benutzer und Admin-Einstellungen verwalten',
                     'audit.view'      => 'Audit-Log einsehen',

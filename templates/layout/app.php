@@ -113,6 +113,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
             </nav>
 
             <div class="rail-foot">
+                <a class="rail-orga" href="<?= e(url('/orga-team')) ?>"><?= icon('mail') ?><span>Orga-Team schreiben</span></a>
                 <?php if (!empty($isImpersonating) && !empty($originalUser)): ?>
                     <form method="post" action="<?= e(url('/users/impersonate/stop')) ?>" class="rail-impersonate">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

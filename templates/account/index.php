@@ -32,6 +32,13 @@
                 <small>Geräte verwalten</small>
             </span>
         </a>
+        <a class="account-quicknav-item" href="<?= e(url('/orga-team')) ?>">
+            <span class="account-quicknav-icon"><?= icon('mail') ?></span>
+            <span>
+                <strong>Orga-Team schreiben</strong>
+                <small>Frage oder Hinweis ans Team</small>
+            </span>
+        </a>
     </div>
 </section>
 

@@ -158,6 +158,7 @@ final class SettingRepository
             'mail.contact_single'  => ['stufenmitglied'],
             'mail.view_log'        => ['orga'],
             'events.manage'        => ['orga'],
+            'orga.contact_target'  => ['orga'],
             'settings.manage'      => ['orga'],
         ];
     }
@@ -261,7 +262,31 @@ final class SettingRepository
             'mail_reply_to_name' => (string) ($replyTo['name'] ?? ($identity['name'] ?? 'Reply-To')),
             'mail_reply_to_email' => (string) ($replyTo['email'] ?? ''),
             'mail_bcc_email' => (string) ($identity['bcc_email'] ?? ''),
+            'mail_orga_address' => '',
         ];
+    }
+
+    /**
+     * Rollen, die Nachrichten über den „Orga-Team schreiben"-Knopf bekommen.
+     * „admin" ist immer dabei.
+     *
+     * @return list<string>
+     */
+    public function orgaContactRoles(): array
+    {
+        $matrix = $this->permissionMatrix();
+        $roles = $matrix['orga.contact_target'] ?? ($this->permissionDefaults()['orga.contact_target'] ?? []);
+        if (!in_array('admin', $roles, true)) {
+            $roles[] = 'admin';
+        }
+
+        return array_values(array_unique($roles));
+    }
+
+    /** Feste Orga-Mailadresse (Ausnahmefall) – leer = an die Rollen oben. */
+    public function orgaContactAddress(): string
+    {
+        return trim((string) ($this->get('mail_orga_address') ?? ''));
     }
 
     public function mailIdentity(): array

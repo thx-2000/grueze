@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.33.0';
+    return '0.34.0';
 }
 
 function system_label(): string
@@ -346,6 +346,7 @@ function page_title(string $path): string
         '/verwaltung/kategorien-tags' => 'Kategorien & Tags',
         '/users'                     => 'Benutzer',
         '/account'                   => 'Mein Konto',
+        '/orga-team'                 => 'Orga-Team schreiben',
         '/security/passkeys'         => 'Passkeys',
         '/impressum'                 => 'Impressum',
         '/datenschutz'               => 'Datenschutz',

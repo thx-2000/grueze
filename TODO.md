@@ -74,8 +74,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   - Datenschutz-Feinheit: aktuell nur die Fremd-Link-Warnung, keine
     Mail-Bestätigung beim Abstimmen (bewusst so entschieden 2026-09).
 
-- **„Mail ans Orga-Team"-Knopf**: schneller Kontakt-Button. Von wo erreichbar,
-  für wen, an welche Adresse (fest vs. an alle mit Orga-/Admin-Rolle)?
+- **„Mail ans Orga-Team"-Knopf**: **erledigt in v0.34.0** – `/orga-team`
+  (`OrgaController`), Link in Seitenleiste + „Mein Konto". Ziel: feste
+  Adresse `mail_orga_address` oder alle aktiven Nutzer:innen mit Rolle
+  `orga.contact_target` (Standard Team+Admin). Reply-To = Login-Mailadresse.
 
 - **Grüße-Pool mit Zufallsrotation**: 10–40 Standard-Wünsche (Geburtstag,
   Weihnachten) hinterlegen und erweitern, beim Versand geshuffelt zuweisen –
@@ -121,6 +123,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- „Orga-Team schreiben" v0.34.0: `OrgaController` (`/orga-team`),
+  Berechtigung `orga.contact_target` (Gruppe „Orga-Team"), Setting
+  `mail_orga_address` (Mail-Einstellungen), `SettingRepository::orgaContactRoles/
+  orgaContactAddress`, `UserRepository::activeByRoleNames`. Links in
+  `.rail-orga` (Seitenleiste) + `account/index.php`. Nebenbei `.linkish`-
+  Kontrastfix (globales `button{color:on-primary!important}` überschrieben).
 - Termine v0.33.0: `events.kind` (Migration `2026-09-07-termin-typ`),
   Typen `date_poll`/`fixed_date`/`poll`. `EventController::applyOptions`
   (fixed_date → 1 Option + auto-`setDecidedOption`; poll → `syncTextOptions`).

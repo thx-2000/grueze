@@ -51,6 +51,11 @@
                                 <input type="email" name="mail_bcc_email" value="<?= e((string) ($mailSettings['mail_bcc_email'] ?? '')) ?>" placeholder="optional@example.org">
                                 <small class="field-hint">Leer lassen, wenn keine automatische BCC-Kopie verschickt werden soll.</small>
                             </label>
+                            <label class="full-width">
+                                <span>Feste Orga-Team-Adresse</span>
+                                <input type="email" name="mail_orga_address" value="<?= e((string) ($mailSettings['mail_orga_address'] ?? '')) ?>" placeholder="orga@example.org">
+                                <small class="field-hint">Der „Orga-Team schreiben"-Knopf geht an diese Adresse. Leer lassen, dann geht er an alle aktiven Nutzer:innen mit der Rolle „Orga-Team" (siehe Berechtigungen).</small>
+                            </label>
                         </div>
                     </div>
 
