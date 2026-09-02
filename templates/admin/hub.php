@@ -14,7 +14,7 @@ $groups = [
     ],
     'Werkzeuge' => [
         ['categories.manage', '/verwaltung/kategorien-tags', 'sliders', 'Kategorien & Tags', 'Kategorien und Tags anlegen, umbenennen und löschen.'],
-        ['contacts.manage', '/namensliste', 'contacts', 'Namensliste', 'Namensliste als Kopiervorlage erzeugen und für den Vollständigkeitsabgleich verschicken.'],
+        ['contacts.manage', '/vollstaendigkeit', 'check', 'Vollständigkeit', 'Datenlücken sehen, pro Person nachtragen, Namensliste zum Abgleich weitergeben.'],
     ],
     'System' => [
         ['users.manage', '/admin/backup', 'archive', 'Datensicherung', 'Voll-Backup herunterladen oder wiederherstellen.'],

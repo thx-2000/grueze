@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.29.0';
+    return '0.30.0';
 }
 
 function system_label(): string
@@ -336,7 +336,8 @@ function page_title(string $path): string
         '/rundmail'                  => 'Nachrichten',
         '/mail/compose'              => 'Nachricht schreiben',
         '/mail/status'               => 'Versand',
-        '/namensliste'               => 'Namensliste',
+        '/vollstaendigkeit'          => 'Vollständigkeit',
+        '/namensliste'               => 'Vollständigkeit',
         '/verwaltung'                => 'Verwaltung',
         '/verwaltung/kategorien-tags' => 'Kategorien & Tags',
         '/users'                     => 'Benutzer',

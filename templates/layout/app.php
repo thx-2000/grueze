@@ -65,8 +65,9 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
     }
     $showAdminHub = !empty($currentUser) && (can('users.manage') || can('settings.manage') || can('audit.view') || can('mail.view_log'));
     $onContacts = $currentPath === '/kontakte' || str_starts_with($currentPath, '/kontakte/')
-        || str_starts_with($currentPath, '/contacts') || str_starts_with($currentPath, '/search');
-    $onRundmail = str_starts_with($currentPath, '/rundmail') || str_starts_with($currentPath, '/mail') || str_starts_with($currentPath, '/namensliste');
+        || str_starts_with($currentPath, '/contacts') || str_starts_with($currentPath, '/search')
+        || str_starts_with($currentPath, '/vollstaendigkeit');
+    $onRundmail = str_starts_with($currentPath, '/rundmail') || str_starts_with($currentPath, '/mail');
     $onAdminHub = str_starts_with($currentPath, '/verwaltung')
         || str_starts_with($currentPath, '/settings') || str_starts_with($currentPath, '/admin')
         || str_starts_with($currentPath, '/users') || str_starts_with($currentPath, '/logs');

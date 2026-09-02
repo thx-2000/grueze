@@ -113,6 +113,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Neuer Look, Stufe 7 – Vollständigkeit (v0.30.0): `templates/contacts/completeness.php`
+  + `ContactController::completeness()/shareCompleteness()/namenslisteMoved()`
+  lösen `MailController::namensliste*` + `mail/namensliste.php` ab.
+  `/vollstaendigkeit` (+ `?which=email|phone` von den Start-To-dos),
+  `/namensliste` → Redirect. Überblickskacheln filtern die Lücken-Liste,
+  je Person Bearbeiten + (mit Mail) Schreiben. Kopiervorlage + „an Gruppe"
+  eingeklappt. Raw-Adressen-Versand entfällt.
 - Neuer Look, Stufe 6 – Nachrichten (v0.29.0): `templates/mail/nachricht.php`
   vereint Empfängerkreis + Text auf einem Screen (`rundmail.php` entfällt,
   `rundmailStart` weg). „Alle" vorgewählt, Live-Zahl via

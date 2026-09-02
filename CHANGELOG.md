@@ -3,6 +3,21 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.30.0
+
+- **Neuer Look, Stufe 7 – Vollständigkeit** (löst die „Namensliste" ab,
+  `/vollstaendigkeit`). Oben ein Überblick: Kontakte gesamt · ohne
+  Mailadresse · ohne Handynummer (die Lücken-Kacheln filtern die Liste).
+  Darunter die betroffenen Personen mit **„Bearbeiten"** und – sofern eine
+  Mailadresse vorliegt – **„Schreiben"** direkt je Zeile. Die
+  Namen-Kopiervorlage und „als Nachricht an eine Gruppe" bleiben, aber
+  eingeklappt unter „Namen weitergeben".
+- Menüpunkt/Verweise „Namensliste" → **Vollständigkeit**; die alte Adresse
+  `/namensliste` leitet um. Die Start-To-dos verlinken jetzt hierher.
+- Die reine „an einzelne Adressen"-Sendefunktion der alten Namensliste
+  entfällt (nur noch über den Nachrichten-Flow).
+- Keine Migration.
+
 ## 0.29.0
 
 - **Neuer Look, Stufe 6 – Nachrichten.** Empfängerkreis und Text auf **einem**

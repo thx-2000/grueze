@@ -38,7 +38,10 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   Änderungsverlauf mit Altwerten für Admins).
 - Stufe 6 (v0.29): **Nachrichten** – erledigt (Empfängerkreis + Text auf einem
   Screen, Live-Empfängerzahl, „Alle" vorgewählt).
-- offen: Vollständigkeit (löst Namensliste ab), Termine, Mein Eintrag.
+- Stufe 7 (v0.30): **Vollständigkeit** – erledigt (`/vollstaendigkeit` löst
+  die Namensliste ab; Überblick + Lücken mit Bearbeiten/Schreiben je Person).
+- offen: Termine (neuer Bereich), „Mein Eintrag" (Handy),
+  „Mail ans Orga-Team", Grüße-Pool.
 
 ## Screen-Entscheidungen
 
@@ -60,7 +63,7 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
 - **Vollständigkeit** (löst „Namensliste" ab): Überblick (X gesamt · Y ohne
   Mail · Z ohne Tel.), pro Lücke „bearbeiten" / „diesen schreiben" /
   „als Text kopieren" / „Liste teilen". Kopier-Funktion bleibt, nicht mehr
-  Hauptdarsteller.
+  Hauptdarsteller. — *umgesetzt v0.30*
 - **Termine — Übersicht:** drei Zeilentypen — Termin mit Datumsabstimmung,
   Termin mit festem Datum (+ Zusagen), reine Abstimmung ohne Datum. Mehrere
   gleichzeitig. **„Archiv"-Tab** (kein Löschen), Abgeschlossenes verschwindet.

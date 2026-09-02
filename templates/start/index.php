@@ -16,14 +16,14 @@ if (($stats['without_email'] ?? 0) > 0) {
     $todos[] = [
         'count' => (int) $stats['without_email'],
         'label' => 'Personen ohne Mailadresse – Lücken schließen',
-        'href' => url('/kontakte?without_email=1'),
+        'href' => url('/vollstaendigkeit?which=email'),
     ];
 }
 if (($stats['without_phone'] ?? 0) > 0) {
     $todos[] = [
         'count' => (int) $stats['without_phone'],
         'label' => 'Personen ohne Handynummer',
-        'href' => url('/kontakte?without_phone=1'),
+        'href' => url('/vollstaendigkeit?which=phone'),
     ];
 }
 ?>

@@ -302,9 +302,9 @@ try {
     $router->post('/rundmail/liste-speichern', [MailController::class, 'saveRecipientList']);
     $router->post('/rundmail/liste-umbenennen', [MailController::class, 'renameRecipientList']);
     $router->post('/rundmail/liste-loeschen', [MailController::class, 'deleteRecipientList']);
-    $router->get('/namensliste', [MailController::class, 'namensliste']);
-    $router->post('/namensliste', [MailController::class, 'namenslisteSend']);
-    $router->post('/namensliste/rundmail', [MailController::class, 'namenslisteToRundmail']);
+    $router->get('/vollstaendigkeit', [ContactController::class, 'completeness']);
+    $router->post('/vollstaendigkeit/teilen', [ContactController::class, 'shareCompleteness']);
+    $router->get('/namensliste', [ContactController::class, 'namenslisteMoved']);
     $router->post('/mail/compose', [MailController::class, 'compose']);
     $router->get('/mail/compose', [MailController::class, 'compose']);
     $router->post('/mail/compose-all', [MailController::class, 'composeAll']);

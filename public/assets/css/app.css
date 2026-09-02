@@ -3203,7 +3203,7 @@ code {
     padding-top: 0.7rem;
 }
 
-/* ------------------------------------------------------------- Namensliste */
+/* ----------------------------------------------------------- Vollständigkeit */
 
 #nameListField {
     font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
@@ -3211,6 +3211,164 @@ code {
     line-height: 1.5;
     white-space: pre-wrap;
     resize: vertical;
+}
+
+.completeness-overview {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+}
+
+.completeness-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 1rem 1.1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-strong);
+    color: var(--color-text);
+}
+
+a.completeness-tile:hover {
+    border-color: var(--color-primary);
+}
+
+.completeness-tile.is-gap .completeness-value {
+    color: var(--color-danger);
+}
+
+.completeness-tile.is-active {
+    border-color: var(--color-primary);
+    background: var(--color-highlight);
+}
+
+.completeness-value {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.7rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.completeness-label {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.completeness-list {
+    list-style: none;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    display: grid;
+}
+
+.completeness-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1rem;
+    padding: 0.8rem 0.15rem;
+}
+
+.completeness-row + .completeness-row {
+    border-top: 1px solid var(--color-border);
+}
+
+.completeness-person {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+.completeness-person strong {
+    display: inline;
+    margin: 0;
+}
+
+.completeness-chips {
+    display: inline-flex;
+    gap: 0.3rem;
+}
+
+.completeness-cat {
+    font-size: 0.85rem;
+}
+
+.completeness-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.completeness-actions form {
+    margin: 0;
+}
+
+.completeness-actions .ghost-button {
+    font-size: 0.88rem;
+}
+
+.completeness-clear {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.4rem 0 0;
+    padding: 0.7rem 0.8rem;
+    border-radius: var(--radius-md);
+    background: var(--success-veil);
+    font-size: 0.95rem;
+}
+
+.completeness-clear .icon {
+    flex: 0 0 auto;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--color-success);
+}
+
+.completeness-namelist-tools {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+    .completeness-overview {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .completeness-overview .completeness-tile:first-child {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+
+    .completeness-tile {
+        padding: 0.8rem 0.9rem;
+    }
+
+    .completeness-row {
+        align-items: flex-start;
+    }
+
+    .completeness-actions {
+        width: 100%;
+    }
+
+    .completeness-actions .ghost-button,
+    .completeness-actions form {
+        flex: 1;
+    }
+
+    .completeness-actions form .ghost-button {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* ------------------------------------------------------- Kategorien & Tags */
