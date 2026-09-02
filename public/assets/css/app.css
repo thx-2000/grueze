@@ -3468,10 +3468,6 @@ a.completeness-tile:hover {
 
 /* ---- Eigene Kontaktdaten ---- */
 
-.own-contact-card {
-    border-left: 3px solid var(--accent-edge);
-}
-
 .own-contact-list {
     margin: 0;
     display: grid;
@@ -4076,16 +4072,17 @@ body { display: block; }
 }
 .topbar-icon {
     width: 36px; height: 36px; flex: none;
+    padding: 0; box-shadow: none;
     border: 1px solid var(--color-border); border-radius: 999px;
     background: var(--color-surface-strong); color: var(--color-text);
     display: grid; place-items: center; cursor: pointer;
 }
-.topbar-icon .icon { width: 17px; height: 17px; }
+.topbar-icon .icon { width: 17px; height: 17px; flex: 0 0 17px; }
 .topbar-icon:hover { border-color: color-mix(in srgb, var(--color-text) 30%, transparent); background: var(--color-bg-alt); }
 .topbar-icon.is-active { background: var(--color-primary); color: var(--color-on-primary); border-color: var(--color-primary); }
 .topbar-btn {
     font: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
-    border: 1px solid var(--color-border); border-radius: 999px;
+    border: 1px solid var(--color-border); border-radius: 999px; box-shadow: none;
     background: var(--color-surface-strong); color: var(--color-text);
     padding: 0.36rem 0.7rem; display: inline-flex; align-items: center; gap: 0.4rem;
 }
@@ -4097,7 +4094,7 @@ body { display: block; }
     align-items: center; justify-content: center;
     border: 1px solid var(--color-border); border-radius: 999px;
     background: var(--color-surface-strong); color: var(--color-text) !important;
-    cursor: pointer; padding: 0;
+    cursor: pointer; padding: 0; box-shadow: none;
 }
 .nav-toggle .icon { width: 18px; height: 18px; }
 

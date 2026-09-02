@@ -128,7 +128,7 @@ $ownFields = $ownContact !== null ? [
 ] : [];
 ?>
 <?php if ($ownContact !== null && in_array(true, $ownFields, true)): ?>
-    <section class="panel own-contact-card">
+    <section class="panel">
         <div class="panel-head">
             <div>
                 <h2>Deine Kontaktdaten</h2>

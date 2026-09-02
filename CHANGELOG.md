@@ -3,6 +3,15 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.41.1
+
+- Blickschutz-Auge oben rechts saß nicht mittig im Kreis (der Knopf hatte
+  versehentlich die Standard-Button-Innenabstände und einen Schatten) – jetzt
+  zentriert und schattenlos. Gleiches für den „Mail an Auswahl"-Knopf und den
+  Mobil-Hamburger.
+- „Deine Kontaktdaten" im Adressbuch: der grüne Akzent-Strich links ist weg,
+  der Kasten sieht aus wie jeder andere.
+
 ## 0.41.0
 
 - **Login schlanker.** Der Kasten mit dem großen Brief-Symbol ist weg. Die
