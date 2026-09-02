@@ -4,18 +4,15 @@ $ownName = trim((string) ($ownName ?? ''));
 $foreign = $ownName !== '' && mb_strtolower($ownName) !== mb_strtolower($personName);
 $closed = $p['status'] === 'archived';
 $decidedId = (int) ($p['decided_option_id'] ?? 0);
+$kind = (string) ($p['kind'] ?? 'date_poll');
+$isFixed = $kind === 'fixed_date';
 
 $answerOptions = ['yes' => 'Ja', 'maybe' => 'Vielleicht', 'no' => 'Nein'];
-$optionTitle = static function (array $option): string {
-    $label = format_weekday_date($option['option_date']);
-    $time = trim((string) ($option['option_time'] ?? ''));
-
-    return $time !== '' ? $label . ', ' . $time : $label;
-};
+$optionTitle = static fn (array $option): string => event_option_label($option);
 ?>
 <section class="vote-page">
     <header class="vote-head">
-        <p class="eyebrow">Terminabstimmung</p>
+        <p class="eyebrow"><?= $kind === 'poll' ? 'Abstimmung' : ($isFixed ? 'Bitte um Rückmeldung' : 'Terminabstimmung') ?></p>
         <h1><?= e($p['title']) ?></h1>
         <?php if (trim((string) ($p['description'] ?? '')) !== ''): ?>
             <p class="vote-description"><?= nl2br(e($p['description'])) ?></p>
@@ -49,7 +46,7 @@ $optionTitle = static function (array $option): string {
     <?php endif; ?>
 
     <?php if ($p['options'] === []): ?>
-        <p class="muted">Es gibt noch keine Datumsvorschläge.</p>
+        <p class="muted">Es gibt noch keine Auswahlmöglichkeiten.</p>
     <?php else: ?>
         <form method="post" action="<?= e(url('/abstimmen')) ?>" class="vote-form">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

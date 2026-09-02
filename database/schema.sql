@@ -149,6 +149,7 @@ CREATE TABLE app_settings (
 CREATE TABLE events (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(190) NOT NULL,
+    kind ENUM('date_poll', 'fixed_date', 'poll') NOT NULL DEFAULT 'date_poll',
     description TEXT NULL,
     location VARCHAR(190) NULL,
     time_note VARCHAR(190) NULL,

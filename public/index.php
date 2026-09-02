@@ -169,7 +169,8 @@ try {
         Container::get(UserRepository::class),
         Container::get(LogRepository::class),
         Container::get(PasswordResetService::class),
-        Container::get(PasskeyRepository::class)
+        Container::get(PasskeyRepository::class),
+        Container::get(EventRepository::class)
     ));
     Container::factory(PasskeyController::class, static fn () => new PasskeyController(
         Container::get(Auth::class),

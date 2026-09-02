@@ -67,9 +67,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   - **v0.32 – erledigt:** Token-Links per Nachricht (`{Abstimmungslink}`),
     „an Teilnehmer" mit Kreis-Filter (alle / nur Zusagen / nur Offene),
     Abstimmungs-Verlauf für Admins.
-  - **v0.33:** weitere Typen (fester Termin + reine Zusagen · reine
-    Ja/Nein-Abstimmung ohne Datum); „Mein Eintrag"/Handy zeigt offene
-    Abstimmungen; Ranking-Variante andenken.
+  - **v0.33 – erledigt:** Typen fester Termin + Abstimmung ohne Datum;
+    offene Abstimmungen in „Mein Konto".
+  - offen: Ranking-Variante andenken; Termine in „Mein Eintrag" (Handy)
+    prominenter, sobald dieser Screen kommt.
   - Datenschutz-Feinheit: aktuell nur die Fremd-Link-Warnung, keine
     Mail-Bestätigung beim Abstimmen (bewusst so entschieden 2026-09).
 
@@ -120,6 +121,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Termine v0.33.0: `events.kind` (Migration `2026-09-07-termin-typ`),
+  Typen `date_poll`/`fixed_date`/`poll`. `EventController::applyOptions`
+  (fixed_date → 1 Option + auto-`setDecidedOption`; poll → `syncTextOptions`).
+  `event_option_label()`-Helper (Datum oder Freitext). Typ-Auswahl auf
+  `/termine/neu`, `form.php`/`detail.php`/`vote.php`/`index.php`
+  typ-abhängig. „Mein Konto": `openEventsForContact()` →
+  `templates/account/index.php` offene Abstimmungen (nur wenn
+  `users.contact_id` gesetzt).
 - Termine v0.32.0: „an Teilnehmer" (`EventController::messageParticipants`
   + `participantContactIds($id, all|confirmed|pending)`) → Nachrichten-Screen
   mit Preset. `{Abstimmungslink}` je Person im `MailController` ersetzt

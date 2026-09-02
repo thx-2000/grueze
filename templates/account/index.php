@@ -35,6 +35,34 @@
     </div>
 </section>
 
+<?php if (!empty($openEvents)): ?>
+    <section class="panel" id="abstimmungen">
+        <div class="panel-head">
+            <div>
+                <h3>Offene Abstimmungen</h3>
+                <p class="muted">Termine, bei denen deine Rückmeldung fehlt oder noch geändert werden kann.</p>
+            </div>
+        </div>
+        <ul class="account-events">
+            <?php foreach ($openEvents as $ev): ?>
+                <li>
+                    <a href="<?= e(url('/abstimmen?token=' . $ev['token'])) ?>">
+                        <span class="account-events-title"><?= e($ev['title']) ?></span>
+                        <span class="account-events-meta">
+                            <?php if ((int) $ev['has_answered'] === 1): ?>
+                                <span class="status-chip is-ok">geantwortet</span> – ändern
+                            <?php else: ?>
+                                <span class="status-chip is-warn">offen</span> – jetzt abstimmen
+                            <?php endif; ?>
+                        </span>
+                    </a>
+                    <?= icon('chevron-right') ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </section>
+<?php endif; ?>
+
 <section class="panel compact-editor-shell" id="password">
     <div class="panel-head">
         <div>

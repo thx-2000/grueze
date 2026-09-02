@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.32.0';
+    return '0.33.0';
 }
 
 function system_label(): string
@@ -423,6 +423,19 @@ function format_date(?string $value): string
     } catch (Throwable) {
         return (string) $value;
     }
+}
+
+/** Anzeigetext einer Termin-Antwortoption: Datum (+ Uhrzeit) oder Freitext-Label. */
+function event_option_label(array $option): string
+{
+    if (trim((string) ($option['option_date'] ?? '')) !== '') {
+        $label = format_weekday_date($option['option_date']);
+        $time = trim((string) ($option['option_time'] ?? ''));
+
+        return $time !== '' ? $label . ', ' . $time : $label;
+    }
+
+    return trim((string) ($option['label'] ?? '')) ?: 'Option';
 }
 
 /** „Fr, 12. Sep 2026" – für Terminvorschläge. Leerer String bei ungültigem Wert. */

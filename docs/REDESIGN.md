@@ -44,7 +44,9 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   ohne Login, Ergebnismatrix, Ergebnis festlegen, Zusagen, Archiv).
 - Stufe 8b (v0.32): Termine – Link-Versand per Nachricht (`{Abstimmungslink}`),
   „an Teilnehmer" (alle / nur Zusagen / nur Offene), Abstimmungs-Verlauf.
-  Offen für v0.33: weitere Termin-Typen, „Mein Eintrag" zeigt offene Abstimmungen.
+- Stufe 8c (v0.33): Termine – drei Typen (Datumsabstimmung / fester Termin /
+  Abstimmung ohne Datum); offene Abstimmungen in „Mein Konto".
+  **Bereich „Termine" damit funktional rund.**
 - offen: „Mein Eintrag" (Handy), „Mail ans Orga-Team", Grüße-Pool,
   Selbst-Registrierung, Verwaltung-Hub in 3 Gruppen, dann Security-Audit.
 

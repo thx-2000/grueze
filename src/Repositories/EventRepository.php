@@ -133,12 +133,14 @@ final class EventRepository
 
     public function create(array $data, int $userId): int
     {
+        $kind = in_array($data['kind'] ?? '', ['date_poll', 'fixed_date', 'poll'], true) ? $data['kind'] : 'date_poll';
         $stmt = $this->pdo->prepare(
-            'INSERT INTO events (title, description, location, time_note, cost_note, bring_note, created_by)
-             VALUES (:title, :description, :location, :time_note, :cost_note, :bring_note, :created_by)'
+            'INSERT INTO events (title, kind, description, location, time_note, cost_note, bring_note, created_by)
+             VALUES (:title, :kind, :description, :location, :time_note, :cost_note, :bring_note, :created_by)'
         );
         $stmt->execute([
             'title' => $data['title'],
+            'kind' => $kind,
             'description' => $data['description'] ?: null,
             'location' => $data['location'] ?: null,
             'time_note' => $data['time_note'] ?: null,
@@ -226,6 +228,70 @@ final class EventRepository
     }
 
     /**
+     * Freitext-Antwortoptionen abgleichen (Typ „poll"). Gleiche Labels behalten
+     * ihre Stimmen.
+     *
+     * @param list<string> $labels
+     */
+    public function syncTextOptions(int $eventId, array $labels): void
+    {
+        $existing = $this->pdo->prepare("SELECT id, label FROM event_options WHERE event_id = :event_id AND label IS NOT NULL");
+        $existing->execute(['event_id' => $eventId]);
+        $byLabel = [];
+        foreach ($existing->fetchAll() as $row) {
+            $byLabel[$row['label']] = (int) $row['id'];
+        }
+
+        $keep = [];
+        $order = 0;
+        foreach ($labels as $label) {
+            $label = trim($label);
+            if ($label === '') {
+                continue;
+            }
+            if (isset($byLabel[$label])) {
+                $keep[] = $byLabel[$label];
+                $this->pdo->prepare('UPDATE event_options SET sort_order = :sort WHERE id = :id')
+                    ->execute(['sort' => $order, 'id' => $byLabel[$label]]);
+            } else {
+                $stmt = $this->pdo->prepare(
+                    'INSERT INTO event_options (event_id, label, sort_order) VALUES (:event_id, :label, :sort_order)'
+                );
+                $stmt->execute(['event_id' => $eventId, 'label' => $label, 'sort_order' => $order]);
+                $keep[] = (int) $this->pdo->lastInsertId();
+            }
+            $order++;
+        }
+
+        $placeholders = $keep === [] ? 'NULL' : implode(',', array_fill(0, count($keep), '?'));
+        $this->pdo->prepare("DELETE FROM event_options WHERE event_id = ? AND id NOT IN ($placeholders)")
+            ->execute(array_merge([$eventId], $keep));
+    }
+
+    /**
+     * Offene Termine/Abstimmungen, an denen dieser Kontakt teilnimmt – für die
+     * „Mein Konto"-Ansicht. Enthält den persönlichen Token und ob schon
+     * geantwortet wurde.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function openEventsForContact(int $contactId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT e.id, e.title, e.kind, e.status, ep.token,
+                    EXISTS(SELECT 1 FROM event_responses r WHERE r.participant_id = ep.id) AS has_answered,
+                    (SELECT MIN(option_date) FROM event_options WHERE event_options.event_id = e.id AND option_date IS NOT NULL) AS earliest_date
+             FROM event_participants ep
+             JOIN events e ON e.id = ep.event_id
+             WHERE ep.contact_id = :contact_id AND e.status <> \'archived\'
+             ORDER BY COALESCE(earliest_date, \'9999-12-31\') ASC, e.created_at DESC'
+        );
+        $stmt->execute(['contact_id' => $contactId]);
+
+        return $stmt->fetchAll();
+    }
+
+    /**
      * Teilnehmerkreis abgleichen. Neue bekommen einen Token, entfernte werden
      * mitsamt ihren Antworten gelöscht.
      *
@@ -302,7 +368,7 @@ final class EventRepository
         $stmt = $this->pdo->prepare(
             'SELECT ep.id AS participant_id, ep.token, ep.event_id,
                     c.vorname, c.nachname,
-                    e.title, e.description, e.location, e.time_note, e.cost_note, e.bring_note, e.status, e.decided_option_id
+                    e.title, e.kind, e.description, e.location, e.time_note, e.cost_note, e.bring_note, e.status, e.decided_option_id
              FROM event_participants ep
              JOIN contacts c ON c.id = ep.contact_id
              JOIN events e ON e.id = ep.event_id

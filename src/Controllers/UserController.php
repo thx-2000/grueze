@@ -20,7 +20,8 @@ final class UserController extends BaseController
         private UserRepository $users,
         private LogRepository $logs,
         private PasswordResetService $passwordResets,
-        private PasskeyRepository $passkeys
+        private PasskeyRepository $passkeys,
+        private \App\Repositories\EventRepository $events
     ) {
         parent::__construct($auth);
     }
@@ -53,10 +54,12 @@ final class UserController extends BaseController
             Redirect::to('/login');
         }
 
+        $contactId = (int) ($user['contact_id'] ?? 0);
         $this->render('account/index', [
             'accountUser' => $user,
             'passkeysAvailable' => $this->passkeys->isAvailable(),
             'passkeys' => $this->passkeys->byUserId((int) $user['id']),
+            'openEvents' => $contactId > 0 ? $this->events->openEventsForContact($contactId) : [],
         ]);
     }
 

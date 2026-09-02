@@ -1,5 +1,6 @@
 <?php
 $statusLabel = ['open' => 'Abstimmung läuft', 'decided' => 'Termin steht', 'archived' => 'Archiviert'];
+$kindLabel = ['date_poll' => 'Datumsabstimmung', 'fixed_date' => 'Fester Termin', 'poll' => 'Abstimmung'];
 ?>
 <header class="contacts-header">
     <div>
@@ -41,9 +42,10 @@ $statusLabel = ['open' => 'Abstimmung läuft', 'decided' => 'Termin steht', 'arc
                         <span class="events-row-title"><?= e($event['title']) ?></span>
                         <span class="events-row-meta">
                             <span class="events-status is-<?= e($event['status']) ?>"><?= e($statusLabel[$event['status']] ?? $event['status']) ?></span>
+                            · <?= e($kindLabel[$event['kind']] ?? 'Termin') ?>
                             <?php if ($decidedOption !== null): ?>
-                                · <?= e(format_weekday_date($decidedOption['option_date'])) ?><?= trim((string) ($decidedOption['option_time'] ?? '')) !== '' ? ', ' . e($decidedOption['option_time']) : '' ?>
-                            <?php elseif ($optionCount > 0): ?>
+                                · <?= e(event_option_label($decidedOption)) ?>
+                            <?php elseif ($optionCount > 0 && $event['kind'] !== 'poll'): ?>
                                 · <?= e((string) $optionCount) ?> <?= $optionCount === 1 ? 'Vorschlag' : 'Vorschläge' ?>
                             <?php endif; ?>
                             · <?= e((string) $event['answered_count']) ?>/<?= e((string) $event['participant_count']) ?> geantwortet

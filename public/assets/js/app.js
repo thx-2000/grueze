@@ -350,6 +350,30 @@ document.querySelectorAll('[data-date-options]').forEach((container) => {
     });
 });
 
+// Termine: Freitext-Antwortoptionen hinzufügen / entfernen.
+document.querySelectorAll('[data-text-options]').forEach((container) => {
+    const template = document.getElementById('textOptionTemplate');
+    const addButton = container.parentElement.querySelector('[data-add-text]');
+
+    const bindRemove = (row) => {
+        row.querySelector('[data-remove-text]')?.addEventListener('click', () => {
+            const rows = container.querySelectorAll('.text-option-row');
+            if (rows.length > 1) {
+                row.remove();
+            } else {
+                row.querySelector('input').value = '';
+            }
+        });
+    };
+
+    container.querySelectorAll('.text-option-row').forEach(bindRemove);
+    addButton?.addEventListener('click', () => {
+        if (!template) return;
+        container.appendChild(template.content.cloneNode(true));
+        bindRemove(container.lastElementChild);
+    });
+});
+
 // Termine: Teilnehmer-Schnellauswahl.
 document.querySelectorAll('[data-participant-picker]').forEach((form) => {
     const boxes = [...form.querySelectorAll('.participant-option input[type="checkbox"]')];

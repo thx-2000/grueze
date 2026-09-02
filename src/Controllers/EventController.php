@@ -41,10 +41,16 @@ final class EventController extends BaseController
         ]);
     }
 
-    public function createForm(): void
+    private const KINDS = ['date_poll', 'fixed_date', 'poll'];
+
+    public function createForm(Request $request): void
     {
         $this->requirePermission('events.manage');
-        $this->render('events/form', ['event' => null]);
+        $kind = (string) $request->input('typ', '');
+        $this->render('events/form', [
+            'event' => null,
+            'kind' => in_array($kind, self::KINDS, true) ? $kind : null,
+        ]);
     }
 
     public function store(Request $request): void
@@ -52,14 +58,16 @@ final class EventController extends BaseController
         $this->requirePermission('events.manage');
         Csrf::validate($request->input('_csrf'));
 
-        $data = $this->detailData($request);
+        $kind = (string) $request->input('kind', 'date_poll');
+        $kind = in_array($kind, self::KINDS, true) ? $kind : 'date_poll';
+        $data = $this->detailData($request) + ['kind' => $kind];
         if ($data['title'] === '') {
             flash('error', 'Bitte einen Titel angeben.');
-            Redirect::to('/termine/neu');
+            Redirect::to('/termine/neu?typ=' . $kind);
         }
 
         $id = $this->events->create($data, (int) $this->auth->user()['id']);
-        $this->events->syncDateOptions($id, $this->optionRows($request));
+        $this->applyOptions($id, $kind, $request);
         flash('success', 'Termin angelegt. Jetzt Teilnehmerkreis wählen.');
         Redirect::to('/termine/detail?id=' . $id);
     }
@@ -93,13 +101,14 @@ final class EventController extends BaseController
             Redirect::to('/termine');
         }
 
+        $existing = $this->events->find($id);
         $data = $this->detailData($request);
         if ($data['title'] === '') {
             flash('error', 'Bitte einen Titel angeben.');
             Redirect::to('/termine/detail?id=' . $id);
         }
         $this->events->updateDetails($id, $data);
-        $this->events->syncDateOptions($id, $this->optionRows($request));
+        $this->applyOptions($id, (string) ($existing['kind'] ?? 'date_poll'), $request);
         flash('success', 'Termin gespeichert.');
         Redirect::to('/termine/detail?id=' . $id);
     }
@@ -255,6 +264,34 @@ final class EventController extends BaseController
             'cost_note' => trim((string) $request->input('cost_note')),
             'bring_note' => trim((string) $request->input('bring_note')),
         ];
+    }
+
+    /**
+     * Antwortoptionen je nach Typ speichern:
+     * - date_poll: mehrere Datum/Uhrzeit-Zeilen
+     * - fixed_date: genau ein Datum, sofort als Ergebnis festgelegt
+     * - poll: Freitext-Optionen
+     */
+    private function applyOptions(int $id, string $kind, Request $request): void
+    {
+        if ($kind === 'poll') {
+            $labels = array_map('strval', (array) $request->input('option_label', []));
+            $this->events->syncTextOptions($id, $labels);
+
+            return;
+        }
+
+        $rows = $this->optionRows($request);
+        if ($kind === 'fixed_date') {
+            $rows = array_slice($rows, 0, 1);
+        }
+        $this->events->syncDateOptions($id, $rows);
+
+        if ($kind === 'fixed_date') {
+            $event = $this->events->find($id);
+            $firstOption = $event['options'][0] ?? null;
+            $this->events->setDecidedOption($id, $firstOption !== null ? (int) $firstOption['id'] : null);
+        }
     }
 
     /**

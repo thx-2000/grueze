@@ -3,6 +3,20 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.33.0
+
+- **Termine: drei Typen.** Beim Anlegen wählt man jetzt zwischen
+  **Datumsabstimmung** (wie bisher), **Fester Termin** (Datum steht, es
+  werden nur Zusagen gesammelt – sofort „Termin steht") und **Abstimmung
+  ohne Datum** (freie Ja/Vielleicht/Nein-Frage mit mehreren Antwort­
+  möglichkeiten). Detailseite, Abstimm-Seite und Übersicht passen Texte
+  und Aktionen an den Typ an; „Als Termin festlegen" gibt es nur bei der
+  Datumsabstimmung.
+- **„Mein Konto": offene Abstimmungen.** Wer mit einem Kontakt verknüpft
+  ist, sieht dort die Termine, bei denen die eigene Rückmeldung fehlt oder
+  noch geändert werden kann – ein Klick führt direkt zur Abstimmung.
+- Migration `2026-09-07-termin-typ` (Spalte `events.kind`).
+
 ## 0.32.0
 
 - **Termine: Links per Nachricht verschicken.** Auf der Termin-Detailseite

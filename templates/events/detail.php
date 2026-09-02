@@ -6,14 +6,13 @@ $participants = $event['participants'];
 $tally = $event['tally'];
 $tokenStats = $event['token_stats'];
 $decidedId = (int) ($event['decided_option_id'] ?? 0);
+$kind = (string) ($event['kind'] ?? 'date_poll');
+$kindLabel = ['date_poll' => 'Datumsabstimmung', 'fixed_date' => 'Fester Termin', 'poll' => 'Abstimmung'][$kind] ?? 'Termin';
+$isPoll = $kind === 'poll';
+$isFixed = $kind === 'fixed_date';
 
 $answerShort = ['yes' => 'Ja', 'maybe' => 'Vielleicht', 'no' => 'Nein'];
-$optionTitle = static function (array $option): string {
-    $label = format_weekday_date($option['option_date']);
-    $time = trim((string) ($option['option_time'] ?? ''));
-
-    return $time !== '' ? $label . ', ' . $time : $label;
-};
+$optionTitle = static fn (array $option): string => event_option_label($option);
 
 // Kontakte für den Teilnehmer-Picker nach Kategorie gruppieren.
 $byCategory = [];
@@ -25,7 +24,7 @@ ksort($byCategory);
 <p class="detail-backlink"><a href="<?= e(url('/termine')) ?>"><?= icon('chevron-right') ?>Zurück zu den Terminen</a></p>
 
 <header class="contact-detail-head">
-    <p class="eyebrow">Termin</p>
+    <p class="eyebrow">Termin · <?= e($kindLabel) ?></p>
     <h1><?= e($event['title']) ?></h1>
     <div class="contact-detail-meta">
         <span class="events-status is-<?= e($event['status']) ?>"><?= e($statusLabel[$event['status']] ?? $event['status']) ?></span>
@@ -33,11 +32,11 @@ ksort($byCategory);
     </div>
 </header>
 
-<?php if ($event['status'] === 'decided'): ?>
+<?php if (!$isPoll && $event['status'] === 'decided'): ?>
     <?php foreach ($options as $option): ?>
         <?php if ((int) $option['id'] === $decidedId): ?>
             <section class="detail-card event-decided">
-                <h2>Festgelegter Termin</h2>
+                <h2><?= $isFixed ? 'Termin &amp; Zusagen' : 'Festgelegter Termin' ?></h2>
                 <p class="event-decided-date"><?= e($optionTitle($option)) ?></p>
                 <?php
                 $yesList = array_values(array_filter($participants, static fn (array $p): bool => ($p['answers'][(int) $option['id']] ?? '') === 'yes'));
@@ -47,12 +46,14 @@ ksort($byCategory);
                 <?php if ($yesList !== []): ?>
                     <p class="event-decided-names"><strong>Dabei:</strong> <?= e(implode(', ', array_map(static fn (array $p): string => trim($p['vorname'] . ' ' . $p['nachname']), $yesList))) ?></p>
                 <?php endif; ?>
-                <form method="post" action="<?= e(url('/termine/ergebnis')) ?>" class="event-inline-form">
-                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                    <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
-                    <input type="hidden" name="option_id" value="0">
-                    <button type="submit" class="ghost-button">Festlegung aufheben</button>
-                </form>
+                <?php if (!$isFixed): ?>
+                    <form method="post" action="<?= e(url('/termine/ergebnis')) ?>" class="event-inline-form">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
+                        <input type="hidden" name="option_id" value="0">
+                        <button type="submit" class="ghost-button">Festlegung aufheben</button>
+                    </form>
+                <?php endif; ?>
             </section>
         <?php endif; ?>
     <?php endforeach; ?>
@@ -70,35 +71,74 @@ ksort($byCategory);
         </div>
     </section>
 
-    <section class="detail-card">
-        <h2>Datumsvorschläge</h2>
-        <p class="field-hint">Vorhandene Vorschläge behalten ihre Rückmeldungen. Entfernte Vorschläge löschen die zugehörigen Stimmen.</p>
-        <div class="date-options" data-date-options>
-            <?php foreach ($options as $i => $option): ?>
-                <div class="date-option-row">
-                    <input type="date" name="option_date[]" value="<?= e((string) $option['option_date']) ?>" aria-label="Datum <?= $i + 1 ?>" min="<?= e($today) ?>">
-                    <input type="text" name="option_time[]" value="<?= e((string) ($option['option_time'] ?? '')) ?>" aria-label="Uhrzeit <?= $i + 1 ?>" placeholder="Uhrzeit (optional)">
-                    <button type="button" class="danger-button icon-button" data-remove-date aria-label="Zeile entfernen"><?= icon('x') ?></button>
+    <?php if ($isPoll): ?>
+        <section class="detail-card">
+            <h2>Antwortmöglichkeiten</h2>
+            <p class="field-hint">Gleiche Möglichkeiten behalten ihre Stimmen. Entfernte löschen die zugehörigen Stimmen.</p>
+            <div class="text-options" data-text-options>
+                <?php foreach ($options as $i => $option): ?>
+                    <div class="text-option-row">
+                        <input type="text" name="option_label[]" value="<?= e((string) ($option['label'] ?? '')) ?>" aria-label="Antwortmöglichkeit <?= $i + 1 ?>">
+                        <button type="button" class="danger-button icon-button" data-remove-text aria-label="Zeile entfernen"><?= icon('x') ?></button>
+                    </div>
+                <?php endforeach; ?>
+                <?php if ($options === []): ?>
+                    <div class="text-option-row">
+                        <input type="text" name="option_label[]" value="" aria-label="Antwortmöglichkeit">
+                        <button type="button" class="danger-button icon-button" data-remove-text aria-label="Zeile entfernen"><?= icon('x') ?></button>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <button type="button" class="ghost-button" data-add-text><?= icon('plus') ?><span>Weitere Möglichkeit</span></button>
+            <template id="textOptionTemplate">
+                <div class="text-option-row">
+                    <input type="text" name="option_label[]" value="" aria-label="Antwortmöglichkeit">
+                    <button type="button" class="danger-button icon-button" data-remove-text aria-label="Zeile entfernen"><?= icon('x') ?></button>
                 </div>
-            <?php endforeach; ?>
-            <?php if ($options === []): ?>
-                <div class="date-option-row">
-                    <input type="date" name="option_date[]" value="" aria-label="Datum" min="<?= e($today) ?>">
-                    <input type="text" name="option_time[]" value="" aria-label="Uhrzeit" placeholder="Uhrzeit (optional)">
-                    <button type="button" class="danger-button icon-button" data-remove-date aria-label="Zeile entfernen"><?= icon('x') ?></button>
-                </div>
-            <?php endif; ?>
-        </div>
-        <button type="button" class="ghost-button" data-add-date><?= icon('plus') ?><span>Weiterer Vorschlag</span></button>
-    </section>
+            </template>
+        </section>
+    <?php elseif ($isFixed): ?>
+        <section class="detail-card">
+            <h2>Termin</h2>
+            <?php $only = $options[0] ?? ['option_date' => '', 'option_time' => '']; ?>
+            <div class="form-grid">
+                <label><span>Datum <span class="required-marker" aria-hidden="true">*</span></span><input type="date" name="option_date[]" value="<?= e((string) $only['option_date']) ?>" min="<?= e($today) ?>" required></label>
+                <label><span>Uhrzeit</span><input type="text" name="option_time[]" value="<?= e((string) ($only['option_time'] ?? '')) ?>" placeholder="z. B. 18:00"></label>
+            </div>
+        </section>
+    <?php else: ?>
+        <section class="detail-card">
+            <h2>Datumsvorschläge</h2>
+            <p class="field-hint">Vorhandene Vorschläge behalten ihre Rückmeldungen. Entfernte Vorschläge löschen die zugehörigen Stimmen.</p>
+            <div class="date-options" data-date-options>
+                <?php foreach ($options as $i => $option): ?>
+                    <div class="date-option-row">
+                        <input type="date" name="option_date[]" value="<?= e((string) $option['option_date']) ?>" aria-label="Datum <?= $i + 1 ?>" min="<?= e($today) ?>">
+                        <input type="text" name="option_time[]" value="<?= e((string) ($option['option_time'] ?? '')) ?>" aria-label="Uhrzeit <?= $i + 1 ?>" placeholder="Uhrzeit (optional)">
+                        <button type="button" class="danger-button icon-button" data-remove-date aria-label="Zeile entfernen"><?= icon('x') ?></button>
+                    </div>
+                <?php endforeach; ?>
+                <?php if ($options === []): ?>
+                    <div class="date-option-row">
+                        <input type="date" name="option_date[]" value="" aria-label="Datum" min="<?= e($today) ?>">
+                        <input type="text" name="option_time[]" value="" aria-label="Uhrzeit" placeholder="Uhrzeit (optional)">
+                        <button type="button" class="danger-button icon-button" data-remove-date aria-label="Zeile entfernen"><?= icon('x') ?></button>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <button type="button" class="ghost-button" data-add-date><?= icon('plus') ?><span>Weiterer Vorschlag</span></button>
+        </section>
+    <?php endif; ?>
 
     <section class="detail-card">
         <h2>Eckdaten</h2>
         <div class="form-grid">
             <label><span>Ort</span><input type="text" name="location" value="<?= e((string) ($event['location'] ?? '')) ?>"></label>
-            <label><span>Uhrzeit</span><input type="text" name="time_note" value="<?= e((string) ($event['time_note'] ?? '')) ?>" placeholder="z. B. ab 18 Uhr"></label>
-            <label><span>Kosten</span><input type="text" name="cost_note" value="<?= e((string) ($event['cost_note'] ?? '')) ?>"></label>
-            <label><span>Mitbringen</span><input type="text" name="bring_note" value="<?= e((string) ($event['bring_note'] ?? '')) ?>"></label>
+            <?php if (!$isPoll): ?>
+                <label><span>Uhrzeit</span><input type="text" name="time_note" value="<?= e((string) ($event['time_note'] ?? '')) ?>" placeholder="z. B. ab 18 Uhr"></label>
+                <label><span>Kosten</span><input type="text" name="cost_note" value="<?= e((string) ($event['cost_note'] ?? '')) ?>"></label>
+                <label><span>Mitbringen</span><input type="text" name="bring_note" value="<?= e((string) ($event['bring_note'] ?? '')) ?>"></label>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -162,8 +202,8 @@ ksort($byCategory);
 
 <?php if ($participants !== [] && $options !== []): ?>
     <section class="detail-card">
-        <h2>Abstimmungsstand</h2>
-        <p class="muted">Wer hat wie geantwortet. Wähle unten das Ergebnis.</p>
+        <h2><?= $isPoll ? 'Ergebnis' : 'Abstimmungsstand' ?></h2>
+        <p class="muted">Wer hat wie geantwortet.<?= $kind === 'date_poll' ? ' Wähle unten das Ergebnis.' : '' ?></p>
 
         <form method="post" action="<?= e(url('/termine/ergebnis')) ?>">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
@@ -182,10 +222,12 @@ ksort($byCategory);
                                         <span class="is-maybe"><?= (int) $tally[(int) $option['id']]['maybe'] ?> ?</span>
                                         <span class="is-no"><?= (int) $tally[(int) $option['id']]['no'] ?> ✗</span>
                                     </span>
-                                    <label class="vote-pick">
-                                        <input type="radio" name="option_id" value="<?= e((string) $option['id']) ?>" <?= (int) $option['id'] === $decidedId ? 'checked' : '' ?>>
-                                        <span>als Ergebnis</span>
-                                    </label>
+                                    <?php if ($kind === 'date_poll'): ?>
+                                        <label class="vote-pick">
+                                            <input type="radio" name="option_id" value="<?= e((string) $option['id']) ?>" <?= (int) $option['id'] === $decidedId ? 'checked' : '' ?>>
+                                            <span>als Ergebnis</span>
+                                        </label>
+                                    <?php endif; ?>
                                 </th>
                             <?php endforeach; ?>
                         </tr>
@@ -212,9 +254,11 @@ ksort($byCategory);
                 </table>
             </div>
 
-            <div class="toolbar-actions">
-                <button type="submit"><?= icon('check') ?><span>Als Termin festlegen</span></button>
-            </div>
+            <?php if ($kind === 'date_poll'): ?>
+                <div class="toolbar-actions">
+                    <button type="submit"><?= icon('check') ?><span>Als Termin festlegen</span></button>
+                </div>
+            <?php endif; ?>
         </form>
     </section>
 <?php endif; ?>
