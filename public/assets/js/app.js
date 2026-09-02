@@ -324,6 +324,51 @@ if (detailForm) {
     });
 }
 
+// Termine: Datumsvorschläge hinzufügen / entfernen.
+document.querySelectorAll('[data-date-options]').forEach((container) => {
+    const template = document.getElementById('dateOptionTemplate');
+    const addButton = container.parentElement.querySelector('[data-add-date]');
+
+    const bindRemove = (row) => {
+        row.querySelector('[data-remove-date]')?.addEventListener('click', () => {
+            const rows = container.querySelectorAll('.date-option-row');
+            if (rows.length > 1) {
+                row.remove();
+            } else {
+                row.querySelectorAll('input').forEach((input) => { input.value = ''; });
+            }
+        });
+    };
+
+    container.querySelectorAll('.date-option-row').forEach(bindRemove);
+    addButton?.addEventListener('click', () => {
+        if (!template) return;
+        const fragment = template.content.cloneNode(true);
+        const row = fragment.querySelector('.date-option-row');
+        container.appendChild(fragment);
+        bindRemove(container.lastElementChild || row);
+    });
+});
+
+// Termine: Teilnehmer-Schnellauswahl.
+document.querySelectorAll('[data-participant-picker]').forEach((form) => {
+    const boxes = [...form.querySelectorAll('.participant-option input[type="checkbox"]')];
+    form.querySelector('[data-pick="all"]')?.addEventListener('click', () => {
+        boxes.forEach((box) => { box.checked = true; });
+    });
+    form.querySelector('[data-pick="none"]')?.addEventListener('click', () => {
+        boxes.forEach((box) => { box.checked = false; });
+    });
+    form.querySelectorAll('[data-pick-category]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const category = button.dataset.pickCategory;
+            form.querySelectorAll(`.participant-option[data-category="${CSS.escape(category)}"] input[type="checkbox"]`).forEach((box) => {
+                box.checked = true;
+            });
+        });
+    });
+});
+
 // Nachrichten-Seite: Empfängerkreis + Text auf einem Screen.
 const messageForm = document.querySelector('[data-message-form]');
 if (messageForm) {

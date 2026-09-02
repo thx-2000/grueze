@@ -40,8 +40,12 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   Screen, Live-Empfängerzahl, „Alle" vorgewählt).
 - Stufe 7 (v0.30): **Vollständigkeit** – erledigt (`/vollstaendigkeit` löst
   die Namensliste ab; Überblick + Lücken mit Bearbeiten/Schreiben je Person).
-- offen: Termine (neuer Bereich), „Mein Eintrag" (Handy),
-  „Mail ans Orga-Team", Grüße-Pool.
+- Stufe 8 (v0.31): **Termine v1** – erledigt (Datumsabstimmung, Token-Links
+  ohne Login, Ergebnismatrix, Ergebnis festlegen, Zusagen, Archiv).
+  Offen für v0.32/0.33: Link-Versand per Nachricht, „an Teilnehmer",
+  weitere Termin-Typen, Abstimm-Historie.
+- offen: „Mein Eintrag" (Handy), „Mail ans Orga-Team", Grüße-Pool,
+  Selbst-Registrierung, Verwaltung-Hub in 3 Gruppen, dann Security-Audit.
 
 ## Screen-Entscheidungen
 

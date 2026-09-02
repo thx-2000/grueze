@@ -4944,3 +4944,435 @@ body { display: block; }
         border-radius: var(--radius-md) var(--radius-md) 0 0;
     }
 }
+
+/* ============================================================
+   Termine (Redesign Stufe 8 – neuer Bereich)
+   ============================================================ */
+
+.events-tabs {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 999px;
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
+    margin-bottom: 0.2rem;
+}
+
+.events-tabs a {
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+}
+
+.events-tabs a.is-active {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+}
+
+.events-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+}
+
+.events-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.2rem 0.15rem;
+}
+
+.events-row + .events-row {
+    border-top: 1px solid var(--color-border);
+}
+
+.events-row-main {
+    flex: 1;
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.85rem 0;
+    color: var(--color-text);
+    min-width: 0;
+}
+
+.events-row-main:hover .events-row-title {
+    color: var(--color-primary);
+}
+
+.events-row-title {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.events-row-meta {
+    color: var(--color-muted);
+    font-size: 0.88rem;
+}
+
+.events-row > .icon {
+    flex: 0 0 auto;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--color-muted);
+}
+
+.events-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.08rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: var(--fill-ghost);
+    color: var(--color-text);
+}
+
+.events-status.is-open {
+    background: var(--accent-veil);
+    color: var(--color-primary-strong);
+}
+
+.events-status.is-decided {
+    background: var(--success-veil);
+    color: var(--color-success);
+}
+
+/* --- Datumsvorschläge --- */
+.date-options {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0.3rem 0 0.8rem;
+}
+
+.date-option-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* --- Teilnehmer-Picker --- */
+.participant-picker-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.9rem;
+    margin-bottom: 0.7rem;
+}
+
+.participant-list {
+    max-height: 22rem;
+    overflow-y: auto;
+    border: 1px solid var(--edge-hairline);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.7rem;
+    margin-bottom: 0.8rem;
+}
+
+.participant-group {
+    margin: 0.6rem 0 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+}
+
+.participant-group:first-child {
+    margin-top: 0;
+}
+
+.participant-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.32rem 0;
+}
+
+.participant-option input {
+    width: auto;
+    flex: 0 0 auto;
+}
+
+.participant-option span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* --- Abstimmungsmatrix --- */
+.vote-matrix-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--edge-hairline);
+    border-radius: var(--radius-md);
+    margin: 0.6rem 0 1rem;
+}
+
+.vote-matrix {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 30rem;
+    font-size: 0.9rem;
+}
+
+.vote-matrix th,
+.vote-matrix td {
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid var(--edge-hairline);
+    text-align: left;
+    background: var(--color-surface-strong);
+}
+
+.vote-matrix thead th {
+    vertical-align: top;
+    background: var(--surface-raised);
+}
+
+.vote-matrix tbody th {
+    font-weight: 600;
+}
+
+.vote-col-date {
+    display: block;
+    font-weight: 700;
+}
+
+.vote-col-tally {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.25rem 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.vote-col-tally .is-yes { color: var(--color-success); }
+.vote-col-tally .is-no { color: var(--color-danger); }
+.vote-col-tally .is-maybe { color: var(--color-muted); }
+
+.vote-pick {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+.vote-pick input {
+    width: auto;
+}
+
+.vote-cell {
+    font-weight: 600;
+}
+
+.vote-cell.is-yes { color: var(--color-success); }
+.vote-cell.is-no { color: var(--color-danger); }
+.vote-cell.is-maybe { color: var(--color-muted); }
+.vote-cell.is-none { color: var(--color-muted); font-weight: 400; }
+
+.vote-warn {
+    display: inline-block;
+    margin-left: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-danger);
+}
+
+.event-decided {
+    border-color: var(--accent-edge);
+    background: var(--color-highlight);
+}
+
+.event-decided-date {
+    margin: 0.2rem 0;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+}
+
+.event-decided-names {
+    margin: 0.4rem 0 0.8rem;
+}
+
+.event-inline-form {
+    margin: 0;
+}
+
+#allVoteLinks {
+    font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    white-space: pre;
+    margin-top: 0.6rem;
+}
+
+/* --- Abstimm-Seite (Token, ohne Login) --- */
+.vote-page {
+    display: grid;
+    gap: 1.1rem;
+}
+
+.vote-head h1 {
+    margin: 0.2rem 0 0;
+    font-size: 1.7rem;
+}
+
+.vote-description {
+    margin: 0.5rem 0 0;
+    color: var(--color-text);
+}
+
+.vote-eckdaten {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
+}
+
+.vote-eckdaten > div {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.vote-eckdaten dt {
+    flex: 0 0 6rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.vote-eckdaten dd {
+    margin: 0;
+}
+
+.vote-hello {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.92rem;
+}
+
+.vote-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.8rem 0.9rem;
+    border-radius: var(--radius-md);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
+    font-size: 0.92rem;
+}
+
+.vote-alert.is-foreign {
+    background: var(--danger-veil);
+    border-color: var(--color-danger);
+    color: var(--color-text);
+}
+
+.vote-alert .icon {
+    flex: 0 0 auto;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.1rem;
+}
+
+.vote-alert strong,
+.vote-hello strong,
+.event-decided-names strong,
+.events-row-meta strong {
+    display: inline;
+    margin: 0;
+}
+
+.vote-form {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.vote-option {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-strong);
+}
+
+.vote-option.is-decided {
+    border-color: var(--color-primary);
+    background: var(--color-highlight);
+}
+
+.vote-option legend {
+    padding: 0;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.vote-choices {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.vote-choice {
+    flex: 1 1 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.55rem 0.6rem;
+    border: 1px solid var(--field-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    background: var(--color-surface-strong);
+}
+
+.vote-choice input {
+    width: auto;
+    margin: 0;
+}
+
+.vote-choice span {
+    margin: 0;
+}
+
+.vote-choice.is-yes:has(input:checked) {
+    border-color: var(--color-success);
+    background: var(--success-veil);
+    color: var(--color-success);
+}
+
+.vote-choice.is-maybe:has(input:checked) {
+    border-color: var(--color-muted);
+    background: var(--fill-ghost);
+}
+
+.vote-choice.is-no:has(input:checked) {
+    border-color: var(--color-danger);
+    background: var(--danger-veil);
+    color: var(--color-danger);
+}
+
+.vote-submit {
+    justify-self: start;
+}
+
+@media (max-width: 640px) {
+    .date-option-row {
+        grid-template-columns: 1fr auto;
+    }
+
+    .date-option-row input[name="option_time[]"] {
+        grid-column: 1 / 2;
+    }
+}

@@ -61,10 +61,17 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   Sichtbarkeit der Warteschlange in der Verwaltung. Sicherheitsrelevant →
   im Security-Audit mitdenken.
 
-- **Terminfindungs-/Abstimmungstool** für die ganze Stufe: Ja/Nein/Vielleicht
-  je Vorschlag, ggf. mehrere Uhrzeiten pro Tag, ggf. weitere Abstimmungs-
-  varianten mitdenken (freie Auswahl, Ranking …). Doodle-artig. Wer legt an
-  (nur Admin/Orga?), wie nehmen Nicht-Eingeloggte teil (Link/Token?).
+- **Terminfindungs-/Abstimmungstool** – **v1 in v0.31.0** (Bereich „Termine",
+  Datumsabstimmung, Token-Links ohne Login, Ergebnismatrix, Ergebnis
+  festlegen, Zusagen, Archiv). Offen:
+  - **v0.32:** Token-Links direkt per Nachricht verschicken (Platzhalter
+    `{Abstimmungslink}`); „✉ an Teilnehmer" mit Kreis-Filter (alle / nur
+    Zusagen / nur Offene); Abstimm-Historie/Änderungen für Admins.
+  - **v0.33:** weitere Typen (fester Termin + reine Zusagen · reine
+    Ja/Nein-Abstimmung ohne Datum); „Mein Eintrag"/Handy zeigt offene
+    Abstimmungen; Ranking-Variante andenken.
+  - Datenschutz-Feinheit: aktuell nur die Fremd-Link-Warnung, keine
+    Mail-Bestätigung beim Abstimmen (bewusst so entschieden 2026-09).
 
 - **„Mail ans Orga-Team"-Knopf**: schneller Kontakt-Button. Von wo erreichbar,
   für wen, an welche Adresse (fest vs. an alle mit Orga-/Admin-Rolle)?
@@ -113,6 +120,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Neuer Bereich „Termine", v1 (v0.31.0): `EventController` + `EventRepository`,
+  Migration `2026-09-05-termine` (5 Tabellen). Übersicht `/termine`
+  (Aktuell/Archiv), Detail (Eckdaten, Datumsoptionen `syncDateOptions`,
+  Teilnehmerkreis `syncParticipants` mit Token), Abstimmen ohne Login
+  `/abstimmen?token=` (Fremd-Link-Warnung, `event_token_hits` pseudonymer
+  Quell-Hash → „⚠ N Quellen"), Ergebnismatrix + `setDecidedOption` + Zusagen.
+  Neue Berechtigung `events.manage` (Gruppe „Termine" in den Rechten).
+  Nav-Punkt „Termine" (`icon('calendar')`). `format_weekday_date()`-Helper.
 - Neuer Look, Stufe 7 – Vollständigkeit (v0.30.0): `templates/contacts/completeness.php`
   + `ContactController::completeness()/shareCompleteness()/namenslisteMoved()`
   lösen `MailController::namensliste*` + `mail/namensliste.php` ab.

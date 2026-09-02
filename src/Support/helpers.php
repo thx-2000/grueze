@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.30.0';
+    return '0.31.0';
 }
 
 function system_label(): string
@@ -338,6 +338,10 @@ function page_title(string $path): string
         '/mail/status'               => 'Versand',
         '/vollstaendigkeit'          => 'Vollständigkeit',
         '/namensliste'               => 'Vollständigkeit',
+        '/termine'                   => 'Termine',
+        '/termine/neu'               => 'Neuer Termin',
+        '/termine/detail'            => 'Termin',
+        '/abstimmen'                 => 'Abstimmen',
         '/verwaltung'                => 'Verwaltung',
         '/verwaltung/kategorien-tags' => 'Kategorien & Tags',
         '/users'                     => 'Benutzer',
@@ -419,6 +423,26 @@ function format_date(?string $value): string
     } catch (Throwable) {
         return (string) $value;
     }
+}
+
+/** „Fr, 12. Sep 2026" – für Terminvorschläge. Leerer String bei ungültigem Wert. */
+function format_weekday_date(?string $value): string
+{
+    if ($value === null || trim($value) === '') {
+        return '';
+    }
+
+    $weekdays = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    $months = [1 => 'Jan', 'Feb', 'März', 'Apr', 'Mai', 'Juni', 'Juli', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+
+    try {
+        $date = new DateTimeImmutable($value);
+    } catch (Throwable) {
+        return (string) $value;
+    }
+
+    return $weekdays[(int) $date->format('w')] . ', ' . (int) $date->format('j') . '. '
+        . $months[(int) $date->format('n')] . ' ' . $date->format('Y');
 }
 
 function format_datetime(?string $value): string
@@ -526,6 +550,9 @@ function icon(string $name): string
         'home' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l8 6.4V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1V9.6l8-6.4Z"/></svg>',
         'chevron-right' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.3 6.7L10.7 5.3l6.7 6.7l-6.7 6.7l-1.4-1.4l5.3-5.3l-5.3-5.3Z"/></svg>',
         'check' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.55 17.15L4.4 12l1.4-1.4l3.75 3.75l8.25-8.25L19.2 9.3l-9.65 9.65Z"/></svg>',
+        'calendar' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h2v2h6V2h2v2h2a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V2ZM5 9v10h14V9H5Zm2 3h4v4H7v-4Z"/></svg>',
+        'link' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a1 1 0 0 0 1.4 0l4-4a3 3 0 0 0-4.2-4.2l-1.5 1.5l1.4 1.4l1.5-1.5a1 1 0 0 1 1.4 1.4l-4 4a1 1 0 0 0 0 1.4Zm2.8-2.8a1 1 0 0 0-1.4 0l-4 4a3 3 0 0 0 4.2 4.2l1.5-1.5l-1.4-1.4l-1.5 1.5a1 1 0 0 1-1.4-1.4l4-4a1 1 0 0 0 0-1.4Z"/></svg>',
+        'x' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5L5 6.4L10.6 12L5 17.6L6.4 19L12 13.4L17.6 19L19 17.6L13.4 12L19 6.4L17.6 5L12 10.6L6.4 5Z"/></svg>',
         'menu' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg>',
         'close' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5L5 6.4L10.6 12L5 17.6L6.4 19L12 13.4L17.6 19L19 17.6L13.4 12L19 6.4L17.6 5L12 10.6L6.4 5Z"/></svg>',
         'eye-off' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.28 2.22L2.22 3.28l3.2 3.2C3.5 7.9 1.98 9.98 1 12.5C2.73 16.89 7 20 12 20c2 0 3.88-.5 5.54-1.38l3.18 3.18l1.06-1.06L3.28 2.22ZM12 18c-3.76 0-7.17-2.2-8.82-5.5c.83-1.66 2.06-3.05 3.54-4.02l2.02 2.02A4 4 0 0 0 14.5 15.9l1.66 1.66A9.6 9.6 0 0 1 12 18Zm0-11c3.76 0 7.17 2.2 8.82 5.5a11.4 11.4 0 0 1-2.2 2.94l1.42 1.42A13.3 13.3 0 0 0 23 12.5C21.27 8.11 17 5 12 5c-1.2 0-2.36.18-3.45.5l1.6 1.6C10.79 7.04 11.38 7 12 7Z"/></svg>',

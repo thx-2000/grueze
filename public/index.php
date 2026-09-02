@@ -7,6 +7,7 @@ use App\Controllers\AuthController;
 use App\Controllers\BackupController;
 use App\Controllers\CategoryController;
 use App\Controllers\ContactController;
+use App\Controllers\EventController;
 use App\Controllers\LegalController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
@@ -28,6 +29,7 @@ use App\Core\Router;
 use App\Core\Session;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
+use App\Repositories\EventRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\PasskeyRepository;
 use App\Repositories\RoleRepository;
@@ -202,6 +204,14 @@ try {
         Container::get(SettingRepository::class)
     ));
     Container::factory(\App\Repositories\RecipientListRepository::class, static fn () => new \App\Repositories\RecipientListRepository(Container::get(PDO::class)));
+    Container::factory(EventRepository::class, static fn () => new EventRepository(Container::get(PDO::class)));
+    Container::factory(EventController::class, static fn () => new EventController(
+        Container::get(Auth::class),
+        Container::get(EventRepository::class),
+        Container::get(ContactRepository::class),
+        Container::get(CategoryRepository::class),
+        Container::get(LogRepository::class)
+    ));
     Container::factory(MailController::class, static fn () => new MailController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
@@ -305,6 +315,18 @@ try {
     $router->get('/vollstaendigkeit', [ContactController::class, 'completeness']);
     $router->post('/vollstaendigkeit/teilen', [ContactController::class, 'shareCompleteness']);
     $router->get('/namensliste', [ContactController::class, 'namenslisteMoved']);
+
+    $router->get('/termine', [EventController::class, 'index']);
+    $router->get('/termine/neu', [EventController::class, 'createForm']);
+    $router->post('/termine', [EventController::class, 'store']);
+    $router->get('/termine/detail', [EventController::class, 'detail']);
+    $router->post('/termine/speichern', [EventController::class, 'updateDetails']);
+    $router->post('/termine/teilnehmer', [EventController::class, 'updateParticipants']);
+    $router->post('/termine/ergebnis', [EventController::class, 'decide']);
+    $router->post('/termine/status', [EventController::class, 'setStatus']);
+    $router->post('/termine/loeschen', [EventController::class, 'delete']);
+    $router->get('/abstimmen', [EventController::class, 'vote']);
+    $router->post('/abstimmen', [EventController::class, 'submitVote']);
     $router->post('/mail/compose', [MailController::class, 'compose']);
     $router->get('/mail/compose', [MailController::class, 'compose']);
     $router->post('/mail/compose-all', [MailController::class, 'composeAll']);

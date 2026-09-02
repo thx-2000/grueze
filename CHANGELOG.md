@@ -3,6 +3,29 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.31.0
+
+- **Neuer Bereich „Termine" – Terminfindung mit Datumsabstimmung.**
+  - Übersicht `/termine` (Tab „Aktuell" / „Archiv") + Detailseite. Anlegen
+    und Verwalten braucht die neue Berechtigung **`events.manage`**
+    (Standard: Team/Admin, über die Rollen-Berechtigungen erweiterbar).
+  - Ein Termin hat Titel, Beschreibung, freie Eckdaten (Ort/Uhrzeit/Kosten/
+    Mitbringen), mehrere **Datumsvorschläge** (Uhrzeit optional, auch mehrere
+    pro Tag) und einen **Teilnehmerkreis aus dem Adressbuch**.
+  - **Abstimmen ohne Login:** jede Person bekommt einen eigenen Token-Link
+    (`/abstimmen?token=…`), Name schon da, Ja/Vielleicht/Nein je Vorschlag,
+    jederzeit über denselben Link änderbar. Wer über einen fremden Link
+    kommt, sieht eine deutliche Warnung. Stimmabgaben werden mit pseudonymem
+    Quell-Hash protokolliert – stimmen mehrere Geräte über einen Link ab,
+    markiert die Verwaltung das („⚠ N Quellen").
+  - **Abstimmungsstand** als Matrix (wer, wie, je Vorschlag) mit Zählern,
+    „**Als Termin festlegen**" → festgelegter Termin + Zusagen-Liste.
+    Termin archivieren / wieder öffnen / löschen.
+  - Die Start-„Steht an"-Liste ist unverändert; Link-Versand per Nachricht,
+    „an Teilnehmer schreiben" und weitere Termin-Typen folgen in v0.32/0.33.
+- Migration `2026-09-05-termine` (Tabellen `events`, `event_options`,
+  `event_participants`, `event_responses`, `event_token_hits`).
+
 ## 0.30.0
 
 - **Neuer Look, Stufe 7 – Vollständigkeit** (löst die „Namensliste" ab,

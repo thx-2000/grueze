@@ -297,6 +297,9 @@ final class SettingsController extends BaseController
                     'mail.contact_single' => 'Einzelne Person über interne Kontaktfunktion kontaktieren',
                     'mail.view_log'       => 'Versandprotokoll einsehen',
                 ],
+                'Termine' => [
+                    'events.manage' => 'Termine anlegen und die Abstimmung verwalten',
+                ],
                 'Administration' => [
                     'users.manage'    => 'Benutzer und Admin-Einstellungen verwalten',
                     'audit.view'      => 'Audit-Log einsehen',

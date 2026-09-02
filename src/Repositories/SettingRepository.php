@@ -157,6 +157,7 @@ final class SettingRepository
             'mail.send'            => ['orga'],
             'mail.contact_single'  => ['stufenmitglied'],
             'mail.view_log'        => ['orga'],
+            'events.manage'        => ['orga'],
             'settings.manage'      => ['orga'],
         ];
     }

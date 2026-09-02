@@ -1,0 +1,409 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repositories;
+
+use PDO;
+
+/**
+ * Termine / Terminfindung. Ein Termin hat Datumsoptionen, einen Teilnehmerkreis
+ * (Kontakte aus dem Adressbuch, je mit personengebundenem Token) und
+ * Antworten (ja/vielleicht/nein je Teilnehmer und Option).
+ */
+final class EventRepository
+{
+    public function __construct(private PDO $pdo)
+    {
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function all(bool $includeArchived = false): array
+    {
+        $sql = 'SELECT events.*, users.name AS creator_name,
+                    (SELECT COUNT(*) FROM event_participants WHERE event_participants.event_id = events.id) AS participant_count,
+                    (SELECT MIN(option_date) FROM event_options WHERE event_options.event_id = events.id AND option_date IS NOT NULL) AS earliest_date
+                FROM events
+                JOIN users ON users.id = events.created_by';
+        if (!$includeArchived) {
+            $sql .= " WHERE events.status <> 'archived'";
+        }
+        $sql .= ' ORDER BY events.status = \'decided\' ASC, COALESCE(earliest_date, \'9999-12-31\') ASC, events.created_at DESC';
+
+        $events = $this->pdo->query($sql)->fetchAll();
+        foreach ($events as &$event) {
+            $event['options'] = $this->optionsForEvent((int) $event['id']);
+            $event['tally'] = $this->tally((int) $event['id']);
+            $event['answered_count'] = $this->answeredParticipantCount((int) $event['id']);
+        }
+
+        return $events;
+    }
+
+    public function find(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT events.*, users.name AS creator_name
+             FROM events JOIN users ON users.id = events.created_by
+             WHERE events.id = :id'
+        );
+        $stmt->execute(['id' => $id]);
+        $event = $stmt->fetch();
+        if (!$event) {
+            return null;
+        }
+
+        $event['options'] = $this->optionsForEvent($id);
+        $event['participants'] = $this->participantsForEvent($id);
+        $event['tally'] = $this->tally($id);
+        $event['answered_count'] = $this->answeredParticipantCount($id);
+        $event['token_stats'] = $this->tokenHitStats($id);
+
+        return $event;
+    }
+
+    public function create(array $data, int $userId): int
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO events (title, description, location, time_note, cost_note, bring_note, created_by)
+             VALUES (:title, :description, :location, :time_note, :cost_note, :bring_note, :created_by)'
+        );
+        $stmt->execute([
+            'title' => $data['title'],
+            'description' => $data['description'] ?: null,
+            'location' => $data['location'] ?: null,
+            'time_note' => $data['time_note'] ?: null,
+            'cost_note' => $data['cost_note'] ?: null,
+            'bring_note' => $data['bring_note'] ?: null,
+            'created_by' => $userId,
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function updateDetails(int $id, array $data): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE events SET title = :title, description = :description, location = :location,
+                 time_note = :time_note, cost_note = :cost_note, bring_note = :bring_note
+             WHERE id = :id'
+        );
+        $stmt->execute([
+            'id' => $id,
+            'title' => $data['title'],
+            'description' => $data['description'] ?: null,
+            'location' => $data['location'] ?: null,
+            'time_note' => $data['time_note'] ?: null,
+            'cost_note' => $data['cost_note'] ?: null,
+            'bring_note' => $data['bring_note'] ?: null,
+        ]);
+    }
+
+    /**
+     * Datumsoptionen abgleichen. Bestehende Optionen, die weiter vorkommen
+     * (gleiches Datum + Uhrzeit-Text), bleiben samt Antworten erhalten.
+     *
+     * @param list<array{date: string, time: string}> $options
+     */
+    public function syncDateOptions(int $eventId, array $options): void
+    {
+        $existing = $this->pdo->prepare('SELECT id, option_date, COALESCE(option_time, \'\') AS option_time FROM event_options WHERE event_id = :event_id');
+        $existing->execute(['event_id' => $eventId]);
+        $byKey = [];
+        foreach ($existing->fetchAll() as $row) {
+            $byKey[$row['option_date'] . '|' . $row['option_time']] = (int) $row['id'];
+        }
+
+        $keep = [];
+        $order = 0;
+        foreach ($options as $option) {
+            $date = trim($option['date']);
+            if ($date === '') {
+                continue;
+            }
+            $time = trim($option['time'] ?? '');
+            $key = $date . '|' . $time;
+            if (isset($byKey[$key])) {
+                $keep[] = $byKey[$key];
+                $this->pdo->prepare('UPDATE event_options SET sort_order = :sort WHERE id = :id')
+                    ->execute(['sort' => $order, 'id' => $byKey[$key]]);
+            } else {
+                $stmt = $this->pdo->prepare(
+                    'INSERT INTO event_options (event_id, option_date, option_time, sort_order)
+                     VALUES (:event_id, :option_date, :option_time, :sort_order)'
+                );
+                $stmt->execute([
+                    'event_id' => $eventId,
+                    'option_date' => $date,
+                    'option_time' => $time !== '' ? $time : null,
+                    'sort_order' => $order,
+                ]);
+                $keep[] = (int) $this->pdo->lastInsertId();
+            }
+            $order++;
+        }
+
+        // Entfernte Optionen löschen (Antworten hängen per Cascade dran).
+        $placeholders = $keep === [] ? 'NULL' : implode(',', array_fill(0, count($keep), '?'));
+        $stmt = $this->pdo->prepare("DELETE FROM event_options WHERE event_id = ? AND id NOT IN ($placeholders)");
+        $stmt->execute(array_merge([$eventId], $keep));
+
+        // Falls die festgelegte Option wegfiel: Festlegung aufheben.
+        $this->pdo->prepare(
+            'UPDATE events SET decided_option_id = NULL, status = IF(status = \'decided\', \'open\', status)
+             WHERE id = :id AND decided_option_id IS NOT NULL
+               AND decided_option_id NOT IN (SELECT id FROM event_options WHERE event_id = :id2)'
+        )->execute(['id' => $eventId, 'id2' => $eventId]);
+    }
+
+    /**
+     * Teilnehmerkreis abgleichen. Neue bekommen einen Token, entfernte werden
+     * mitsamt ihren Antworten gelöscht.
+     *
+     * @param list<int> $contactIds
+     */
+    public function syncParticipants(int $eventId, array $contactIds): void
+    {
+        $contactIds = array_values(array_unique(array_filter(array_map('intval', $contactIds), static fn (int $n): bool => $n > 0)));
+
+        $current = $this->pdo->prepare('SELECT contact_id FROM event_participants WHERE event_id = :event_id');
+        $current->execute(['event_id' => $eventId]);
+        $currentIds = array_map('intval', $current->fetchAll(PDO::FETCH_COLUMN));
+
+        foreach (array_diff($contactIds, $currentIds) as $contactId) {
+            $stmt = $this->pdo->prepare(
+                'INSERT INTO event_participants (event_id, contact_id, token) VALUES (:event_id, :contact_id, :token)'
+            );
+            $stmt->execute([
+                'event_id' => $eventId,
+                'contact_id' => $contactId,
+                'token' => bin2hex(random_bytes(16)),
+            ]);
+        }
+
+        $remove = array_diff($currentIds, $contactIds);
+        if ($remove !== []) {
+            $placeholders = implode(',', array_fill(0, count($remove), '?'));
+            $stmt = $this->pdo->prepare("DELETE FROM event_participants WHERE event_id = ? AND contact_id IN ($placeholders)");
+            $stmt->execute(array_merge([$eventId], array_values($remove)));
+        }
+    }
+
+    public function setDecidedOption(int $eventId, ?int $optionId): void
+    {
+        if ($optionId === null) {
+            $this->pdo->prepare('UPDATE events SET decided_option_id = NULL, status = \'open\' WHERE id = :id')
+                ->execute(['id' => $eventId]);
+
+            return;
+        }
+
+        $check = $this->pdo->prepare('SELECT 1 FROM event_options WHERE id = :oid AND event_id = :eid');
+        $check->execute(['oid' => $optionId, 'eid' => $eventId]);
+        if ($check->fetchColumn() === false) {
+            return;
+        }
+
+        $this->pdo->prepare('UPDATE events SET decided_option_id = :oid, status = \'decided\' WHERE id = :eid')
+            ->execute(['oid' => $optionId, 'eid' => $eventId]);
+    }
+
+    public function setStatus(int $eventId, string $status): void
+    {
+        if (!in_array($status, ['open', 'decided', 'archived'], true)) {
+            return;
+        }
+        $this->pdo->prepare('UPDATE events SET status = :status WHERE id = :id')
+            ->execute(['status' => $status, 'id' => $eventId]);
+    }
+
+    public function delete(int $eventId): void
+    {
+        $this->pdo->prepare('DELETE FROM events WHERE id = :id')->execute(['id' => $eventId]);
+    }
+
+    // --------------------------------------------------------- Abstimmen (Token)
+
+    /**
+     * Teilnehmer über Token laden – mit Termin, Kontaktname, Optionen und den
+     * bisherigen Antworten dieser Person.
+     */
+    public function participantByToken(string $token): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT ep.id AS participant_id, ep.token, ep.event_id,
+                    c.vorname, c.nachname,
+                    e.title, e.description, e.location, e.time_note, e.cost_note, e.bring_note, e.status, e.decided_option_id
+             FROM event_participants ep
+             JOIN contacts c ON c.id = ep.contact_id
+             JOIN events e ON e.id = ep.event_id
+             WHERE ep.token = :token'
+        );
+        $stmt->execute(['token' => $token]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            return null;
+        }
+
+        $row['options'] = $this->optionsForEvent((int) $row['event_id']);
+        $row['answers'] = $this->answersForParticipant((int) $row['participant_id']);
+        $row['tally'] = $this->tally((int) $row['event_id']);
+
+        return $row;
+    }
+
+    /**
+     * Antworten eines Teilnehmers speichern. $answers = [optionId => yes|maybe|no].
+     */
+    public function saveResponses(int $participantId, array $answers, string $via): void
+    {
+        $validOptions = $this->pdo->prepare(
+            'SELECT eo.id FROM event_options eo
+             JOIN event_participants ep ON ep.event_id = eo.event_id
+             WHERE ep.id = :pid'
+        );
+        $validOptions->execute(['pid' => $participantId]);
+        $allowed = array_map('intval', $validOptions->fetchAll(PDO::FETCH_COLUMN));
+
+        $insert = $this->pdo->prepare(
+            'INSERT INTO event_responses (participant_id, option_id, answer, via)
+             VALUES (:pid, :oid, :answer, :via)
+             ON DUPLICATE KEY UPDATE answer = VALUES(answer), via = VALUES(via)'
+        );
+        foreach ($answers as $optionId => $answer) {
+            $optionId = (int) $optionId;
+            if (!in_array($optionId, $allowed, true) || !in_array($answer, ['yes', 'maybe', 'no'], true)) {
+                continue;
+            }
+            $insert->execute(['pid' => $participantId, 'oid' => $optionId, 'answer' => $answer, 'via' => $via]);
+        }
+    }
+
+    public function logTokenHit(int $participantId, string $sourceHash): void
+    {
+        $this->pdo->prepare(
+            'INSERT INTO event_token_hits (participant_id, source_hash) VALUES (:pid, :hash)'
+        )->execute(['pid' => $participantId, 'hash' => $sourceHash]);
+    }
+
+    // ------------------------------------------------------------------ intern
+
+    private function optionsForEvent(int $eventId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT id, option_date, option_time, label, sort_order
+             FROM event_options WHERE event_id = :event_id
+             ORDER BY sort_order ASC, option_date ASC'
+        );
+        $stmt->execute(['event_id' => $eventId]);
+
+        return $stmt->fetchAll();
+    }
+
+    private function participantsForEvent(int $eventId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT ep.id, ep.contact_id, ep.token, ep.added_at,
+                    c.vorname, c.nachname,
+                    (SELECT email FROM contact_emails WHERE contact_emails.contact_id = c.id ORDER BY contact_emails.id LIMIT 1) AS email
+             FROM event_participants ep
+             JOIN contacts c ON c.id = ep.contact_id
+             WHERE ep.event_id = :event_id
+             ORDER BY c.nachname ASC, c.vorname ASC'
+        );
+        $stmt->execute(['event_id' => $eventId]);
+        $participants = $stmt->fetchAll();
+
+        $answers = $this->pdo->prepare(
+            'SELECT r.participant_id, r.option_id, r.answer
+             FROM event_responses r
+             JOIN event_participants ep ON ep.id = r.participant_id
+             WHERE ep.event_id = :event_id'
+        );
+        $answers->execute(['event_id' => $eventId]);
+        $byParticipant = [];
+        foreach ($answers->fetchAll() as $row) {
+            $byParticipant[(int) $row['participant_id']][(int) $row['option_id']] = $row['answer'];
+        }
+
+        foreach ($participants as &$participant) {
+            $participant['answers'] = $byParticipant[(int) $participant['id']] ?? [];
+            $participant['has_answered'] = $participant['answers'] !== [];
+        }
+
+        return $participants;
+    }
+
+    private function answersForParticipant(int $participantId): array
+    {
+        $stmt = $this->pdo->prepare('SELECT option_id, answer FROM event_responses WHERE participant_id = :pid');
+        $stmt->execute(['pid' => $participantId]);
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $out[(int) $row['option_id']] = $row['answer'];
+        }
+
+        return $out;
+    }
+
+    /** @return array<int, array{yes:int, maybe:int, no:int}> option_id → Zähler */
+    private function tally(int $eventId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT r.option_id, r.answer, COUNT(*) AS n
+             FROM event_responses r
+             JOIN event_options eo ON eo.id = r.option_id
+             WHERE eo.event_id = :event_id
+             GROUP BY r.option_id, r.answer'
+        );
+        $stmt->execute(['event_id' => $eventId]);
+
+        $result = [];
+        foreach ($this->optionsForEvent($eventId) as $option) {
+            $result[(int) $option['id']] = ['yes' => 0, 'maybe' => 0, 'no' => 0];
+        }
+        foreach ($stmt->fetchAll() as $row) {
+            $result[(int) $row['option_id']][$row['answer']] = (int) $row['n'];
+        }
+
+        return $result;
+    }
+
+    private function answeredParticipantCount(int $eventId): int
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT COUNT(DISTINCT r.participant_id)
+             FROM event_responses r
+             JOIN event_participants ep ON ep.id = r.participant_id
+             WHERE ep.event_id = :event_id'
+        );
+        $stmt->execute(['event_id' => $eventId]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /** @return array<int, array{submissions:int, sources:int}> participant_id → Stimmabgaben/Quellen */
+    private function tokenHitStats(int $eventId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT h.participant_id, COUNT(*) AS submissions, COUNT(DISTINCT h.source_hash) AS sources
+             FROM event_token_hits h
+             JOIN event_participants ep ON ep.id = h.participant_id
+             WHERE ep.event_id = :event_id
+             GROUP BY h.participant_id'
+        );
+        $stmt->execute(['event_id' => $eventId]);
+
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $out[(int) $row['participant_id']] = [
+                'submissions' => (int) $row['submissions'],
+                'sources' => (int) $row['sources'],
+            ];
+        }
+
+        return $out;
+    }
+}
