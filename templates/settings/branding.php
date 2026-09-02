@@ -1,13 +1,8 @@
-<section class="hero-card">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow">Verwaltung</p>
-            <h2>Branding</h2>
-            <p class="muted">Name, Kurzname, öffentliche Links, Login-Texte, Support-Adresse und Logo. Das Aussehen – Farben, Schriften, Ecken – steckt in den <a href="<?= e(url('/settings/themes')) ?>">Themes</a>.</p>
-        </div>
-        <div class="floating-icon"><?= icon('sliders') ?></div>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Verwaltung</p>
+    <h1>Branding</h1>
+    <p class="muted">Name, Kurzname, öffentliche Links, Login-Texte, Support-Adresse und Logo. Das Aussehen – Farben, Schriften, Ecken – steckt in den <a href="<?= e(url('/settings/themes')) ?>">Themes</a>.</p>
+</header>
 
 <section class="panel compact-editor-shell">
     <form method="post" action="<?= e(url('/settings/branding')) ?>" enctype="multipart/form-data" class="stack">

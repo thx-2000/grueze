@@ -1,8 +1,8 @@
-<section class="hero-card">
-    <p class="eyebrow">Versandprotokoll</p>
-    <h2>Letzte Einzelversände</h2>
-    <p class="muted">Jede Mail wird separat dokumentiert.</p>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Protokoll</p>
+    <h1>Versandprotokoll</h1>
+    <p class="muted">Jede verschickte Mail wird separat dokumentiert – auch fehlgeschlagene.</p>
+</header>
 
 <section class="panel">
     <div class="table-wrap">

@@ -1,13 +1,11 @@
-<section class="hero-card">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow">Import</p>
-            <h2>Kontakte aus XLSX einspielen</h2>
-            <p class="muted">Gedacht für die vorhandene Namens- und Adressliste. Bestehende Kontakte werden am Namen abgeglichen und bei Bedarf ergänzt.</p>
-        </div>
-        <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Zurück zur Übersicht</a>
+<header class="page-head page-head--split">
+    <div>
+        <p class="eyebrow">Import</p>
+        <h1>Kontakte aus XLSX einspielen</h1>
+        <p class="muted">Gedacht für die vorhandene Namens- und Adressliste. Bestehende Kontakte werden am Namen abgeglichen und bei Bedarf ergänzt.</p>
     </div>
-</section>
+    <a class="ghost-button" href="<?= e(url('/kontakte')) ?>">Zurück zum Adressbuch</a>
+</header>
 
 <section class="panel stack narrow">
     <div class="subsection-card stack">

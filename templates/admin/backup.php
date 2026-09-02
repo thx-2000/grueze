@@ -18,13 +18,11 @@ $tableLabels = [
     'mail_log' => 'Versandprotokoll',
 ];
 ?>
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Administration</p>
-        <h2>Datensicherung</h2>
-        <p class="muted">Vollständiges Backup aller Daten als ZIP herunterladen oder aus einem Backup wiederherstellen. Gedacht für Sicherung, Serverumzug und Systemwechsel.</p>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Administration</p>
+    <h1>Datensicherung</h1>
+    <p class="muted">Vollständiges Backup aller Daten als ZIP herunterladen oder aus einem Backup wiederherstellen. Gedacht für Sicherung, Serverumzug und Systemwechsel.</p>
+</header>
 
 <section class="panel">
     <div class="panel-head">

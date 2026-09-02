@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.40.0';
+    return '0.41.0';
 }
 
 function system_label(): string
@@ -356,6 +356,7 @@ function page_title(string $path): string
         '/impressum'                 => 'Impressum',
         '/datenschutz'               => 'Datenschutz',
         '/admin/migrations'          => 'Migrationen',
+        '/admin/aktualisieren'       => 'Aktualisieren',
         '/admin/backup'              => 'Datensicherung',
         '/admin/legal/impressum'     => 'Impressum bearbeiten',
         '/admin/legal/datenschutz'   => 'Datenschutz bearbeiten',
@@ -364,8 +365,9 @@ function page_title(string $path): string
         '/settings/branding'         => 'Branding',
         '/settings/themes'           => 'Themes',
         '/settings/themes/bearbeiten' => 'Theme bearbeiten',
+        '/settings/roles'            => 'Rollen',
         '/settings/mail-footer'      => 'Mail-Einstellungen',
-        '/settings/visibility'       => 'Sichtbarkeiten',
+        '/settings/visibility'       => 'Sichtbarkeit',
         '/settings/permissions'      => 'Berechtigungen',
     ];
 

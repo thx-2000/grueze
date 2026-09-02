@@ -1,10 +1,8 @@
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Einstellungen</p>
-        <h2>Berechtigungen</h2>
-        <p class="muted">Hier legst du fest, welche Rollen welche Aktionen ausführen dürfen. <strong>Admin hat immer alle Rechte</strong> und kann hier nicht eingeschränkt werden.</p>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Einstellungen</p>
+    <h1>Berechtigungen</h1>
+    <p class="muted">Hier legst du fest, welche Rollen welche Aktionen ausführen dürfen. <strong>Admin hat immer alle Rechte</strong> und kann hier nicht eingeschränkt werden.</p>
+</header>
 
 <section class="panel">
     <form method="post" action="<?= e(url('/settings/permissions')) ?>" class="stack">

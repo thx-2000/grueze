@@ -1,12 +1,10 @@
-<section class="hero-card compact-editor-shell">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow">Benutzerverwaltung</p>
-            <h2>Accounts für euer Team</h2>
-            <p class="muted">Neue Accounts erhalten ein einmalig angezeigtes Erstpasswort. Für Kontakte ist der bequemere Weg jetzt direkt im Kontaktformular.</p>
-        </div>
-    </div>
+<header class="page-head">
+    <p class="eyebrow">Benutzerverwaltung</p>
+    <h1>Benutzer</h1>
+    <p class="muted">Neue Accounts erhalten ein einmalig angezeigtes Erstpasswort. Für Kontakte ist der bequemere Weg direkt im Kontaktformular („Zugang per Einladung").</p>
+</header>
 
+<section class="panel compact-editor-shell">
     <details class="admin-drawer compact-editor-drawer">
         <summary>
             <span><?= icon('plus') ?></span>

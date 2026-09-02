@@ -339,6 +339,15 @@ input[type="range"] {
 
 label span,
 strong {
+    font-weight: 700;
+}
+
+/* <strong> als Mini-Überschrift einer Karte (immer gefolgt von Beschreibungstext)
+   wird zum Block – im Fließtext bleibt <strong> dagegen inline. */
+.subsection-card > strong,
+.workflow-card-head strong,
+.account-overview-card strong,
+strong:has(+ p) {
     display: block;
     margin-bottom: 0.45rem;
 }
@@ -437,7 +446,6 @@ h1, h2, h3, h4 {
 }
 
 .sidebar h1,
-.hero-card h2,
 .panel h3 {
     font-family: var(--font-display);
     margin: 0;
@@ -655,7 +663,6 @@ h1, h2, h3, h4 {
     border: 1px solid var(--edge-light);
 }
 
-.hero-card,
 .panel {
     background: var(--color-surface);
     border: 1px solid var(--edge-light);
@@ -665,11 +672,6 @@ h1, h2, h3, h4 {
     padding: 1.28rem;
 }
 
-.hero-card {
-    background: var(--surface-veil);
-}
-
-.hero-row,
 .toolbar,
 .card-actions,
 .section-head,
@@ -714,13 +716,11 @@ h1, h2, h3, h4 {
     align-items: end;
 }
 
-.hero-card.is-member-compact,
 .contacts-view-root.is-member-compact {
     padding-top: 1rem;
     padding-bottom: 1rem;
 }
 
-.hero-card.is-staff-compact,
 .contacts-view-root.is-staff-compact {
     padding-top: 1.08rem;
     padding-bottom: 1.08rem;
@@ -830,7 +830,10 @@ h1, h2, h3, h4 {
 }
 
 .selection-status {
-    padding: 0.68rem 0.92rem;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 0.5rem 0.9rem;
     border-radius: 999px;
     background: var(--surface-sunken);
     color: var(--color-primary-strong);
@@ -2344,23 +2347,14 @@ td {
     color: var(--color-muted);
 }
 
-.floating-icon {
-    width: 4.25rem;
-    height: 4.25rem;
-    border-radius: 1.35rem;
-    display: grid;
-    place-items: center;
-    background: var(--surface-sunken);
-    border: 1px solid var(--accent-edge);
-    color: var(--color-primary-strong);
-    font-size: 1.35rem;
-}
-
 .link-row {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+    font-size: 0.92rem;
 }
+.link-row p { margin: 0; }
 
 code {
     background: var(--accent-veil);
@@ -2579,7 +2573,6 @@ code {
         display: grid;
     }
 
-    .hero-card,
     .panel {
         padding: 1.05rem;
     }
@@ -2791,7 +2784,7 @@ code {
 
 .start-hero h1 {
     margin: 0;
-    font-size: 1.9rem;
+    font-size: 1.8rem;
     line-height: 1.15;
 }
 
@@ -4200,7 +4193,8 @@ body { display: block; }
 
 .contacts-header h1 {
     margin: 0;
-    font-size: 1.7rem;
+    font-size: 1.8rem;
+    line-height: 1.15;
 }
 
 /* --- Filterleiste: Suche + Kategorie sichtbar, Rest hinter „Filter" --- */
@@ -5671,4 +5665,57 @@ body { display: block; }
     font-size: 0.88rem;
     color: var(--color-muted);
     font-style: italic;
+}
+
+/* ==========================================================================
+   Einheitlicher Seitenkopf (v0.41)
+   Ablösung der uneinheitlichen hero-card/hero-row/floating-icon-Köpfe.
+   Genau ein <h1> pro Seite, gleiche Abstände wie die Kernscreens.
+   ========================================================================== */
+.page-head {
+    display: grid;
+    gap: 0.4rem;
+    padding: 0.2rem 0.1rem 0;
+    margin-bottom: 0.35rem;
+}
+.page-head .eyebrow { margin: 0; }
+.page-head h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    line-height: 1.15;
+    text-wrap: balance;
+}
+.page-head .muted,
+.page-head > p { margin: 0; max-width: 64ch; }
+.page-head a { text-decoration: underline; }
+
+/* Kopf mit Aktion/Badge rechts (Import, Versand, …) */
+.page-head--split {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.8rem 1.1rem;
+}
+.page-head--split > :first-child { display: grid; gap: 0.4rem; }
+.page-head--split > :last-child { justify-self: end; }
+@media (max-width: 640px) {
+    .page-head--split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .page-head--split > :last-child { justify-self: start; }
+}
+
+/* Gäste-Seiten (Login, Passwort, Registrieren): ruhige einspaltige Karte */
+.auth-card { gap: 1.1rem; }
+.auth-alt {
+    display: grid;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--edge-hairline);
+}
+.auth-alt .ghost-button { justify-self: start; }
+.auth-alt .detail-hint { margin: 0; }
+.auth-aside {
+    margin: 0.9rem 0.1rem 0;
+    font-size: 0.9rem;
+    color: var(--color-muted);
 }

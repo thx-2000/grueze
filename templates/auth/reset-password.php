@@ -1,6 +1,10 @@
-<section class="hero-card narrow">
+<header class="page-head">
     <p class="eyebrow">Neues Passwort</p>
-    <h2>Passwort festlegen</h2>
+    <h1>Passwort festlegen</h1>
+    <p class="muted">Mindestens 12 Zeichen. Danach kannst du dich direkt anmelden.</p>
+</header>
+
+<section class="panel stack auth-card">
     <form method="post" action="<?= e(url('/reset-password')) ?>" class="stack">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <input type="hidden" name="email" value="<?= e($email ?? '') ?>">
@@ -11,5 +15,7 @@
         </label>
         <button type="submit">Passwort speichern</button>
     </form>
+    <div class="link-row">
+        <a href="<?= e(url('/login')) ?>">Zurück zur Anmeldung</a>
+    </div>
 </section>
-

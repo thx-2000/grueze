@@ -1,13 +1,8 @@
-<section class="hero-card compact-editor-shell">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow">Sicherheit</p>
-            <h2>Passkeys</h2>
-            <p class="muted">Passkeys ermöglichen eine schnelle Anmeldung per Face ID, Touch ID, Windows Hello oder Sicherheitsschlüssel, ohne dass du dein Passwort eintippen musst.</p>
-        </div>
-        <div class="floating-icon"><?= icon('passkey') ?></div>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Sicherheit</p>
+    <h1>Passkeys</h1>
+    <p class="muted">Passkeys ermöglichen eine schnelle Anmeldung per Face ID, Touch ID, Windows Hello oder Sicherheitsschlüssel, ohne dass du dein Passwort eintippen musst.</p>
+</header>
 
 <?php if (empty($passkeysAvailable)): ?>
     <section class="panel">

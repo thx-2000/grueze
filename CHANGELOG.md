@@ -3,6 +3,23 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.41.0
+
+- **Login schlanker.** Der Kasten mit dem großen Brief-Symbol ist weg. Die
+  Anmeldeseite ist jetzt: Überschrift, dann eine ruhige Karte mit den beiden
+  Feldern, Passkey-Anmeldung und den Links darunter.
+- **Einheitliche Seitenköpfe überall.** Jede Seite hat jetzt genau eine
+  Hauptüberschrift (`<h1>`) im selben Stil – vorher hatten viele Unterseiten
+  gar keine oder nur eine kleinere. Die dekorativen Icon-Kacheln neben den
+  Überschriften (Branding, Passkeys, Benutzer, Versand, Import …) sind raus.
+- **Lesbarkeit:** Fettschrift (`<strong>`) im Fließtext brach bisher überall auf
+  eine eigene Zeile um – jetzt bleibt sie inline, nur echte Zwischen-
+  Überschriften stehen als eigene Zeile.
+- Feinschliff: gleiche `<h1>`-Größe auf allen Kernseiten, ein paar fehlende
+  Seitentitel im Browser-Tab ergänzt, „Ersten Admin anlegen" ohne vorbelegten
+  Namen.
+- Keine Migration.
+
 ## 0.40.0
 
 - **Verwaltung aufgeräumt.** Die Einstellungs-Seite hat statt vier nur noch

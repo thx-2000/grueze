@@ -3,27 +3,25 @@ $appliedNames = array_column($applied, 'migration');
 $pendingCount = count($pendingMigrations);
 $installedLabel = $installedVersion !== null ? 'v' . $installedVersion : 'unbekannt';
 ?>
-<section class="hero-card narrow">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow">Administration</p>
-            <h2>Aktualisieren</h2>
-            <p class="muted">
-                Nach einem Datei-Upload bringt dieser Schritt die Datenbank auf den
-                passenden Stand. Bestandsdaten bleiben dabei erhalten – Migrationen
-                sind additiv, und auf Wunsch wird vorher eine Sicherung abgelegt.
-            </p>
-        </div>
-        <div class="version-badge">
-            <span class="version-badge-from"><?= e($installedLabel) ?></span>
-            <span aria-hidden="true">→</span>
-            <span class="version-badge-to">v<?= e($codeVersion) ?></span>
-        </div>
+<header class="page-head page-head--split">
+    <div>
+        <p class="eyebrow">Administration</p>
+        <h1>Aktualisieren</h1>
+        <p class="muted">
+            Nach einem Datei-Upload bringt dieser Schritt die Datenbank auf den
+            passenden Stand. Bestandsdaten bleiben dabei erhalten – Migrationen
+            sind additiv, und auf Wunsch wird vorher eine Sicherung abgelegt.
+        </p>
+        <?php if ($lastUpdatedAt !== null): ?>
+            <p class="detail-hint">Zuletzt aktualisiert: <?= e(format_datetime($lastUpdatedAt)) ?></p>
+        <?php endif; ?>
     </div>
-    <?php if ($lastUpdatedAt !== null): ?>
-        <p class="detail-hint">Zuletzt aktualisiert: <?= e(format_datetime($lastUpdatedAt)) ?></p>
-    <?php endif; ?>
-</section>
+    <span class="version-badge">
+        <span class="version-badge-from"><?= e($installedLabel) ?></span>
+        <span aria-hidden="true">→</span>
+        <span class="version-badge-to">v<?= e($codeVersion) ?></span>
+    </span>
+</header>
 
 <?php if ($locked): ?>
     <section class="panel">

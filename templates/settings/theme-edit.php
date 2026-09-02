@@ -33,18 +33,16 @@ foreach (['color_primary' => '--color-on-primary', 'color_danger' => '--color-on
     $previewStyle .= $var . ':' . readable_ink($effective($src)) . ';';
 }
 ?>
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Theme bearbeiten</p>
-        <h2><?= e($theme['name']) ?></h2>
-        <p class="muted">
-            <?= $theme['based_on'] !== '' ? 'Basiert auf „' . e($theme['based_on']) . '". ' : '' ?>
-            Ein leeres Feld lässt den Token unverändert; der Platzhalter zeigt den
-            Standardwert. Farbwerte als Hex (<code>#ff8800</code>) oder CSS
-            (<code>rgba(…)</code>).
-        </p>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Theme bearbeiten</p>
+    <h1><?= e($theme['name']) ?></h1>
+    <p class="muted">
+        <?= $theme['based_on'] !== '' ? 'Basiert auf „' . e($theme['based_on']) . '". ' : '' ?>
+        Ein leeres Feld lässt den Token unverändert; der Platzhalter zeigt den
+        Standardwert. Farbwerte als Hex (<code>#ff8800</code>) oder CSS
+        (<code>rgba(…)</code>).
+    </p>
+</header>
 
 <section class="panel">
     <form method="post" action="<?= e(url('/settings/themes/umbenennen')) ?>" class="inline-form">

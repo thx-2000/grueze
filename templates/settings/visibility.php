@@ -1,10 +1,8 @@
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Einstellungen</p>
-        <h2>Sichtbarkeit</h2>
-        <p class="muted">Hier legst du fest, welche Rollen welche Kontaktfelder sehen dürfen. Rollen selbst verwaltest du unter <a href="<?= e(url('/settings/roles')) ?>">Rollen</a>. Admin sieht immer alles.</p>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Einstellungen</p>
+    <h1>Sichtbarkeit</h1>
+    <p class="muted">Hier legst du fest, welche Rollen welche Kontaktfelder sehen dürfen. Rollen selbst verwaltest du unter <a href="<?= e(url('/settings/roles')) ?>">Rollen</a>. Admin sieht immer alles.</p>
+</header>
 
 <section class="panel">
     <form method="post" action="<?= e(url('/settings/visibility')) ?>" class="stack">

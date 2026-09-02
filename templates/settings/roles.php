@@ -1,15 +1,13 @@
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Verwaltung</p>
-        <h2>Rollen</h2>
-        <p class="muted">
-            Anzeigename und Beschreibung frei wählen, eigene Rollen anlegen. Was
-            eine Rolle darf und sieht, wird unter <a href="<?= e(url('/settings/permissions')) ?>">Berechtigungen</a>
-            und <a href="<?= e(url('/settings/visibility')) ?>">Sichtbarkeit</a> festgelegt.
-            <strong>Admin</strong> hat immer alle Rechte.
-        </p>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Verwaltung</p>
+    <h1>Rollen</h1>
+    <p class="muted">
+        Anzeigename und Beschreibung frei wählen, eigene Rollen anlegen. Was
+        eine Rolle darf und sieht, wird unter <a href="<?= e(url('/settings/permissions')) ?>">Berechtigungen</a>
+        und <a href="<?= e(url('/settings/visibility')) ?>">Sichtbarkeit</a> festgelegt.
+        <strong>Admin</strong> hat immer alle Rechte.
+    </p>
+</header>
 
 <section class="panel stack">
     <div class="panel-head"><div><h3>Vorhandene Rollen</h3></div></div>

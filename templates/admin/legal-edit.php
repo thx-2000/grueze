@@ -1,13 +1,11 @@
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Rechtliches &rsaquo; <?= e($pageLabel) ?></p>
-        <h2><?= e($pageLabel) ?> bearbeiten</h2>
-        <p class="muted">Der Inhalt wird als HTML gespeichert und direkt auf der &ouml;ffentlichen Seite angezeigt.</p>
-    </div>
-    <div>
-        <a href="<?= e(url('/' . ($page === 'impressum' ? 'impressum' : 'datenschutz'))) ?>" class="button-secondary">Vorschau</a>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Rechtliches &rsaquo; <?= e($pageLabel) ?></p>
+    <h1><?= e($pageLabel) ?> bearbeiten</h1>
+    <p class="muted">Der Inhalt wird als HTML gespeichert und direkt auf der &ouml;ffentlichen Seite angezeigt.</p>
+</div>
+<div>
+    <a href="<?= e(url('/' . ($page === 'impressum' ? 'impressum' : 'datenschutz'))) ?>" class="button-secondary">Vorschau</a>
+</header>
 
 <section class="panel narrow">
     <form method="post" action="<?= e(url('/admin/legal/' . $page)) ?>">

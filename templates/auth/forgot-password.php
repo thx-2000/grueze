@@ -1,6 +1,10 @@
-<section class="hero-card narrow">
+<header class="page-head">
     <p class="eyebrow">Passwort zurücksetzen</p>
-    <h2>Reset-Link anfordern</h2>
+    <h1>Reset-Link anfordern</h1>
+    <p class="muted">Wir schicken dir einen Link, mit dem du ein neues Passwort setzen kannst.</p>
+</header>
+
+<section class="panel stack auth-card">
     <form method="post" action="<?= e(url('/forgot-password')) ?>" class="stack">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <label>
@@ -9,6 +13,7 @@
         </label>
         <button type="submit">Reset-Link senden</button>
     </form>
-    <p><a href="<?= e(url('/login')) ?>">Zurück zur Anmeldung</a></p>
+    <div class="link-row">
+        <a href="<?= e(url('/login')) ?>">Zurück zur Anmeldung</a>
+    </div>
 </section>
-

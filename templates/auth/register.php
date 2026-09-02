@@ -1,8 +1,10 @@
-<section class="hero-card narrow">
+<header class="page-head">
     <p class="eyebrow">Zugang einrichten</p>
-    <h2>Willkommen!</h2>
+    <h1>Willkommen!</h1>
     <p class="muted">Für <strong><?= e($email) ?></strong>. Bestätige deinen Namen und wähle, wie du dich anmelden willst.</p>
+</header>
 
+<section class="panel stack auth-card">
     <form method="post" action="<?= e(url('/registrieren')) ?>" class="stack" data-register-form>
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <input type="hidden" name="token" value="<?= e($token) ?>">

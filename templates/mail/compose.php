@@ -10,17 +10,17 @@ $activeSalutationMode = $draft['salutation_mode'] ?? ($defaultSalutationMode ?? 
 $subjectPreview = trim(($activeSubjectPrefix ? $activeSubjectPrefix . ' ' : '') . ($draft['subject'] ?? 'Dein Betreff'));
 $memberContactMode = (bool) ($memberContactMode ?? false);
 ?>
-<section class="hero-card">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow"><?= $memberContactMode ? 'Kontaktaufnahme' : 'Mailing' ?></p>
-            <h2><?= $memberContactMode ? 'Einzelkontakt über ' . e($appName) : 'Personalisierte E-Mail verfassen' ?></h2>
-            <p class="muted"><?= count($contacts) ?> ausgewählte Kontakte. Platzhalter: <code>{Anrede}</code>, <code>{Vorname}</code> und <code>{Nachname}</code>.</p>
-        </div>
-        <div class="selection-status"><?= count($contacts) ?> Empfänger ausgewählt</div>
+<header class="page-head page-head--split">
+    <div>
+        <p class="eyebrow"><?= $memberContactMode ? 'Kontaktaufnahme' : 'Mailing' ?></p>
+        <h1><?= $memberContactMode ? 'Einzelkontakt über ' . e($appName) : 'Personalisierte E-Mail verfassen' ?></h1>
+        <p class="muted"><?= count($contacts) ?> ausgewählte Kontakte. Platzhalter: <code>{Anrede}</code>, <code>{Vorname}</code> und <code>{Nachname}</code>.</p>
     </div>
+    <span class="selection-status"><?= count($contacts) ?> Empfänger</span>
+</header>
 
-    <?php if (!$memberContactMode && count($contacts) > 1): ?>
+<?php if (!$memberContactMode && count($contacts) > 1): ?>
+    <section class="panel">
         <div class="save-list-row" id="saveRecipientList" data-url="<?= e(url('/rundmail/liste-speichern')) ?>">
             <label for="saveListName">Diese Empfänger als Liste speichern</label>
             <div class="save-list-fields">
@@ -29,8 +29,8 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
             </div>
             <p class="save-list-feedback" role="status" hidden></p>
         </div>
-    <?php endif; ?>
-</section>
+    </section>
+<?php endif; ?>
 
 <section class="panel">
     <form id="mailComposeForm" method="post" action="<?= e(url('/mail/start')) ?>" enctype="multipart/form-data" class="stack">

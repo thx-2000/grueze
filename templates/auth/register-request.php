@@ -1,7 +1,9 @@
-<section class="hero-card narrow">
+<header class="page-head">
     <p class="eyebrow">Zugang einrichten</p>
-    <h2>Noch keinen Zugang?</h2>
+    <h1>Noch keinen Zugang?</h1>
+</header>
 
+<section class="panel stack auth-card">
     <?php if ($selfEnabled): ?>
         <p class="muted">Trag die Mailadresse ein, die bei uns hinterlegt ist. Passt sie zu einem Kontakt, schicken wir dir einen Link, über den du dir den Zugang einrichten kannst.</p>
         <form method="post" action="<?= e(url('/registrieren')) ?>" class="stack">
@@ -21,5 +23,7 @@
         <p class="muted">Zugänge werden zurzeit nur über eine persönliche Einladung vergeben. Wende dich ans Orga-Team – sie schicken dir einen Link.</p>
     <?php endif; ?>
 
-    <p class="field-hint"><a href="<?= e(url('/login')) ?>">Zurück zur Anmeldung</a></p>
+    <div class="link-row">
+        <a href="<?= e(url('/login')) ?>">Zurück zur Anmeldung</a>
+    </div>
 </section>

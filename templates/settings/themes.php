@@ -1,17 +1,15 @@
 <?php
 $swatchKeys = ['color_bg', 'color_surface', 'color_primary', 'color_accent', 'color_secondary', 'color_text'];
 ?>
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Verwaltung</p>
-        <h2>Themes</h2>
-        <p class="muted">Ein Theme bündelt Farben, Schriften und Eckenradien unter einem Namen. Die
-            mitgelieferten Vorlagen (Signalfarbe, Hell, Dunkel) lassen sich nicht direkt ändern – der
-            Knopf „Kopieren &amp; bearbeiten" legt eine eigene Kopie an und öffnet sie sofort im
-            Editor mit Live-Vorschau, Farbwähler und Kontrasthinweisen. Eigene Themes lassen sich
-            frei bearbeiten, umbenennen und löschen.</p>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Verwaltung</p>
+    <h1>Themes</h1>
+    <p class="muted">Ein Theme bündelt Farben, Schriften und Eckenradien unter einem Namen. Die
+        mitgelieferten Vorlagen (Signalfarbe, Hell, Dunkel) lassen sich nicht direkt ändern – der
+        Knopf „Kopieren &amp; bearbeiten" legt eine eigene Kopie an und öffnet sie sofort im
+        Editor mit Live-Vorschau, Farbwähler und Kontrasthinweisen. Eigene Themes lassen sich
+        frei bearbeiten, umbenennen und löschen.</p>
+</header>
 
 <section class="panel">
     <div class="theme-grid">

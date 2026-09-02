@@ -1,15 +1,13 @@
-<section class="hero-card narrow">
+<header class="page-head page-head--split">
     <div>
         <p class="eyebrow">Rechtliches</p>
-        <h2>Impressum</h2>
+        <h1>Impressum</h1>
         <p class="muted">Angaben gem&auml;&szlig; &sect; 5 TMG</p>
     </div>
     <?php if (!empty($currentUser) && ($currentUser['role_name'] ?? '') === 'admin'): ?>
-        <div>
-            <a href="<?= e(url('/admin/legal/impressum')) ?>" class="button-secondary">Bearbeiten</a>
-        </div>
+        <a href="<?= e(url('/admin/legal/impressum')) ?>" class="ghost-button">Bearbeiten</a>
     <?php endif; ?>
-</section>
+</header>
 
 <section class="panel narrow legal-copy">
     <?= $content ?>

@@ -6,26 +6,13 @@ $loginIntro = trim((string) ($branding['branding_login_intro'] ?? ''));
 $loginPublicHint = trim((string) ($branding['branding_login_public_hint'] ?? ''));
 $loginHeadline = trim((string) ($branding['branding_login_headline'] ?? ''));
 ?>
-<section class="hero-card narrow">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow">Anmeldung</p>
-            <h2><?= e($loginHeadline !== '' ? $loginHeadline : 'Interner Bereich') ?></h2>
-            <p class="muted"><?= e($loginIntro !== '' ? $loginIntro : 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten.') ?></p>
-        </div>
-        <div class="floating-icon"><?= icon('mail-open') ?></div>
-    </div>
+<header class="page-head">
+    <p class="eyebrow">Anmeldung</p>
+    <h1><?= e($loginHeadline !== '' ? $loginHeadline : 'Interner Bereich') ?></h1>
+    <p class="muted"><?= e($loginIntro !== '' ? $loginIntro : 'Hier pflegt ihr Kontakte, Mailings und interne Organisationsdaten.') ?></p>
+</header>
 
-    <?php if ($publicSiteUrl !== ''): ?>
-        <div class="subsection-card">
-            <strong>Öffentliche Seite</strong>
-            <p class="detail-hint">
-                <?= e($loginPublicHint !== '' ? $loginPublicHint : 'Infos zur Gruppe und die öffentliche Startseite findet ihr hier.') ?>
-                <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= e($publicSiteLabel !== '' ? $publicSiteLabel : $publicSiteUrl) ?></a>.
-            </p>
-        </div>
-    <?php endif; ?>
-
+<section class="panel stack auth-card">
     <form method="post" action="<?= e(url('/login')) ?>" class="stack">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <label>
@@ -40,9 +27,7 @@ $loginHeadline = trim((string) ($branding['branding_login_headline'] ?? ''));
     </form>
 
     <?php if (!empty($passkeysAvailable)): ?>
-        <div class="subsection-card passkey-login-box">
-            <strong>Schnell anmelden</strong>
-            <p class="detail-hint">Wenn für dein Konto bereits ein Passkey hinterlegt ist, kannst du dich damit direkt per Gerätefreigabe anmelden.</p>
+        <div class="auth-alt">
             <button
                 type="button"
                 class="ghost-button"
@@ -52,17 +37,22 @@ $loginHeadline = trim((string) ($branding['branding_login_headline'] ?? ''));
             >
                 <?= icon('passkey') ?><span>Mit Passkey anmelden</span>
             </button>
+            <p class="detail-hint">Schneller per Face ID, Touch ID, Windows Hello oder Sicherheitsschlüssel – sofern für dein Konto ein Passkey hinterlegt ist.</p>
         </div>
     <?php endif; ?>
 
     <div class="link-row">
-        <p><a href="<?= e(url('/forgot-password')) ?>">Passwort vergessen?</a></p>
-        <p><a href="<?= e(url('/registrieren')) ?>">Noch keinen Zugang?</a></p>
-        <?php if ($publicSiteUrl !== ''): ?>
-            <p><a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer">Zur öffentlichen Seite</a></p>
-        <?php endif; ?>
+        <a href="<?= e(url('/forgot-password')) ?>">Passwort vergessen?</a>
+        <a href="<?= e(url('/registrieren')) ?>">Noch keinen Zugang?</a>
     </div>
-    <?php if (empty($adminExists)): ?>
-        <p><a href="<?= e(url('/setup/admin')) ?>">Ersten Admin anlegen</a></p>
-    <?php endif; ?>
 </section>
+
+<?php if ($publicSiteUrl !== ''): ?>
+    <p class="auth-aside">
+        <?= e($loginPublicHint !== '' ? $loginPublicHint : 'Infos zur Gruppe und die öffentliche Startseite:') ?>
+        <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= e($publicSiteLabel !== '' ? $publicSiteLabel : $publicSiteUrl) ?></a>
+    </p>
+<?php endif; ?>
+<?php if (empty($adminExists)): ?>
+    <p class="auth-aside"><a href="<?= e(url('/setup/admin')) ?>">Ersten Admin anlegen</a></p>
+<?php endif; ?>

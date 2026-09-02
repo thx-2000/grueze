@@ -1,13 +1,15 @@
-<section class="hero-card narrow">
+<header class="page-head">
     <p class="eyebrow">Erstkonfiguration</p>
-    <h2>Ersten Admin anlegen</h2>
+    <h1>Ersten Admin anlegen</h1>
     <p class="muted">Diese Seite ist nur nutzbar, solange noch kein Admin-Konto existiert.</p>
+</header>
 
+<section class="panel stack auth-card">
     <form method="post" action="<?= e(url('/setup/admin')) ?>" class="stack">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <label>
             <span>Name</span>
-            <input type="text" name="name" value="<?= e(old('name', 'Thomas')) ?>" required>
+            <input type="text" name="name" value="<?= e(old('name', '')) ?>" required>
         </label>
         <label>
             <span>E-Mail-Adresse</span>

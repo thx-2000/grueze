@@ -3,16 +3,14 @@ $total = count($contacts);
 $processed = (int) ($job['offset'] ?? 0);
 $memberContactMode = (bool) ($memberContactMode ?? false);
 ?>
-<section class="hero-card">
-    <div class="hero-row">
-        <div>
-            <p class="eyebrow"><?= $memberContactMode ? 'Kontaktaufnahme läuft' : 'Versand läuft' ?></p>
-            <h2><?= $memberContactMode ? 'Nachricht wird verschickt' : 'Mailing wird verschickt' ?></h2>
-            <p class="muted">Der Versand erfolgt einzeln und personalisiert. Du kannst auf dieser Seite den Fortschritt verfolgen.</p>
-        </div>
-        <div class="selection-status" id="mailStatusBadge" role="status" aria-live="polite"><?= e((string) $processed) ?> / <?= e((string) $total) ?> verarbeitet</div>
+<header class="page-head page-head--split">
+    <div>
+        <p class="eyebrow"><?= $memberContactMode ? 'Kontaktaufnahme läuft' : 'Versand läuft' ?></p>
+        <h1><?= $memberContactMode ? 'Nachricht wird verschickt' : 'Mailing wird verschickt' ?></h1>
+        <p class="muted">Der Versand erfolgt einzeln und personalisiert. Du kannst auf dieser Seite den Fortschritt verfolgen.</p>
     </div>
-</section>
+    <span class="selection-status" id="mailStatusBadge" role="status" aria-live="polite"><?= e((string) $processed) ?> / <?= e((string) $total) ?> verarbeitet</span>
+</header>
 
 <section class="panel" data-mail-status-page>
     <div class="panel-head">

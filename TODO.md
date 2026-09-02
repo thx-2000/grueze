@@ -142,6 +142,17 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Konsistenz-Durchgang alle Seiten v0.41.0: Login ohne floating-icon-Kasten
+  (`page-head` + `panel`). Neuer einheitlicher `.page-head`/`.page-head--split`
+  löst die uneinheitlichen `hero-card`/`hero-row`/`floating-icon`-Köpfe ab –
+  ~24 Templates (settings/*, admin/*, auth/*, logs/*, security, mail/compose+
+  status, contacts/import, legal/*, users). Jede Seite hat jetzt genau ein
+  `<h1>` (vorher hatten die hero-card-Seiten keins). `strong { display:block }`
+  war global → Fließtext-Fettung brach um; jetzt inline, Block nur für
+  `.subsection-card > strong` & `strong:has(+ p)`. `.hero-card`-CSS + tote
+  `is-*-compact`-hero-Regeln + `.floating-icon` entfernt. h1-Größe auf allen
+  Kernscreens 1.8rem. Fehlende `page_title`-Einträge ergänzt. `setup/admin`
+  ohne vorbelegten Namen. Keine Migration.
 - Verwaltung-Hub in 3 Gruppen v0.40.0: `templates/admin/hub.php` – Gruppen
   „Zugänge · Erscheinungsbild · System" (statt Personen & Zugänge / Erscheinungs-
   bild & Texte / Werkzeuge / System). Kategorien & Tags + Grüße-Pool →

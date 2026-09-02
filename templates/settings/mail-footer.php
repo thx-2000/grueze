@@ -1,10 +1,8 @@
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Einstellungen</p>
-        <h2>Mail-Einstellungen</h2>
-        <p class="muted">Hier pflegst du Mail-Fuß, Betreff-Präfixe und als Admin auch die technischen Versanddaten.</p>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Einstellungen</p>
+    <h1>Mail-Einstellungen</h1>
+    <p class="muted">Hier pflegst du Mail-Fuß, Betreff-Präfixe und als Admin auch die technischen Versanddaten.</p>
+</header>
 
 <section class="panel">
     <form method="post" action="<?= e(url('/settings/mail-footer')) ?>" class="stack">

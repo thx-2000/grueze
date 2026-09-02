@@ -21,13 +21,11 @@ $renderRows = static function (array $items, string $saveAction, string $deleteA
     endforeach;
 };
 ?>
-<section class="hero-card narrow">
-    <div>
-        <p class="eyebrow">Verwaltung</p>
-        <h2>Kategorien &amp; Tags</h2>
-        <p class="muted">Anlegen, umbenennen und löschen. Das Zuordnen zu Kontakten passiert im Kontaktformular und in der Sammelbearbeitung.</p>
-    </div>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Verwaltung</p>
+    <h1>Kategorien &amp; Tags</h1>
+    <p class="muted">Anlegen, umbenennen und löschen. Das Zuordnen zu Kontakten passiert im Kontaktformular und in der Sammelbearbeitung.</p>
+</header>
 
 <section class="panel stack">
     <div class="panel-head"><div><h3>Kategorien</h3><p class="muted">Jeder Kontakt kann genau eine Kategorie haben.</p></div></div>

@@ -1,14 +1,12 @@
-<section class="hero-card narrow">
+<header class="page-head page-head--split">
     <div>
         <p class="eyebrow">Rechtliches</p>
-        <h2>Datenschutzerkl&auml;rung</h2>
+        <h1>Datenschutzerkl&auml;rung</h1>
     </div>
     <?php if (!empty($currentUser) && ($currentUser['role_name'] ?? '') === 'admin'): ?>
-        <div>
-            <a href="<?= e(url('/admin/legal/datenschutz')) ?>" class="button-secondary">Bearbeiten</a>
-        </div>
+        <a href="<?= e(url('/admin/legal/datenschutz')) ?>" class="ghost-button">Bearbeiten</a>
     <?php endif; ?>
-</section>
+</header>
 
 <section class="panel narrow legal-copy">
     <?= $content ?>

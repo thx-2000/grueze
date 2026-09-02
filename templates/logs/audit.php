@@ -1,8 +1,8 @@
-<section class="hero-card">
-    <p class="eyebrow">Audit-Log</p>
-    <h2>Änderungen an Kontakten</h2>
-    <p class="muted">Chronologische Übersicht der letzten Aktivitäten.</p>
-</section>
+<header class="page-head">
+    <p class="eyebrow">Protokoll</p>
+    <h1>Änderungsprotokoll</h1>
+    <p class="muted">Chronologische Übersicht der letzten Aktivitäten – wer wann welchen Kontakt geändert hat.</p>
+</header>
 
 <section class="panel">
     <div class="table-wrap">
