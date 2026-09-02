@@ -28,16 +28,24 @@ Seitenleiste, für alle dieselbe App — die Rolle blendet aus:
 
 Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
 
+## Umsetzungsstand
+
+- Stufe 1 (v0.23): Palette + lokale Schriften.
+- Stufe 2 (v0.24): Hülle – Seitenleiste + Kopfzeile.
+- Stufe 3 (v0.25): **Start** – erledigt.
+- Stufe 4 (v0.26): **Adressbuch** – erledigt.
+- offen: Kontakt-Detail, Nachrichten, Vollständigkeit, Termine, Mein Eintrag.
+
 ## Screen-Entscheidungen
 
 - **Start (Admin):** „Steht an"-Block (dieselben Kennzahlen, aber als
-  verlinktes To-do), großes Suchfeld zuerst, zwei Schnellaktionen.
+  verlinktes To-do), großes Suchfeld zuerst, zwei Schnellaktionen. — *umgesetzt v0.25*
 - **Adressbuch:** eine ruhige Liste. Filter = Suche + Kategorie sichtbar,
   Rest hinter „＋ Filter". Die vier Aufklapp-Bereiche (Sammelauswahl /
   Spalten / Sammelbearbeitung / Schnell-Anlegen) → **ein „Auswählen"-Modus**
   mit Aktionsleiste. **Status-Spalte** (Mail fehlt / Tel. fehlt / vollständig)
   statt sechs Einzelspalten. **Tabelle ↔ Karten pro Konto** merkbar
-  (nicht Admin-only), Standard Tabelle, am Handy Karten.
+  (nicht Admin-only), Standard Tabelle, am Handy Karten. — *umgesetzt v0.26*
 - **Kontakt-Detail:** ansehen + inline bearbeiten auf einer Seite, kein
   getrenntes Formular. Notizen klar „nur intern". **Änderungshistorie mit
   Altwerten — nur für Admins.**

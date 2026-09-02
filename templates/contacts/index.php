@@ -1,11 +1,8 @@
 <?php
 $contactCount = count($contacts);
-$emailCount = 0;
-$phoneCount = 0;
 $supportEmail = trim((string) branding_value('branding_support_email', ''));
 $activeTagIds = array_map('intval', (array) ($filters['tag_ids'] ?? []));
-$currentSort = (string) ($filters['sort'] ?? 'vorname');
-$currentDirection = (string) ($filters['direction'] ?? 'asc');
+
 $visibleContactFields = [
     'address' => can_view_contact_field('address'),
     'birthday' => can_view_contact_field('birthday'),
@@ -15,37 +12,36 @@ $visibleContactFields = [
     'login' => can_view_contact_field('login'),
 ];
 $canViewPrivateDetails = in_array(true, $visibleContactFields, true);
-$detailFieldLabels = [
-    'address' => 'Adresse',
-    'birthday' => 'Geburtstag',
-    'emails' => 'E-Mail',
-    'phones' => 'Telefon',
-    'notes' => 'Notizen',
-    'login' => 'Login',
-];
-$visibleDetailLabels = [];
-foreach ($detailFieldLabels as $fieldKey => $fieldLabel) {
-    if ($visibleContactFields[$fieldKey]) {
-        $visibleDetailLabels[] = $fieldLabel;
-    }
-}
+
 $canCopyVisibleEmails = $visibleContactFields['emails'] && can('contacts.copy_emails');
 $canSendRegularMail = can('mail.send');
 $canSendSingleContactMail = can('mail.contact_single');
-$isMemberCompactView = $canSendSingleContactMail && !can('contacts.manage');
-$isStaffCompactView = !$isMemberCompactView;
-$contactWithEmailCount = 0;
-$contactWithoutEmailCount = 0;
+$canManage = can('contacts.manage');
+// Mitglieder-Sicht: darf genau eine Person kontaktieren, verwaltet aber nichts.
+$isMemberContactView = $canSendSingleContactMail && !$canManage;
+$canSelect = $canCopyVisibleEmails || $canSendRegularMail || $canSendSingleContactMail || $canManage;
+
+// Ohne-Mailadresse-Zahl für die Kopfzeile (nur aus der aktuellen Liste).
+$withoutEmailInList = 0;
 foreach ($contacts as $contact) {
-    $emailCount += count($contact['emails']);
-    $phoneCount += count($contact['phones']);
     if (($contact['emails'] ?? []) === []) {
-        $contactWithoutEmailCount++;
-    } else {
-        $contactWithEmailCount++;
+        $withoutEmailInList++;
     }
 }
 
+$hasActiveFilter = ($filters['q'] ?? '') !== ''
+    || ($filters['category_id'] ?? '') !== ''
+    || $activeTagIds !== []
+    || ($filters['without_email'] ?? '') === '1'
+    || ($filters['without_phone'] ?? '') === '1';
+$advancedFilterActive = ($filters['sort'] ?? 'vorname') !== 'vorname'
+    || ($filters['direction'] ?? 'asc') !== 'asc'
+    || $activeTagIds !== []
+    || ($filters['without_email'] ?? '') === '1'
+    || ($filters['without_phone'] ?? '') === '1';
+
+$currentSort = (string) ($filters['sort'] ?? 'vorname');
+$currentDirection = (string) ($filters['direction'] ?? 'asc');
 $buildSortUrl = static function (string $sortKey) use ($filters, $currentSort, $currentDirection): string {
     $nextDirection = $currentSort === $sortKey && $currentDirection === 'asc' ? 'desc' : 'asc';
     $query = $filters;
@@ -54,16 +50,6 @@ $buildSortUrl = static function (string $sortKey) use ($filters, $currentSort, $
 
     return url('/kontakte?' . http_build_query($query));
 };
-
-$sortLabel = static function (string $sortKey, string $label) use ($currentSort, $currentDirection): string {
-    if ($currentSort !== $sortKey) {
-        return $label;
-    }
-
-    return $label . ' ' . ($currentDirection === 'asc' ? '↑' : '↓');
-};
-
-// aria-sort für die sortierte Spaltenüberschrift (WCAG 1.3.1).
 $ariaSort = static function (string $sortKey) use ($currentSort, $currentDirection): string {
     if ($currentSort !== $sortKey) {
         return 'none';
@@ -71,25 +57,44 @@ $ariaSort = static function (string $sortKey) use ($currentSort, $currentDirecti
 
     return $currentDirection === 'asc' ? 'ascending' : 'descending';
 };
+
+// Datenstand einer Person als Chip-Liste: fehlt Mail? fehlt Telefon?
+$statusChips = static function (array $contact): array {
+    $hasEmail = ($contact['emails'] ?? []) !== [];
+    $hasPhone = ($contact['phones'] ?? []) !== [];
+    if ($hasEmail && $hasPhone) {
+        return [['tone' => 'ok', 'label' => 'vollständig']];
+    }
+    $chips = [];
+    if (!$hasEmail) {
+        $chips[] = ['tone' => 'warn', 'label' => 'Mail fehlt'];
+    }
+    if (!$hasPhone) {
+        $chips[] = ['tone' => 'warn', 'label' => 'Tel. fehlt'];
+    }
+
+    return $chips;
+};
+$renderChips = static function (array $chips): string {
+    $html = '<div class="status-chips">';
+    foreach ($chips as $chip) {
+        $html .= '<span class="status-chip is-' . e($chip['tone']) . '">' . e($chip['label']) . '</span>';
+    }
+
+    return $html . '</div>';
+};
 ?>
-<?php
-$hasActiveFilter = ($filters['q'] ?? '') !== ''
-    || ($filters['category_id'] ?? '') !== ''
-    || $activeTagIds !== []
-    || ($filters['without_email'] ?? '') === '1'
-    || ($filters['without_phone'] ?? '') === '1';
-?>
-<section class="panel contacts-header">
+<header class="contacts-header">
     <div>
-        <h2>Kontakte</h2>
+        <h1>Adressbuch</h1>
         <p class="muted">
-            <?= e((string) $contactCount) ?> <?= $contactCount === 1 ? 'Kontakt' : 'Kontakte' ?><?= $hasActiveFilter ? ' (gefiltert)' : '' ?>
+            <?= e((string) $contactCount) ?> <?= $contactCount === 1 ? 'Kontakt' : 'Kontakte' ?><?= $hasActiveFilter ? ' (gefiltert)' : '' ?><?php if ($withoutEmailInList > 0): ?> · <?= e((string) $withoutEmailInList) ?> ohne Mailadresse<?php endif; ?>
         </p>
     </div>
-    <?php if (can('contacts.manage')): ?>
-        <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Neuen Kontakt</span></a>
+    <?php if ($canManage): ?>
+        <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Person hinzufügen</span></a>
     <?php endif; ?>
-</section>
+</header>
 
 <?php
 // Eigene verknüpfte Kontaktdaten – auch für Rollen sichtbar, die sonst nichts
@@ -107,10 +112,10 @@ $ownFields = $ownContact !== null ? [
     <section class="panel own-contact-card">
         <div class="panel-head">
             <div>
-                <h3>Deine Kontaktdaten</h3>
+                <h2>Deine Kontaktdaten</h2>
                 <p class="muted">
                     Das ist bei uns zu dir hinterlegt.
-                    <?php if (can('contacts.manage')): ?>
+                    <?php if ($canManage): ?>
                         <a href="<?= e(url('/contacts/edit?id=' . (int) $ownContact['id'])) ?>">Bearbeiten</a>.
                     <?php elseif ($supportEmail !== ''): ?>
                         Stimmt etwas nicht? Melde dich bei <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>.
@@ -155,14 +160,15 @@ $ownFields = $ownContact !== null ? [
     </section>
 <?php endif; ?>
 
-<section class="panel">
-    <form method="get" action="<?= e(url('/kontakte')) ?>" class="filter-grid<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
-        <label>
-            <span>Suche</span>
+<section class="panel addressbook-filter">
+    <form method="get" action="<?= e(url('/kontakte')) ?>" class="filter-bar">
+        <label class="filter-field filter-field--search">
+            <span class="visually-hidden">Suche</span>
+            <?= icon('search') ?>
             <input type="search" name="q" value="<?= e($filters['q'] ?? '') ?>" placeholder="Name oder Geburtsname">
         </label>
-        <label>
-            <span>Kategorie</span>
+        <label class="filter-field">
+            <span class="visually-hidden">Kategorie</span>
             <select name="category_id">
                 <option value="">Alle Kategorien</option>
                 <?php foreach ($categories as $category): ?>
@@ -172,35 +178,28 @@ $ownFields = $ownContact !== null ? [
                 <?php endforeach; ?>
             </select>
         </label>
-        <div class="filter-actions">
-            <button type="submit">Filtern</button>
-            <?php if ($hasActiveFilter): ?>
-                <a class="ghost-button compact-action" href="<?= e(url('/kontakte')) ?>"><?= icon('reset') ?><span>Zurücksetzen</span></a>
-            <?php endif; ?>
-        </div>
-        <details class="admin-drawer filter-drawer">
-            <summary>
-                <span><?= icon('sliders') ?></span>
-                <span>Weitere Filter</span>
-            </summary>
-            <div class="admin-drawer-body">
-                <div class="filter-advanced-grid">
+        <button type="submit" class="filter-apply">Filtern</button>
+
+        <details class="filter-more"<?= $advancedFilterActive ? ' open' : '' ?>>
+            <summary><?= icon('sliders') ?><span>Filter</span></summary>
+            <div class="filter-more-body">
+                <div class="filter-more-grid">
                     <label>
                         <span>Sortierung</span>
                         <select name="sort">
-                            <option value="vorname" <?= ($filters['sort'] ?? 'vorname') === 'vorname' ? 'selected' : '' ?>>Vorname</option>
-                            <option value="nachname" <?= ($filters['sort'] ?? '') === 'nachname' ? 'selected' : '' ?>>Nachname</option>
-                            <option value="category_name" <?= ($filters['sort'] ?? '') === 'category_name' ? 'selected' : '' ?>>Kategorie</option>
-                            <option value="ort" <?= ($filters['sort'] ?? '') === 'ort' ? 'selected' : '' ?>>Ort</option>
-                            <option value="geburtstag" <?= ($filters['sort'] ?? '') === 'geburtstag' ? 'selected' : '' ?>>Geburtstag</option>
-                            <option value="created_at" <?= ($filters['sort'] ?? '') === 'created_at' ? 'selected' : '' ?>>Angelegt</option>
+                            <option value="vorname" <?= $currentSort === 'vorname' ? 'selected' : '' ?>>Vorname</option>
+                            <option value="nachname" <?= $currentSort === 'nachname' ? 'selected' : '' ?>>Nachname</option>
+                            <option value="category_name" <?= $currentSort === 'category_name' ? 'selected' : '' ?>>Kategorie</option>
+                            <option value="ort" <?= $currentSort === 'ort' ? 'selected' : '' ?>>Ort</option>
+                            <option value="geburtstag" <?= $currentSort === 'geburtstag' ? 'selected' : '' ?>>Geburtstag</option>
+                            <option value="created_at" <?= $currentSort === 'created_at' ? 'selected' : '' ?>>Angelegt</option>
                         </select>
                     </label>
                     <label>
                         <span>Richtung</span>
                         <select name="direction">
-                            <option value="asc" <?= ($filters['direction'] ?? 'asc') === 'asc' ? 'selected' : '' ?>>A bis Z</option>
-                            <option value="desc" <?= ($filters['direction'] ?? '') === 'desc' ? 'selected' : '' ?>>Z bis A</option>
+                            <option value="asc" <?= $currentDirection === 'asc' ? 'selected' : '' ?>>A bis Z</option>
+                            <option value="desc" <?= $currentDirection === 'desc' ? 'selected' : '' ?>>Z bis A</option>
                         </select>
                     </label>
                     <div class="filter-tags" role="group" aria-label="Nach Tags filtern">
@@ -230,174 +229,93 @@ $ownFields = $ownContact !== null ? [
                         </label>
                     </div>
                 </div>
+                <div class="filter-more-actions">
+                    <button type="submit">Filter anwenden</button>
+                    <?php if ($hasActiveFilter): ?>
+                        <a class="ghost-button" href="<?= e(url('/kontakte')) ?>"><?= icon('reset') ?><span>Zurücksetzen</span></a>
+                    <?php endif; ?>
+                </div>
             </div>
         </details>
     </form>
-    <?php if (can('mail.send') || can('contacts.export') || can('contacts.manage')): ?>
-        <div class="list-actions">
-            <?php if (can('mail.send')): ?>
-                <a class="ghost-button compact-action" href="<?= e(url('/rundmail?' . http_build_query(array_merge($filters, ['from' => 'filter'])))) ?>"><?= icon('mail') ?><span>Rundmail an diese Liste</span></a>
+
+    <?php if ($hasActiveFilter): ?>
+        <p class="filter-active-note">
+            <?= icon('sliders') ?>
+            <span>Gefilterte Ansicht.</span>
+            <a href="<?= e(url('/kontakte')) ?>">Alle Kontakte zeigen</a>
+        </p>
+    <?php endif; ?>
+
+    <?php if ($canSendRegularMail || can('contacts.export') || $canManage): ?>
+        <div class="addressbook-tools">
+            <?php if ($canSendRegularMail): ?>
+                <a class="ghost-button" href="<?= e(url('/rundmail?' . http_build_query(array_merge($filters, ['from' => 'filter'])))) ?>"><?= icon('mail') ?><span>Rundmail an diese Liste</span></a>
             <?php endif; ?>
-            <?php if (can('contacts.manage')): ?>
-                <a class="ghost-button compact-action" href="<?= e(url('/namensliste' . (($filters['category_id'] ?? '') !== '' ? '?category_id=' . rawurlencode((string) $filters['category_id']) : ''))) ?>"><?= icon('contacts') ?><span>Namensliste</span></a>
+            <?php if ($canManage): ?>
+                <a class="ghost-button" href="<?= e(url('/namensliste' . (($filters['category_id'] ?? '') !== '' ? '?category_id=' . rawurlencode((string) $filters['category_id']) : ''))) ?>"><?= icon('contacts') ?><span>Namensliste</span></a>
             <?php endif; ?>
             <?php if (can('contacts.export')): ?>
-                <a class="ghost-button compact-action" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>"><?= icon('upload') ?><span>CSV exportieren</span></a>
+                <a class="ghost-button" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>"><?= icon('upload') ?><span>CSV exportieren</span></a>
             <?php endif; ?>
         </div>
     <?php endif; ?>
 </section>
 
-<section class="panel contacts-view-root is-table<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>" data-contacts-view-root>
-        <div class="panel-head">
-            <div>
-                <h3>Kontaktliste</h3>
-                <?php if (!$canViewPrivateDetails): ?>
-                    <p class="muted">Für diese Rolle sind Kontaktdaten ausgeblendet – „Mail fehlt" markiert Personen ohne Adresse.</p>
-                <?php endif; ?>
-            </div>
-            <div class="selection-tools">
-                <span class="selection-status" id="selectionStatus" role="status">Noch nichts ausgewählt</span>
-                <?php if (!$isMemberCompactView): ?>
-                    <div class="view-toggle" role="group" aria-label="Ansicht umschalten">
-                        <button type="button" class="view-toggle-button is-active" data-view-toggle="desktop" aria-pressed="true">Tabelle</button>
-                        <button type="button" class="view-toggle-button" data-view-toggle="mobile" aria-pressed="false">Karten</button>
-                    </div>
-                <?php endif; ?>
-            </div>
+<section class="panel contacts-view-root is-table" data-contacts-view-root aria-labelledby="contactListTitle">
+    <h2 class="visually-hidden" id="contactListTitle">Kontaktliste</h2>
+    <div class="list-bar">
+        <div class="view-toggle" role="group" aria-label="Ansicht umschalten">
+            <button type="button" class="view-toggle-button is-active" data-view-toggle="desktop" aria-pressed="true">Tabelle</button>
+            <button type="button" class="view-toggle-button" data-view-toggle="mobile" aria-pressed="false">Karten</button>
         </div>
-
-        <?php if (!$isMemberCompactView): ?>
-            <details class="admin-drawer inline-drawer">
-                <summary><span><?= icon('sliders') ?></span><span>Spalten ein-/ausblenden</span></summary>
-                <div class="admin-drawer-body column-toggle-list">
-                    <label class="column-toggle"><input type="checkbox" data-column-toggle="category" checked><span>Kategorie</span></label>
-                    <label class="column-toggle"><input type="checkbox" data-column-toggle="tags" checked><span>Tags</span></label>
-                    <?php if ($visibleContactFields['address']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="adresse" checked><span>Adresse</span></label>
-                    <?php endif; ?>
-                    <?php if ($visibleContactFields['birthday']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="geburtstag" checked><span>Geburtstag</span></label>
-                    <?php endif; ?>
-                    <?php if ($visibleContactFields['emails']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="emails" checked><span>E-Mail</span></label>
-                    <?php endif; ?>
-                    <?php if ($visibleContactFields['phones']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="phones" checked><span>Telefon</span></label>
-                    <?php endif; ?>
-                    <?php if ($visibleContactFields['login']): ?>
-                        <label class="column-toggle"><input type="checkbox" data-column-toggle="login" checked><span>Login</span></label>
-                    <?php endif; ?>
-                </div>
-            </details>
+        <?php if ($canSelect): ?>
+            <button type="button" class="ghost-button select-mode-button" data-select-mode-toggle aria-pressed="false">
+                <?= icon('check-double') ?><span>Auswählen</span>
+            </button>
         <?php endif; ?>
+    </div>
+
+    <?php if (!$canViewPrivateDetails): ?>
+        <p class="field-hint list-role-hint">Für deine Rolle sind Kontaktdaten ausgeblendet – der Status zeigt nur, ob Angaben fehlen.</p>
+    <?php endif; ?>
 
     <form id="contactSelectionForm" method="post" action="<?= e(url('/mail/compose')) ?>">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <details class="admin-drawer" data-bulk-drawer>
-            <summary><span><?= icon('check-double') ?></span><span>Auswählen &amp; Sammelaktionen</span></summary>
-            <div class="admin-drawer-body">
-        <div class="bulk-layout<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
-            <div class="bulk-card<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
-                <span class="bulk-title">Schnellauswahl</span>
-                <div class="toolbar-actions">
-                    <button type="button" class="compact-action" data-select="all"><?= icon('check-double') ?><span>Alle auswählen</span></button>
-                    <button type="button" class="ghost-button compact-action" data-select="none"><?= icon('reset') ?><span>Auswahl aufheben</span></button>
-                </div>
-                <?php if ($categories !== []): ?>
-                    <div class="quick-category-list">
-                        <?php foreach ($categories as $category): ?>
-                            <button type="button" class="ghost-button compact-action" data-select-category="<?= e((string) $category['id']) ?>"><?= e($category['name']) ?> auswählen</button>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($tags !== []): ?>
-                    <div class="quick-category-list">
-                        <?php foreach ($tags as $tag): ?>
-                            <button type="button" class="ghost-button compact-action" data-select-tag="<?= e((string) $tag['id']) ?>"><?= e($tag['name']) ?> markieren</button>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
 
-            <div class="bulk-card accent<?= $isMemberCompactView ? ' is-member-compact' : '' ?><?= $isStaffCompactView ? ' is-staff-compact' : '' ?>">
-                <span class="bulk-title">Aktionen für Auswahl</span>
-                <div class="toolbar-actions">
+        <?php if ($canSelect): ?>
+            <div class="select-bar" role="group" aria-label="Aktionen für die Auswahl">
+                <span class="select-bar-count" id="selectionStatus" role="status">Noch nichts ausgewählt</span>
+                <div class="select-bar-quick">
+                    <button type="button" class="linkish" data-select="all">Alle</button>
+                    <button type="button" class="linkish" data-select="none">Keine</button>
+                </div>
+                <div class="select-bar-actions">
                     <?php if ($canCopyVisibleEmails): ?>
-                        <button type="button" id="copyEmailsButton"><?= icon('copy') ?><span>E-Mail-Adressen kopieren</span></button>
+                        <button type="button" id="copyEmailsButton" class="ghost-button"><?= icon('copy') ?><span>E-Mails kopieren</span></button>
                     <?php endif; ?>
                     <?php if ($canSendRegularMail): ?>
                         <button type="submit" class="button-link"><?= icon('edit') ?><span>E-Mail verfassen</span></button>
                     <?php elseif ($canSendSingleContactMail): ?>
                         <button type="submit" class="button-link"><?= icon('message-send') ?><span>Person kontaktieren</span></button>
                     <?php endif; ?>
+                    <button type="button" class="ghost-button" data-select-mode-exit><?= icon('close') ?><span>Fertig</span></button>
                 </div>
-                <?php if ($canSendSingleContactMail): ?>
-                    <p class="detail-hint">Je Auswahl ist genau eine Person erlaubt. Die Zieladresse bleibt verborgen, Antworten gehen direkt an deine eigene Login-Mailadresse.</p>
-                    <?php if ($isMemberCompactView): ?>
-                        <ul class="compact-help-list">
-                            <li><strong>Mail fehlt</strong> bedeutet: Uns liegt noch keine Adresse vor.</li>
-                            <?php if ($supportEmail !== ''): ?>
-                                <li>Wenn du sie kennst, bitte an <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a> senden.</li>
-                            <?php endif; ?>
-                            <li>Für eine Nachricht genau eine Person auswählen und dann <strong>Person kontaktieren</strong>.</li>
-                        </ul>
-                    <?php endif; ?>
-                <?php endif; ?>
-                <?php if (!$canCopyVisibleEmails && !$canSendRegularMail && !$canSendSingleContactMail): ?>
-                    <p class="detail-hint">Für diese Rolle sind hier gerade keine Sammelaktionen freigeschaltet.</p>
-                <?php endif; ?>
             </div>
-        </div>
-
-        <?php if ($canSendSingleContactMail && !$isMemberCompactView): ?>
-            <aside class="workflow-card" aria-label="Hinweise zur Kontaktaufnahme">
-                <div class="workflow-card-head">
-                    <span class="workflow-icon"><?= icon('message-send') ?></span>
-                    <div>
-                        <strong>So funktioniert die Kontaktaufnahme</strong>
-                        <p class="detail-hint">Diese Ansicht ist bewusst auf zwei Aufgaben reduziert: fehlende Mailadressen erkennen und genau eine Person kontaktieren.</p>
-                    </div>
-                </div>
-                <ol class="workflow-list">
-                    <li>Wenn neben einem Namen <strong>Mail fehlt</strong> steht, liegt uns noch keine Adresse vor.</li>
-                    <?php if ($supportEmail !== ''): ?>
-                        <li>Wenn du die fehlende Adresse kennst, schicke sie bitte an <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>.</li>
-                    <?php endif; ?>
-                    <li>Für eine Kontaktaufnahme genau eine Person auswählen und <strong>Person kontaktieren</strong> klicken. Die Zieladresse bleibt verborgen, Antworten gehen an dich.</li>
-                </ol>
-            </aside>
+            <?php if ($isMemberContactView): ?>
+                <p class="detail-hint select-bar-hint">Genau eine Person auswählen. Die Zieladresse bleibt verborgen; Antworten gehen an deine eigene Login-Mailadresse.<?php if ($supportEmail !== ''): ?> Fehlt eine Mailadresse und du kennst sie? Bitte an <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>.<?php endif; ?></p>
+            <?php endif; ?>
         <?php endif; ?>
-            </div>
-        </details>
 
         <div class="contacts-table-wrap">
-            <table class="contacts-table">
+            <table class="contacts-table contacts-table--lean">
                 <thead>
                     <tr>
-                        <th class="col-select" scope="col">Auswahl</th>
-                        <th scope="col" aria-sort="<?= e($ariaSort('vorname')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('vorname')) ?>"><?= e($sortLabel('vorname', 'Vorname')) ?></a></th>
-                        <th scope="col" aria-sort="<?= e($ariaSort('nachname')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('nachname')) ?>"><?= e($sortLabel('nachname', 'Nachname')) ?></a></th>
-                        <th data-col="category" scope="col" aria-sort="<?= e($ariaSort('category_name')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>"><?= e($sortLabel('category_name', 'Kategorie')) ?></a></th>
-                        <th data-col="tags" scope="col">Tags</th>
-                        <?php if ($visibleContactFields['address']): ?>
-                            <th data-col="adresse" scope="col" aria-sort="<?= e($ariaSort('ort')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>"><?= e($sortLabel('ort', 'Adresse')) ?></a></th>
-                        <?php endif; ?>
-                        <?php if ($visibleContactFields['birthday']): ?>
-                            <th data-col="geburtstag" scope="col" aria-sort="<?= e($ariaSort('geburtstag')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>"><?= e($sortLabel('geburtstag', 'Geburtstag')) ?></a></th>
-                        <?php endif; ?>
-                        <?php if ($visibleContactFields['emails']): ?>
-                            <th data-col="emails" scope="col">E-Mail</th>
-                        <?php endif; ?>
-                        <?php if ($visibleContactFields['phones']): ?>
-                            <th data-col="phones" scope="col">Telefon</th>
-                        <?php endif; ?>
-                        <?php if ($visibleContactFields['login']): ?>
-                            <th data-col="login" scope="col">Login / Rolle</th>
-                        <?php endif; ?>
-                        <?php if (can('contacts.manage')): ?>
-                            <th class="col-actions" scope="col">Aktionen</th>
-                        <?php endif; ?>
+                        <th class="col-select" scope="col"><span class="visually-hidden">Auswahl</span></th>
+                        <th scope="col" aria-sort="<?= e($ariaSort('nachname')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('nachname')) ?>">Name</a></th>
+                        <th scope="col" aria-sort="<?= e($ariaSort('category_name')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>">Kategorie</a></th>
+                        <th scope="col">Status</th>
+                        <?php if ($canManage): ?><th class="col-open" scope="col"><span class="visually-hidden">Öffnen</span></th><?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -410,83 +328,24 @@ $ownFields = $ownContact !== null ? [
                             </td>
                             <td>
                                 <div class="contact-name-cell">
-                                    <strong><?= e($contact['vorname']) ?></strong>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="contact-name-cell">
-                                    <strong><?= e($contact['nachname']) ?></strong>
+                                    <strong><?= e(trim($contact['vorname'] . ' ' . $contact['nachname'])) ?></strong>
                                     <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
                                         <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
                                     <?php endif; ?>
-                                    <?php if (($contact['emails'] ?? []) === [] && !$visibleContactFields['emails']): ?>
-                                        <span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span>
-                                    <?php endif; ?>
                                 </div>
                             </td>
-                            <td data-col="category"><span class="table-pill"><?= e($contact['category_name'] ?: '—') ?></span></td>
-                            <td data-col="tags">
-                                <div class="tag-cluster">
-                                    <?php foreach ($contact['tags'] as $tag): ?>
-                                        <span class="tag tag-secondary" style="<?= e(tag_style($tag['name'])) ?>"><?= e($tag['name']) ?></span>
-                                    <?php endforeach; ?>
-                                </div>
-                            </td>
-                            <?php if ($visibleContactFields['address']): ?>
-                                <td data-col="adresse">
-                                    <div class="table-stack is-guarded">
-                                        <span><?= e($contact['strasse']) ?></span>
-                                        <span><?= e($contact['plz']) ?> <?= e($contact['ort']) ?></span>
-                                        <span class="muted"><?= e($contact['land'] ?: 'Deutschland') ?></span>
-                                    </div>
-                                </td>
-                            <?php endif; ?>
-                            <?php if ($visibleContactFields['birthday']): ?>
-                                <td data-col="geburtstag"><span class="is-guarded"><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : '—') ?></span></td>
-                            <?php endif; ?>
-                            <?php if ($visibleContactFields['emails']): ?>
-                                <td data-col="emails">
-                                    <?php if ($contact['emails'] !== []): ?>
-                                        <div class="table-stack is-guarded">
-                                            <?php foreach ($contact['emails'] as $email): ?>
-                                                <a href="mailto:<?= e($email['email']) ?>" data-email="<?= e($email['email']) ?>"><?= e($email['email']) ?></a>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    <?php else: ?>
-                                        <span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span>
-                                    <?php endif; ?>
-                                </td>
-                            <?php endif; ?>
-                            <?php if ($visibleContactFields['phones']): ?>
-                                <td data-col="phones">
-                                    <div class="table-stack is-guarded">
-                                        <?php foreach ($contact['phones'] as $phone): ?>
-                                            <a href="tel:<?= e($phone['phone']) ?>"><?= e($phone['phone']) ?></a>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </td>
-                            <?php endif; ?>
-                            <?php if ($visibleContactFields['login']): ?>
-                                <td data-col="login">
-                                    <?php if (!empty($contact['linked_user'])): ?>
-                                        <div class="table-stack">
-                                            <span class="is-guarded"><?= e($contact['linked_user']['email']) ?></span>
-                                            <span class="muted"><?= e($contact['linked_user']['role_name']) ?></span>
-                                        </div>
-                                    <?php else: ?>
-                                        <span class="muted">Kein Login</span>
-                                    <?php endif; ?>
-                                </td>
-                            <?php endif; ?>
-                            <?php if (can('contacts.manage')): ?>
-                                <td class="col-actions">
-                                    <div class="table-actions">
-                                        <a class="ghost-button icon-button" title="Kontakt bearbeiten" aria-label="Kontakt bearbeiten" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span class="visually-hidden">Bearbeiten</span></a>
-                                    </div>
+                            <td><span class="table-pill"><?= e($contact['category_name'] ?: '—') ?></span></td>
+                            <td><?= $renderChips($statusChips($contact)) ?></td>
+                            <?php if ($canManage): ?>
+                                <td class="col-open">
+                                    <a class="row-open" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>" aria-label="<?= e(trim($contact['vorname'] . ' ' . $contact['nachname']) . ' öffnen') ?>"><?= icon('chevron-right') ?></a>
                                 </td>
                             <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
+                    <?php if ($contacts === []): ?>
+                        <tr><td colspan="<?= $canManage ? 5 : 4 ?>" class="table-empty">Keine Kontakte für diese Ansicht.</td></tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -499,102 +358,71 @@ $ownFields = $ownContact !== null ? [
                         <span aria-hidden="true">Auswählen</span>
                     </label>
                     <div class="contact-head">
-                        <div>
-                            <div class="contact-title-row">
-                                <h3><?= e($contact['vorname'] . ' ' . $contact['nachname']) ?></h3>
-                                <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
-                                    <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
-                                <?php endif; ?>
-                                <?php if (($contact['emails'] ?? []) === [] && !$visibleContactFields['emails']): ?>
-                                    <span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span>
-                                <?php endif; ?>
-                            </div>
+                        <div class="contact-title-row">
+                            <h3><?= e(trim($contact['vorname'] . ' ' . $contact['nachname'])) ?></h3>
+                            <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
+                                <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
+                            <?php endif; ?>
                         </div>
                         <span class="tag"><?= e($contact['category_name'] ?: '—') ?></span>
                     </div>
-                    <div class="tag-cluster">
-                        <?php foreach ($contact['tags'] as $tag): ?>
-                            <span class="tag tag-secondary" style="<?= e(tag_style($tag['name'])) ?>"><?= e($tag['name']) ?></span>
-                        <?php endforeach; ?>
-                        <?php if ($visibleContactFields['login'] && !empty($contact['linked_user'])): ?>
-                            <span class="tag tag-account<?= (int) $contact['linked_user']['is_active'] === 1 ? ' is-active' : '' ?>">
-                                <?= e($contact['linked_user']['role_name']) ?>
-                            </span>
-                        <?php endif; ?>
-                    </div>
 
-                    <div class="contact-body">
-                        <?php if ($visibleContactFields['address'] || $visibleContactFields['birthday']): ?>
-                            <div class="contact-meta-list is-guarded">
-                                <?php if ($visibleContactFields['address']): ?>
-                                    <p><?= icon('location') ?><span><strong><?= e(contact_value_label((int) ((trim((string) ($contact['strasse'] ?? '')) !== '' || trim((string) ($contact['plz'] ?? '')) !== '' || trim((string) ($contact['ort'] ?? '')) !== '') ? 1 : 0), 'Adresse', 'Adresse', 'Adressen')) ?></strong><?= e(contact_address_line($contact)) ?></span></p>
-                                    <p><?= icon('globe') ?><span><?= e(contact_country_label($contact)) ?></span></p>
-                                <?php endif; ?>
-                                <?php if ($visibleContactFields['birthday']): ?>
-                                    <p class="muted"><?= icon('cake') ?><span><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : 'Kein Geburtstag hinterlegt') ?></span></p>
-                                <?php endif; ?>
-                            </div>
-                        <?php endif; ?>
+                    <?= $renderChips($statusChips($contact)) ?>
 
-                        <?php if ($visibleContactFields['emails']): ?>
-                            <div>
-                                <strong><?= e(contact_value_label(count($contact['emails']), 'E-Mail-Adresse', 'E-Mail-Adresse', 'E-Mail-Adressen')) ?></strong>
-                                <?php if ($contact['emails'] !== []): ?>
-                                    <ul class="mini-list is-guarded">
-                                        <?php foreach ($contact['emails'] as $email): ?>
-                                            <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e($email['email']) ?></a></li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                <?php else: ?>
-                                    <p class="missing-contact-value"><span class="missing-email-badge" title="Keine Mailadresse hinterlegt" aria-label="Keine Mailadresse hinterlegt"><?= icon('mail-off') ?><span>Mail fehlt</span></span></p>
-                                <?php endif; ?>
-                            </div>
-                        <?php endif; ?>
+                    <?php if ($contact['tags'] !== []): ?>
+                        <div class="tag-cluster">
+                            <?php foreach ($contact['tags'] as $tag): ?>
+                                <span class="tag tag-secondary" style="<?= e(tag_style($tag['name'])) ?>"><?= e($tag['name']) ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
 
-                        <?php if ($visibleContactFields['phones']): ?>
-                            <div>
-                                <strong><?= e(contact_value_label(count($contact['phones']), 'Telefonnummer', 'Telefonnummer', 'Telefonnummern')) ?></strong>
-                                <?php if ($contact['phones'] !== []): ?>
-                                    <ul class="mini-list is-guarded">
-                                        <?php foreach ($contact['phones'] as $phone): ?>
-                                            <li><a href="tel:<?= e($phone['phone']) ?>"><?= e((trim((string) ($phone['label'] ?? '')) !== '' ? $phone['label'] . ': ' : '') . $phone['phone']) ?></a></li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                <?php else: ?>
-                                    <p class="missing-contact-value"><?= icon('phone-off') ?><span>–</span></p>
-                                <?php endif; ?>
-                            </div>
-                        <?php endif; ?>
+                    <?php if ($canViewPrivateDetails): ?>
+                        <div class="contact-body">
+                            <?php if ($visibleContactFields['address']): ?>
+                                <p class="is-guarded"><?= icon('location') ?><span><?= e(contact_address_line($contact)) ?><br><?= e(contact_country_label($contact)) ?></span></p>
+                            <?php endif; ?>
+                            <?php if ($visibleContactFields['birthday'] && trim((string) ($contact['geburtstag'] ?? '')) !== ''): ?>
+                                <p class="is-guarded"><?= icon('cake') ?><span><?= e(format_date($contact['geburtstag'])) ?></span></p>
+                            <?php endif; ?>
+                            <?php if ($visibleContactFields['emails'] && $contact['emails'] !== []): ?>
+                                <ul class="mini-list is-guarded">
+                                    <?php foreach ($contact['emails'] as $email): ?>
+                                        <li data-email="<?= e($email['email']) ?>"><a href="mailto:<?= e($email['email']) ?>"><?= e($email['email']) ?></a></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
+                            <?php if ($visibleContactFields['phones'] && $contact['phones'] !== []): ?>
+                                <ul class="mini-list is-guarded">
+                                    <?php foreach ($contact['phones'] as $phone): ?>
+                                        <li><a href="tel:<?= e($phone['phone']) ?>"><?= e((trim((string) ($phone['label'] ?? '')) !== '' ? $phone['label'] . ': ' : '') . $phone['phone']) ?></a></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
+                            <?php if ($visibleContactFields['login'] && !empty($contact['linked_user'])): ?>
+                                <p class="is-guarded"><?= icon('login') ?><span><?= e($contact['linked_user']['email']) ?> · <?= e(role_label((string) $contact['linked_user']['role_name'])) ?></span></p>
+                            <?php endif; ?>
+                            <?php if ($visibleContactFields['notes'] && !empty($contact['notizen'])): ?>
+                                <p class="note is-guarded"><?= e($contact['notizen']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
 
-                        <?php if ($visibleContactFields['login'] && !empty($contact['linked_user'])): ?>
-                            <div class="account-summary">
-                                <strong>Login</strong>
-                                <p class="is-guarded"><?= e($contact['linked_user']['email']) ?></p>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if ($visibleContactFields['notes'] && !empty($contact['notizen'])): ?><p class="note is-guarded"><?= e($contact['notizen']) ?></p><?php endif; ?>
-
-                        <?php if (!$canViewPrivateDetails): ?>
-                            <p class="detail-hint">Weitere Kontaktdaten sind für diese Rolle ausgeblendet.</p>
-                        <?php endif; ?>
-                    </div>
-
-                    <?php if (can('contacts.manage')): ?>
+                    <?php if ($canManage): ?>
                         <div class="card-actions">
-                            <a class="ghost-button icon-button" title="Kontakt bearbeiten" aria-label="Kontakt bearbeiten" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span class="visually-hidden">Bearbeiten</span></a>
+                            <a class="ghost-button" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span>Bearbeiten</span></a>
                         </div>
                     <?php endif; ?>
                 </article>
             <?php endforeach; ?>
+            <?php if ($contacts === []): ?>
+                <p class="table-empty">Keine Kontakte für diese Ansicht.</p>
+            <?php endif; ?>
         </div>
 
-        <?php if (can('contacts.manage')): ?>
-            <details class="admin-drawer">
-                <summary>
-                    <span><?= icon('sliders') ?></span>
-                    <span>Massenbearbeitung und Verwaltung</span>
-                </summary>
+        <?php if ($canManage): ?>
+            <details class="admin-drawer bulk-edit-drawer">
+                <summary><span><?= icon('sliders') ?></span><span>Sammelbearbeitung der Auswahl</span></summary>
                 <div class="admin-drawer-body">
                     <div class="bulk-editor">
                         <label>
@@ -661,7 +489,7 @@ $ownFields = $ownContact !== null ? [
             </summary>
             <div class="admin-drawer-body stack">
                 <div>
-                    <h3>Kategorie ergänzen</h3>
+                    <h2>Kategorie ergänzen</h2>
                     <form method="post" action="<?= e(url('/categories/store')) ?>" class="inline-form">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <input type="text" name="name" placeholder="Neue Kategorie" aria-label="Name der neuen Kategorie" required>
@@ -669,7 +497,7 @@ $ownFields = $ownContact !== null ? [
                     </form>
                 </div>
                 <div>
-                    <h3>Tag ergänzen</h3>
+                    <h2>Tag ergänzen</h2>
                     <form method="post" action="<?= e(url('/tags/store')) ?>" class="inline-form">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <input type="text" name="name" placeholder="Neuer Tag" aria-label="Name des neuen Tags" required>

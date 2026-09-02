@@ -3,6 +3,26 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.26.0
+
+- **Neuer Look, Stufe 4 – Adressbuch.** Das dichteste Fenster wird ruhig:
+  - Kopf mit echtem `<h1>` und Zeile „N Kontakte · M ohne Mailadresse".
+  - Filterleiste: Suche + Kategorie sichtbar, alles Weitere (Sortierung,
+    Tags, fehlende Angaben) hinter **„Filter"**.
+  - Die vier Aufklapp-Bereiche (Schnellauswahl, Spalten, Sammelaktionen,
+    Sammelbearbeitung) sind zu **einem „Auswählen"-Modus** zusammengefasst:
+    ein Klick blendet Auswahl-Kästchen und eine Aktionsleiste ein
+    (Alle/Keine, E-Mails kopieren, E-Mail verfassen bzw. Person kontaktieren,
+    Sammelbearbeitung, Fertig). Beim Verlassen wird die Auswahl geleert.
+    Die Spalten-ein-/ausblenden-Funktion entfällt.
+  - Tabelle nur noch **Name · Kategorie · Status**. Status als Chip
+    (vollständig / Mail fehlt / Tel. fehlt) statt sechs Einzelspalten;
+    Adresse, Geburtstag, Login stehen in der Kartenansicht und im Detail.
+  - **Tabelle ↔ Karten** jetzt für alle Rollen umschaltbar (nicht mehr
+    Admin-only) und pro Gerät gemerkt; ohne gespeicherte Wahl am Handy
+    Karten, sonst Tabelle.
+- Keine Migration.
+
 ## 0.25.0
 
 - **Neuer Look, Stufe 3 – Startseite.** Kein Kacheln-Dashboard mehr: oben

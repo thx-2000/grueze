@@ -85,7 +85,7 @@ function updateSelectionUI() {
     }
 }
 
-function applyContactsView(view) {
+function applyContactsView(view, persist = true) {
     if (!contactsViewRoot) {
         return;
     }
@@ -101,10 +101,12 @@ function applyContactsView(view) {
         button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });
 
-    try {
-        window.localStorage.setItem(contactsViewStorageKey, normalizedView);
-    } catch (error) {
-        // Ignore storage failures and keep the current in-memory state.
+    if (persist) {
+        try {
+            window.localStorage.setItem(contactsViewStorageKey, normalizedView);
+        } catch (error) {
+            // Ignore storage failures and keep the current in-memory state.
+        }
     }
 
     updateSelectionUI();
@@ -115,6 +117,35 @@ document.querySelectorAll('[data-view-toggle]').forEach((button) => {
         applyContactsView(button.dataset.viewToggle);
     });
 });
+
+// „Auswählen"-Modus: blendet Checkbox-Spalte und Aktionsleiste ein. Beim
+// Verlassen wird die Auswahl geleert, damit nichts unbemerkt gesendet wird.
+const selectModeToggle = document.querySelector('[data-select-mode-toggle]');
+if (selectModeToggle && contactsViewRoot) {
+    const setSelectMode = (on) => {
+        contactsViewRoot.classList.toggle('is-selecting', on);
+        selectModeToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (!on) {
+            document.querySelectorAll('[data-contact-checkbox]').forEach((checkbox) => {
+                checkbox.checked = false;
+            });
+            updateSelectionUI();
+        } else {
+            const firstCheckbox = document.querySelector(
+                `[data-contact-selectable][data-view="${activeView()}"] [data-contact-checkbox]`
+            );
+            firstCheckbox?.focus();
+        }
+    };
+
+    selectModeToggle.addEventListener('click', () => {
+        setSelectMode(!contactsViewRoot.classList.contains('is-selecting'));
+    });
+
+    document.querySelectorAll('[data-select-mode-exit]').forEach((button) => {
+        button.addEventListener('click', () => setSelectMode(false));
+    });
+}
 
 if (copyButton) {
     copyButton.addEventListener('click', async () => {
@@ -231,7 +262,14 @@ if (contactsViewRoot) {
         savedView = null;
     }
 
-    applyContactsView(savedView === 'mobile' ? 'mobile' : 'desktop');
+    // Ohne gespeicherte Wahl richtet sich die Ansicht nach dem Gerät (am Handy
+    // Karten, sonst Tabelle) – ohne diese Automatik gleich zu speichern.
+    const hasSavedView = savedView === 'mobile' || savedView === 'desktop';
+    const initialView = hasSavedView
+        ? savedView
+        : (mobileContactsLayout.matches ? 'mobile' : 'desktop');
+
+    applyContactsView(initialView, hasSavedView);
 } else {
     updateSelectionUI();
 }
