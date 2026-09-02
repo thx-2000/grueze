@@ -3,6 +3,24 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.28.0
+
+- **Neuer Look, Stufe 5 – Kontakt-Detail.** Ansehen und Bearbeiten auf
+  **einer** Seite, kein getrenntes Formular mehr. Kopf mit `<h1>`
+  (Name + Geburtsname), Status-Chip, Kategorie, „im Adressbuch seit …".
+  Alles direkt editierbar, ruhig in Karten (Stammdaten · Adresse ·
+  Kontaktwege · Notizen · Login). Sobald etwas geändert wird, erscheint
+  unten eine klebende **„Speichern"-Leiste**; eine Rückfrage schützt vor
+  versehentlichem Verlassen.
+- **Notizen** sind klar als **nur intern** gekennzeichnet.
+- **Änderungsverlauf mit Altwerten** – nur für die Verwaltung
+  (`audit.view`). Bei jeder Speicherung werden die geänderten Felder mit
+  altem und neuem Wert protokolliert (`audit_log.changes`). Alte Einträge
+  ohne Detailverlauf zeigen weiter ihren Kurztext. Rückwirkend nicht
+  befüllbar.
+- „Neuer Kontakt" nutzt dieselbe Seite; `contacts/form.php` entfällt.
+- Migration `2026-09-04-audit-changes` (Spalte `audit_log.changes`).
+
 ## 0.27.0
 
 - **Adressbuch: Spalten wieder anpassbar.** Neben „Auswählen" ein Menü

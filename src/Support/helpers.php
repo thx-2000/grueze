@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.27.0';
+    return '0.28.0';
 }
 
 function system_label(): string
@@ -328,10 +328,10 @@ function page_title(string $path): string
         '/forgot-password'           => 'Passwort vergessen',
         '/reset-password'            => 'Neues Passwort',
         '/setup/admin'               => 'Ersteinrichtung',
-        '/kontakte'                  => 'Kontakte',
+        '/kontakte'                  => 'Adressbuch',
         '/search'                    => 'Suche',
         '/contacts/create'           => 'Neuer Kontakt',
-        '/contacts/edit'             => 'Kontakt bearbeiten',
+        '/contacts/edit'             => 'Kontakt',
         '/contacts/import'           => 'Kontakte importieren',
         '/rundmail'                  => 'Rundmail',
         '/mail/compose'              => 'Rundmail schreiben',

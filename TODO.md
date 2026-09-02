@@ -90,6 +90,15 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Neuer Look, Stufe 5 – Kontakt-Detail (v0.28.0): `templates/contacts/detail.php`
+  ersetzt `form.php` (gelöscht) für Ansehen+Bearbeiten und Neu-Anlegen.
+  Ganze Seite editierbar, klebende Speichern-Leiste bei Änderung
+  (`[data-detail-form]`/`[data-save-bar]` in app.js), beforeunload-Schutz.
+  Notizen als „nur intern" markiert. Änderungsverlauf mit Altwerten für
+  `audit.view`: `LogRepository::contactAuditTrail()` +
+  `ContactController::contactChanges()`, Spalte `audit_log.changes`
+  (Migration `2026-09-04-audit-changes`, `addAudit()` 5. Param). Redirect
+  nach Speichern zurück auf die Detailseite.
 - Adressbuch: Spalten-Menü (v0.27.0): Tags/Adresse/Geburtstag/E-Mail/
   Telefon/Login einzeln zuschaltbar (`[data-column-toggle]`, `.column-menu`
   in der `.list-bar`). Standard schlank (leeres Set), pro Gerät gemerkt

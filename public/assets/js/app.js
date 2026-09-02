@@ -286,6 +286,44 @@ if (selectionForm) {
     });
 }
 
+// Kontakt-Detail: „Speichern"-Leiste erscheint, sobald etwas geändert wurde;
+// eine leichte Rückfrage schützt vor versehentlichem Verlassen.
+const detailForm = document.querySelector('[data-detail-form]');
+if (detailForm) {
+    const saveBar = detailForm.querySelector('[data-save-bar]');
+    let dirty = false;
+
+    const markDirty = () => {
+        if (dirty) return;
+        dirty = true;
+        if (saveBar) saveBar.hidden = false;
+    };
+
+    detailForm.addEventListener('input', markDirty);
+    detailForm.addEventListener('change', markDirty);
+    detailForm.querySelectorAll('[data-add-row], [data-remove-row]').forEach((button) => {
+        button.addEventListener('click', markDirty);
+    });
+
+    detailForm.addEventListener('submit', () => {
+        dirty = false;
+    });
+
+    const resetButton = detailForm.querySelector('[data-detail-reset]');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            dirty = false;
+            window.location.reload();
+        });
+    }
+
+    window.addEventListener('beforeunload', (event) => {
+        if (!dirty) return;
+        event.preventDefault();
+        event.returnValue = '';
+    });
+}
+
 const contactsTable = document.querySelector('.contacts-table');
 if (contactsTable) {
     const storageKey = 'grueze_visible_contact_columns';

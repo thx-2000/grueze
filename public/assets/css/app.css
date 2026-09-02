@@ -4442,3 +4442,223 @@ body { display: block; }
         justify-content: center;
     }
 }
+
+/* ============================================================
+   Kontakt-Detail – ansehen + inline bearbeiten (Redesign Stufe 5)
+   ============================================================ */
+
+.detail-backlink {
+    margin: 0 0 0.2rem;
+}
+
+.detail-backlink a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--color-muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.detail-backlink a:hover {
+    color: var(--color-primary);
+}
+
+.detail-backlink .icon {
+    width: 1rem;
+    height: 1rem;
+    transform: rotate(180deg);
+}
+
+.contact-detail-head {
+    display: grid;
+    gap: 0.4rem;
+    padding: 0.2rem 0.1rem 0;
+}
+
+.contact-detail-head h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    line-height: 1.15;
+}
+
+.contact-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.9rem;
+}
+
+.contact-detail-form {
+    display: grid;
+    gap: 1.1rem;
+}
+
+.detail-card {
+    padding: 1.2rem 1.3rem;
+    background: var(--color-surface-strong);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.detail-card > h2 {
+    margin: 0 0 0.9rem;
+    font-size: 1.15rem;
+}
+
+.detail-card > h2 + .field-hint {
+    margin-top: -0.6rem;
+    margin-bottom: 0.9rem;
+}
+
+.detail-card .repeater-block + .repeater-block {
+    margin-top: 0.9rem;
+}
+
+.detail-card .section-head h3 {
+    margin: 0;
+    font-size: 0.98rem;
+}
+
+.detail-notes-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0 0 0.7rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
+    color: var(--color-muted);
+    font-size: 0.88rem;
+}
+
+.detail-notes-hint .icon {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
+    margin-top: 0.1rem;
+}
+
+/* Speichern-Leiste: klebt unten, erscheint bei Änderung. */
+.detail-save-bar {
+    position: sticky;
+    bottom: 0.8rem;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.7rem 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+    border: 1px solid var(--accent-edge);
+    box-shadow: var(--shadow-soft);
+}
+
+.detail-save-hint {
+    font-weight: 600;
+    color: var(--color-primary-strong);
+}
+
+.detail-save-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* --- Änderungsverlauf --- */
+.history-card > .muted {
+    margin: -0.5rem 0 1rem;
+    font-size: 0.9rem;
+}
+
+.history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.9rem;
+}
+
+.history-entry {
+    padding: 0.75rem 0.85rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
+}
+
+.history-when {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+}
+
+.history-changes {
+    list-style: none;
+    margin: 0.55rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.history-changes li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+}
+
+.history-field {
+    font-weight: 600;
+    min-width: 6rem;
+}
+
+.history-from {
+    color: var(--color-danger);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+.history-to {
+    color: var(--color-success);
+    font-weight: 600;
+}
+
+.history-arrow {
+    color: var(--color-muted);
+}
+
+.history-note {
+    margin: 0.4rem 0 0;
+    font-size: 0.9rem;
+}
+
+.detail-danger {
+    border-color: var(--danger-veil);
+}
+
+.detail-danger > .muted {
+    margin: -0.5rem 0 0.9rem;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+    .detail-save-bar {
+        bottom: 0;
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+    }
+
+    .detail-save-actions {
+        width: 100%;
+    }
+
+    .detail-save-actions button {
+        flex: 1;
+        justify-content: center;
+    }
+}

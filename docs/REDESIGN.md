@@ -33,8 +33,10 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
 - Stufe 1 (v0.23): Palette + lokale Schriften.
 - Stufe 2 (v0.24): Hülle – Seitenleiste + Kopfzeile.
 - Stufe 3 (v0.25): **Start** – erledigt.
-- Stufe 4 (v0.26): **Adressbuch** – erledigt.
-- offen: Kontakt-Detail, Nachrichten, Vollständigkeit, Termine, Mein Eintrag.
+- Stufe 4 (v0.26): **Adressbuch** – erledigt (Spalten-Menü v0.27).
+- Stufe 5 (v0.28): **Kontakt-Detail** – erledigt (eine Seite ansehen+bearbeiten,
+  Änderungsverlauf mit Altwerten für Admins).
+- offen: Nachrichten, Vollständigkeit, Termine, Mein Eintrag.
 
 ## Screen-Entscheidungen
 
@@ -48,7 +50,8 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
   (nicht Admin-only), Standard Tabelle, am Handy Karten. — *umgesetzt v0.26*
 - **Kontakt-Detail:** ansehen + inline bearbeiten auf einer Seite, kein
   getrenntes Formular. Notizen klar „nur intern". **Änderungshistorie mit
-  Altwerten — nur für Admins.**
+  Altwerten — nur für Admins.** — *umgesetzt v0.28 (ganze Seite editierbar,
+  klebende Speichern-Leiste)*
 - **Nachrichten:** Empfängerkreis + Text auf **einem** Screen, Empfängerzahl
   live. „Als Liste speichern" an der Senden-Zeile. „An alle" vorgewählt.
 - **Vollständigkeit** (löst „Namensliste" ab): Überblick (X gesamt · Y ohne

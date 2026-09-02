@@ -62,12 +62,13 @@ final class ContactController extends BaseController
     public function create(): void
     {
         $this->requirePermission('contacts.manage');
-        $this->render('contacts/form', [
+        $this->render('contacts/detail', [
             'contact' => null,
             'categories' => $this->categories->all(),
             'tags' => $this->tags->all(),
             'roles' => $this->users->roles(),
             'phoneLabels' => config('defaults.phone_labels', []),
+            'history' => [],
         ]);
     }
 
@@ -158,12 +159,15 @@ final class ContactController extends BaseController
             Redirect::to('/kontakte');
         }
 
-        $this->render('contacts/form', [
+        $this->render('contacts/detail', [
             'contact' => $contact,
             'categories' => $this->categories->all(),
             'tags' => $this->tags->all(),
             'roles' => $this->users->roles(),
             'phoneLabels' => config('defaults.phone_labels', []),
+            'history' => can('audit.view')
+                ? $this->logs->contactAuditTrail((int) $contact['id'])
+                : [],
         ]);
     }
 
@@ -201,9 +205,13 @@ final class ContactController extends BaseController
         $data['photo_path'] = $this->uploads->storePhoto($request->file('photo'), $existing['photo_path']);
         $this->contacts->update($id, $data, (int) $this->auth->user()['id']);
         $accountMessage = $this->syncLinkedAccount($id, $data);
-        $this->logs->addAudit((int) $this->auth->user()['id'], $id, 'updated', 'Kontaktdaten wurden aktualisiert.');
+        $changes = $this->contactChanges($existing, $data);
+        $summary = $changes === []
+            ? 'Kontakt gespeichert, keine Feldänderung.'
+            : 'Geändert: ' . implode(', ', array_keys($changes)) . '.';
+        $this->logs->addAudit((int) $this->auth->user()['id'], $id, 'updated', $summary, $changes);
         flash('success', trim('Der Kontakt wurde gespeichert. ' . $accountMessage));
-        Redirect::to('/kontakte');
+        Redirect::to('/contacts/edit?id=' . $id);
     }
 
     public function delete(Request $request): void
@@ -358,6 +366,100 @@ final class ContactController extends BaseController
         $normalized = strtolower(trim($geschlecht));
 
         return in_array($normalized, ['m', 'w'], true) ? $normalized : '';
+    }
+
+    /**
+     * Feldweiser Vergleich alt → neu für den Änderungsverlauf. Nur tatsächlich
+     * geänderte Felder, Werte als menschenlesbarer Text.
+     *
+     * @param array<string, mixed> $before Kontakt aus find() (inkl. emails/phones/tags/linked_user)
+     * @param array<string, mixed> $after  bereinigte Formulardaten aus sanitizePayload()
+     * @return array<string, array{from: string, to: string}>
+     */
+    private function contactChanges(array $before, array $after): array
+    {
+        $geschlecht = static fn (string $v): string => match ($v) {
+            'm' => 'männlich', 'w' => 'weiblich', default => '—',
+        };
+        $categoryName = static function (string $id, array $categories): string {
+            foreach ($categories as $category) {
+                if ((string) $category['id'] === $id && $id !== '') {
+                    return (string) $category['name'];
+                }
+            }
+
+            return '—';
+        };
+        $categories = $this->categories->all();
+        $tagNames = function (array $ids): string {
+            $ids = array_map('intval', $ids);
+            $names = [];
+            foreach ($this->tags->all() as $tag) {
+                if (in_array((int) $tag['id'], $ids, true)) {
+                    $names[] = (string) $tag['name'];
+                }
+            }
+            sort($names);
+
+            return $names === [] ? '—' : implode(', ', $names);
+        };
+        $emailText = static function (array $rows): string {
+            $parts = [];
+            foreach ($rows as $row) {
+                $label = trim((string) ($row['label'] ?? ''));
+                $parts[] = ($label !== '' ? $label . ': ' : '') . (string) ($row['email'] ?? '');
+            }
+            sort($parts);
+
+            return $parts === [] ? '—' : implode(', ', $parts);
+        };
+        $phoneText = static function (array $rows): string {
+            $parts = [];
+            foreach ($rows as $row) {
+                $label = trim((string) ($row['label'] ?? ''));
+                $parts[] = ($label !== '' ? $label . ': ' : '') . (string) ($row['phone'] ?? '');
+            }
+            sort($parts);
+
+            return $parts === [] ? '—' : implode(', ', $parts);
+        };
+
+        $pairs = [
+            'Vorname' => [(string) ($before['vorname'] ?? ''), (string) $after['vorname']],
+            'Nachname' => [(string) ($before['nachname'] ?? ''), (string) $after['nachname']],
+            'Geburtsname' => [(string) ($before['geburtsname'] ?? ''), (string) $after['geburtsname']],
+            'Geschlecht' => [$geschlecht((string) ($before['geschlecht'] ?? '')), $geschlecht((string) $after['geschlecht'])],
+            'Geburtstag' => [(string) ($before['geburtstag'] ?? ''), (string) $after['geburtstag']],
+            'Kategorie' => [
+                (string) ($before['category_name'] ?? '') ?: '—',
+                $categoryName((string) $after['category_id'], $categories),
+            ],
+            'Straße' => [(string) ($before['strasse'] ?? ''), (string) $after['strasse']],
+            'PLZ' => [(string) ($before['plz'] ?? ''), (string) $after['plz']],
+            'Ort' => [(string) ($before['ort'] ?? ''), (string) $after['ort']],
+            'Land' => [(string) ($before['land'] ?? ''), (string) $after['land']],
+            'Notizen' => [(string) ($before['notizen'] ?? ''), (string) $after['notizen']],
+            'Tags' => [
+                $tagNames(array_map(static fn (array $t): int => (int) $t['id'], $before['tags'] ?? [])),
+                $tagNames((array) $after['tag_ids']),
+            ],
+            'E-Mail' => [$emailText($before['emails'] ?? []), $emailText($after['emails'])],
+            'Telefon' => [$phoneText($before['phones'] ?? []), $phoneText($after['phones'])],
+        ];
+
+        $changes = [];
+        foreach ($pairs as $label => [$from, $to]) {
+            $from = trim($from);
+            $to = trim($to);
+            if ($from !== $to) {
+                $changes[$label] = [
+                    'from' => $from === '' ? '—' : $from,
+                    'to' => $to === '' ? '—' : $to,
+                ];
+            }
+        }
+
+        return $changes;
     }
 
     private function syncLinkedAccount(int $contactId, array $data): string

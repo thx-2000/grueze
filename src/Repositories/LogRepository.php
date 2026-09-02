@@ -8,12 +8,33 @@ use PDO;
 
 final class LogRepository
 {
+    private ?bool $hasChangesColumn = null;
+
     public function __construct(private PDO $pdo)
     {
     }
 
-    public function addAudit(int $userId, ?int $contactId, string $action, string $details): void
+    /**
+     * @param array<string, array{from: string, to: string}> $changes Feld → alt/neu
+     */
+    public function addAudit(int $userId, ?int $contactId, string $action, string $details, array $changes = []): void
     {
+        if ($this->changesColumnAvailable()) {
+            $stmt = $this->pdo->prepare(
+                'INSERT INTO audit_log (user_id, contact_id, action, details, changes)
+                 VALUES (:user_id, :contact_id, :action, :details, :changes)'
+            );
+            $stmt->execute([
+                'user_id' => $userId,
+                'contact_id' => $contactId,
+                'action' => $action,
+                'details' => $details,
+                'changes' => $changes === [] ? null : json_encode($changes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            ]);
+
+            return;
+        }
+
         $stmt = $this->pdo->prepare(
             'INSERT INTO audit_log (user_id, contact_id, action, details) VALUES (:user_id, :contact_id, :action, :details)'
         );
@@ -35,6 +56,54 @@ final class LogRepository
              ORDER BY audit_log.created_at DESC
              LIMIT 200'
         )->fetchAll();
+    }
+
+    /**
+     * Änderungsverlauf eines einzelnen Kontakts, neueste zuerst. `changes` ist
+     * bereits als Array dekodiert (leer, wenn nichts protokolliert wurde).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function contactAuditTrail(int $contactId, int $limit = 100): array
+    {
+        $withChanges = $this->changesColumnAvailable();
+        $stmt = $this->pdo->prepare(
+            'SELECT audit_log.id, audit_log.action, audit_log.details, audit_log.created_at, '
+            . ($withChanges ? 'audit_log.changes,' : "NULL AS changes,")
+            . ' users.name AS user_name
+             FROM audit_log
+             JOIN users ON users.id = audit_log.user_id
+             WHERE audit_log.contact_id = :contact_id
+             ORDER BY audit_log.created_at DESC, audit_log.id DESC
+             LIMIT :limit'
+        );
+        $stmt->bindValue(':contact_id', $contactId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll();
+        foreach ($rows as $index => $row) {
+            $decoded = $row['changes'] !== null && $row['changes'] !== ''
+                ? json_decode((string) $row['changes'], true)
+                : [];
+            $rows[$index]['changes'] = is_array($decoded) ? $decoded : [];
+        }
+
+        return $rows;
+    }
+
+    private function changesColumnAvailable(): bool
+    {
+        if ($this->hasChangesColumn === null) {
+            try {
+                $this->pdo->query('SELECT changes FROM audit_log LIMIT 0');
+                $this->hasChangesColumn = true;
+            } catch (\PDOException) {
+                $this->hasChangesColumn = false;
+            }
+        }
+
+        return $this->hasChangesColumn;
     }
 
     public function addMailLog(array $data): void

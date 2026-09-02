@@ -121,6 +121,7 @@ CREATE TABLE audit_log (
     contact_id INT UNSIGNED NULL,
     action ENUM('created', 'updated', 'deleted') NOT NULL,
     details TEXT NOT NULL,
+    changes LONGTEXT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_audit_log_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_audit_log_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE SET NULL
