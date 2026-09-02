@@ -20,6 +20,30 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   diese Kern-Workflows so gestalten, dass sie mit möglichst wenigen,
   eindeutigen Schritten erledigt sind. Menüstruktur, Benennung, Seitenlayout
   und Einstiegspunkte daran ausrichten.
+  Erkenntnisse aus dem 1. Gespräch (2026-09-01):
+  - Nutzer real fast nur Admins, ggf. Orga-Team; Aktivität rund um jährliche
+    Stufentreffen. White-Label wird ernst genommen (Firmen, Vereine, Familien,
+    JGA …). Schwächste Nutzer:in: gar nicht technikaffin.
+  - Zwei Modi: Admin/Orga = Power-Tool am Schreibtisch (alles verwalten,
+    Mailings); alle anderen = Handy, sehr einfach (eigene Daten sehen/pflegen,
+    andere finden/kontaktieren, an Abstimmungen teilnehmen).
+  - Job-Phasen: erst Daten vervollständigen + Personen anlegen, später
+    kontaktieren (meist an alle) + gelegentlich Korrektur.
+  - Größter Schmerz: „wirkt zu überfrachtet". Ziel: cleaner, moderner, wertiger.
+  - Self-Service gewünscht: jede:r ändert nur die eigenen Daten; Audit-Log muss
+    alte Werte behalten (falsches Löschen/Ändern nachvollziehbar).
+
+- **Terminfindungs-/Abstimmungstool** für die ganze Stufe: Ja/Nein/Vielleicht
+  je Vorschlag, ggf. mehrere Uhrzeiten pro Tag, ggf. weitere Abstimmungs-
+  varianten mitdenken (freie Auswahl, Ranking …). Doodle-artig. Wer legt an
+  (nur Admin/Orga?), wie nehmen Nicht-Eingeloggte teil (Link/Token?).
+
+- **„Mail ans Orga-Team"-Knopf**: schneller Kontakt-Button. Von wo erreichbar,
+  für wen, an welche Adresse (fest vs. an alle mit Orga-/Admin-Rolle)?
+
+- **Grüße-Pool mit Zufallsrotation**: 10–40 Standard-Wünsche (Geburtstag,
+  Weihnachten) hinterlegen und erweitern, beim Versand geshuffelt zuweisen –
+  assistiert (Admin prüft Batch) oder automatisch am Tag.
 
 - **Voll-Import: Merge-Modus** – **erledigt in v0.22.0**. Backup → „Zusammen-
   führen" spielt Kontakte ins bestehende System ein, dedupliziert über
