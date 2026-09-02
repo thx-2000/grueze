@@ -47,8 +47,10 @@ Handy-Ansicht für Mitglieder: nur *Mein Eintrag · Adressbuch · Termine*.
 - Stufe 8c (v0.33): Termine – drei Typen (Datumsabstimmung / fester Termin /
   Abstimmung ohne Datum); offene Abstimmungen in „Mein Konto".
   **Bereich „Termine" damit funktional rund.**
-- offen: „Mein Eintrag" (Handy), „Mail ans Orga-Team", Grüße-Pool,
-  Selbst-Registrierung, Verwaltung-Hub in 3 Gruppen, dann Security-Audit.
+- v0.34: „Mail ans Orga-Team"-Knopf – erledigt.
+- v0.35–0.36: Grüße-Pool (Weihnachten + Geburtstag, geshuffelt) – erledigt.
+- offen: „Mein Eintrag" (Handy-Redesign), Selbst-Registrierung,
+  Verwaltung-Hub in 3 Gruppen, dann Security-Audit.
 
 ## Screen-Entscheidungen
 

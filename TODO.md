@@ -82,8 +82,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 - **Grüße-Pool mit Zufallsrotation**: **v1 in v0.35.0** – getrennte Listen
   Geburtstag/Weihnachten, CRUD, 40 Seed-Texte, Weihnachts-Serienversand mit
   Vorschau + „neu mischen" (assistiert). Offen:
-  - **v0.36:** Geburtstagsgrüße – Liste der heutigen/anstehenden Geburtstage
-    (Kontakte mit `geburtstag`), je Person Zufallstext, einzeln versenden.
+  - **v0.36 – erledigt:** Geburtstagsgrüße (`/gruesse/geburtstage`, Zeitraum-
+    Tabs, Vorschau + Shuffle + Einzelversand).
   - später ggf. „automatisch am Tag" (braucht Cron – aktuell kein Cron).
 
 - **Voll-Import: Merge-Modus** – **erledigt in v0.22.0**. Backup → „Zusammen-
@@ -126,6 +126,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Geburtstagsgrüße v0.36.0: `/gruesse/geburtstage` (`GreetingController::
+  birthdayForm/birthdayPreview`, `birthdaysWithin($days)`),
+  `ContactRepository::withBirthdays()`, Helper `birthday_countdown()`.
+  Geteilte `greetings/preview.php` (generisches `$rebuild`). Nebenbei:
+  Helper `format_birth_name()` → Geburtsname als „(ehem. X)" in Adressbuch,
+  Detail, Suche, Vollständigkeit.
 - Grüße-Pool v0.35.0: `greetings`-Tabelle (Migration `2026-09-08-gruesse-pool`,
   40 Seeds, auch in `schema.sql` für Neuinstallationen),
   `GreetingRepository::assign()` (Bag-Shuffle), `GreetingController`

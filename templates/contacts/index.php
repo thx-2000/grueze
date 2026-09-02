@@ -370,8 +370,8 @@ $ownFields = $ownContact !== null ? [
                             <td>
                                 <div class="contact-name-cell">
                                     <strong><?= e(trim($contact['vorname'] . ' ' . $contact['nachname'])) ?></strong>
-                                    <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
-                                        <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
+                                    <?php if (($bn = format_birth_name($contact)) !== ''): ?>
+                                        <span class="birth-name-inline"><?= e($bn) ?></span>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -462,8 +462,8 @@ $ownFields = $ownContact !== null ? [
                     <div class="contact-head">
                         <div class="contact-title-row">
                             <h3><?= e(trim($contact['vorname'] . ' ' . $contact['nachname'])) ?></h3>
-                            <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
-                                <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
+                            <?php if (($bn = format_birth_name($contact)) !== ''): ?>
+                                <span class="birth-name-inline"><?= e($bn) ?></span>
                             <?php endif; ?>
                         </div>
                         <span class="tag"><?= e($contact['category_name'] ?: '—') ?></span>

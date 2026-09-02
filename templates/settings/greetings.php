@@ -9,7 +9,10 @@ $groups = [
         <h1>Grüße-Pool</h1>
         <p class="muted">Kurze, persönliche Standard-Wünsche. Platzhalter <code>{Anrede}</code>, <code>{Vorname}</code>, <code>{Nachname}</code> werden beim Versand ersetzt.</p>
     </div>
-    <a class="ghost-button" href="<?= e(url('/gruesse/weihnachten')) ?>"><?= icon('mail') ?><span>Weihnachtsgrüße verschicken</span></a>
+    <div class="hero-actions">
+        <a class="ghost-button" href="<?= e(url('/gruesse/geburtstage')) ?>"><?= icon('calendar') ?><span>Geburtstage</span></a>
+        <a class="ghost-button" href="<?= e(url('/gruesse/weihnachten')) ?>"><?= icon('mail') ?><span>Weihnachtsgrüße</span></a>
+    </div>
 </header>
 
 <?php foreach ($groups as $occasion => [$title, $hint, $items]): ?>

@@ -84,7 +84,7 @@ $queryFor = static function (array $overrides) use ($categoryId, $which, $number
                 <li class="completeness-row">
                     <div class="completeness-person">
                         <strong><?= e($gap['name']) ?></strong>
-                        <?php if ($gap['geburtsname'] !== ''): ?><span class="birth-name-inline">(<?= e($gap['geburtsname']) ?>)</span><?php endif; ?>
+                        <?php if ($gap['geburtsname'] !== ''): ?><span class="birth-name-inline">(ehem. <?= e($gap['geburtsname']) ?>)</span><?php endif; ?>
                         <span class="completeness-chips">
                             <?php if ($gap['missing_email']): ?><span class="status-chip is-warn">Mail fehlt</span><?php endif; ?>
                             <?php if ($gap['missing_phone']): ?><span class="status-chip is-warn">Tel. fehlt</span><?php endif; ?>

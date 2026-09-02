@@ -1,6 +1,7 @@
+<?php $hasWhen = isset($rows[0]['when']); ?>
 <header class="msg-head">
-    <p class="eyebrow">Weihnachtsgrüße · Vorschau</p>
-    <h1><?= e((string) count($rows)) ?> Empfänger, gemischt</h1>
+    <p class="eyebrow">Grüße · Vorschau</p>
+    <h1><?= e($headline) ?></h1>
     <p class="muted">Betreff: „<?= e($subject) ?>". Jede Zeile geht einzeln und personalisiert raus. Passt die Mischung nicht, einfach neu mischen.</p>
 </header>
 
@@ -8,7 +9,11 @@
     <div class="vote-matrix-wrap">
         <table class="vote-matrix greeting-preview-table">
             <thead>
-                <tr><th scope="col">Person</th><th scope="col">Zugeloster Text</th></tr>
+                <tr>
+                    <th scope="col">Person</th>
+                    <?php if ($hasWhen): ?><th scope="col">Geburtstag</th><?php endif; ?>
+                    <th scope="col">Zugeloster Text</th>
+                </tr>
             </thead>
             <tbody>
                 <?php foreach ($rows as $row): ?>
@@ -17,6 +22,7 @@
                             <?= e($row['name']) ?>
                             <span class="muted"><?= e($row['email']) ?></span>
                         </th>
+                        <?php if ($hasWhen): ?><td class="muted"><?= e($row['when']) ?></td><?php endif; ?>
                         <td><?= e($row['text']) ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -26,17 +32,18 @@
 </section>
 
 <div class="greeting-preview-actions">
-    <form method="post" action="<?= e(url('/gruesse/weihnachten/vorschau')) ?>">
+    <form method="post" action="<?= e($rebuild['action']) ?>">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <input type="hidden" name="recipient_mode" value="<?= e($params['recipient_mode']) ?>">
-        <input type="hidden" name="category_id" value="<?= e($params['category_id']) ?>">
-        <?php foreach ($params['tag_ids'] as $tid): ?><input type="hidden" name="tag_ids[]" value="<?= e((string) $tid) ?>"><?php endforeach; ?>
-        <input type="hidden" name="subject" value="<?= e($params['subject']) ?>">
-        <input type="hidden" name="sender_key" value="<?= e($params['sender_key']) ?>">
-        <input type="hidden" name="reply_to_key" value="<?= e($params['reply_to_key']) ?>">
+        <?php foreach ($rebuild['fields'] as $name => $value): ?>
+            <?php if (is_array($value)): ?>
+                <?php foreach ($value as $v): ?><input type="hidden" name="<?= e($name) ?>[]" value="<?= e((string) $v) ?>"><?php endforeach; ?>
+            <?php else: ?>
+                <input type="hidden" name="<?= e($name) ?>" value="<?= e((string) $value) ?>">
+            <?php endif; ?>
+        <?php endforeach; ?>
         <button type="submit" class="ghost-button"><?= icon('reset') ?><span>Neu mischen</span></button>
     </form>
-    <form method="post" action="<?= e(url('/mail/gruesse-senden')) ?>" onsubmit="return confirm('<?= e((string) count($rows)) ?> Weihnachtsgrüße jetzt verschicken?');">
+    <form method="post" action="<?= e(url('/mail/gruesse-senden')) ?>" onsubmit="return confirm('<?= e((string) count($rows)) ?> Grüße jetzt verschicken?');">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <button type="submit" class="button-link"><?= icon('message-send') ?><span>Jetzt verschicken</span></button>
     </form>

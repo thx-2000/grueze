@@ -345,6 +345,8 @@ try {
     $router->post('/verwaltung/gruesse/loeschen', [GreetingController::class, 'delete']);
     $router->get('/gruesse/weihnachten', [GreetingController::class, 'christmasForm']);
     $router->post('/gruesse/weihnachten/vorschau', [GreetingController::class, 'christmasPreview']);
+    $router->get('/gruesse/geburtstage', [GreetingController::class, 'birthdayForm']);
+    $router->post('/gruesse/geburtstage/vorschau', [GreetingController::class, 'birthdayPreview']);
     $router->post('/mail/gruesse-senden', [MailController::class, 'sendGreetings']);
 
     $router->get('/termine', [EventController::class, 'index']);

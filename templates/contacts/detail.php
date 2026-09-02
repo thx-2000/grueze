@@ -61,8 +61,8 @@ $actionLabel = static fn (string $a): string => match ($a) {
 
 <header class="contact-detail-head">
     <p class="eyebrow"><?= $editing ? 'Kontakt' : 'Neuer Kontakt' ?></p>
-    <h1><?= $fullName !== '' ? e($fullName) : 'Kontakt anlegen' ?><?php if ($editing && !empty($contact['geburtsname']) && $contact['geburtsname'] !== $contact['nachname']): ?>
-        <span class="birth-name-inline">(<?= e($contact['geburtsname']) ?>)</span>
+    <h1><?= $fullName !== '' ? e($fullName) : 'Kontakt anlegen' ?><?php if ($editing && ($bn = format_birth_name($contact)) !== ''): ?>
+        <span class="birth-name-inline"><?= e($bn) ?></span>
     <?php endif; ?></h1>
     <?php if ($editing): ?>
         <div class="contact-detail-meta">

@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.36.0
+
+- **Geburtstagsgrüße.** Neue Seite `/gruesse/geburtstage` (Verwaltung →
+  Grüße-Pool → „Geburtstage"): Liste der anstehenden Geburtstage
+  (heute / 3 / 7 / 14 Tage), je Person Datum und „in X Tagen". Wer eine
+  Mailadresse hat, kommt in die **Vorschau** – jede:r bekommt zufällig
+  einen Text aus dem Geburtstags-Pool, „neu mischen", dann einzeln senden.
+  Personen ohne Mailadresse werden angezeigt, aber übersprungen.
+- **Geburtsname mit „ehem.".** Der Geburtsname wird überall als
+  **„(ehem. Müller)"** angezeigt (Adressbuch, Kontakt-Detail, Suche,
+  Vollständigkeit).
+- Keine Migration.
+
 ## 0.35.0
 
 - **Grüße-Pool** (Verwaltung → Grüße-Pool): editierbare Standard-Wünsche,

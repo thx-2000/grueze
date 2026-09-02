@@ -38,8 +38,8 @@ $hasQuery = $query !== '';
                     <div class="search-result-head">
                         <div>
                             <strong><?= e(trim(($contact['vorname'] ?? '') . ' ' . ($contact['nachname'] ?? ''))) ?></strong>
-                            <?php if (!empty($contact['geburtsname']) && $contact['geburtsname'] !== ($contact['nachname'] ?? '')): ?>
-                                <span class="muted">(<?= e($contact['geburtsname']) ?>)</span>
+                            <?php if (($bn = format_birth_name($contact)) !== ''): ?>
+                                <span class="muted"><?= e($bn) ?></span>
                             <?php endif; ?>
                         </div>
                         <?php if (($contact['has_email'] ?? 0) == 0): ?>

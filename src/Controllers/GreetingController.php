@@ -136,9 +136,10 @@ final class GreetingController extends BaseController
             ];
         }
 
+        $subject = trim((string) $request->input('subject')) ?: 'Frohe Weihnachten!';
         $_SESSION['greeting_batch'] = [
             'occasion' => 'christmas',
-            'subject' => trim((string) $request->input('subject')) ?: 'Frohe Weihnachten!',
+            'subject' => $subject,
             'sender_key' => (string) $request->input('sender_key'),
             'reply_to_key' => (string) $request->input('reply_to_key'),
             'assignments' => $assignments,
@@ -146,16 +147,119 @@ final class GreetingController extends BaseController
 
         $this->render('greetings/preview', [
             'rows' => $rows,
-            'subject' => $_SESSION['greeting_batch']['subject'],
-            'params' => [
-                'recipient_mode' => (string) $request->input('recipient_mode', 'all'),
-                'category_id' => (string) $request->input('category_id', ''),
-                'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
-                'subject' => $_SESSION['greeting_batch']['subject'],
-                'sender_key' => $_SESSION['greeting_batch']['sender_key'],
-                'reply_to_key' => $_SESSION['greeting_batch']['reply_to_key'],
+            'subject' => $subject,
+            'headline' => count($rows) . ' Empfänger, gemischt',
+            'rebuild' => [
+                'action' => url('/gruesse/weihnachten/vorschau'),
+                'fields' => [
+                    'recipient_mode' => (string) $request->input('recipient_mode', 'all'),
+                    'category_id' => (string) $request->input('category_id', ''),
+                    'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
+                    'subject' => $subject,
+                    'sender_key' => (string) $request->input('sender_key'),
+                    'reply_to_key' => (string) $request->input('reply_to_key'),
+                ],
             ],
         ]);
+    }
+
+    // ------------------------------------------------------ Geburtstagsgrüße
+
+    public function birthdayForm(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+
+        $days = $this->clampDays((int) $request->input('tage', 0));
+        $rows = $this->birthdaysWithin($days);
+
+        $this->render('greetings/birthdays', [
+            'days' => $days,
+            'rows' => $rows,
+            'poolSize' => count($this->greetings->activeTexts('birthday')),
+            'identities' => $this->settings->mailIdentities(),
+            'replyToOptions' => $this->settings->mailReplyToOptions(),
+        ]);
+    }
+
+    public function birthdayPreview(Request $request): void
+    {
+        $this->requirePermission('mail.send');
+        Csrf::validate($request->input('_csrf'));
+
+        if ($this->greetings->activeTexts('birthday') === []) {
+            flash('error', 'Es sind keine Geburtstags-Texte im Pool. Bitte zuerst welche anlegen.');
+            Redirect::to('/verwaltung/gruesse');
+        }
+
+        $days = $this->clampDays((int) $request->input('tage', 0));
+        $withEmail = array_values(array_filter(
+            $this->birthdaysWithin($days),
+            static fn (array $r): bool => trim((string) ($r['email'] ?? '')) !== ''
+        ));
+        if ($withEmail === []) {
+            flash('error', 'In diesem Zeitraum hat niemand mit Mailadresse Geburtstag.');
+            Redirect::to('/gruesse/geburtstage?tage=' . $days);
+        }
+
+        $assignments = $this->greetings->assign(
+            array_map(static fn (array $r): int => (int) $r['id'], $withEmail),
+            'birthday'
+        );
+
+        $rows = [];
+        foreach ($withEmail as $r) {
+            $rows[] = [
+                'name' => trim($r['vorname'] . ' ' . $r['nachname']),
+                'email' => (string) $r['email'],
+                'when' => $r['days_until'] === 0 ? 'heute' : 'in ' . $r['days_until'] . ' Tag' . ($r['days_until'] === 1 ? '' : 'en'),
+                'text' => (string) ($assignments[(int) $r['id']] ?? ''),
+            ];
+        }
+
+        $subject = trim((string) $request->input('subject')) ?: 'Alles Gute zum Geburtstag!';
+        $_SESSION['greeting_batch'] = [
+            'occasion' => 'birthday',
+            'subject' => $subject,
+            'sender_key' => (string) $request->input('sender_key'),
+            'reply_to_key' => (string) $request->input('reply_to_key'),
+            'assignments' => $assignments,
+        ];
+
+        $this->render('greetings/preview', [
+            'rows' => $rows,
+            'subject' => $subject,
+            'headline' => count($rows) . ' Geburtstag' . (count($rows) === 1 ? '' : 'e') . ($days === 0 ? ' heute' : ' bis in ' . $days . ' Tagen'),
+            'rebuild' => [
+                'action' => url('/gruesse/geburtstage/vorschau'),
+                'fields' => [
+                    'tage' => (string) $days,
+                    'subject' => $subject,
+                    'sender_key' => (string) $request->input('sender_key'),
+                    'reply_to_key' => (string) $request->input('reply_to_key'),
+                ],
+            ],
+        ]);
+    }
+
+    private function clampDays(int $days): int
+    {
+        return max(0, min(30, $days));
+    }
+
+    /** @return list<array<string,mixed>> nach Nähe sortiert, mit days_until */
+    private function birthdaysWithin(int $days): array
+    {
+        $out = [];
+        foreach ($this->contacts->withBirthdays() as $contact) {
+            $until = birthday_countdown((string) $contact['geburtstag']);
+            if ($until !== null && $until <= $days) {
+                $contact['days_until'] = $until;
+                $out[] = $contact;
+            }
+        }
+        usort($out, static fn (array $a, array $b): int => $a['days_until'] <=> $b['days_until']);
+
+        return $out;
     }
 
     /** @return list<int> */

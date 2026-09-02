@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.35.0';
+    return '0.36.0';
 }
 
 function system_label(): string
@@ -336,6 +336,7 @@ function page_title(string $path): string
         '/rundmail'                  => 'Nachrichten',
         '/verwaltung/gruesse'        => 'Grüße-Pool',
         '/gruesse/weihnachten'       => 'Weihnachtsgrüße',
+        '/gruesse/geburtstage'       => 'Geburtstagsgrüße',
         '/mail/compose'              => 'Nachricht schreiben',
         '/mail/status'               => 'Versand',
         '/vollstaendigkeit'          => 'Vollständigkeit',
@@ -426,6 +427,56 @@ function format_date(?string $value): string
     } catch (Throwable) {
         return (string) $value;
     }
+}
+
+/**
+ * Tage bis zum nächsten Geburtstag (0 = heute). Null, wenn kein gültiges
+ * Datum. 29.2. in Nicht-Schaltjahren zählt als 1.3.
+ */
+function birthday_countdown(?string $ymd): ?int
+{
+    $ymd = trim((string) $ymd);
+    if ($ymd === '') {
+        return null;
+    }
+
+    try {
+        $today = new DateTimeImmutable('today');
+        $birth = new DateTimeImmutable($ymd);
+    } catch (Throwable) {
+        return null;
+    }
+
+    $year = (int) $today->format('Y');
+    $month = (int) $birth->format('n');
+    $day = (int) $birth->format('j');
+    if ($month === 2 && $day === 29 && !checkdate(2, 29, $year)) {
+        $month = 3;
+        $day = 1;
+    }
+
+    $next = $today->setDate($year, $month, $day);
+    if ($next < $today) {
+        $next = $next->modify('+1 year');
+    }
+
+    return (int) $today->diff($next)->days;
+}
+
+/**
+ * Geburtsname für die Anzeige: „(ehem. Müller)" – leer, wenn keiner hinterlegt
+ * ist oder er dem aktuellen Nachnamen entspricht.
+ */
+function format_birth_name(array $contact): string
+{
+    $geburtsname = trim((string) ($contact['geburtsname'] ?? ''));
+    $nachname = trim((string) ($contact['nachname'] ?? ''));
+
+    if ($geburtsname === '' || $geburtsname === $nachname) {
+        return '';
+    }
+
+    return '(ehem. ' . $geburtsname . ')';
 }
 
 /** Anzeigetext einer Termin-Antwortoption: Datum (+ Uhrzeit) oder Freitext-Label. */

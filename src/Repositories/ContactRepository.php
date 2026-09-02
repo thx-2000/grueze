@@ -199,6 +199,21 @@ final class ContactRepository
         );
     }
 
+    /**
+     * Kontakte mit hinterlegtem Geburtstag (für die Geburtstagsgrüße).
+     *
+     * @return list<array{id:int,vorname:string,nachname:string,geburtstag:string,email:?string}>
+     */
+    public function withBirthdays(): array
+    {
+        return $this->pdo->query(
+            'SELECT contacts.id, contacts.vorname, contacts.nachname, contacts.geburtstag,
+                    (SELECT email FROM contact_emails WHERE contact_emails.contact_id = contacts.id ORDER BY contact_emails.id LIMIT 1) AS email
+             FROM contacts
+             WHERE contacts.geburtstag IS NOT NULL'
+        )->fetchAll();
+    }
+
     public function find(int $id): ?array
     {
         $stmt = $this->pdo->prepare(
