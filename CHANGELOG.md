@@ -3,6 +3,16 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.25.0
+
+- **Neuer Look, Stufe 3 – Startseite.** Kein Kacheln-Dashboard mehr: oben
+  Begrüßung mit Datum, großes Suchfeld, zwei Schnellaktionen. Darunter
+  **„Steht an"** – dieselben Kennzahlen wie früher (ohne Mailadresse / ohne
+  Handynummer), aber als verlinkte To-do-Liste mit großer Fraunces-Zahl in
+  gedämpftem Amber. Sind keine Lücken offen, steht dort eine ruhige
+  „alles gepflegt"-Zeile. Erste Seite mit echtem `<h1>`.
+- Keine Migration.
+
 ## 0.24.0
 
 - **Neuer Look, Stufe 2 – Seitenleiste + Kopfzeile.** Die laute grüne

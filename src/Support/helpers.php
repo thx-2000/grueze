@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.24.0';
+    return '0.25.0';
 }
 
 function system_label(): string
@@ -523,6 +523,8 @@ function icon(string $name): string
         'eye' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5 0 9.27 3.11 11 7.5C21.27 16.89 17 20 12 20S2.73 16.89 1 12.5C2.73 8.11 7 5 12 5Zm0 2C8.24 7 4.83 9.2 3.18 12.5C4.83 15.8 8.24 18 12 18s7.17-2.2 8.82-5.5C18.17 9.2 14.76 7 12 7Zm0 1.5a4 4 0 1 1 0 8a4 4 0 0 1 0-8Zm0 2a2 2 0 1 0 0 4a2 2 0 0 0 0-4Z"/></svg>',
         'archive' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h15A1.5 1.5 0 0 1 21 5.5v2A1.5 1.5 0 0 1 19.5 9H19v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9h-.5A1.5 1.5 0 0 1 3 7.5v-2ZM5 6v1.5h14V6H5Zm2 3v9h10V9H7Zm3 2h4v2h-4v-2Z"/></svg>',
         'home' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l8 6.4V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1V9.6l8-6.4Z"/></svg>',
+        'chevron-right' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.3 6.7L10.7 5.3l6.7 6.7l-6.7 6.7l-1.4-1.4l5.3-5.3l-5.3-5.3Z"/></svg>',
+        'check' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.55 17.15L4.4 12l1.4-1.4l3.75 3.75l8.25-8.25L19.2 9.3l-9.65 9.65Z"/></svg>',
         'menu' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg>',
         'close' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5L5 6.4L10.6 12L5 17.6L6.4 19L12 13.4L17.6 19L19 17.6L13.4 12L19 6.4L17.6 5L12 10.6L6.4 5Z"/></svg>',
         'eye-off' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.28 2.22L2.22 3.28l3.2 3.2C3.5 7.9 1.98 9.98 1 12.5C2.73 16.89 7 20 12 20c2 0 3.88-.5 5.54-1.38l3.18 3.18l1.06-1.06L3.28 2.22ZM12 18c-3.76 0-7.17-2.2-8.82-5.5c.83-1.66 2.06-3.05 3.54-4.02l2.02 2.02A4 4 0 0 0 14.5 15.9l1.66 1.66A9.6 9.6 0 0 1 12 18Zm0-11c3.76 0 7.17 2.2 8.82 5.5a11.4 11.4 0 0 1-2.2 2.94l1.42 1.42A13.3 13.3 0 0 0 23 12.5C21.27 8.11 17 5 12 5c-1.2 0-2.36.18-3.45.5l1.6 1.6C10.79 7.04 11.38 7 12 7Z"/></svg>',

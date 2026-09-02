@@ -2726,16 +2726,16 @@ code {
         font-size: 0.95rem;
     }
 
-    .start-stats {
-        grid-template-columns: 1fr;
-    }
-
     .start-hero {
-        padding: 1.4rem 1.1rem;
+        padding: 0;
     }
 
     .start-actions {
         grid-template-columns: 1fr;
+    }
+
+    .start-todo-count {
+        font-size: 1.5rem;
     }
 
     .start-search input[type="search"] {
@@ -2770,17 +2770,25 @@ code {
 /* -------------------------------------------------------------- Startseite */
 
 .start-hero {
-    background: var(--color-surface-strong);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    padding: 2rem 1.6rem;
     display: grid;
-    gap: 1.1rem;
+    gap: 0.35rem;
+    padding: 0.4rem 0.2rem 0;
 }
 
-.start-hero h2 {
+.start-hero .eyebrow {
     margin: 0;
-    font-size: 1.7rem;
+}
+
+.start-hero h1 {
+    margin: 0;
+    font-size: 1.9rem;
+    line-height: 1.15;
+}
+
+.start-date {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.95rem;
 }
 
 /* Suchfeld als eine geschlossene Einheit: Rahmen nur außen, Eingabe und
@@ -2871,12 +2879,12 @@ code {
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 0.8rem;
+    gap: 0.7rem;
     min-height: 0;
-    padding: 1rem 1.15rem;
+    padding: 0.85rem 1.1rem;
     border-radius: var(--radius-md);
-    font-weight: 700;
-    font-size: 1rem;
+    font-weight: 600;
+    font-size: 0.98rem;
     box-shadow: var(--shadow-card);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -2889,10 +2897,10 @@ code {
 /* Icon in einer runden Plakette, damit die Kacheln „knopfiger" wirken. */
 .start-actions .icon {
     box-sizing: content-box;
-    width: 1.4rem;
-    height: 1.4rem;
-    flex: 0 0 1.4rem;
-    padding: 0.5rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    flex: 0 0 1.2rem;
+    padding: 0.4rem;
     border-radius: 999px;
     background: color-mix(in srgb, currentColor 14%, transparent);
 }
@@ -2901,41 +2909,94 @@ code {
     color: var(--color-primary);
 }
 
-.start-stats {
+/* „Steht an" – verlinkte To-do-Liste statt Kennzahl-Kacheln. */
+.start-board {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 0.9rem;
-    margin-top: 1.1rem;
 }
 
-.start-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    padding: 1.1rem 1.2rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
+.start-board-head h2 {
+    margin: 0 0 0.15rem;
+    font-size: 1.15rem;
 }
 
-.start-stat:hover {
-    border-color: var(--color-accent);
-}
-
-.start-stat-value {
-    font-size: 1.9rem;
-    font-weight: 800;
-    line-height: 1.1;
-}
-
-.start-stat-label {
-    color: var(--color-muted);
+.start-board-head p {
+    margin: 0;
     font-size: 0.9rem;
 }
 
-.start-stat.is-attention .start-stat-value {
-    color: var(--color-secondary);
+.start-todo {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+}
+
+.start-todo li + li {
+    border-top: 1px solid var(--color-border);
+}
+
+.start-todo-link {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.85rem 0.25rem;
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.start-todo-link:hover .start-todo-label,
+.start-todo-link:focus-visible .start-todo-label {
+    color: var(--color-primary);
+}
+
+.start-todo-count {
+    flex: 0 0 auto;
+    min-width: 2.4ch;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.7rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-danger);
+}
+
+.start-todo-label {
+    flex: 1;
+    font-size: 0.95rem;
+}
+
+.start-todo-link .icon {
+    flex: 0 0 auto;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--color-muted);
+}
+
+.start-board-clear {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-md);
+    background: var(--success-veil);
+    color: var(--color-text);
+    font-size: 0.95rem;
+}
+
+.start-board-clear .icon {
+    flex: 0 0 auto;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--color-success);
+}
+
+.start-board-foot {
+    margin: 0;
+    padding-top: 0.15rem;
+    color: var(--color-muted);
+    font-size: 0.88rem;
 }
 
 /* ------------------------------------------------------- Verwaltungs-Hub */
