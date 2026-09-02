@@ -92,6 +92,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   #f5f7f3-Grund, weiche Ecken). `h1–h4` global in der Display-Schrift.
   Kein HTML-Umbau – nur Tokens + Schriften. Nächste Stufen laut
   `docs/REDESIGN.md`: Seitenleiste/Kopf, dann Screens, dann „Termine".
+- Neuer Look, Stufe 2 (v0.24.0): laute gruene Kopfleiste -> ruhige helle
+  Topbar (Suche + Blickschutz); neue Seitenleiste (Wortmarke+Punkt,
+  Mein-Eintrag-Karte, Aktiv-Streifen in Lindgruen, Verwaltung als Gruppe) in
+  templates/layout/app.php + neuer CSS-Block am Ende von app.css
+  (.app-shell/.app-rail/.app-topbar, ersetzt .signal-bar/.page-shell/.sidebar).
+  Menue: Kontakte->Adressbuch, Rundmail->Nachrichten. Gast-Seiten ohne Chrome.
+  Achtung: globales `button { color: !important }` musste fuer die Huellen-
+  Knoepfe ueberschrieben werden.
 - Backup zusammenführen (v0.22.0): Dritter Restore-Modus `merge` in
   `BackupService::mergeContacts()`. Nur Kontakte + Mails/Telefone/Tags/
   Kategorien; Dedup über `ContactRepository::findImportMatch()` (Name +

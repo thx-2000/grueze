@@ -3,6 +3,23 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.24.0
+
+- **Neuer Look, Stufe 2 – Seitenleiste + Kopfzeile.** Die laute grüne
+  Kopfleiste weicht einer ruhigen, hellen Topbar (Suche + Blickschutz). Neue
+  Seitenleiste: Wortmarke mit grünem Punkt, eine **„Mein Eintrag"-Karte** oben,
+  klare Navigation mit grünem Aktiv-Streifen, Verwaltung als Gruppe.
+- Menüpunkte umbenannt: „Kontakte" → **Adressbuch**, „Rundmail" → **Nachrichten**.
+- Login und andere Gast-Seiten ohne Chrome, zentriert.
+- Kein Screen-Umbau – die Seiteninhalte sind noch die alten. Nächste Stufen
+  laut `docs/REDESIGN.md`.
+
+## 0.23.1
+
+- Fix: Update-Hinweisstreifen erschien auch bei Code-Updates ohne DB-Änderung,
+  ohne Möglichkeit ihn zu quittieren. Erscheint jetzt nur bei offenen
+  Migrationen; die Version zieht sonst still nach.
+
 ## 0.23.0
 
 - **Neuer Look, erste Stufe:** ruhigeres Waldgrün statt Leuchtgrün, viel Weiß,

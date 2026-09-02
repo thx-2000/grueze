@@ -57,124 +57,108 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
 </head>
 <body>
     <a class="skip-link" href="#main">Zum Inhalt springen</a>
-    <div class="signal-bar">
-        <div class="signal-bar-inner">
-            <div class="signal-bar-main">
-                <?php if (!empty($currentUser)): ?>
-                    <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="pageSidebar">
-                        <span class="nav-toggle-icon nav-toggle-icon--menu"><?= icon('menu') ?></span>
-                        <span class="nav-toggle-icon nav-toggle-icon--close"><?= icon('close') ?></span>
-                        <span class="nav-toggle-label">Menü</span>
-                    </button>
+    <?php
+    $navInitials = '';
+    if (!empty($currentUser['name'])) {
+        $parts = preg_split('/\s+/', trim((string) $currentUser['name'])) ?: [];
+        $navInitials = mb_strtoupper(mb_substr($parts[0] ?? '', 0, 1) . mb_substr(end($parts) ?: '', 0, 1));
+    }
+    $showAdminHub = !empty($currentUser) && (can('users.manage') || can('settings.manage') || can('audit.view') || can('mail.view_log'));
+    $onContacts = $currentPath === '/kontakte' || str_starts_with($currentPath, '/kontakte/')
+        || str_starts_with($currentPath, '/contacts') || str_starts_with($currentPath, '/search');
+    $onRundmail = str_starts_with($currentPath, '/rundmail') || str_starts_with($currentPath, '/mail') || str_starts_with($currentPath, '/namensliste');
+    $onAdminHub = str_starts_with($currentPath, '/verwaltung')
+        || str_starts_with($currentPath, '/settings') || str_starts_with($currentPath, '/admin')
+        || str_starts_with($currentPath, '/users') || str_starts_with($currentPath, '/logs');
+    $onAccount = str_starts_with($currentPath, '/account') || str_starts_with($currentPath, '/security');
+    ?>
+    <div class="app-shell<?= empty($currentUser) ? ' is-guest' : '' ?>">
+        <?php if (!empty($currentUser)): ?>
+        <aside class="app-rail" id="pageSidebar">
+            <a class="rail-brand" href="<?= e(url('/')) ?>">
+                <?php if ($logoPath !== ''): ?>
+                    <img class="rail-logo" src="<?= e(asset_url('/' . ltrim($logoPath, '/'))) ?>" alt="">
+                <?php else: ?>
+                    <span class="rail-dot" aria-hidden="true"></span>
                 <?php endif; ?>
-                <a class="signal-bar-label" href="<?= e(url('/')) ?>"><?= e($appName) ?></a>
-                <?php if (!empty($currentUser)): ?>
-                    <form method="get" action="<?= e(url('/search')) ?>" class="signal-search" role="search">
-                        <label class="visually-hidden" for="globalSearch">Global suchen: Kontakte, Benutzer</label>
-                        <input type="search" id="globalSearch" name="q" value="<?= e($globalSearchQuery) ?>" placeholder="Global suchen: Kontakte, Benutzer ...">
-                        <button type="submit" class="signal-bar-button"><?= icon('search') ?><span>Suchen</span></button>
+                <span class="rail-wordmark"><?= e($shortName !== '' ? $shortName : $appName) ?></span>
+            </a>
+
+            <a class="rail-me<?= $onAccount ? ' is-active' : '' ?>" href="<?= e(url('/account')) ?>">
+                <span class="rail-me-ava" aria-hidden="true"><?= e($navInitials) ?></span>
+                <span class="rail-me-text">
+                    <strong><?= e($currentUser['name']) ?></strong>
+                    <span>Mein Eintrag</span>
+                </span>
+            </a>
+
+            <nav class="rail-nav" aria-label="Hauptnavigation">
+                <?php if ($publicSiteUrl !== '' && !can('contacts.manage') && can('mail.contact_single')): ?>
+                    <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><span class="rail-ic"><?= icon('globe') ?></span><?= e($publicSiteLabel !== '' ? $publicSiteLabel : 'Startseite') ?></a>
+                <?php endif; ?>
+                <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><span class="rail-ic"><?= icon('home') ?></span>Start</a>
+                <a class="<?= $onContacts ? 'is-active' : '' ?>" href="<?= e(url('/kontakte')) ?>"><span class="rail-ic"><?= icon('contacts') ?></span>Adressbuch</a>
+                <?php if (can('mail.send')): ?>
+                    <a class="<?= $onRundmail ? 'is-active' : '' ?>" href="<?= e(url('/rundmail')) ?>"><span class="rail-ic"><?= icon('mail') ?></span>Nachrichten</a>
+                <?php endif; ?>
+                <?php if ($showAdminHub): ?>
+                    <span class="rail-group">Verwaltung</span>
+                    <a class="<?= $onAdminHub ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung')) ?>"><span class="rail-ic"><?= icon('sliders') ?></span>Einstellungen</a>
+                <?php endif; ?>
+            </nav>
+
+            <div class="rail-foot">
+                <?php if (!empty($isImpersonating) && !empty($originalUser)): ?>
+                    <form method="post" action="<?= e(url('/users/impersonate/stop')) ?>" class="rail-impersonate">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <button type="submit">Angemeldet als <?= e($currentUser['name']) ?> — zurück zu <?= e($originalUser['name']) ?></button>
                     </form>
                 <?php endif; ?>
-            </div>
-            <div class="signal-bar-secondary">
-                <div class="signal-bar-userzone">
-                    <?php if (!empty($currentUser)): ?>
-                        <?php if (!empty($isImpersonating) && !empty($originalUser)): ?>
-                            <span class="signal-bar-meta">Angemeldet als <?= e($currentUser['name']) ?></span>
-                            <form method="post" action="<?= e(url('/users/impersonate/stop')) ?>">
-                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                <button type="submit" class="signal-bar-button">Zurück zu <?= e($originalUser['name']) ?></button>
-                            </form>
-                        <?php else: ?>
-                            <span class="signal-bar-meta">Angemeldet als <?= e($currentUser['name']) ?></span>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </div>
-                <?php if (!empty($currentUser)): ?>
-                    <div class="signal-bar-tools">
-                        <button type="button" id="privacyGuardToggle" class="signal-bar-button" aria-pressed="false" title="Kontaktdaten (E-Mail, Telefon, Adresse, Geburtstag, Notizen) aus- oder einblenden – falls jemand mitliest">
-                            <?= icon('eye-off') ?><span data-privacy-guard-label>Blickschutz</span>
-                        </button>
-                        <?php if (!empty($signalHint)): ?>
-                            <span class="signal-bar-hint"><?= e($signalHint) ?></span>
-                        <?php endif; ?>
-                        <span id="signalSelectionStatus" class="signal-bar-hint" role="status" hidden></span>
-                        <div class="signal-bar-actions">
-                            <button type="submit" id="signalComposeSelection" form="contactSelectionForm" class="signal-bar-button" hidden><?= icon('mail') ?><span>Mail an Auswahl</span></button>
-                            <button type="button" id="signalClearSelection" class="signal-bar-button" data-select="none" hidden><?= icon('reset') ?><span>Auswahl aufheben</span></button>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-    <div class="nav-backdrop" hidden></div>
-    <div class="page-shell">
-        <div class="sidebar" id="pageSidebar">
-            <a class="sidebar-brand" href="<?= e(url('/')) ?>">
-                <?php if ($logoPath !== ''): ?>
-                    <span class="brand-mark brand-mark-image">
-                        <img src="<?= e(asset_url('/' . ltrim($logoPath, '/'))) ?>" alt="<?= e($shortName !== '' ? $shortName : $appName) ?>">
-                    </span>
-                <?php else: ?>
-                    <span class="brand-mark"><?= e($shortName !== '' ? $shortName : $appName) ?></span>
-                <?php endif; ?>
-                <div>
-                    <p class="eyebrow">Organisation</p>
-                    <h1><?= e($appName) ?></h1>
-                    <p class="muted sidebar-copy"><?= e($sidebarCopy !== '' ? $sidebarCopy : 'Kontakte, Mailings und Organisation an einem Ort.') ?></p>
-                </div>
-            </a>
-            <?php if (!empty($currentUser)): ?>
-                <?php
-                $showAdminHub = can('users.manage') || can('settings.manage') || can('audit.view') || can('mail.view_log');
-                $onContacts = $currentPath === '/kontakte' || str_starts_with($currentPath, '/kontakte/')
-                    || str_starts_with($currentPath, '/contacts') || str_starts_with($currentPath, '/search');
-                $onRundmail = str_starts_with($currentPath, '/rundmail') || str_starts_with($currentPath, '/mail');
-                $onAdminHub = str_starts_with($currentPath, '/verwaltung')
-                    || str_starts_with($currentPath, '/settings') || str_starts_with($currentPath, '/admin')
-                    || str_starts_with($currentPath, '/users') || str_starts_with($currentPath, '/logs');
-                ?>
-                <nav class="nav" aria-label="Hauptnavigation">
-                    <?php if ($publicSiteUrl !== '' && !can('contacts.manage') && can('mail.contact_single')): ?>
-                        <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= icon('globe') ?><span><?= e($publicSiteLabel !== '' ? $publicSiteLabel : 'Startseite') ?></span></a>
-                    <?php endif; ?>
-                    <a class="<?= $currentPath === '/' ? 'is-active' : '' ?>" href="<?= e(url('/')) ?>"><?= icon('home') ?><span>Start</span></a>
-                    <a class="<?= $onContacts ? 'is-active' : '' ?>" href="<?= e(url('/kontakte')) ?>"><?= icon('contacts') ?><span>Kontakte</span></a>
-                    <?php if (can('mail.send')): ?>
-                        <a class="<?= $onRundmail ? 'is-active' : '' ?>" href="<?= e(url('/rundmail')) ?>"><?= icon('mail') ?><span>Rundmail</span></a>
-                    <?php endif; ?>
-                    <?php if ($showAdminHub): ?>
-                        <a class="<?= $onAdminHub ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung')) ?>"><?= icon('sliders') ?><span>Verwaltung</span></a>
-                    <?php endif; ?>
-                </nav>
-                <div class="sidebar-footer">
-                    <a class="profile-chip<?= str_starts_with($currentPath, '/account') ? ' is-active' : '' ?>" href="<?= e(url('/account')) ?>">
-                        <strong><?= e($currentUser['name']) ?></strong>
-                        <span><?= e(role_label((string) ($currentUser['role_name'] ?? ''))) ?></span>
-                        <small>Konto verwalten</small>
-                    </a>
+                <div class="rail-foot-row">
+                    <span class="rail-role"><?= e(role_label((string) ($currentUser['role_name'] ?? ''))) ?></span>
                     <form method="post" action="<?= e(url('/logout')) ?>">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                        <button type="submit" class="ghost-button">Abmelden</button>
+                        <button type="submit" class="rail-logout">Abmelden</button>
                     </form>
-                    <?php if ($systemLabel !== ''): ?>
-                        <p class="sidebar-product">läuft mit
-                            <a href="<?= e(product_url()) ?>" target="_blank" rel="noopener noreferrer"><?= e($systemLabel) ?></a>
-                            <span class="sidebar-product-version">v<?= e($appVersion) ?></span>
-                        </p>
-                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
-        </div>
+                <?php if ($systemLabel !== ''): ?>
+                    <p class="rail-product">läuft mit
+                        <a href="<?= e(product_url()) ?>" target="_blank" rel="noopener noreferrer"><?= e($systemLabel) ?></a>
+                        v<?= e($appVersion) ?></p>
+                <?php endif; ?>
+            </div>
+        </aside>
+        <div class="nav-backdrop" hidden></div>
+        <?php endif; ?>
 
-        <main class="content" id="main">
-            <header class="content-topbar">
-                <div>
-                    <p class="eyebrow">Arbeitsbereich</p>
-                    <p class="topbar-title"><a href="<?= e(url('/')) ?>"><?= e($appName) ?></a></p>
+        <div class="app-main">
+            <?php if (!empty($currentUser)): ?>
+            <header class="app-topbar">
+                <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="pageSidebar">
+                    <span class="nav-toggle-icon nav-toggle-icon--menu"><?= icon('menu') ?></span>
+                    <span class="nav-toggle-icon nav-toggle-icon--close"><?= icon('close') ?></span>
+                    <span class="visually-hidden">Menü</span>
+                </button>
+                <form method="get" action="<?= e(url('/search')) ?>" class="topbar-search" role="search">
+                    <label class="visually-hidden" for="globalSearch">Suchen: Kontakte, Benutzer</label>
+                    <span class="topbar-search-ic" aria-hidden="true"><?= icon('search') ?></span>
+                    <input type="search" id="globalSearch" name="q" value="<?= e($globalSearchQuery) ?>" placeholder="Suchen: Name, Ort …">
+                </form>
+                <div class="topbar-tools">
+                    <?php if (!empty($signalHint)): ?><span class="topbar-hint"><?= e($signalHint) ?></span><?php endif; ?>
+                    <span id="signalSelectionStatus" class="topbar-hint" role="status" hidden></span>
+                    <button type="submit" id="signalComposeSelection" form="contactSelectionForm" class="topbar-btn" hidden><?= icon('mail') ?><span>Mail an Auswahl</span></button>
+                    <button type="button" id="signalClearSelection" class="topbar-btn" data-select="none" hidden><?= icon('reset') ?><span>Auswahl aufheben</span></button>
+                    <button type="button" id="privacyGuardToggle" class="topbar-icon" aria-pressed="false" title="Kontaktdaten aus- oder einblenden – falls jemand mitliest">
+                        <?= icon('eye-off') ?><span class="visually-hidden" data-privacy-guard-label>Blickschutz</span>
+                    </button>
                 </div>
             </header>
+            <?php endif; ?>
+
+        <main class="content" id="main"><?php if (empty($currentUser)): ?>
+            <div class="guest-brand"><span class="rail-dot" aria-hidden="true"></span><span><?= e($shortName !== '' ? $shortName : $appName) ?></span></div>
+        <?php endif; ?>
             <?php if (!empty($currentUser) && can('users.manage') && $currentPath !== '/admin/aktualisieren' && system_update_pending()): ?>
                 <div class="update-banner" role="status">
                     <span><?= icon('upload') ?> Nach dem letzten Upload steht noch ein Datenbank-Update aus.</span>
@@ -195,7 +179,8 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
 
             <?php require $templatePath; ?>
         </main>
-    </div>
+        </div><!-- /.app-main -->
+    </div><!-- /.app-shell -->
 
     <footer class="site-footer<?= !empty($currentUser) ? ' is-authenticated' : '' ?>">
         <div class="site-footer-shell">
