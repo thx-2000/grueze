@@ -305,6 +305,8 @@ try {
     $router->post('/verwaltung/registrierung', [RegistrationController::class, 'updateSettings']);
     $router->post('/verwaltung/einladung', [RegistrationController::class, 'createInvite']);
     $router->post('/verwaltung/einladung/zuruecknehmen', [RegistrationController::class, 'revokeInvite']);
+    $router->post('/verwaltung/einladung/freigeben', [RegistrationController::class, 'approveRequest']);
+    $router->post('/verwaltung/einladung/ablehnen', [RegistrationController::class, 'rejectRequest']);
     $router->get('/impressum', [LegalController::class, 'impressum']);
     $router->get('/datenschutz', [LegalController::class, 'datenschutz']);
     $router->get('/setup/admin', [SetupController::class, 'showAdminForm']);

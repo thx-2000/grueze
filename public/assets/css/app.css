@@ -4022,7 +4022,18 @@ body { display: block; }
     cursor: pointer;
 }
 .rail-logout:hover { border-color: color-mix(in srgb, var(--color-text) 25%, transparent); }
-.rail-product { font-size: 0.72rem; color: var(--color-muted); margin: 0; line-height: 1.5; }
+.rail-legal {
+    display: grid;
+    gap: 0.15rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--edge-hairline);
+}
+.rail-legal a {
+    font-size: 0.74rem;
+    color: var(--color-muted);
+}
+.rail-legal a:hover { color: var(--color-text); }
+.rail-product { font-size: 0.72rem; color: var(--color-muted); margin: 0.15rem 0 0; line-height: 1.5; }
 .rail-product a { color: var(--color-muted); }
 .rail-impersonate button {
     font: inherit; font-size: 0.74rem; width: 100%; text-align: left;
@@ -5640,4 +5651,24 @@ body { display: block; }
 
 .greeting-preview-actions form {
     margin: 0;
+}
+
+/* Selbst-Registrierung */
+.register-mode {
+    display: grid;
+    gap: 0.4rem;
+    border: 1px solid var(--edge-hairline);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.85rem;
+}
+.register-mode legend {
+    padding: 0;
+    font-weight: 700;
+}
+.registration-note {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.88rem;
+    color: var(--color-muted);
+    font-style: italic;
 }

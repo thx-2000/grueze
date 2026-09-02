@@ -90,9 +90,17 @@ final class RegistrationController extends BaseController
         }
 
         $email = mb_strtolower(trim((string) $request->input('email')));
+        $note = trim((string) $request->input('note'));
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             flash('error', 'Bitte eine gültige Mailadresse eingeben.');
             Redirect::to('/registrieren');
+        }
+
+        // Rate-Limit: max. 5 Anfragen je Quelle pro Stunde.
+        $ipHash = $this->sourceHash();
+        if ($this->invites->recentCountByIp($ipHash, 60) >= 5) {
+            flash('error', 'Zu viele Anfragen. Bitte später erneut versuchen.');
+            Redirect::to('/login');
         }
 
         // Schon ein aktiver Account? Schon eine offene Einladung? → neutral raus.
@@ -103,8 +111,11 @@ final class RegistrationController extends BaseController
 
         $contactId = $this->contacts->findIdByEmail($email);
         if ($contactId !== null && !($existingUser && (int) ($existingUser['contact_id'] ?? 0) === $contactId)) {
-            $token = $this->invites->create($email, $contactId, null, $config['link_hours']);
+            $token = $this->invites->create($email, $contactId, null, $config['link_hours'], $note, $ipHash);
             $this->sendInviteMail($email, $token, $config['link_hours']);
+        } else {
+            // Unbekannte Adresse → Freigabe durch Admin/Orga nötig.
+            $this->invites->createAwaitingApproval($email, $note, $ipHash, $config['link_hours']);
         }
 
         $neutral();
@@ -124,17 +135,18 @@ final class RegistrationController extends BaseController
         $name = trim((string) $request->input('name'));
         $password = trim((string) $request->input('password'));
         $repeat = trim((string) $request->input('password_repeat'));
+        $usePasskey = (string) $request->input('mode') === 'passkey';
         $backTo = '/registrieren?token=' . rawurlencode($token);
 
         if ($name === '') {
             flash('error', 'Bitte einen Namen angeben.');
             Redirect::to($backTo);
         }
-        if (mb_strlen($password) < 12) {
+        if (!$usePasskey && mb_strlen($password) < 12) {
             flash('error', 'Das Passwort muss mindestens 12 Zeichen lang sein.');
             Redirect::to($backTo);
         }
-        if ($password !== $repeat) {
+        if (!$usePasskey && $password !== $repeat) {
             flash('error', 'Die Passwörter stimmen nicht überein.');
             Redirect::to($backTo);
         }
@@ -153,7 +165,9 @@ final class RegistrationController extends BaseController
         $userId = $this->users->create([
             'name' => $name,
             'email' => (string) $invite['email'],
-            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            // Bei Passkey ein zufälliges, unbrauchbares Passwort – der Passkey
+            // wird direkt danach unter „Mein Konto" eingerichtet.
+            'password_hash' => password_hash($usePasskey ? bin2hex(random_bytes(24)) : $password, PASSWORD_DEFAULT),
             'role_id' => $roleId,
             'is_active' => 1,
             'contact_id' => $invite['contact_id'] !== null ? (int) $invite['contact_id'] : null,
@@ -161,7 +175,12 @@ final class RegistrationController extends BaseController
         $this->invites->markUsed((int) $invite['id']);
         $this->auth->loginUsingId($userId);
 
-        flash('success', 'Willkommen! Dein Zugang ist eingerichtet. Einen Passkey kannst du unter „Mein Konto" hinzufügen.');
+        if ($usePasskey) {
+            flash('success', 'Dein Zugang ist da. Richte jetzt gleich deinen Passkey ein – danach meldest du dich einfach per Gerätefreigabe an.');
+            Redirect::to('/account#passkeys');
+        }
+
+        flash('success', 'Willkommen! Dein Zugang ist eingerichtet. Einen Passkey kannst du jederzeit unter „Mein Konto" hinzufügen.');
         Redirect::to('/account');
     }
 
@@ -175,7 +194,37 @@ final class RegistrationController extends BaseController
             'config' => $this->settings->registrationSettings(),
             'roles' => $this->users->roles(),
             'openInvites' => $this->invites->open(),
+            'awaiting' => $this->invites->awaitingApproval(),
         ]);
+    }
+
+    public function approveRequest(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $invite = $this->invites->findById((int) $request->input('id'));
+        if ($invite === null || $invite['status'] !== 'awaiting_approval') {
+            Redirect::to('/verwaltung/registrierung');
+        }
+
+        $config = $this->settings->registrationSettings();
+        $contactId = $this->contacts->findIdByEmail((string) $invite['email']);
+        $token = $this->invites->create((string) $invite['email'], $contactId, (int) $this->auth->user()['id'], $config['link_hours']);
+        $this->invites->setStatus((int) $invite['id'], 'revoked');
+        $mailStatus = $this->sendInviteMail((string) $invite['email'], $token, $config['link_hours']);
+
+        flash('success', 'Freigegeben. ' . $mailStatus . ' Link: ' . $this->inviteUrl($token));
+        Redirect::to('/verwaltung/registrierung');
+    }
+
+    public function rejectRequest(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+        $this->invites->setStatus((int) $request->input('id'), 'revoked');
+        flash('success', 'Anfrage abgelehnt.');
+        Redirect::to('/verwaltung/registrierung');
     }
 
     public function updateSettings(Request $request): void
@@ -243,6 +292,11 @@ final class RegistrationController extends BaseController
     private function inviteUrl(string $token): string
     {
         return url('/registrieren?token=' . $token);
+    }
+
+    private function sourceHash(): string
+    {
+        return hash('sha256', ((string) ($_SERVER['REMOTE_ADDR'] ?? '')) . '|grueze-registrierung');
     }
 
     private function sendInviteMail(string $email, string $token, int $hours): string

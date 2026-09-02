@@ -10,8 +10,13 @@
                 <span>Deine Mailadresse</span>
                 <input type="email" name="email" required autocomplete="email">
             </label>
+            <label>
+                <span>Kurz zu dir (optional)</span>
+                <textarea name="note" rows="2" placeholder="Falls deine Adresse noch nicht hinterlegt ist – wer bist du?"></textarea>
+            </label>
             <button type="submit">Link anfordern</button>
         </form>
+        <p class="field-hint">Ist deine Adresse bei uns bekannt, kommt der Link sofort. Sonst prüft das Orga-Team deine Anfrage kurz.</p>
     <?php else: ?>
         <p class="muted">Zugänge werden zurzeit nur über eine persönliche Einladung vergeben. Wende dich ans Orga-Team – sie schicken dir einen Link.</p>
     <?php endif; ?>

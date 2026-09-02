@@ -3,6 +3,23 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.38.0
+
+- **Selbst-Registrierung, Stufe 2.**
+  - **Freigabe-Warteschlange:** trägt jemand bei der Selbst-Anmeldung eine
+    Adresse ein, die keinem Kontakt zugeordnet ist, landet die Anfrage
+    (samt optionaler kurzer Notiz „wer bin ich") in Verwaltung →
+    Selbst-Registrierung. Admin/Orga geben frei (Link geht raus) oder lehnen ab.
+  - **Passkey schon beim Anlegen:** auf der Registrierungsseite wählt man
+    „Mit Kennwort" oder „Mit Passkey". Bei Passkey wird der Zugang angelegt
+    und man landet direkt bei „Mein Konto → Passkeys", um ihn einzurichten.
+  - **Rate-Limit:** max. 5 Selbst-Anmelde-Anfragen pro Quelle und Stunde.
+- **Footer/Seitenleiste aufgeräumt:** der Balken unter der Seitenleiste ist
+  für Angemeldete weg. Impressum und Datenschutz stehen jetzt (je in einer
+  Zeile) unten in der Seitenleiste, direkt über „läuft mit GRUEZE vX.Y".
+- Migration `2026-09-10-registrierung-freigabe` (`registration_invites.note`,
+  `.ip_hash`).
+
 ## 0.37.0
 
 - **Selbst-Registrierung, Stufe 1 – Einladungslinks.**

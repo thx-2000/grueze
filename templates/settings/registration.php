@@ -36,6 +36,38 @@
     </form>
 </section>
 
+<?php if (!empty($awaiting)): ?>
+    <section class="detail-card">
+        <h2>Freigabe-Warteschlange <span class="status-chip is-warn"><?= count($awaiting) ?></span></h2>
+        <p class="muted">Anfragen von Adressen, die (noch) keinem Kontakt zugeordnet sind. Nach der Freigabe geht ein Link an die Adresse.</p>
+        <ul class="completeness-list">
+            <?php foreach ($awaiting as $req): ?>
+                <li class="completeness-row">
+                    <div class="completeness-person">
+                        <strong><?= e($req['email']) ?></strong>
+                        <span class="muted">angefragt <?= e(format_datetime($req['created_at'])) ?></span>
+                        <?php if (trim((string) ($req['note'] ?? '')) !== ''): ?>
+                            <span class="registration-note">„<?= e($req['note']) ?>"</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="completeness-actions">
+                        <form method="post" action="<?= e(url('/verwaltung/einladung/freigeben')) ?>">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="id" value="<?= e((string) $req['id']) ?>">
+                            <button type="submit" class="button-link">Freigeben</button>
+                        </form>
+                        <form method="post" action="<?= e(url('/verwaltung/einladung/ablehnen')) ?>">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="id" value="<?= e((string) $req['id']) ?>">
+                            <button type="submit" class="ghost-button">Ablehnen</button>
+                        </form>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </section>
+<?php endif; ?>
+
 <section class="detail-card">
     <h2>Offene Einladungen</h2>
     <?php if ($openInvites === []): ?>

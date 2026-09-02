@@ -127,6 +127,10 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                         <button type="submit" class="rail-logout">Abmelden</button>
                     </form>
                 </div>
+                <nav class="rail-legal" aria-label="Rechtliches">
+                    <a href="<?= e(url('/impressum')) ?>">Impressum</a>
+                    <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
+                </nav>
                 <?php if ($systemLabel !== ''): ?>
                     <p class="rail-product">läuft mit
                         <a href="<?= e(product_url()) ?>" target="_blank" rel="noopener noreferrer"><?= e($systemLabel) ?></a>
@@ -188,11 +192,9 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
         </div><!-- /.app-main -->
     </div><!-- /.app-shell -->
 
-    <footer class="site-footer<?= !empty($currentUser) ? ' is-authenticated' : '' ?>">
+    <?php if (empty($currentUser)): ?>
+    <footer class="site-footer">
         <div class="site-footer-shell">
-            <?php if (!empty($currentUser)): ?>
-                <div class="site-footer-spacer" aria-hidden="true"></div>
-            <?php endif; ?>
             <div class="site-footer-inner">
             <a href="<?= e(url('/impressum')) ?>">Impressum</a>
             <span aria-hidden="true">|</span>
@@ -205,13 +207,10 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                 <span aria-hidden="true">|</span>
                 <a href="<?= e($publicSiteUrl) ?>" target="_blank" rel="noopener noreferrer"><?= e($publicSiteLabel !== '' ? $publicSiteLabel : $publicSiteUrl) ?></a>
             <?php endif; ?>
-            <?php if ($supportEmail !== ''): ?>
-                <span aria-hidden="true">|</span>
-                <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>
-            <?php endif; ?>
             </div>
         </div>
     </footer>
+    <?php endif; ?>
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
     <script>

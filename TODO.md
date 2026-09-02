@@ -6,6 +6,18 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 ## Neu
 
 
+- **GitHub-Projektbeschreibung für den Public-Release**: bevor das Repo
+  öffentlich geht, braucht die README / Projektseite:
+  - **aktuelle Screenshots** (Adressbuch, Kontakt-Detail, Nachrichten,
+    Termine, Grüße-Pool, Mobil-Ansicht) – das Redesign ist inzwischen weit
+    weg von allen alten Bildern.
+  - **Beschreibung der Möglichkeiten** (White-Label-Adressbuch, Rundmails,
+    Terminfindung mit Token-Links, Grüße-Pool, Selbst-Registrierung,
+    Rollen/Rechte, Passkeys, Themes, Backup/Restore, Update-Ablauf).
+  - **Systemvoraussetzungen** (PHP 8.3, MariaDB/MySQL, Composer optional,
+    ein SMTP-Postfach; Docker-Compose als schneller Start).
+  - **Spendenlink** von mir.
+
 - **Security-Audit**: Vollständige Sicherheitsüberprüfung des Systems –
   u. a. Auth/Session/Passkey-Flows, CSRF, Rechte-/Rollenprüfung an jedem
   Endpunkt, SQL-/Template-Injection, Datei-Uploads (XLSX-Import, Logo),
@@ -38,13 +50,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   „Mein Eintrag" (Handy), „Mail ans Orga-Team", Grüße-Pool.
 
 - **Selbst-Registrierung / Account-Anlage mit niedriger Berechtigung**:
-  **Stufe 1 in v0.37.0** – Einladungslinks (Weg 1) + Selbst-Anmeldung mit
-  bekannter Adresse (Weg 2, per Schalter, Standard aus). Standard-Rolle
-  Mitglied, konfigurierbar. **Offen (Stufe 2, v0.38):**
-  - Weg 3: unbekannte Adresse → Freigabe-Warteschlange in der Verwaltung.
-  - Passkey schon beim Anlegen (statt/zusätzlich zum Kennwort).
-  - Rate-Limit auf `/registrieren` pro IP (bisher nur: eine offene
-    Einladung je Adresse, neutrale Antworten).
+  **Stufe 1 in v0.37.0, Stufe 2 in v0.38.0** – alle drei Wege umgesetzt:
+  Einladungslinks · Selbst-Anmeldung bekannte Adresse · unbekannte Adresse →
+  Freigabe-Warteschlange. Passkey-Option beim Anlegen, Rate-Limit (5/Std./IP).
+  Standard-Rolle Mitglied, Selbst-Anmeldung per Schalter (Standard aus).
   Ursprüngliche Anforderung zur Referenz:
   Es soll leicht sein, sich einen (niedrig berechtigten) Account anzulegen.
   Beim Anlegen legt die Person selbst ein Kennwort fest **oder** hinterlegt
@@ -134,6 +143,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Selbst-Registrierung Stufe 2 v0.38.0: Freigabe-Warteschlange
+  (`createAwaitingApproval` / `approveRequest` / `rejectRequest`, optionale
+  Notiz), Passkey-Option beim Anlegen (`mode=passkey` → Account + Redirect
+  `/account#passkeys`), Rate-Limit `recentCountByIp` (5/Std.). Migration
+  `2026-09-10-registrierung-freigabe` (`note`, `ip_hash`).
+- Footer/Seitenleiste: `<footer>` nur noch für Gäste; Impressum + Datenschutz
+  als `.rail-legal` im Balken über `.rail-product` (`templates/layout/app.php`).
 - Selbst-Registrierung Stufe 1 v0.37.0: `registration_invites`-Tabelle
   (Migration `2026-09-09-registrierung`), `RegistrationInviteRepository`
   (Token-Hash wie Passwort-Reset), `RegistrationController` (`/registrieren`
