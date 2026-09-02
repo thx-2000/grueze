@@ -230,7 +230,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                                         <option value="">Rolle wählen</option>
                                         <?php foreach ($roles as $role): ?>
                                             <option value="<?= e((string) $role['id']) ?>" <?= $roleId === (string) $role['id'] ? 'selected' : '' ?>>
-                                                <?= e($role['name']) ?>
+                                                <?= e((string) (($role['label'] ?? '') !== '' ? $role['label'] : $role['name'])) ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -238,7 +238,7 @@ $roleId = $hasOld ? (string) ($oldInput['role_id'] ?? '') : (string) ($linkedUse
                             </div>
                             <p class="field-hint">Beim ersten Anlegen wird automatisch ein Erstpasswort erzeugt und nach dem Speichern eingeblendet.</p>
                             <?php if ($linkedUser): ?>
-                                <p class="field-hint">Aktuell verknüpft: <?= e($linkedUser['email']) ?> als <?= e($linkedUser['role_name']) ?>.</p>
+                                <p class="field-hint">Aktuell verknüpft: <?= e($linkedUser['email']) ?> als <?= e(role_label((string) $linkedUser['role_name'])) ?>.</p>
                             <?php endif; ?>
                         </div>
                     </section>

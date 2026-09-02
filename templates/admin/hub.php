@@ -2,6 +2,7 @@
 $groups = [
     'Personen & Zugänge' => [
         ['users.manage', '/users', 'user', 'Benutzer', 'Zugänge anlegen, sperren, Passkeys zurücksetzen.'],
+        ['users.manage', '/settings/roles', 'key', 'Rollen', 'Rollen anlegen, umbenennen und löschen.'],
         ['users.manage', '/settings/permissions', 'sliders', 'Berechtigungen', 'Festlegen, welche Rolle welche Aktionen ausführen darf.'],
         ['users.manage', '/settings/visibility', 'eye', 'Sichtbarkeit', 'Steuern, welche Rolle welche Kontaktfelder sieht.'],
     ],

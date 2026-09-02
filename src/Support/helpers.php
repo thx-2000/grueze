@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '0.19.0';
+    return '0.20.0';
 }
 
 function system_label(): string
@@ -261,6 +261,25 @@ function system_label(): string
 function product_url(): string
 {
     return trim(branding_default('product_url', 'https://github.com/thx-2000/grueze'));
+}
+
+/**
+ * Anzeigename einer Rolle (aus roles.label, Fallback = interner name).
+ * Ergebnis wird pro Request gecacht.
+ */
+function role_label(string $roleName): string
+{
+    static $map = null;
+
+    if ($map === null) {
+        try {
+            $map = App\Core\Container::get(App\Repositories\RoleRepository::class)->labelMap();
+        } catch (Throwable) {
+            $map = [];
+        }
+    }
+
+    return $map[$roleName] ?? $roleName;
 }
 
 /**

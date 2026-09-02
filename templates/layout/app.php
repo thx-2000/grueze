@@ -150,7 +150,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                 <div class="sidebar-footer">
                     <a class="profile-chip<?= str_starts_with($currentPath, '/account') ? ' is-active' : '' ?>" href="<?= e(url('/account')) ?>">
                         <strong><?= e($currentUser['name']) ?></strong>
-                        <span><?= e($currentUser['role_name'] ?? '') ?></span>
+                        <span><?= e(role_label((string) ($currentUser['role_name'] ?? ''))) ?></span>
                         <small>Konto verwalten</small>
                     </a>
                     <form method="post" action="<?= e(url('/logout')) ?>">

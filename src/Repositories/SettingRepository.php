@@ -173,6 +173,38 @@ final class SettingRepository
         return $this->permissionMatrixCache = $result;
     }
 
+    /**
+     * Entfernt einen Rollennamen aus allen gespeicherten Rechte- und
+     * Sichtbarkeits-Listen – aufzurufen, nachdem eine Rolle gelöscht wurde.
+     */
+    public function pruneRole(string $roleName): void
+    {
+        foreach (array_keys($this->fieldVisibilityDefaults()) as $field) {
+            $this->removeRoleFromSetting('security_visibility_' . $field, $roleName);
+        }
+        foreach (array_keys($this->permissionDefaults()) as $permission) {
+            $this->removeRoleFromSetting('security_permission_' . str_replace('.', '_', $permission), $roleName);
+        }
+
+        $this->fieldVisibilityCache = null;
+        $this->permissionMatrixCache = null;
+    }
+
+    private function removeRoleFromSetting(string $key, string $roleName): void
+    {
+        $stored = $this->get($key);
+        if ($stored === null) {
+            return; // Kein Override gespeichert – der Default greift, nichts zu tun.
+        }
+
+        $roles = array_values(array_filter(
+            array_map('trim', explode(',', $stored)),
+            static fn (string $role): bool => $role !== '' && $role !== $roleName
+        ));
+
+        $this->set($key, implode(',', $roles));
+    }
+
     public function mailSettings(): array
     {
         if ($this->mailSettingsCache !== null) {

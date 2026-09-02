@@ -21,7 +21,7 @@
                     <span>Rolle</span>
                     <select name="role_id" required>
                         <?php foreach ($roles as $role): ?>
-                            <option value="<?= e((string) $role['id']) ?>"><?= e($role['name']) ?></option>
+                            <option value="<?= e((string) $role['id']) ?>"><?= e((string) (($role['label'] ?? '') !== '' ? $role['label'] : $role['name'])) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </label>
@@ -77,7 +77,7 @@
                         <td data-label="Name"><?= e($user['name']) ?></td>
                         <td data-label="Verknüpfter Kontakt"><?= e($linkedContact) ?></td>
                         <td data-label="E-Mail"><?= e($user['email']) ?></td>
-                        <td data-label="Rolle"><span class="table-badge role-badge role-badge-<?= e((string) $user['role_name']) ?>"><?= e($user['role_name']) ?></span></td>
+                        <td data-label="Rolle"><span class="table-badge role-badge role-badge-<?= e((string) $user['role_name']) ?>"><?= e(role_label((string) $user['role_name'])) ?></span></td>
                         <td data-label="Status"><span class="table-badge status-badge status-badge-<?= (int) $user['is_active'] === 1 ? 'active' : 'inactive' ?>"><?= $statusLabel ?></span></td>
                         <td data-label="Passkeys"><?= $passkeyCount > 0 ? e((string) $passkeyCount) : '–' ?></td>
                         <td data-label="Letzter Login"><?= e($loginLabel) ?></td>

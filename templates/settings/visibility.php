@@ -1,16 +1,8 @@
-<?php
-$roleLabels = [
-    'admin'          => 'Admin',
-    'orga'           => 'Orga',
-    'stufenmitglied' => 'Stufenmitglied',
-    'betrachter'     => 'Betrachter',
-];
-?>
 <section class="hero-card narrow">
     <div>
         <p class="eyebrow">Einstellungen</p>
-        <h2>Sichtbarkeit & Rollen</h2>
-        <p class="muted">Hier legst du fest, welche Rollen welche Kontaktfelder sehen dürfen. Stufenmitglieder und Betrachter sehen standardmäßig nur Namen und Kategorie.</p>
+        <h2>Sichtbarkeit</h2>
+        <p class="muted">Hier legst du fest, welche Rollen welche Kontaktfelder sehen dürfen. Rollen selbst verwaltest du unter <a href="<?= e(url('/settings/roles')) ?>">Rollen</a>. Admin sieht immer alles.</p>
     </div>
 </section>
 

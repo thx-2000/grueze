@@ -44,10 +44,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 1. White-Label: **abgeschlossen in v0.12.0**, Mail-Feinschliff in **v0.19.0**
    (Platzhalter `{name}`/`{kurzname}` in Mail-Fuß + Betreff-Präfixen, neutrale
    Standard-Texte, Member-Modus über Berechtigung statt Rollenname).
-2. Rollen- und Rechtekonzept weiter schärfen, vor allem für spätere
-   "Kontakt kann optional Login haben"-Logik.
-3. Sichtbarkeit einzelner Kontaktfelder noch granularer pro Rolle
-   administrierbar machen.
+2. Rollen- und Rechtekonzept: **datengetrieben in v0.20.0** – Rollen frei
+   anlegen/umbenennen/löschen (Verwaltung → Rollen), Rechte-/Sichtbarkeits-
+   Seiten lesen alle Rollen aus der DB. Offen (falls je gewünscht): den
+   internen Rollen-Schlüssel umbenennbar machen (aktuell fix).
+3. Sichtbarkeit einzelner Kontaktfelder: **in Arbeit (v0.21.0)** – „eigener
+   verknüpfter Kontakt immer sichtbar, außer Notizen".
 4. Admin-Einstellungsbereich weiter strukturieren (Branding / Mail-Versand /
    Sichtbarkeiten-Rollen / ggf. System-Backup später).
 5. Vorbereitung für neutrale Distribution: Installer-Konzept.
@@ -59,6 +61,17 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Erledigt
 
+- Volle Rollen-Verwaltung (v0.20.0): `roles`-Tabelle bekommt `label`
+  (Anzeigename), interner `name` bleibt der fixe Rechte-Schlüssel. Neue Seite
+  **Verwaltung → Rollen** (`RoleController`/`RoleRepository`,
+  `templates/settings/roles.php`): anlegen, umbenennen (Label + Beschreibung),
+  löschen. `admin` geschützt, Löschen blockiert solange Benutzer zugeordnet,
+  danach `SettingRepository::pruneRole()` räumt den Namen aus den
+  `security_permission_*`/`security_visibility_*`-Werten. `SettingsController`
+  liest Rollen + Labels aus `RoleRepository` statt aus fester Liste;
+  `role_label()`-Helper (pro Request gecacht) für Badges/Auswahllisten.
+  `RoleRepository::ensureSchema()` legt die `label`-Spalte lazy an, falls die
+  Migration noch aussteht. Migration `2026-09-03-rollen-label`.
 - White-Label-Feinschliff Mail (v0.19.0): Platzhalter `{name}` / `{kurzname}`
   in Mail-Fuß und Betreff-Präfixen (`apply_branding_placeholders()`), ersetzt
   beim Versand in `MailController`. Neutrale Standard-Texte ohne „Orga-Team".

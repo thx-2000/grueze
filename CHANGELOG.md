@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 0.20.0
+
+- **Rollen frei verwaltbar** (Verwaltung → Rollen): Anzeigename und
+  Beschreibung jeder Rolle setzen, eigene Rollen anlegen und löschen. Der
+  interne Schlüssel bleibt fix (Rechte und Sichtbarkeit hängen daran). „Admin"
+  ist geschützt; Löschen ist gesperrt, solange Benutzer zugeordnet sind, und
+  entfernt den Rollennamen danach aus allen Rechte-/Sichtbarkeits-Listen.
+- Rechte- und Sichtbarkeits-Seiten lesen jetzt alle Rollen aus der Datenbank
+  statt aus einer festen Liste; überall Anzeigenamen statt interner Schlüssel.
+- Migration `2026-09-03-rollen-label` (Spalte `roles.label`).
+
 ## 0.19.0
 
 - White-Label-Feinschliff bei Mail-Texten: Platzhalter `{name}` (Instanzname)

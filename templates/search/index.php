@@ -70,7 +70,7 @@ $hasQuery = $query !== '';
                 <a class="search-result-card" href="<?= e(url('/users#user-' . $user['id'])) ?>">
                     <div class="search-result-head">
                         <strong><?= e($user['name']) ?></strong>
-                        <span class="table-pill"><?= e($user['role_name']) ?></span>
+                        <span class="table-pill"><?= e(role_label((string) $user['role_name'])) ?></span>
                     </div>
                     <div class="table-stack">
                         <span class="is-guarded"><?= e($user['email']) ?></span>

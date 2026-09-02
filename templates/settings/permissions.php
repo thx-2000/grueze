@@ -1,10 +1,3 @@
-<?php
-$roleLabels = [
-    'orga'           => 'Orga',
-    'stufenmitglied' => 'Stufenmitglied',
-    'betrachter'     => 'Betrachter',
-];
-?>
 <section class="hero-card narrow">
     <div>
         <p class="eyebrow">Einstellungen</p>

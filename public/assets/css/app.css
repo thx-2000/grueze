@@ -3183,6 +3183,60 @@ code {
     width: auto;
 }
 
+/* ---- Rollen ---- */
+
+.role-edit {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+
+.role-edit-fields {
+    flex: 1 1 20rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.role-edit-fields input[type="text"] {
+    flex: 1 1 10rem;
+    width: auto;
+}
+
+.role-edit-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+
+.role-edit-meta code {
+    font-size: 0.78rem;
+    background: var(--fill-ghost);
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-sm);
+}
+
+.role-lock {
+    display: inline-flex;
+    color: var(--color-muted);
+    padding: 0.4rem;
+}
+
+.role-add {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.4rem;
+}
+
+.role-add input[type="text"] {
+    flex: 1 1 12rem;
+    width: auto;
+}
+
 /* -------------------------------------------------------------------- Themes */
 
 .theme-grid {

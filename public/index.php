@@ -30,6 +30,7 @@ use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\PasskeyRepository;
+use App\Repositories\RoleRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\ThemeRepository;
@@ -92,6 +93,7 @@ try {
     Container::factory(ContactRepository::class, static fn () => new ContactRepository(Container::get(PDO::class)));
     Container::factory(LogRepository::class, static fn () => new LogRepository(Container::get(PDO::class)));
     Container::factory(SettingRepository::class, static fn () => new SettingRepository(Container::get(PDO::class)));
+    Container::factory(RoleRepository::class, static fn () => new RoleRepository(Container::get(PDO::class)));
     Container::factory(ThemeRepository::class, static fn () => new ThemeRepository(Container::get(PDO::class)));
     Container::factory(ThemeService::class, static fn () => new ThemeService(
         Container::get(SettingRepository::class),
@@ -211,7 +213,13 @@ try {
     Container::factory(SettingsController::class, static fn () => new SettingsController(
         Container::get(Auth::class),
         Container::get(SettingRepository::class),
-        Container::get(UploadService::class)
+        Container::get(UploadService::class),
+        Container::get(RoleRepository::class)
+    ));
+    Container::factory(\App\Controllers\RoleController::class, static fn () => new \App\Controllers\RoleController(
+        Container::get(Auth::class),
+        Container::get(RoleRepository::class),
+        Container::get(SettingRepository::class)
     ));
     Container::factory(\App\Controllers\ThemeController::class, static fn () => new \App\Controllers\ThemeController(
         Container::get(Auth::class),
@@ -330,6 +338,10 @@ try {
     $router->post('/settings/visibility', [SettingsController::class, 'updateVisibility']);
     $router->get('/settings/permissions', [SettingsController::class, 'permissions']);
     $router->post('/settings/permissions', [SettingsController::class, 'updatePermissions']);
+    $router->get('/settings/roles', [\App\Controllers\RoleController::class, 'index']);
+    $router->post('/settings/roles/store', [\App\Controllers\RoleController::class, 'store']);
+    $router->post('/settings/roles/update', [\App\Controllers\RoleController::class, 'update']);
+    $router->post('/settings/roles/delete', [\App\Controllers\RoleController::class, 'delete']);
 
     $router->dispatch(new Request());
 } catch (Throwable $exception) {

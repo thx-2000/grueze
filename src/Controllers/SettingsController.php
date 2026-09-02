@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Csrf;
 use App\Core\Request;
+use App\Repositories\RoleRepository;
 use App\Repositories\SettingRepository;
 use App\Services\UploadService;
 use App\Support\Redirect;
@@ -15,9 +16,29 @@ final class SettingsController extends BaseController
     public function __construct(
         \App\Core\Auth $auth,
         private SettingRepository $settings,
-        private UploadService $uploads
+        private UploadService $uploads,
+        private RoleRepository $roles
     ) {
         parent::__construct($auth);
+    }
+
+    /** @return array{names: list<string>, configurable: list<string>, labels: array<string,string>} */
+    private function roleContext(): array
+    {
+        $names = [];
+        $labels = [];
+        foreach ($this->roles->all() as $role) {
+            $names[] = (string) $role['name'];
+            $labels[(string) $role['name']] = trim((string) ($role['label'] ?? '')) !== ''
+                ? (string) $role['label']
+                : (string) $role['name'];
+        }
+
+        return [
+            'names' => $names,
+            'configurable' => array_values(array_filter($names, static fn (string $n): bool => $n !== RoleRepository::PROTECTED_NAME)),
+            'labels' => $labels,
+        ];
     }
 
     public function branding(): void
@@ -214,11 +235,13 @@ final class SettingsController extends BaseController
     public function visibility(): void
     {
         $this->requirePermission('users.manage');
+        $roles = $this->roleContext();
 
         $this->render('settings/visibility', [
             'visibility' => $this->settings->fieldVisibility(),
             'defaults' => $this->settings->fieldVisibilityDefaults(),
-            'roles' => ['admin', 'orga', 'stufenmitglied', 'betrachter'],
+            'roles' => $roles['names'],
+            'roleLabels' => $roles['labels'],
             'fieldLabels' => [
                 'address'  => 'Adresse',
                 'birthday' => 'Geburtstag',
@@ -236,7 +259,7 @@ final class SettingsController extends BaseController
         Csrf::validate($request->input('_csrf'));
 
         $fields = array_keys($this->settings->fieldVisibilityDefaults());
-        $allRoles = ['admin', 'orga', 'stufenmitglied', 'betrachter'];
+        $allRoles = $this->roleContext()['names'];
         $submitted = (array) $request->input('visibility', []);
 
         foreach ($fields as $field) {
@@ -251,11 +274,13 @@ final class SettingsController extends BaseController
     public function permissions(): void
     {
         $this->requirePermission('users.manage');
+        $roles = $this->roleContext();
 
         $this->render('settings/permissions', [
             'matrix' => $this->settings->permissionMatrix(),
             'defaults' => $this->settings->permissionDefaults(),
-            'configurableRoles' => ['orga', 'stufenmitglied', 'betrachter'],
+            'configurableRoles' => $roles['configurable'],
+            'roleLabels' => $roles['labels'],
             'permissionGroups' => [
                 'Kontakte' => [
                     'contacts.manage'      => 'Kontakte anlegen und bearbeiten',
@@ -284,7 +309,7 @@ final class SettingsController extends BaseController
         Csrf::validate($request->input('_csrf'));
 
         $allPermissions = array_keys($this->settings->permissionDefaults());
-        $configurableRoles = ['orga', 'stufenmitglied', 'betrachter'];
+        $configurableRoles = $this->roleContext()['configurable'];
         $submitted = (array) $request->input('permissions', []);
 
         foreach ($allPermissions as $permission) {

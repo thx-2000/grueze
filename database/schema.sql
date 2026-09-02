@@ -1,6 +1,7 @@
 CREATE TABLE roles (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
+    label VARCHAR(80) NOT NULL DEFAULT '',
     description VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -144,8 +145,8 @@ CREATE TABLE app_settings (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO roles (name, description) VALUES
-('admin', 'Vollzugriff inklusive Benutzerverwaltung'),
-('orga', 'Organisationsteam mit Verwaltungsrechten'),
-('stufenmitglied', 'Kann Kontakte pflegen und E-Mails kopieren'),
-('betrachter', 'Kann Kontakte ansehen und E-Mails kopieren');
+INSERT INTO roles (name, label, description) VALUES
+('admin', 'Admin', 'Vollzugriff inklusive Benutzerverwaltung'),
+('orga', 'Team', 'Verwaltet Kontakte, Mailings und Einstellungen'),
+('stufenmitglied', 'Mitglied', 'Kann Namen und Gruppen sehen und einzelne Kontaktanfragen senden'),
+('betrachter', 'Gast', 'Kann Kontakte in reduzierter Ansicht sehen');

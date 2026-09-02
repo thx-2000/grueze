@@ -50,13 +50,24 @@ Verwaltung → Themes. `hell` ist der Standard, `signalfarbe` und `dunkel` sind
 weitere Vorlagen. „Kopieren & bearbeiten" öffnet den Editor mit Live-Vorschau,
 Farbwähler und Kontrasthinweisen. Details: `themes/README.md`.
 
-## 4. Rechtstexte (Pflicht für DE)
+## 4. Rollen, Rechte und Sichtbarkeit
+
+Mitgeliefert sind vier Rollen (Admin, Team, Mitglied, Gast). Unter
+**Verwaltung → Rollen** lassen sich Anzeigename und Beschreibung anpassen,
+eigene Rollen anlegen und nicht benötigte löschen (Admin ist geschützt, eine
+Rolle mit zugeordneten Benutzern erst nach dem Umziehen).
+
+**Verwaltung → Berechtigungen** legt fest, welche Rolle welche Aktionen darf,
+**Verwaltung → Sichtbarkeit**, welche Kontaktfelder sie sieht. Admin hat immer
+alles.
+
+## 5. Rechtstexte (Pflicht für DE)
 
 Verwaltung → Rechtliches. Impressum und Datenschutzerklärung sind bei
 Auslieferung nur ein Platzhalter-Gerüst und **müssen** vor dem produktiven
 Betrieb vollständig ausgefüllt werden.
 
-## 5. Mail-Texte
+## 6. Mail-Texte
 
 Verwaltung → Mail-Einstellungen: Absender/Mailserver, Betreff-Präfixe und der
 Mail-Fuß. Bleibt der Mail-Fuß leer, wird ein knapper, aus dem Branding
