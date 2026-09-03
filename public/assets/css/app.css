@@ -5205,6 +5205,82 @@ body { display: block; }
     font-size: 0.92rem;
 }
 
+/* --- Gruppen-Abstimmung --- */
+.events-group-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.05rem 0.45rem;
+    margin-left: 0.4rem;
+    border-radius: 999px;
+    background: var(--accent-veil);
+    color: var(--color-primary-strong);
+    font-size: 0.72rem;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+.events-group-tag .icon svg {
+    width: 0.85em;
+    height: 0.85em;
+}
+
+.event-group-note p {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.event-group-note .icon {
+    flex: none;
+    color: var(--color-primary);
+}
+
+.poll-options {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+}
+
+.poll-option {
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-veil);
+}
+
+.poll-option-label {
+    margin: 0 0 0.3rem;
+    font-weight: 600;
+}
+
+.poll-option-tally {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.9rem;
+    font-size: 0.85rem;
+    color: var(--color-text-soft, var(--color-text));
+}
+
+.poll-option-tally .is-yes { color: var(--color-success); }
+.poll-option-tally .is-no { color: var(--color-danger); }
+
+.poll-option-mine {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+}
+
+.poll-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.55rem;
+}
+
 /* --- Datumsvorschläge --- */
 .date-options {
     display: grid;

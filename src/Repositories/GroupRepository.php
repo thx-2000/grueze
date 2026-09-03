@@ -181,6 +181,12 @@ final class GroupRepository
 
     public function delete(int $id): void
     {
+        // events.group_id hat keinen DB-Fremdschlüssel – hier von Hand lösen.
+        try {
+            $this->pdo->prepare('UPDATE events SET group_id = NULL WHERE group_id = :id')->execute(['id' => $id]);
+        } catch (\Throwable) {
+            // events-Tabelle existiert evtl. noch nicht – unkritisch.
+        }
         $this->pdo->prepare('DELETE FROM contact_groups WHERE id = :id')->execute(['id' => $id]);
     }
 

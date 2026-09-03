@@ -27,6 +27,8 @@ Die Anwendung ist als kleine SSR-PHP-App ohne Framework aufgebaut. `public/index
   `mail_locked` = Notbremse für die Gruppen-Mail)
 - `group_mail_log`: ein Eintrag je Gruppen-Mail-Versand (weiche Tagesgrenze,
   Nachvollziehbarkeit)
+- `events.group_id`: optionale Bindung einer Abstimmung an eine Gruppe
+  (Gruppen-Abstimmung – nur für Mitglieder sichtbar; kein DB-Fremdschlüssel)
 - `password_resets`, `login_attempts`: Sicherheit für Reset und Brute-Force-Schutz
 - `audit_log`, `mail_log`: Nachvollziehbarkeit von Änderungen und Versand
 

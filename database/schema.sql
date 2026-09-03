@@ -151,6 +151,7 @@ CREATE TABLE events (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(190) NOT NULL,
     kind ENUM('date_poll', 'fixed_date', 'poll') NOT NULL DEFAULT 'date_poll',
+    group_id INT UNSIGNED NULL,
     description TEXT NULL,
     location VARCHAR(190) NULL,
     time_note VARCHAR(190) NULL,
@@ -167,7 +168,10 @@ CREATE TABLE events (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_events_status (status),
     KEY idx_events_closes_at (closes_at),
+    KEY idx_events_group (group_id),
     CONSTRAINT fk_events_user FOREIGN KEY (created_by) REFERENCES users(id)
+    -- events.group_id: kein DB-Fremdschlüssel (Tabellenreihenfolge); wird in
+    -- GroupRepository::delete() beim Löschen der Gruppe auf NULL gesetzt.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE event_options (

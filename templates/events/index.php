@@ -39,7 +39,7 @@ $kindLabel = ['date_poll' => 'Datumsabstimmung', 'fixed_date' => 'Fester Termin'
                 ?>
                 <li class="events-row">
                     <a class="events-row-main" href="<?= e(url('/termine/detail?id=' . (int) $event['id'])) ?>">
-                        <span class="events-row-title"><?= e($event['title']) ?></span>
+                        <span class="events-row-title"><?= e($event['title']) ?><?php if (trim((string) ($event['group_name'] ?? '')) !== ''): ?> <span class="events-group-tag"><?= icon('contacts') ?><?= e($event['group_name']) ?></span><?php endif; ?></span>
                         <span class="events-row-meta">
                             <span class="events-status is-<?= e($event['status']) ?>"><?= e($statusLabel[$event['status']] ?? $event['status']) ?></span>
                             · <?= e($kindLabel[$event['kind']] ?? 'Termin') ?>

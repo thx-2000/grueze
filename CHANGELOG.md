@@ -3,6 +3,23 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.4.0
+
+**Gruppen-Abstimmung (Stufe D)**
+
+- Jedes Gruppenmitglied kann für die eigene Gruppe eine **Meinungsabstimmung**
+  anlegen (`/gruppen` → Gruppe → „Abstimmungen"): Frage, Antwortmöglichkeiten,
+  optional Frist und automatische Ergebnis-Mail.
+- Die Abstimmung ist **nur für die Gruppe sichtbar**. Mitglieder stimmen direkt
+  im eingeloggten Zustand ab (Ja / Vielleicht / Nein je Möglichkeit) und sehen
+  den laufenden Stand.
+- Neue Gruppenmitglieder werden automatisch in laufende Abstimmungen aufgenommen.
+- **Admins** mit „Termine verwalten" sehen Gruppen-Abstimmungen zusätzlich in der
+  Terminübersicht – mit dem Hinweis, dass sie zur Gruppe gehören und dort
+  eigenständig laufen.
+- Frist, Auto-Schließen, 48-Stunden-Erinnerung und Ergebnis-Mail nutzen dieselbe
+  Automatik wie die übrigen Termine (Stufe A).
+
 ## 1.3.0
 
 **Gruppen-Mail (Stufe C)**

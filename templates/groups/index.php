@@ -33,6 +33,7 @@
                             <p class="group-card-desc"><?= e($group['description']) ?></p>
                         <?php endif; ?>
                         <div class="group-card-actions">
+                            <a class="compact-action" href="<?= e(url('/gruppen/abstimmungen?id=' . (int) $group['id'])) ?>"><?= icon('check') ?><span>Abstimmungen</span></a>
                             <?php if ((int) ($group['mail_locked'] ?? 0) === 1): ?>
                                 <span class="field-hint">Gruppen-Versand ist gesperrt.</span>
                             <?php else: ?>

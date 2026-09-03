@@ -22,11 +22,12 @@ final class EventRepository
      */
     public function all(bool $includeArchived = false): array
     {
-        $sql = 'SELECT events.*, users.name AS creator_name,
+        $sql = 'SELECT events.*, users.name AS creator_name, cg.name AS group_name,
                     (SELECT COUNT(*) FROM event_participants WHERE event_participants.event_id = events.id) AS participant_count,
                     (SELECT MIN(option_date) FROM event_options WHERE event_options.event_id = events.id AND option_date IS NOT NULL) AS earliest_date
                 FROM events
-                JOIN users ON users.id = events.created_by';
+                JOIN users ON users.id = events.created_by
+                LEFT JOIN contact_groups cg ON cg.id = events.group_id';
         if (!$includeArchived) {
             $sql .= " WHERE events.status <> 'archived'";
         }
@@ -45,8 +46,9 @@ final class EventRepository
     public function find(int $id): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT events.*, users.name AS creator_name
+            'SELECT events.*, users.name AS creator_name, cg.name AS group_name
              FROM events JOIN users ON users.id = events.created_by
+             LEFT JOIN contact_groups cg ON cg.id = events.group_id
              WHERE events.id = :id'
         );
         $stmt->execute(['id' => $id]);
@@ -134,15 +136,17 @@ final class EventRepository
     public function create(array $data, int $userId): int
     {
         $kind = in_array($data['kind'] ?? '', ['date_poll', 'fixed_date', 'poll'], true) ? $data['kind'] : 'date_poll';
+        $groupId = (int) ($data['group_id'] ?? 0);
         $stmt = $this->pdo->prepare(
-            'INSERT INTO events (title, kind, description, location, time_note, cost_note, bring_note,
+            'INSERT INTO events (title, kind, group_id, description, location, time_note, cost_note, bring_note,
                  closes_at, result_recipients, created_by)
-             VALUES (:title, :kind, :description, :location, :time_note, :cost_note, :bring_note,
+             VALUES (:title, :kind, :group_id, :description, :location, :time_note, :cost_note, :bring_note,
                  :closes_at, :result_recipients, :created_by)'
         );
         $stmt->execute([
             'title' => $data['title'],
             'kind' => $kind,
+            'group_id' => $groupId > 0 ? $groupId : null,
             'description' => $data['description'] ?: null,
             'location' => $data['location'] ?: null,
             'time_note' => $data['time_note'] ?: null,
@@ -298,7 +302,7 @@ final class EventRepository
     public function openEventsForContact(int $contactId): array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT e.id, e.title, e.kind, e.status, e.closes_at, ep.token,
+            'SELECT e.id, e.title, e.kind, e.status, e.closes_at, e.group_id, ep.token,
                     EXISTS(SELECT 1 FROM event_responses r WHERE r.participant_id = ep.id) AS has_answered,
                     (SELECT MIN(option_date) FROM event_options WHERE event_options.event_id = e.id AND option_date IS NOT NULL) AS earliest_date
              FROM event_participants ep
@@ -309,6 +313,85 @@ final class EventRepository
         $stmt->execute(['contact_id' => $contactId]);
 
         return $stmt->fetchAll();
+    }
+
+    // -------------------------------------------------------- Gruppen-Abstimmung
+
+    /**
+     * Abstimmungen einer Gruppe – für die Mitglieder-Ansicht.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function pollsForGroup(int $groupId): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT e.*, u.name AS creator_name,
+                    (SELECT COUNT(*) FROM event_participants ep WHERE ep.event_id = e.id) AS participant_count
+             FROM events e
+             JOIN users u ON u.id = e.created_by
+             WHERE e.group_id = :group_id AND e.status <> 'archived'
+             ORDER BY e.status = 'open' DESC, e.created_at DESC"
+        );
+        $stmt->execute(['group_id' => $groupId]);
+        $events = $stmt->fetchAll();
+
+        foreach ($events as &$event) {
+            $event['options'] = $this->optionsForEvent((int) $event['id']);
+            $event['tally'] = $this->tally((int) $event['id']);
+            $event['answered_count'] = $this->answeredParticipantCount((int) $event['id']);
+        }
+
+        return $events;
+    }
+
+    /**
+     * Kontakte (z. B. alle Gruppenmitglieder) additiv als Teilnehmer aufnehmen –
+     * ohne bestehende Teilnehmer oder Antworten anzutasten.
+     *
+     * @param list<int> $contactIds
+     */
+    public function addParticipantsFromContacts(int $eventId, array $contactIds): void
+    {
+        $contactIds = array_values(array_unique(array_filter(
+            array_map('intval', $contactIds),
+            static fn (int $n): bool => $n > 0
+        )));
+        if ($contactIds === []) {
+            return;
+        }
+
+        $current = $this->pdo->prepare('SELECT contact_id FROM event_participants WHERE event_id = :event_id');
+        $current->execute(['event_id' => $eventId]);
+        $currentIds = array_map('intval', $current->fetchAll(PDO::FETCH_COLUMN));
+
+        foreach (array_diff($contactIds, $currentIds) as $contactId) {
+            $this->pdo->prepare(
+                'INSERT INTO event_participants (event_id, contact_id, token) VALUES (:event_id, :contact_id, :token)'
+            )->execute([
+                'event_id' => $eventId,
+                'contact_id' => $contactId,
+                'token' => bin2hex(random_bytes(16)),
+            ]);
+        }
+    }
+
+    /**
+     * Teilnehmer-Datensatz eines Kontakts an einer Abstimmung – für das
+     * Abstimmen im eingeloggten Zustand (ohne Token-Link).
+     */
+    public function participantForContact(int $eventId, int $contactId): ?array
+    {
+        if ($contactId <= 0) {
+            return null;
+        }
+        $stmt = $this->pdo->prepare(
+            'SELECT id AS participant_id, token FROM event_participants
+             WHERE event_id = :event_id AND contact_id = :contact_id'
+        );
+        $stmt->execute(['event_id' => $eventId, 'contact_id' => $contactId]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
     }
 
     /**

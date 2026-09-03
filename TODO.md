@@ -5,15 +5,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **Gruppen:** Stufe A (Abstimmungs-Fristen + Ergebnis-Mail) in v1.1.0,
-  Stufe B (Gruppen-Objekte, Verwaltung, „Meine Gruppen", offene Gruppen) in
-  v1.2.0, Stufe C (Gruppen-Mail + Soft-Limit + Notbremse + Bestätigungsmail)
-  in v1.3.0. Offen:
-  - **Stufe D – Gruppen-Abstimmung:** Abstimmung nur für eine Gruppe sichtbar;
-    Admin sieht alles mit Hinweis „nicht für dich, sondern für Gruppe X".
-  - **Stufe E – Feinschliff:** ggf. Gruppenleitung (`role='lead'`) mit
-    Verwaltungsrecht ohne globales `groups.manage`; Beitritts-Anfragen für
-    nicht-offene Gruppen.
+- **Gruppen:** Stufe A (Fristen + Ergebnis-Mail) v1.1.0, Stufe B (Objekte,
+  Verwaltung, „Meine Gruppen", offene Gruppen) v1.2.0, Stufe C (Gruppen-Mail +
+  Soft-Limit + Notbremse + Bestätigung) v1.3.0, Stufe D (Gruppen-Abstimmung,
+  nur Meinungsabstimmung `kind=poll`) v1.4.0. Offen:
+  - **Stufe E – Feinschliff:** Gruppen-Terminfindung (`date_poll` in der
+    Gruppe, inkl. „Termin festlegen" für Mitglieder); Gruppenleitung
+    (`contact_group_members.role='lead'`) mit Verwaltungsrecht ohne globales
+    `groups.manage`; Beitritts-Anfragen für nicht-offene Gruppen.
 - **Cron einrichten:** `app.cron_key` in `config/config.php` setzen und beim
   Hoster einen 15-Minuten-Aufruf von `/intern/cron?key=…` anlegen
   (`docs/NEUE-INSTANZ.md`, Abschnitt 7). Ohne echten Cron greift nur die

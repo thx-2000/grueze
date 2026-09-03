@@ -41,6 +41,12 @@ ksort($byCategory);
     </div>
 </header>
 
+<?php if (trim((string) ($event['group_name'] ?? '')) !== ''): ?>
+    <section class="detail-card event-group-note">
+        <p><?= icon('contacts') ?><span>Diese Abstimmung gehört zur Gruppe <strong><?= e($event['group_name']) ?></strong>. Sie läuft dort eigenständig – hier siehst du sie nur mit.</span></p>
+    </section>
+<?php endif; ?>
+
 <?php if ($closesAt !== '' && !$isFixed): ?>
     <section class="detail-card event-deadline-card">
         <div>

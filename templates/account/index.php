@@ -183,7 +183,7 @@ foreach ($phones as $i => $entry) {
         <ul class="account-events">
             <?php foreach ($openEvents as $ev): ?>
                 <li>
-                    <a href="<?= e(url('/abstimmen?token=' . $ev['token'])) ?>">
+                    <a href="<?= e(url((int) ($ev['group_id'] ?? 0) > 0 ? '/gruppen/abstimmung?id=' . (int) $ev['id'] : '/abstimmen?token=' . $ev['token'])) ?>">
                         <span class="account-events-title"><?= e($ev['title']) ?></span>
                         <span class="account-events-meta">
                             <?php if ($ev['status'] === 'closed'): ?>

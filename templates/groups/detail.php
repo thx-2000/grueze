@@ -108,6 +108,7 @@ ksort($byCategory);
         <p class="muted">Jedes Mitglied darf der Gruppe eine Nachricht schicken (weiche Grenze: 2 pro Person und Tag). Bei Missbrauch hier stoppen.</p>
         <div class="toolbar-actions">
             <a class="ghost-button" href="<?= e(url('/gruppen/nachricht?id=' . (int) $group['id'])) ?>"><?= icon('mail') ?><span>Nachricht schreiben</span></a>
+            <a class="ghost-button" href="<?= e(url('/gruppen/abstimmungen?id=' . (int) $group['id'])) ?>"><?= icon('check') ?><span>Abstimmungen</span></a>
             <form method="post" action="<?= e(url('/verwaltung/gruppen/sperre')) ?>" data-confirm="Gruppen-Versand für „<?= e($group['name']) ?>“ sperren?">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">

@@ -11,6 +11,7 @@ use App\Controllers\CronController;
 use App\Controllers\EventController;
 use App\Controllers\GreetingController;
 use App\Controllers\GroupController;
+use App\Controllers\GroupPollController;
 use App\Controllers\LegalController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
@@ -275,6 +276,11 @@ try {
         Container::get(ContactRepository::class),
         Container::get(GroupMailService::class)
     ));
+    Container::factory(GroupPollController::class, static fn () => new GroupPollController(
+        Container::get(Auth::class),
+        Container::get(EventRepository::class),
+        Container::get(GroupRepository::class)
+    ));
     Container::factory(MailController::class, static fn () => new MailController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
@@ -451,6 +457,12 @@ try {
     $router->post('/gruppen/verlassen', [GroupController::class, 'leave']);
     $router->get('/gruppen/nachricht', [GroupController::class, 'composeMail']);
     $router->post('/gruppen/nachricht', [GroupController::class, 'sendMail']);
+    $router->get('/gruppen/abstimmungen', [GroupPollController::class, 'list']);
+    $router->get('/gruppen/abstimmung', [GroupPollController::class, 'show']);
+    $router->get('/gruppen/abstimmung/neu', [GroupPollController::class, 'createForm']);
+    $router->post('/gruppen/abstimmung', [GroupPollController::class, 'store']);
+    $router->post('/gruppen/abstimmung/stimme', [GroupPollController::class, 'vote']);
+    $router->post('/gruppen/abstimmung/schliessen', [GroupPollController::class, 'close']);
     $router->post('/verwaltung/gruppen/sperre', [GroupController::class, 'toggleMailLock']);
     $router->get('/verwaltung/gruppen', [GroupController::class, 'manage']);
     $router->get('/verwaltung/gruppen/detail', [GroupController::class, 'detail']);
