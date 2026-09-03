@@ -37,7 +37,7 @@ foreach ($phones as $i => $entry) {
 <header class="contact-detail-head">
     <p class="eyebrow">Mein Eintrag</p>
     <h1><?= $firstName !== '' ? 'Hallo, ' . e($firstName) : 'Mein Eintrag' ?></h1>
-    <p class="muted">Deine eigenen Angaben, offene Abstimmungen und dein Zugang – an einem Ort.</p>
+    <p class="muted">Deine eigenen Angaben, offene Abstimmungen und dein Zugang – an einem Ort. <a href="<?= e(url('/hilfe/mitglied.html')) ?>" target="_blank" rel="noopener">Kurzanleitung</a>.</p>
 </header>
 
 <?php if ($ownContact !== null && $canEditOwn): ?>

@@ -3,6 +3,27 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.9.0
+
+**Mail: Antwortweg wählbar**
+
+- **Gruppen-Nachricht:** Die absendende Person wählt jetzt, ob Antworten *nur an
+  sie* gehen oder *an die gesamte Gruppenleitung* – praktisch, wenn eine Gruppe
+  zu mehreren geleitet wird.
+- **Rundmail (Nachrichten):** Im Feld „Antwort-an" gibt es zusätzlich die Option
+  **„Ich selbst"** – dann kommen die Antworten direkt ins eigene Postfach statt
+  ans Team-Postfach. Standard bleibt das Team. (Die sichtbare Absenderadresse ist
+  weiterhin das eingerichtete Mailkonto.)
+
+**Anleitungen erweitert**
+
+- Neu **für Mitglieder**: „Dein Zugang zur Adress-Zentrale" – eigene Daten, Leute
+  kontaktieren, an Abstimmungen teilnehmen, Gruppen.
+- Neu **für Admins**: „Cronjob bei All-Inkl einrichten" – Schritt für Schritt,
+  auch im Verwaltungs-Hub unter System verlinkt.
+- Orga- und Gruppenleitungs-Anleitung um den neuen Antwortweg ergänzt.
+- Alle vier Anleitungen unter **Hilfe & Anleitungen** und je als PDF.
+
 ## 1.8.0
 
 **Hilfe &amp; Anleitungen in der App**

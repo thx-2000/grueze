@@ -5406,6 +5406,32 @@ body { display: block; }
     flex-wrap: wrap;
 }
 
+.reply-to-choice {
+    margin: 0;
+    padding: 0.3rem 0 0;
+    border: 0;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.reply-to-choice legend {
+    padding: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-soft, var(--color-text));
+}
+
+.reply-to-choice .radio-line {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.95rem;
+}
+
+.reply-to-choice .radio-line input {
+    width: auto;
+    margin: 0;
+}
+
 /* --- Datumsvorschläge --- */
 .date-options {
     display: grid;

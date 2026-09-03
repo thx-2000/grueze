@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Cronjob bei All-Inkl einrichten · Adress-Zentrale</title>
+<meta name="description" content="Für Admins: den regelmäßigen Aufruf einrichten, der Abstimmungs-Fristen schließt, an Nicht-Abstimmende erinnert und Ergebnis-Mails verschickt – bei All-Inkl (KAS).">
+<style>
+  @import url("../assets/css/fonts.css");
+
+  :root {
+    --bg: #f2f5ef; --surface: #ffffff; --surface-sunken: #eef2ea;
+    --ink: #19231d; --muted: #586159; --border: #dbe1d5; --hairline: #e7ebe2;
+    --primary: #2e6b41; --primary-strong: #245334; --primary-soft: #e4efe6;
+    --warn: #9a4a26; --warn-soft: #f6e9e1;
+    --shadow: 0 1px 2px rgba(25,35,29,.04), 0 8px 24px -12px rgba(25,35,29,.14);
+    --radius: 14px;
+    --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --font-body: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10140f; --surface: #171c15; --surface-sunken: #1e241b;
+      --ink: #e9ede6; --muted: #a2aa9f; --border: #2f362d; --hairline: #262d23;
+      --primary: #6bbf7e; --primary-strong: #82cf93; --primary-soft: #1d2a1e;
+      --warn: #d68a5c; --warn-soft: #2a201a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 17px; line-height: 1.62; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: clamp(1.4rem, 4vw, 3.4rem) clamp(1.1rem, 4vw, 1.8rem) 4rem; }
+
+  .topbar { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+  .backlink { font-size: .9rem; color: var(--primary-strong); text-decoration: none; }
+  .backlink:hover { text-decoration: underline; }
+  .printbtn {
+    font: inherit; font-size: .86rem; font-weight: 600; background: var(--surface);
+    color: var(--primary-strong); border: 1px solid var(--border); border-radius: 9px;
+    padding: .4rem .8rem; cursor: pointer;
+  }
+  .printbtn:hover { background: var(--primary-soft); }
+
+  .eyebrow { font-size: .74rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--primary-strong); margin: 0 0 .7rem; }
+  h1 {
+    font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560;
+    font-size: clamp(1.9rem, 5.5vw, 2.7rem); line-height: 1.08; letter-spacing: -.01em;
+    text-wrap: balance; margin: 0 0 .6rem;
+  }
+  .lede { font-size: 1.05rem; color: var(--muted); max-width: 62ch; margin: 0 0 1.6rem; }
+
+  .why {
+    background: var(--surface-sunken); border: 1px solid var(--hairline);
+    border-radius: var(--radius); padding: 1rem 1.2rem; margin-bottom: 2.4rem; font-size: .95rem;
+  }
+  .why b { font-weight: 600; }
+
+  .tasks { display: grid; gap: 1.4rem; counter-reset: task; }
+  .task {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1.35rem clamp(1.1rem, 4vw, 1.6rem) 1.5rem;
+  }
+  .task h2 {
+    font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560;
+    font-size: 1.3rem; line-height: 1.15; margin: 0 0 .2rem; text-wrap: balance;
+  }
+  .task h2::before {
+    counter-increment: task; content: "Schritt " counter(task) " · ";
+    color: var(--muted); font-family: var(--font-body); font-weight: 700; font-size: .62em;
+    text-transform: uppercase; letter-spacing: .08em;
+  }
+  .goal { color: var(--muted); font-size: .95rem; margin: .3rem 0 1rem; }
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: .55rem; }
+  ol.steps > li { position: relative; padding-left: 2.1rem; font-size: .98rem; }
+  ol.steps > li::before {
+    counter-increment: step; content: counter(step); position: absolute; left: 0; top: .05rem;
+    width: 1.5rem; height: 1.5rem; display: grid; place-items: center; border-radius: 50%;
+    background: var(--surface-sunken); border: 1px solid var(--border);
+    font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--primary-strong);
+  }
+  ol.steps b { font-weight: 600; }
+  code {
+    font-family: var(--mono); font-size: .84em; background: var(--surface-sunken);
+    border: 1px solid var(--border); border-radius: 5px; padding: .08em .4em; word-break: break-all;
+  }
+  pre {
+    font-family: var(--mono); font-size: .82rem; line-height: 1.55;
+    background: var(--surface-sunken); border: 1px solid var(--border); border-radius: 10px;
+    padding: .8rem 1rem; margin: .7rem 0 .2rem; overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+  }
+  .field {
+    display: grid; grid-template-columns: 150px 1fr; gap: .3rem .9rem;
+    margin: .5rem 0; font-size: .93rem;
+  }
+  .field b { color: var(--primary-strong); font-weight: 600; }
+  @media (max-width: 520px) { .field { grid-template-columns: 1fr; } }
+
+  .tip {
+    display: flex; gap: .6rem; margin-top: 1rem; padding: .7rem .85rem; border-radius: 9px;
+    background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+    font-size: .9rem; line-height: 1.5;
+  }
+  .tip svg { width: 17px; height: 17px; flex: none; color: var(--warn); margin-top: .16rem; }
+  .tip.calm { background: var(--surface-sunken); border-color: var(--hairline); }
+  .tip.calm svg { color: var(--primary-strong); }
+
+  .section-title { font-family: var(--font-display); font-weight: 560; font-size: 1.4rem; margin: 3rem 0 .7rem; }
+  .faq { display: grid; gap: .8rem; }
+  .faq div { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: .85rem 1rem; }
+  .faq b { display: block; margin-bottom: .2rem; }
+  .faq p { margin: 0; font-size: .92rem; color: var(--muted); }
+
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--hairline); font-size: .84rem; color: var(--muted); }
+  a { color: var(--primary-strong); }
+  a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
+
+  @media print {
+    :root { --shadow: none; }
+    body { background: #fff; color: #000; font-size: 10.5pt; }
+    .wrap { max-width: none; padding: 0; }
+    .topbar { display: none; }
+    .task, .why, .faq div { break-inside: avoid; box-shadow: none; }
+    .section-title { break-after: avoid; }
+    a { color: #000; text-decoration: none; }
+    h1 { font-size: 21pt; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a class="backlink" href="./">&larr; Alle Anleitungen</a>
+    <button class="printbtn" type="button" onclick="window.print()">Als PDF speichern / drucken</button>
+  </div>
+
+  <p class="eyebrow">Für Admins &middot; Einrichtung</p>
+  <h1>Cronjob bei All-Inkl einrichten</h1>
+  <p class="lede">
+    Einmalig, dauert 5&nbsp;Minuten. Danach schließen sich Abstimmungen zur Frist
+    von selbst, Nicht-Abstimmende werden 48&nbsp;Stunden vorher erinnert und
+    Ergebnis-Mails gehen automatisch raus.
+  </p>
+
+  <div class="why">
+    <b>Warum überhaupt?</b> Die Adress-Zentrale hat keinen eigenen Hintergrund­dienst.
+    Zeitgesteuerte Dinge (Fristen, Erinnerungen, Ergebnis-Mails, Aufräumen alter
+    Protokolldaten) passieren nur, wenn die Seite von außen &bdquo;angestoßen&ldquo;
+    wird. Ohne echten Cron gibt es nur eine Notlösung: bei normalen Seitenaufrufen
+    wird die Automatik höchstens einmal pro Stunde nebenbei mitgemacht &ndash; in
+    einer selten besuchten Instanz zu unzuverlässig.
+  </div>
+
+  <div class="tasks">
+
+    <section class="task">
+      <h2>Geheimen Schlüssel setzen</h2>
+      <p class="goal">Der Cron-Aufruf ist nur mit diesem Schlüssel gültig &ndash; sonst antwortet die Adresse mit „nicht gefunden".</p>
+      <ol class="steps">
+        <li>Auf dem Webspace die Datei <code>config/config.php</code> öffnen (per FTP oder KAS-Dateimanager).</li>
+        <li>Im <code>'app'</code>-Block eine Zeile ergänzen &ndash; eine beliebige lange Zufallskette:
+          <pre>'app' =&gt; [
+    // ... vorhandene Zeilen ...
+    'cron_key' =&gt; 'HIER_EINE_LANGE_ZUFALLSKETTE',
+],</pre>
+        </li>
+        <li>Kette erzeugen z.&nbsp;B. mit <code>openssl rand -hex 24</code> oder einem Passwort-Generator (mind. 20&nbsp;Zeichen, keine Leer-/Sonderzeichen wie <code>&amp; ? #</code>).</li>
+        <li>Speichern. <b>Diesen Schlüssel gleich für Schritt 2 bereithalten.</b></li>
+      </ol>
+      <div class="tip calm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+        <span><code>config/config.php</code> wird beim Deployment nicht überschrieben &ndash; die Zeile bleibt also erhalten.</span>
+      </div>
+    </section>
+
+    <section class="task">
+      <h2>Cronjob im KAS anlegen</h2>
+      <p class="goal">Im All-Inkl-Kundenmenü (KAS). Bezeichnungen können je nach KAS-Version leicht abweichen.</p>
+      <ol class="steps">
+        <li>Im KAS anmelden &rarr; linkes Menü <b>Tools</b> &rarr; <b>Cronjobs</b>.</li>
+        <li><b>Neuen Cronjob erstellen</b> und als Typ <b>&bdquo;URL aufrufen&ldquo;</b> (nicht &bdquo;Skript/Kommando&ldquo;) wählen.</li>
+        <li>Felder ausfüllen:
+          <div class="field"><b>URL</b><span><code>https://DEINE-DOMAIN/intern/cron?key=DEIN_SCHLUESSEL</code></span></div>
+          <div class="field"><b>Intervall</b><span>alle 15&nbsp;Minuten &ndash; falls Cron-Schreibweise gefragt ist: <code>*/15 * * * *</code></span></div>
+          <div class="field"><b>Benachrichtigung</b><span>optional: &bdquo;nur bei Fehler&ldquo; an deine Admin-Mailadresse</span></div>
+        </li>
+        <li>Speichern. Fertig &ndash; ab jetzt ruft All-Inkl die Adresse alle 15&nbsp;Minuten auf.</li>
+      </ol>
+      <div class="tip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4M12 17v.5"/></svg>
+        <span>Die vollständige URL mit dem echten Schlüssel eintragen, keine Platzhalter. Der Schlüssel steht damit in der KAS-Konfiguration &ndash; das ist in Ordnung, er dient nur diesem einen Zweck.</span>
+      </div>
+    </section>
+
+    <section class="task">
+      <h2>Einmal testen</h2>
+      <p class="goal">Prüfen, dass der Aufruf funktioniert.</p>
+      <ol class="steps">
+        <li>Die URL <code>https://DEINE-DOMAIN/intern/cron?key=DEIN_SCHLUESSEL</code> einmal im Browser öffnen.</li>
+        <li>Richtig ist eine schlichte Textausgabe:
+          <pre>ok
+closed=0
+reminded=0
+results=0
+mails=0
+errors=0</pre>
+        </li>
+        <li>Kommt stattdessen <b>&bdquo;Nicht gefunden.&ldquo;</b>: Schlüssel stimmt nicht mit <code>config.php</code> überein, oder die geänderte <code>config.php</code> ist noch nicht auf dem Server.</li>
+      </ol>
+    </section>
+
+  </div>
+
+  <h2 class="section-title">Häufige Fragen</h2>
+  <div class="faq">
+    <div><b>Wie oft sollte der Cron laufen?</b><p>Alle 15&nbsp;Minuten reicht gut. Häufiger schadet nicht, bringt aber wenig; die 48-Stunden-Erinnerung ist auf die Minute ohnehin unkritisch.</p></div>
+    <div><b>Kostet das etwas / belastet das den Server?</b><p>Nein. Der Aufruf macht fast immer nichts (nur ein kurzer Datenbank-Check) und ist in Millisekunden fertig.</p></div>
+    <div><b>Was, wenn ich keinen Cron einrichte?</b><p>Fristen, Erinnerungen und Ergebnis-Mails hängen dann, bis jemand die Seite öffnet &ndash; und auch dann nur höchstens einmal pro Stunde. Für einen verlässlichen Betrieb: Cron einrichten.</p></div>
+    <div><b>Kann ich den Schlüssel später ändern?</b><p>Ja &ndash; <code>cron_key</code> in <code>config.php</code> anpassen und die URL im KAS-Cronjob entsprechend aktualisieren.</p></div>
+    <div><b>Anderer Hoster?</b><p>Das Prinzip ist überall gleich: einen zeitgesteuerten Aufruf der URL <code>/intern/cron?key=…</code> anlegen (per HTTP-Cron oder <code>curl</code> im Shell-Cron).</p></div>
+  </div>
+
+  <footer>
+    Adress-Zentrale &middot; läuft mit GRUEZE (GRUppen-Erreichbarkeits-ZEntrale).
+    Diese Anleitung richtet sich an Administrator:innen. Siehe auch
+    <code>docs/NEUE-INSTANZ.md</code>, Abschnitt 7.
+  </footer>
+
+</div>
+</body>
+</html>

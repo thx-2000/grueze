@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Anleitung für Mitglieder · Adress-Zentrale</title>
+<meta name="description" content="Kurz und einfach: was du mit deinem Mitglieder-Zugang machen kannst – eigene Daten pflegen, Leute finden und kontaktieren, an Abstimmungen teilnehmen, Gruppen.">
+<style>
+  @import url("../assets/css/fonts.css");
+
+  :root {
+    --bg: #f2f5ef; --surface: #ffffff; --surface-sunken: #eef2ea;
+    --ink: #19231d; --muted: #586159; --border: #dbe1d5; --hairline: #e7ebe2;
+    --primary: #2e6b41; --primary-strong: #245334; --primary-soft: #e4efe6;
+    --warn: #9a4a26; --warn-soft: #f6e9e1;
+    --shadow: 0 1px 2px rgba(25,35,29,.04), 0 8px 24px -12px rgba(25,35,29,.14);
+    --radius: 14px;
+    --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --font-body: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10140f; --surface: #171c15; --surface-sunken: #1e241b;
+      --ink: #e9ede6; --muted: #a2aa9f; --border: #2f362d; --hairline: #262d23;
+      --primary: #6bbf7e; --primary-strong: #82cf93; --primary-soft: #1d2a1e;
+      --warn: #d68a5c; --warn-soft: #2a201a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 17px; line-height: 1.62; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 700px; margin: 0 auto; padding: clamp(1.4rem, 4vw, 3.4rem) clamp(1.1rem, 4vw, 1.8rem) 4rem; }
+
+  .topbar { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+  .backlink { font-size: .9rem; color: var(--primary-strong); text-decoration: none; }
+  .backlink:hover { text-decoration: underline; }
+  .printbtn {
+    font: inherit; font-size: .86rem; font-weight: 600; background: var(--surface);
+    color: var(--primary-strong); border: 1px solid var(--border); border-radius: 9px;
+    padding: .4rem .8rem; cursor: pointer;
+  }
+  .printbtn:hover { background: var(--primary-soft); }
+
+  .eyebrow { font-size: .74rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--primary-strong); margin: 0 0 .7rem; }
+  h1 {
+    font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560;
+    font-size: clamp(2rem, 6vw, 2.8rem); line-height: 1.08; letter-spacing: -.01em;
+    text-wrap: balance; margin: 0 0 .6rem;
+  }
+  .lede { font-size: 1.08rem; color: var(--muted); max-width: 60ch; margin: 0 0 1.6rem; }
+
+  .quick {
+    background: var(--primary-soft); border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+    border-radius: var(--radius); padding: 1.05rem 1.2rem; display: grid; gap: .5rem; margin-bottom: 2.6rem;
+  }
+  .quick h2 { font-size: .95rem; margin: 0; font-family: var(--font-body); font-weight: 700; }
+  .quick ul { margin: 0; padding-left: 1.1rem; font-size: .96rem; }
+  .quick li { margin: .15rem 0; }
+  .quick li::marker { color: var(--primary); }
+
+  .tasks { display: grid; gap: 1.4rem; counter-reset: task; }
+  .task {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1.35rem clamp(1.1rem, 4vw, 1.6rem) 1.5rem;
+  }
+  .task-head { display: flex; align-items: center; gap: .7rem; margin-bottom: .15rem; }
+  .task-ic { width: 34px; height: 34px; flex: none; display: grid; place-items: center; border-radius: 9px; background: var(--primary-soft); color: var(--primary-strong); }
+  .task-ic svg { width: 19px; height: 19px; }
+  .task h2 {
+    font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560;
+    font-size: 1.32rem; line-height: 1.15; margin: 0; text-wrap: balance;
+  }
+  .task h2::before {
+    counter-increment: task; content: counter(task) " · ";
+    color: var(--muted); font-family: var(--font-body); font-weight: 700; font-size: .8em;
+  }
+  .goal { color: var(--muted); font-size: .96rem; margin: .35rem 0 1rem; }
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: .55rem; }
+  ol.steps > li { position: relative; padding-left: 2.1rem; font-size: .98rem; }
+  ol.steps > li::before {
+    counter-increment: step; content: counter(step); position: absolute; left: 0; top: .05rem;
+    width: 1.5rem; height: 1.5rem; display: grid; place-items: center; border-radius: 50%;
+    background: var(--surface-sunken); border: 1px solid var(--border);
+    font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--primary-strong);
+  }
+  ol.steps b { font-weight: 600; }
+  kbd {
+    font-family: var(--font-body); font-size: .86em; font-weight: 600; background: var(--surface-sunken);
+    border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px; padding: .05em .42em; white-space: nowrap;
+  }
+
+  .tip {
+    display: flex; gap: .6rem; margin-top: 1rem; padding: .7rem .85rem; border-radius: 9px;
+    background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+    font-size: .9rem; line-height: 1.5;
+  }
+  .tip svg { width: 17px; height: 17px; flex: none; color: var(--warn); margin-top: .16rem; }
+  .tip.calm { background: var(--surface-sunken); border-color: var(--hairline); }
+  .tip.calm svg { color: var(--primary-strong); }
+
+  .section-title { font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560; font-size: 1.5rem; margin: 3.2rem 0 .8rem; text-wrap: balance; }
+  .knowhow { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: .9rem; margin-top: 1rem; }
+  .know { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: .9rem 1rem; }
+  .know h3 { font-size: .92rem; margin: 0 0 .25rem; }
+  .know p { margin: 0; font-size: .88rem; color: var(--muted); line-height: 1.5; }
+
+  footer { margin-top: 3.2rem; padding-top: 1.2rem; border-top: 1px solid var(--hairline); font-size: .84rem; color: var(--muted); }
+  a { color: var(--primary-strong); }
+  a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
+
+  @media print {
+    :root { --shadow: none; }
+    body { background: #fff; color: #000; font-size: 10.5pt; }
+    .wrap { max-width: none; padding: 0; }
+    .topbar { display: none; }
+    .task, .quick, .know { break-inside: avoid; box-shadow: none; }
+    .section-title { break-after: avoid; }
+    .task-head { break-after: avoid; }
+    a { color: #000; text-decoration: none; }
+    h1 { font-size: 22pt; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a class="backlink" href="./">&larr; Alle Anleitungen</a>
+    <button class="printbtn" type="button" onclick="window.print()">Als PDF speichern / drucken</button>
+  </div>
+
+  <p class="eyebrow">Kurzanleitung &middot; Mitglieder</p>
+  <h1>Dein Zugang zur Adress-Zentrale</h1>
+  <p class="lede">
+    Du hast einen Zugang als <b>Mitglied</b>. Damit hältst du deine eigenen Daten
+    aktuell, findest und kontaktierst andere, stimmst bei Terminen ab und bist bei
+    deinen Gruppen dabei. Am Handy siehst du eine bewusst schlanke Ansicht.
+  </p>
+
+  <div class="quick">
+    <h2>In 30 Sekunden</h2>
+    <ul>
+      <li><b>Mein Eintrag</b> &ndash; deine Daten, dein Passwort, deine offenen Abstimmungen.</li>
+      <li><b>Adressbuch</b> &ndash; jemanden suchen und über einen Knopf kontaktieren.</li>
+      <li><b>Termine</b> &ndash; bei Abstimmungen mitmachen (per Link oder eingeloggt).</li>
+      <li><b>Gruppen</b> &ndash; deine Gruppen sehen, offenen beitreten, dort abstimmen.</li>
+    </ul>
+  </div>
+
+  <div class="tasks">
+
+    <section class="task" id="meineintrag">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 19c1-3.2 3.7-4.6 6.5-4.6S17.5 15.8 18.5 19"/></svg></span>
+        <h2>Anmelden &amp; „Mein Eintrag"</h2>
+      </div>
+      <p class="goal">Reinkommen und deine eigenen Angaben aktuell halten.</p>
+      <ol class="steps">
+        <li>Die Adresse der Zentrale im Browser öffnen, mit <b>E-Mail + Passwort</b> anmelden. Kein Passwort? Unten <kbd>Passwort vergessen?</kbd> &ndash; du bekommst einen Link zum Setzen.</li>
+        <li>Noch schneller: einen <b>Passkey</b> (Face&nbsp;ID / Fingerabdruck) hinterlegen unter <kbd>Mein Eintrag</kbd> &rarr; <kbd>Passkeys</kbd>.</li>
+        <li>Unter <kbd>Mein Eintrag</kbd> steht &bdquo;Das haben wir zu dir&ldquo;. Stimmt etwas nicht, direkt ändern &ndash; unten erscheint <kbd>Änderungen speichern</kbd>.</li>
+      </ol>
+      <div class="tip calm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+        <span>Du bearbeitest nur deinen eigenen Eintrag. Interne Notizen der Verwaltung sind für dich unsichtbar. Fehlt die Verknüpfung zu deinem Adressbuch-Eintrag, kann das Orga-Team das herstellen.</span>
+      </div>
+    </section>
+
+    <section class="task" id="kontaktieren">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6z"/><path d="M6 4v16"/><circle cx="12.5" cy="10" r="2"/><path d="M9.5 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4"/></svg></span>
+        <h2>Jemanden finden &amp; kontaktieren</h2>
+      </div>
+      <p class="goal">Namen nachschlagen und einer Person schreiben &ndash; ohne dass du ihre Adresse siehst.</p>
+      <ol class="steps">
+        <li><kbd>Adressbuch</kbd> öffnen, im Suchfeld den Namen eingeben.</li>
+        <li>Bei der Person auf <kbd>Schreiben</kbd> tippen. Du füllst Betreff und Text aus; die Zieladresse bleibt verborgen.</li>
+        <li>Die Mail geht über das System raus, <b>Antworten kommen an deine eigene Login-Adresse</b>.</li>
+      </ol>
+      <div class="tip calm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+        <span>Du kannst immer nur <b>eine</b> Person auf einmal anschreiben. Rundmails an viele macht das Orga-Team.</span>
+      </div>
+    </section>
+
+    <section class="task" id="abstimmen">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9h17M8 3v3M16 3v3"/><path d="m9 14 2 2 4-4"/></svg></span>
+        <h2>An einer Abstimmung teilnehmen</h2>
+      </div>
+      <p class="goal">Bei einer Terminfindung oder Umfrage deine Rückmeldung geben.</p>
+      <ol class="steps">
+        <li><b>Per Link:</b> Du bekommst eine Mail mit deinem <b>persönlichen Abstimmungs-Link</b>. Draufklicken &ndash; dein Name ist schon vorausgefüllt &ndash; und je Vorschlag <kbd>Ja</kbd> / <kbd>Vielleicht</kbd> / <kbd>Nein</kbd> wählen, dann <kbd>Rückmeldung speichern</kbd>.</li>
+        <li><b>Eingeloggt:</b> Offene Abstimmungen stehen auch unter <kbd>Mein Eintrag</kbd> und &ndash; wenn es eine Gruppen-Abstimmung ist &ndash; unter <kbd>Gruppen</kbd> &rarr; <kbd>Abstimmungen</kbd>.</li>
+        <li>Du kannst deine Antwort bis zum Ende der Abstimmung jederzeit ändern.</li>
+      </ol>
+      <div class="tip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <span>Der Link gehört <b>dir</b>. Nicht weitergeben &ndash; wer ihn hat, kann deine Stimme ändern.</span>
+      </div>
+    </section>
+
+    <section class="task" id="gruppen">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="9" r="2.4"/><path d="M3.5 18c.6-2.4 2.3-3.6 4.5-3.6S12 15.6 12.5 18M11.5 18c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6"/></svg></span>
+        <h2>Meine Gruppen</h2>
+      </div>
+      <p class="goal">Sehen, in welchen Runden du bist &ndash; und bei offenen selbst mitmachen.</p>
+      <ol class="steps">
+        <li><kbd>Gruppen</kbd> in der Seitenleiste zeigt unter <b>Dabei</b> deine Gruppen. Pro Gruppe kannst du eine <kbd>Nachricht an die Gruppe</kbd> schreiben und <kbd>Abstimmungen</kbd> ansehen und daran teilnehmen.</li>
+        <li>Unter <b>Offene Gruppen</b> trittst du mit <kbd>Beitreten</kbd> selbst bei.</li>
+        <li>Bei <b>anderen Gruppen</b> (die ein Team verwaltet) kannst du <kbd>Beitritt anfragen</kbd>, optional mit kurzer Nachricht. Die Gruppenleitung nimmt an oder lehnt ab.</li>
+      </ol>
+    </section>
+
+  </div>
+
+  <h2 class="section-title">Gut zu wissen</h2>
+  <div class="knowhow">
+    <div class="know">
+      <h3>Blickschutz</h3>
+      <p>Das Auge oben rechts verwischt alle persönlichen Werte &ndash; praktisch, wenn jemand mit auf den Bildschirm schaut.</p>
+    </div>
+    <div class="know">
+      <h3>Deine Daten, deine Sache</h3>
+      <p>Du änderst nur deinen eigenen Eintrag. Änderungen sind für die Verwaltung nachvollziehbar.</p>
+    </div>
+    <div class="know">
+      <h3>Orga-Team schreiben</h3>
+      <p>Der Knopf „Orga-Team schreiben" (Seitenleiste) erreicht alle, die organisieren &ndash; für Fragen und Korrekturen.</p>
+    </div>
+    <div class="know">
+      <h3>Am Handy reicht wenig</h3>
+      <p>Mitglied · Adressbuch · Termine · Gruppen &ndash; mehr brauchst du unterwegs nicht. Der Rest ist fürs Orga-Team am Rechner.</p>
+    </div>
+  </div>
+
+  <footer>
+    Adress-Zentrale &middot; läuft mit GRUEZE (GRUppen-Erreichbarkeits-ZEntrale).
+    Diese Anleitung gilt für die Rolle &bdquo;Mitglied&ldquo;.
+  </footer>
+
+</div>
+</body>
+</html>

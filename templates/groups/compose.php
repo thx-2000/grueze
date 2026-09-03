@@ -2,10 +2,12 @@
 /** @var array<string,mixed> $group */
 /** @var int $recipientCount */
 /** @var int $noEmailCount */
+/** @var int $leadCount */
 /** @var int $sentToday */
 /** @var int $softLimit */
 /** @var bool $isAdmin */
 $overSoftLimit = !$isAdmin && $sentToday >= $softLimit;
+$otherLeads = max(0, ($leadCount ?? 0) - 1);
 ?>
 <p class="detail-backlink"><a href="<?= e(url('/gruppen')) ?>"><?= icon('chevron-right') ?>Zurück zu meinen Gruppen</a></p>
 
@@ -15,7 +17,6 @@ $overSoftLimit = !$isAdmin && $sentToday >= $softLimit;
     <p class="muted">
         Geht an <?= e((string) $recipientCount) ?> <?= $recipientCount === 1 ? 'Person' : 'Personen' ?> mit Mailadresse.
         <?php if ($noEmailCount > 0): ?><?= e((string) $noEmailCount) ?> ohne Mailadresse werden übersprungen.<?php endif; ?>
-        Antworten gehen direkt an dich.
     </p>
 </header>
 
@@ -39,6 +40,17 @@ $overSoftLimit = !$isAdmin && $sentToday >= $softLimit;
             <span>Nachricht <span class="required-marker" aria-hidden="true">*</span></span>
             <textarea name="message" rows="10" required><?= e(old('message')) ?></textarea>
         </label>
+        <fieldset class="full-width reply-to-choice">
+            <legend>Antworten gehen an</legend>
+            <label class="radio-line">
+                <input type="radio" name="reply_to" value="self" <?= old('reply_to') === 'leads' ? '' : 'checked' ?>>
+                <span>nur an mich</span>
+            </label>
+            <label class="radio-line">
+                <input type="radio" name="reply_to" value="leads" <?= old('reply_to') === 'leads' ? 'checked' : '' ?>>
+                <span>an mich und die <?= ($leadCount ?? 0) === 1 ? 'Gruppenleitung' : 'gesamte Gruppenleitung' ?><?php if (($leadCount ?? 0) > 1): ?> (<?= e((string) $leadCount) ?> Personen)<?php endif; ?></span>
+            </label>
+        </fieldset>
         <div class="form-actions full-width">
             <a class="ghost-button" href="<?= e(url('/gruppen')) ?>">Abbrechen</a>
             <button type="submit"><?= icon('mail') ?><span>An die Gruppe senden</span></button>

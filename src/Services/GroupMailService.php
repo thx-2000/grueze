@@ -47,7 +47,11 @@ final class GroupMailService
      * @return array{sent:int, failed:int, skipped:int, recipients:list<string>,
      *               failedNames:list<string>, noEmail:list<string>, softLimitHit:bool}
      */
-    public function send(array $group, array $sender, string $subject, string $message, bool $senderIsAdmin): array
+    /**
+     * @param string $replyToMode 'self' = Antworten nur an den Absender,
+     *   'leads' = an den Absender und alle Personen mit Gruppenleitung
+     */
+    public function send(array $group, array $sender, string $subject, string $message, bool $senderIsAdmin, string $replyToMode = 'self'): array
     {
         $groupId = (int) $group['id'];
         $members = $this->groups->membersOf($groupId);
@@ -72,6 +76,21 @@ final class GroupMailService
         $senderEmail = trim((string) ($sender['email'] ?? '')) ?: null;
         $fullSubject = $this->clip('[' . $group['name'] . '] ' . $subject, 190);
 
+        // Reply-To: nur der Absender – oder der Absender plus die gesamte
+        // Gruppenleitung.
+        $replyTo = [];
+        if ($senderEmail !== null) {
+            $replyTo[] = $senderEmail;
+        }
+        if ($replyToMode === 'leads') {
+            foreach ($this->groups->leadRecipients((int) $group['id']) as $lead) {
+                if (!in_array($lead['email'], $replyTo, true)) {
+                    $replyTo[] = $lead['email'];
+                }
+            }
+        }
+        $replyToHeader = implode(', ', $replyTo) ?: null;
+
         $footer = "\n\n—\nDiese Nachricht ging an alle in der Gruppe „" . $group['name'] . '".'
             . "\nAbgesendet von " . $senderName
             . ($senderEmail !== null ? ' <' . $senderEmail . '>' : '') . '.';
@@ -82,7 +101,7 @@ final class GroupMailService
         $failed = [];
         foreach ($withEmail as $recipient) {
             try {
-                $this->mailer->sendSystemMail($identity, $recipient['email'], $fullSubject, $body, $senderEmail);
+                $this->mailer->sendSystemMail($identity, $recipient['email'], $fullSubject, $body, $replyToHeader);
                 $sent[] = $recipient['name'];
                 $status = 'gesendet';
                 $error = null;
@@ -111,7 +130,7 @@ final class GroupMailService
             'soft_limit_hit' => $softLimitHit,
         ]);
 
-        $this->confirmToSender($identity, $sender, $group, $subject, $sent, $failed, $noEmail);
+        $this->confirmToSender($identity, $sender, $group, $subject, $sent, $failed, $noEmail, $replyToMode);
 
         if ($failed !== [] || $softLimitHit) {
             $this->notifyAdmins($identity, $senderName, $group, count($sent), $failed, $softLimitHit, $todayCount + 1);
@@ -140,7 +159,8 @@ final class GroupMailService
         string $subject,
         array $sent,
         array $failed,
-        array $noEmail
+        array $noEmail,
+        string $replyToMode = 'self'
     ): void {
         $to = trim((string) ($sender['email'] ?? ''));
         if ($to === '') {
@@ -149,6 +169,7 @@ final class GroupMailService
 
         $lines = [
             'Deine Nachricht „' . $subject . '" an die Gruppe „' . $group['name'] . '" ist raus.',
+            'Antworten gehen an ' . ($replyToMode === 'leads' ? 'dich und die Gruppenleitung' : 'dich') . '.',
             '',
             'Zugestellt an ' . count($sent) . ' ' . (count($sent) === 1 ? 'Person' : 'Personen') . ':',
             $sent === [] ? '– niemand' : $this->nameList($sent),

@@ -689,12 +689,32 @@ final class MailController extends BaseController
         }
 
         $options = $this->settings->mailReplyToOptions();
-
-        if ($options !== []) {
-            return $options;
+        if ($options === []) {
+            $options = $this->settings->mailIdentities();
         }
 
-        return $this->settings->mailIdentities();
+        // Zusätzlich: „Antworten kommen zu mir" – das eigene Login-Postfach.
+        $self = $this->selfReplyTo($this->auth->user());
+        if ($self !== null) {
+            $options[] = $self;
+        }
+
+        return $options;
+    }
+
+    /** Reply-To auf das eigene Postfach der absendenden Person. */
+    private function selfReplyTo(?array $user): ?array
+    {
+        $email = trim((string) ($user['email'] ?? ''));
+        if ($email === '') {
+            return null;
+        }
+
+        return [
+            'key' => 'self',
+            'name' => 'Ich selbst (' . trim((string) ($user['name'] ?? 'mein Postfach')) . ')',
+            'email' => $email,
+        ];
     }
 
     private function composeMailBody(string $message, bool $memberContactMode = false): string

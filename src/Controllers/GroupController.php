@@ -166,10 +166,16 @@ final class GroupController extends BaseController
         $members = $group['members'];
         $withEmail = array_filter($members, static fn (array $m): bool => trim((string) ($m['email'] ?? '')) !== '');
 
+        $leadCount = count(array_filter(
+            $members,
+            static fn (array $m): bool => ($m['role'] ?? 'member') === 'lead'
+        ));
+
         $this->render('groups/compose', [
             'group' => $group,
             'recipientCount' => count($withEmail),
             'noEmailCount' => count($members) - count($withEmail),
+            'leadCount' => $leadCount,
             'sentToday' => $this->auth->isAdmin() ? 0 : $this->groupMail->sentTodayBy($userId),
             'softLimit' => $this->groupMail->softLimit(),
             'isAdmin' => $this->auth->isAdmin(),
@@ -207,12 +213,14 @@ final class GroupController extends BaseController
             Redirect::to('/gruppen');
         }
 
+        $replyToMode = $request->input('reply_to') === 'leads' ? 'leads' : 'self';
         $result = $this->groupMail->send(
             $group,
             (array) $this->auth->user(),
             $subject,
             $message,
-            $this->auth->isAdmin()
+            $this->auth->isAdmin(),
+            $replyToMode
         );
 
         $msg = 'Nachricht an ' . $result['sent'] . ' ' . ($result['sent'] === 1 ? 'Person' : 'Personen') . ' verschickt.';

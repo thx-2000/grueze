@@ -77,10 +77,40 @@ final class MailService
         return $clean;
     }
 
+    /**
+     * Reply-To kann eine kommagetrennte Liste sein („nur ich" vs. „die ganze
+     * Gruppenleitung"). Zerlegen, säubern, doppelte entfernen.
+     *
+     * @return list<string>
+     */
+    private function replyToList(string $value, string $fallback): array
+    {
+        $out = [];
+        foreach (preg_split('/[,;]+/', $value) ?: [] as $part) {
+            $part = trim($part);
+            if ($part === '') {
+                continue;
+            }
+            try {
+                $addr = $this->safeAddress($part);
+            } catch (\Throwable) {
+                continue;
+            }
+            if (!in_array($addr, $out, true)) {
+                $out[] = $addr;
+            }
+        }
+        if ($out === [] && $fallback !== '') {
+            $out[] = $this->safeAddress($fallback);
+        }
+
+        return $out;
+    }
+
     private function sendRaw(array $identity, string $to, string $subject, string $body, string $replyTo, array $attachments): void
     {
         $to = $this->safeAddress($to);
-        $replyTo = $this->safeAddress($replyTo);
+        $replyToAddrs = $this->replyToList($replyTo, (string) ($identity['email'] ?? ''));
         $identity['email'] = $this->safeAddress((string) ($identity['email'] ?? ''));
         $identity['name'] = trim((string) preg_replace('/[\r\n]+/', ' ', (string) ($identity['name'] ?? '')));
 
@@ -96,7 +126,9 @@ final class MailService
             $mailer->CharSet = 'UTF-8';
             $mailer->setFrom($identity['email'], $identity['name']);
             $mailer->addAddress($to);
-            $mailer->addReplyTo($replyTo, $identity['name']);
+            foreach ($replyToAddrs as $addr) {
+                $mailer->addReplyTo($addr);
+            }
             if (!empty($identity['bcc_email'])) {
                 $mailer->addBCC((string) $identity['bcc_email']);
             }
@@ -117,7 +149,7 @@ final class MailService
             'MIME-Version: 1.0',
             'Content-Type: text/plain; charset=UTF-8',
             'From: ' . $identity['name'] . ' <' . $identity['email'] . '>',
-            'Reply-To: ' . $replyTo,
+            'Reply-To: ' . implode(', ', $replyToAddrs),
         ];
         if (!empty($identity['bcc_email'])) {
             $headers[] = 'Bcc: ' . $identity['bcc_email'];
@@ -132,7 +164,7 @@ final class MailService
             throw new RuntimeException('Mailversand fehlgeschlagen. Bitte SMTP prüfen.');
         }
 
-        $this->archiveSentCopy($identity, $this->buildPlainTextMime($identity, $to, $replyTo, $subject, $body, $headers));
+        $this->archiveSentCopy($identity, $this->buildPlainTextMime($identity, $to, implode(', ', $replyToAddrs), $subject, $body, $headers));
     }
 
     private function archiveSentCopy(array $identity, string $rawMessage): void
