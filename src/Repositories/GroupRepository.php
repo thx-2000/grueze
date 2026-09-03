@@ -25,7 +25,8 @@ final class GroupRepository
     {
         return $this->pdo->query(
             'SELECT g.*,
-                    (SELECT COUNT(*) FROM contact_group_members m WHERE m.group_id = g.id) AS member_count
+                    (SELECT COUNT(*) FROM contact_group_members m WHERE m.group_id = g.id) AS member_count,
+                    (SELECT COUNT(*) FROM contact_group_join_requests r WHERE r.group_id = g.id) AS pending_requests
              FROM contact_groups g
              ORDER BY g.name ASC'
         )->fetchAll();
@@ -123,7 +124,8 @@ final class GroupRepository
         }
         $stmt = $this->pdo->prepare(
             'SELECT g.*, m.role AS my_role,
-                    (SELECT COUNT(*) FROM contact_group_members mm WHERE mm.group_id = g.id) AS member_count
+                    (SELECT COUNT(*) FROM contact_group_members mm WHERE mm.group_id = g.id) AS member_count,
+                    (SELECT COUNT(*) FROM contact_group_join_requests r WHERE r.group_id = g.id) AS pending_requests
              FROM contact_group_members m
              JOIN contact_groups g ON g.id = m.group_id
              WHERE m.contact_id = :contact_id
@@ -165,7 +167,7 @@ final class GroupRepository
         $stmt = $this->pdo->prepare(
             'SELECT
                 EXISTS(SELECT 1 FROM contact_group_members WHERE contact_id = :c)
-                OR EXISTS(SELECT 1 FROM contact_groups WHERE is_open = 1)'
+                OR EXISTS(SELECT 1 FROM contact_groups)'
         );
         $stmt->execute(['c' => $contactId]);
 
@@ -306,6 +308,122 @@ final class GroupRepository
         }
     }
 
+    // ----------------------------------------------------------- Beitrittsanfragen
+
+    /**
+     * Nicht-offene Gruppen, in denen dieser Kontakt noch nicht Mitglied ist –
+     * für die „Beitritt anfragen"-Liste.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function closedGroupsToRequest(int $contactId): array
+    {
+        if ($contactId <= 0) {
+            return [];
+        }
+        $stmt = $this->pdo->prepare(
+            'SELECT g.*,
+                    (SELECT COUNT(*) FROM contact_group_members mm WHERE mm.group_id = g.id) AS member_count,
+                    EXISTS(SELECT 1 FROM contact_group_join_requests r
+                           WHERE r.group_id = g.id AND r.contact_id = :contact_id) AS request_pending
+             FROM contact_groups g
+             WHERE g.is_open = 0
+               AND g.id NOT IN (SELECT group_id FROM contact_group_members WHERE contact_id = :contact_id2)
+             ORDER BY g.name ASC'
+        );
+        $stmt->execute(['contact_id' => $contactId, 'contact_id2' => $contactId]);
+
+        return $stmt->fetchAll();
+    }
+
+    public function createJoinRequest(int $groupId, int $contactId, string $message): void
+    {
+        if ($contactId <= 0) {
+            return;
+        }
+        $this->pdo->prepare(
+            'INSERT INTO contact_group_join_requests (group_id, contact_id, message)
+             VALUES (:g, :c, :m)
+             ON DUPLICATE KEY UPDATE message = VALUES(message), created_at = CURRENT_TIMESTAMP'
+        )->execute(['g' => $groupId, 'c' => $contactId, 'm' => $message !== '' ? mb_substr($message, 0, 500) : null]);
+    }
+
+    public function deleteJoinRequest(int $groupId, int $contactId): void
+    {
+        $this->pdo->prepare('DELETE FROM contact_group_join_requests WHERE group_id = :g AND contact_id = :c')
+            ->execute(['g' => $groupId, 'c' => $contactId]);
+    }
+
+    /** @return list<array<string, mixed>> offene Anfragen einer Gruppe mit Name */
+    public function joinRequestsForGroup(int $groupId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT r.contact_id, r.message, r.created_at, c.vorname, c.nachname
+             FROM contact_group_join_requests r
+             JOIN contacts c ON c.id = r.contact_id
+             WHERE r.group_id = :g
+             ORDER BY r.created_at ASC'
+        );
+        $stmt->execute(['g' => $groupId]);
+
+        return $stmt->fetchAll();
+    }
+
+    public function joinRequestCount(int $groupId): int
+    {
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM contact_group_join_requests WHERE group_id = :g');
+        $stmt->execute(['g' => $groupId]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function hasJoinRequest(int $groupId, int $contactId): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT 1 FROM contact_group_join_requests WHERE group_id = :g AND contact_id = :c'
+        );
+        $stmt->execute(['g' => $groupId, 'c' => $contactId]);
+
+        return $stmt->fetchColumn() !== false;
+    }
+
+    /**
+     * Mailadressen, an die eine Beitrittsanfrage gemeldet werden soll:
+     * die Gruppenleitung – oder, wenn es keine gibt, wird auf die globale
+     * Verwaltung zurückgegriffen (das erledigt der Aufrufer).
+     *
+     * @return list<array{name: string, email: string}>
+     */
+    public function leadRecipients(int $groupId): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT c.vorname, c.nachname,
+                    (SELECT email FROM contact_emails ce WHERE ce.contact_id = c.id ORDER BY ce.id LIMIT 1) AS email
+             FROM contact_group_members m
+             JOIN contacts c ON c.id = m.contact_id
+             WHERE m.group_id = :g AND m.role = 'lead'"
+        );
+        $stmt->execute(['g' => $groupId]);
+
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $email = trim((string) ($row['email'] ?? ''));
+            if ($email !== '') {
+                $out[] = ['name' => trim($row['vorname'] . ' ' . $row['nachname']), 'email' => $email];
+            }
+        }
+
+        return $out;
+    }
+
+    public function hasLead(int $groupId): bool
+    {
+        $stmt = $this->pdo->prepare("SELECT 1 FROM contact_group_members WHERE group_id = :g AND role = 'lead' LIMIT 1");
+        $stmt->execute(['g' => $groupId]);
+
+        return $stmt->fetchColumn() !== false;
+    }
+
     private function ensureSchema(): void
     {
         if (self::$schemaChecked) {
@@ -342,6 +460,19 @@ final class GroupRepository
             );
             $this->pdo->exec(
                 'ALTER TABLE contact_groups ADD COLUMN IF NOT EXISTS mail_locked TINYINT(1) NOT NULL DEFAULT 0'
+            );
+            $this->pdo->exec(
+                'CREATE TABLE IF NOT EXISTS contact_group_join_requests (
+                    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    group_id INT UNSIGNED NOT NULL,
+                    contact_id INT UNSIGNED NOT NULL,
+                    message VARCHAR(500) NULL,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uq_group_join_request (group_id, contact_id),
+                    KEY idx_group_join_request_group (group_id),
+                    CONSTRAINT fk_gjr_group FOREIGN KEY (group_id) REFERENCES contact_groups(id) ON DELETE CASCADE,
+                    CONSTRAINT fk_gjr_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
             );
             $this->pdo->exec(
                 'CREATE TABLE IF NOT EXISTS group_mail_log (

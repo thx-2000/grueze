@@ -5,13 +5,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **Gruppen – abgeschlossen (Stufen A–E):** A (Fristen + Ergebnis-Mail) v1.1.0,
-  B (Objekte, Verwaltung, „Meine Gruppen", offene Gruppen) v1.2.0, C
-  (Gruppen-Mail + Soft-Limit + Notbremse + Bestätigung) v1.3.0, D
-  (Gruppen-Meinungsabstimmung) v1.4.0, E (Gruppen-Terminfindung +
-  Gruppenleitung `role='lead'`) v1.5.0.
-  Bewusst offen gelassen: Beitritts-Anfragen für nicht-offene Gruppen
-  (Warteschlange wie bei der Registrierung) – bei Bedarf nachrüsten.
+- **Gruppen (Stufen A–E + Nachträge):** A v1.1.0, B v1.2.0, C v1.3.0, D v1.4.0,
+  E (Terminfindung + Gruppenleitung) v1.5.0, Beitrittsanfragen v1.6.0.
+  Noch offen (aus dem TH-Wunschzettel, für v1.7.0):
+  - Adressliste: **Spalte „Gruppen"** + Gruppen-Filter (#7)
+  - Spalten **„Tags" und „Gruppen" sortierbar** machen (#2)
+  - **„Aus Tag eine Gruppe machen"** (Tag-Verwaltung), Option „Tag danach
+    löschen" (#3, #6)
+  - **„Auswahl als neue Gruppe"** in der Sammelbearbeitung des Adressbuchs (#3)
 - **Cron einrichten:** `app.cron_key` in `config/config.php` setzen und beim
   Hoster einen 15-Minuten-Aufruf von `/intern/cron?key=…` anlegen
   (`docs/NEUE-INSTANZ.md`, Abschnitt 7). Ohne echten Cron greift nur die

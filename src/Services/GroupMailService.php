@@ -221,6 +221,41 @@ final class GroupMailService
         }
     }
 
+    /**
+     * Der Gruppenleitung (bzw. ersatzweise Orga/Admin) eine Beitrittsanfrage
+     * melden.
+     */
+    public function notifyJoinRequest(array $group, string $requesterName, string $message): void
+    {
+        $recipients = $this->groups->leadRecipients((int) $group['id']);
+        if ($recipients === []) {
+            foreach ($this->users->activeByRoleNames(['admin', 'orga']) as $user) {
+                $email = trim((string) ($user['email'] ?? ''));
+                if ($email !== '') {
+                    $recipients[] = ['name' => trim((string) ($user['name'] ?? '')), 'email' => $email];
+                }
+            }
+        }
+        if ($recipients === []) {
+            return;
+        }
+
+        $identity = $this->settings->mailIdentity();
+        $short = trim((string) branding_value('branding_short_name', ''));
+        $subject = $this->clip('[' . ($short !== '' ? $short : 'Gruppen') . '] Beitrittsanfrage: ' . $group['name'], 190);
+        $body = $requesterName . ' möchte der Gruppe „' . $group['name'] . '" beitreten.'
+            . ($message !== '' ? "\n\nNachricht:\n" . $message : '')
+            . "\n\nAnnehmen oder ablehnen unter „Verwaltung → Gruppen → " . $group['name'] . '".';
+
+        foreach ($recipients as $person) {
+            try {
+                $this->mailer->sendSystemMail($identity, $person['email'], $subject, $body);
+            } catch (\Throwable) {
+                // best effort
+            }
+        }
+    }
+
     /** @param list<string> $names */
     private function nameList(array $names): string
     {

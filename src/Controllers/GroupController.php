@@ -39,6 +39,7 @@ final class GroupController extends BaseController
             'contactId' => $contactId,
             'myGroups' => $this->groups->forContact($contactId),
             'openGroups' => $contactId > 0 ? $this->groups->openGroupsToJoin($contactId) : [],
+            'closedGroups' => $contactId > 0 ? $this->groups->closedGroupsToRequest($contactId) : [],
             'canManage' => $this->auth->can('groups.manage'),
         ]);
     }
@@ -80,6 +81,74 @@ final class GroupController extends BaseController
         $this->groups->removeMember($groupId, $contactId);
         flash('success', 'Du bist aus der Gruppe „' . $group['name'] . '" ausgetreten.');
         Redirect::to('/gruppen');
+    }
+
+    public function requestJoin(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+        $contactId = (int) ($this->auth->user()['contact_id'] ?? 0);
+        $groupId = (int) $request->input('id');
+        $group = $this->groups->find($groupId);
+
+        if ($contactId <= 0 || $group === null || (int) $group['is_open'] === 1
+            || $this->groups->isMember($groupId, $contactId)) {
+            flash('error', 'Für diese Gruppe ist keine Beitrittsanfrage möglich.');
+            Redirect::to('/gruppen');
+        }
+
+        $message = trim((string) $request->input('message'));
+        $isNew = !$this->groups->hasJoinRequest($groupId, $contactId);
+        $this->groups->createJoinRequest($groupId, $contactId, $message);
+        if ($isNew) {
+            $this->groupMail->notifyJoinRequest($group, $this->currentPersonName(), $message);
+        }
+
+        flash('success', 'Deine Anfrage an „' . $group['name'] . '" ist raus. Die Gruppenleitung meldet sich.');
+        Redirect::to('/gruppen');
+    }
+
+    public function withdrawJoin(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+        $contactId = (int) ($this->auth->user()['contact_id'] ?? 0);
+        $groupId = (int) $request->input('id');
+
+        $this->groups->deleteJoinRequest($groupId, $contactId);
+        flash('success', 'Anfrage zurückgezogen.');
+        Redirect::to('/gruppen');
+    }
+
+    public function approveJoin(Request $request): void
+    {
+        Csrf::validate($request->input('_csrf'));
+        $id = (int) $request->input('id');
+        $this->requireGroupManage($id);
+
+        $contactId = (int) $request->input('contact_id');
+        if ($this->groups->hasJoinRequest($id, $contactId)) {
+            $this->groups->addMember($id, $contactId);
+            $this->groups->deleteJoinRequest($id, $contactId);
+            flash('success', 'Aufgenommen.');
+        }
+        Redirect::to('/verwaltung/gruppen/detail?id=' . $id);
+    }
+
+    public function rejectJoin(Request $request): void
+    {
+        Csrf::validate($request->input('_csrf'));
+        $id = (int) $request->input('id');
+        $this->requireGroupManage($id);
+
+        $this->groups->deleteJoinRequest($id, (int) $request->input('contact_id'));
+        flash('success', 'Anfrage abgelehnt.');
+        Redirect::to('/verwaltung/gruppen/detail?id=' . $id);
+    }
+
+    private function currentPersonName(): string
+    {
+        return trim((string) ($this->auth->user()['name'] ?? '')) ?: 'Ein Mitglied';
     }
 
     // ------------------------------------------------------------ Gruppen-Mail
@@ -209,6 +278,7 @@ final class GroupController extends BaseController
             'memberIds' => $memberIds,
             'contacts' => $this->contacts->search(['sort' => 'nachname', 'direction' => 'asc']),
             'canDelete' => $this->auth->can('groups.manage'),
+            'joinRequests' => $this->groups->joinRequestsForGroup((int) $group['id']),
         ]);
     }
 

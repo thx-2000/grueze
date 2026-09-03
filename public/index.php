@@ -455,6 +455,10 @@ try {
     $router->get('/gruppen', [GroupController::class, 'mine']);
     $router->post('/gruppen/beitreten', [GroupController::class, 'join']);
     $router->post('/gruppen/verlassen', [GroupController::class, 'leave']);
+    $router->post('/gruppen/beitritt-anfragen', [GroupController::class, 'requestJoin']);
+    $router->post('/gruppen/beitritt-zuruecknehmen', [GroupController::class, 'withdrawJoin']);
+    $router->post('/verwaltung/gruppen/anfrage/annehmen', [GroupController::class, 'approveJoin']);
+    $router->post('/verwaltung/gruppen/anfrage/ablehnen', [GroupController::class, 'rejectJoin']);
     $router->get('/gruppen/nachricht', [GroupController::class, 'composeMail']);
     $router->post('/gruppen/nachricht', [GroupController::class, 'sendMail']);
     $router->get('/gruppen/abstimmungen', [GroupPollController::class, 'list']);

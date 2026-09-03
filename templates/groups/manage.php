@@ -22,6 +22,7 @@
                         <span class="events-row-meta">
                             <?php if ((int) $group['is_open'] === 1): ?><span class="events-status is-open">offen</span> · <?php endif; ?>
                             <?php if ((int) ($group['mail_locked'] ?? 0) === 1): ?><span class="events-status is-closed">Versand gesperrt</span> · <?php endif; ?>
+                            <?php if ((int) ($group['pending_requests'] ?? 0) > 0): ?><span class="events-status is-open"><?= (int) $group['pending_requests'] ?> Anfrage<?= (int) $group['pending_requests'] === 1 ? '' : 'n' ?></span> · <?php endif; ?>
                             <?= e((string) $count) ?> <?= $count === 1 ? 'Mitglied' : 'Mitglieder' ?>
                             <?php if (trim((string) ($group['description'] ?? '')) !== ''): ?>
                                 · <?= e(mb_strimwidth((string) $group['description'], 0, 80, '…')) ?>

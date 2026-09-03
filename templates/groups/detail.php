@@ -42,6 +42,39 @@ ksort($byCategory);
     </section>
 </form>
 
+<?php if (!empty($joinRequests)): ?>
+    <section class="detail-card">
+        <h2>Beitrittsanfragen <span class="events-status is-open"><?= count($joinRequests) ?></span></h2>
+        <ul class="group-request-list">
+            <?php foreach ($joinRequests as $req): ?>
+                <li>
+                    <div>
+                        <strong><?= e(trim($req['vorname'] . ' ' . $req['nachname'])) ?></strong>
+                        <span class="muted"><?= e(format_datetime($req['created_at'])) ?></span>
+                        <?php if (trim((string) ($req['message'] ?? '')) !== ''): ?>
+                            <p class="group-request-msg"><?= nl2br(e($req['message'])) ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="group-request-actions">
+                        <form method="post" action="<?= e(url('/verwaltung/gruppen/anfrage/annehmen')) ?>">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
+                            <input type="hidden" name="contact_id" value="<?= e((string) $req['contact_id']) ?>">
+                            <button type="submit" class="compact-action"><?= icon('check') ?><span>Aufnehmen</span></button>
+                        </form>
+                        <form method="post" action="<?= e(url('/verwaltung/gruppen/anfrage/ablehnen')) ?>">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
+                            <input type="hidden" name="contact_id" value="<?= e((string) $req['contact_id']) ?>">
+                            <button type="submit" class="ghost-button compact-action">Ablehnen</button>
+                        </form>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </section>
+<?php endif; ?>
+
 <section class="detail-card">
     <h2>Mitglieder</h2>
     <?php if ($members === []): ?>

@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.6.0
+
+**Beitrittsanfragen für Gruppen**
+
+- Nicht-offene Gruppen erscheinen in „Meine Gruppen" unter **„Andere Gruppen"**
+  mit „Beitritt anfragen" (optional mit kurzer Nachricht).
+- Die **Gruppenleitung** (oder die globale Verwaltung) sieht offene Anfragen auf
+  der Gruppenseite und nimmt sie an oder lehnt sie ab. Bei einer neuen Anfrage
+  geht ein Mail-Hinweis an die Leitung – gibt es keine, an Orga/Admin.
+- „Meine Gruppen" und die Gruppen-Übersicht zeigen der Leitung bzw. Verwaltung
+  die Zahl offener Anfragen.
+
 ## 1.5.0
 
 **Gruppen: Terminfindung & Gruppenleitung (Stufe E)**

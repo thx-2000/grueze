@@ -32,6 +32,8 @@ Die Anwendung ist als kleine SSR-PHP-App ohne Framework aufgebaut. `public/index
   DB-Fremdschlüssel)
 - `contact_group_members.role` (`member`/`lead`): Gruppenleitung darf die
   eigene Gruppe verwalten, ohne globales `groups.manage`
+- `contact_group_join_requests`: Beitrittsanfragen für nicht-offene Gruppen
+  (Leitung/Verwaltung nimmt an oder lehnt ab)
 - `password_resets`, `login_attempts`: Sicherheit für Reset und Brute-Force-Schutz
 - `audit_log`, `mail_log`: Nachvollziehbarkeit von Änderungen und Versand
 

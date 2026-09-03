@@ -33,7 +33,7 @@
                             <p class="group-card-desc"><?= e($group['description']) ?></p>
                         <?php endif; ?>
                         <?php if (($group['my_role'] ?? 'member') === 'lead'): ?>
-                            <p class="group-card-lead"><?= icon('key') ?><span>Du bist Gruppenleitung</span></p>
+                            <p class="group-card-lead"><?= icon('key') ?><span>Du bist Gruppenleitung<?php if ((int) ($group['pending_requests'] ?? 0) > 0): ?> · <?= (int) $group['pending_requests'] ?> Beitrittsanfrage<?= (int) $group['pending_requests'] === 1 ? '' : 'n' ?><?php endif; ?></span></p>
                         <?php endif; ?>
                         <div class="group-card-actions">
                             <a class="compact-action" href="<?= e(url('/gruppen/abstimmungen?id=' . (int) $group['id'])) ?>"><?= icon('check') ?><span>Abstimmungen</span></a>
@@ -80,6 +80,43 @@
                             <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
                             <button type="submit" class="compact-action"><?= icon('plus') ?><span>Beitreten</span></button>
                         </form>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </section>
+    <?php endif; ?>
+
+    <?php if (!empty($closedGroups)): ?>
+        <section class="panel stack">
+            <div class="panel-head"><div><h3>Andere Gruppen</h3><p class="muted">Diese Gruppen verwaltet ein Team – du kannst um Aufnahme bitten.</p></div></div>
+            <ul class="group-cards">
+                <?php foreach ($closedGroups as $group): ?>
+                    <?php $count = (int) $group['member_count']; $pending = (int) ($group['request_pending'] ?? 0) === 1; ?>
+                    <li class="group-card">
+                        <div class="group-card-head">
+                            <h4><?= e($group['name']) ?></h4>
+                            <span class="muted"><?= e((string) $count) ?> <?= $count === 1 ? 'Mitglied' : 'Mitglieder' ?></span>
+                        </div>
+                        <?php if (trim((string) ($group['description'] ?? '')) !== ''): ?>
+                            <p class="group-card-desc"><?= e($group['description']) ?></p>
+                        <?php endif; ?>
+                        <?php if ($pending): ?>
+                            <div class="group-card-actions">
+                                <span class="field-hint">Anfrage läuft.</span>
+                                <form method="post" action="<?= e(url('/gruppen/beitritt-zuruecknehmen')) ?>">
+                                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                    <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
+                                    <button type="submit" class="ghost-button compact-action">Zurückziehen</button>
+                                </form>
+                            </div>
+                        <?php else: ?>
+                            <form method="post" action="<?= e(url('/gruppen/beitritt-anfragen')) ?>" class="group-request-form">
+                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
+                                <input type="text" name="message" maxlength="500" placeholder="Kurze Nachricht (optional)" aria-label="Nachricht an die Gruppenleitung">
+                                <button type="submit" class="compact-action"><?= icon('mail') ?><span>Beitritt anfragen</span></button>
+                            </form>
+                        <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
             </ul>
