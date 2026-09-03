@@ -11,6 +11,7 @@ use App\Controllers\CronController;
 use App\Controllers\EventController;
 use App\Controllers\GreetingController;
 use App\Controllers\GroupController;
+use App\Controllers\HelpController;
 use App\Controllers\GroupPollController;
 use App\Controllers\LegalController;
 use App\Controllers\LogController;
@@ -278,6 +279,7 @@ try {
         Container::get(ContactRepository::class),
         Container::get(GroupMailService::class)
     ));
+    Container::factory(HelpController::class, static fn () => new HelpController(Container::get(Auth::class)));
     Container::factory(GroupPollController::class, static fn () => new GroupPollController(
         Container::get(Auth::class),
         Container::get(EventRepository::class),
@@ -455,6 +457,9 @@ try {
     $router->post('/abstimmen', [EventController::class, 'submitVote']);
     $router->get('/intern/cron', [CronController::class, 'run']);
     $router->post('/intern/cron', [CronController::class, 'run']);
+
+    $router->get('/hilfe/cron', [HelpController::class, 'cron']);
+    $router->get('/hilfe/cron.pdf', [HelpController::class, 'cronPdf']);
 
     $router->get('/gruppen', [GroupController::class, 'mine']);
     $router->post('/gruppen/beitreten', [GroupController::class, 'join']);

@@ -18,7 +18,7 @@ $groups = [
     ],
     'System' => [
         ['users.manage', '/admin/aktualisieren', 'upload', 'Aktualisieren', 'Nach einem Upload die Datenbank auf den neuen Stand bringen.'],
-        ['users.manage', '/hilfe/cron-allinkl.html', 'clock', 'Cronjob einrichten', 'Einmalig: der Aufruf, der Abstimmungs-Fristen, Erinnerungen und Ergebnis-Mails auslöst.'],
+        ['users.manage', '/hilfe/cron', 'clock', 'Cronjob einrichten', 'Einmalig: der Aufruf, der Abstimmungs-Fristen, Erinnerungen und Ergebnis-Mails auslöst.'],
         ['users.manage', '/admin/backup', 'archive', 'Datensicherung', 'Voll-Backup herunterladen oder wiederherstellen.'],
         ['contacts.manage', '/vollstaendigkeit', 'check', 'Vollständigkeit', 'Datenlücken sehen, pro Person nachtragen, Namensliste zum Abgleich weitergeben.'],
         ['audit.view', '/logs/audit', 'history', 'Änderungsprotokoll', 'Wer hat wann welchen Kontakt geändert.'],

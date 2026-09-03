@@ -9,16 +9,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   E (Terminfindung + Gruppenleitung) v1.5.0, Beitrittsanfragen v1.6.0,
   Adressbuch-Verzahnung (Gruppen-Spalte/-Filter, Tags/Gruppen sortierbar,
   „Aus Tag/Auswahl eine Gruppe machen") v1.7.0. **Gruppen-Thema durch.**
-- **Cron einrichten:** `app.cron_key` in `config/config.php` setzen und beim
-  Hoster einen 15-Minuten-Aufruf von `/intern/cron?key=…` anlegen
-  (`docs/NEUE-INSTANZ.md`, Abschnitt 7). Ohne echten Cron greift nur die
-  gedrosselte Rückfallebene bei Seitenaufrufen.
-
+- **Cron:** eingerichtet auf der produktiven Instanz (all-inkl, 15-Min-Aufruf
+  von `/intern/cron?key=…`, Test lief ok – 2026-09-03). Anleitung für künftige
+  Instanzen: Verwaltung → System → „Cronjob einrichten" (`/hilfe/cron`).
 - **buymeacoffee:** das Projekt GRUEZE auf der eigenen buymeacoffee-Seite
-  ergänzen/beschreiben (Aktion von TH – nicht im Code). Link im Code:
-  `branding.product_donate_url` = `https://buymeacoffee.com/thomashageleit`.
-- **Lizenz-Feinheiten prüfen:** Name in `LICENSE` (Zeile „Licensor" / „Required
-  Notice") gegen den echten Namen abgleichen; ggf. `README` „Lizenz"-Absatz.
+  ergänzen (Aktion von TH). Kurztext dafür: siehe unten bzw. Chat 2026-09-03.
+- **Lizenz:** Name in `LICENSE` von TH bestätigt (2026-09-03) – erledigt.
 
 Ideen, falls es weitergeht (kein Muss – v1.0.0 ist erreicht, Backlog leer):
 - Echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows – nur am

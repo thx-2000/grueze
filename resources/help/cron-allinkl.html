@@ -7,7 +7,7 @@
 <title>Cronjob bei All-Inkl einrichten · Adress-Zentrale</title>
 <meta name="description" content="Für Admins: den regelmäßigen Aufruf einrichten, der Abstimmungs-Fristen schließt, an Nicht-Abstimmende erinnert und Ergebnis-Mails verschickt – bei All-Inkl (KAS).">
 <style>
-  @import url("../assets/css/fonts.css");
+  @import url("/assets/css/fonts.css");
 
   :root {
     --bg: #f2f5ef; --surface: #ffffff; --surface-sunken: #eef2ea;
@@ -135,8 +135,11 @@
 <div class="wrap">
 
   <div class="topbar">
-    <a class="backlink" href="./">&larr; Alle Anleitungen</a>
-    <button class="printbtn" type="button" onclick="window.print()">Als PDF speichern / drucken</button>
+    <a class="backlink" href="/verwaltung">&larr; Zurück zur Verwaltung</a>
+    <span>
+      <a class="printbtn" href="/hilfe/cron.pdf" style="text-decoration:none;margin-right:.4rem">PDF</a>
+      <button class="printbtn" type="button" onclick="window.print()">Drucken</button>
+    </span>
   </div>
 
   <p class="eyebrow">Für Admins &middot; Einrichtung</p>

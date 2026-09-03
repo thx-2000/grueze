@@ -3,6 +3,13 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.9.1
+
+- Die **Cronjob-Anleitung** ist jetzt nur noch für Admins zugänglich
+  (`/hilfe/cron`, hinter Login + Recht „Benutzer verwalten"). Die übrigen
+  Anleitungen (Mitglieder, Gruppenleitung, Orga-Team) bleiben bewusst auch ohne
+  Login erreichbar – sie enthalten keine instanz- oder personenbezogenen Daten.
+
 ## 1.9.0
 
 **Mail: Antwortweg wählbar**
