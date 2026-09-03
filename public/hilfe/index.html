@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Hilfe &amp; Anleitungen · Adress-Zentrale</title>
+<style>
+  @import url("../assets/css/fonts.css");
+  :root {
+    --bg: #f2f5ef; --surface: #ffffff; --ink: #19231d; --muted: #586159;
+    --border: #dbe1d5; --hairline: #e7ebe2; --primary: #2e6b41; --primary-strong: #245334; --primary-soft: #e4efe6;
+    --shadow: 0 1px 2px rgba(25,35,29,.04), 0 8px 24px -12px rgba(25,35,29,.14); --radius: 14px;
+    --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --font-body: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10140f; --surface: #171c15; --ink: #e9ede6; --muted: #a2aa9f;
+      --border: #2f362d; --hairline: #262d23; --primary: #6bbf7e; --primary-strong: #82cf93; --primary-soft: #1d2a1e;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body);
+    font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: clamp(1.6rem, 5vw, 4rem) clamp(1.1rem, 4vw, 1.8rem); }
+  .backlink { font-size: .9rem; color: var(--primary-strong); text-decoration: none; }
+  .backlink:hover { text-decoration: underline; }
+  .eyebrow { font-size: .74rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--primary-strong); margin: 1.6rem 0 .7rem; }
+  h1 { font-family: var(--font-display); font-weight: 560; font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.1; margin: 0 0 .5rem; text-wrap: balance; }
+  .lede { color: var(--muted); margin: 0 0 2rem; max-width: 52ch; }
+  .cards { display: grid; gap: 1rem; }
+  a.card {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1.2rem 1.3rem;
+  }
+  a.card:hover { border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); }
+  a.card h2 { font-family: var(--font-display); font-weight: 560; font-size: 1.24rem; margin: 0 0 .3rem; }
+  a.card p { margin: 0 0 .7rem; font-size: .95rem; color: var(--muted); }
+  a.card .who { display: block; font-size: .8rem; font-weight: 600; color: var(--primary-strong); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .3rem; }
+  footer { margin-top: 3rem; padding-top: 1.1rem; border-top: 1px solid var(--hairline); font-size: .84rem; color: var(--muted); }
+  a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="backlink" href="/">&larr; Zurück zur Adress-Zentrale</a>
+  <p class="eyebrow">Hilfe</p>
+  <h1>Anleitungen</h1>
+  <p class="lede">Kurze, bebilderte Schritt-für-Schritt-Anleitungen. Jede lässt sich über den Knopf oben rechts als PDF speichern oder ausdrucken.</p>
+
+  <div class="cards">
+    <a class="card" href="orga-team.html">
+      <span class="who">Für das Orga-Team</span>
+      <h2>Was du in der Adress-Zentrale machen kannst</h2>
+      <p>Kontakte pflegen, Gruppen bilden, Rundmails und Grüße verschicken, Termine abstimmen lassen &ndash; Schritt für Schritt, mit den Klickpfaden.</p>
+    </a>
+    <a class="card" href="gruppenleitung.html">
+      <span class="who">Für Gruppenleitungen</span>
+      <h2>Deine Gruppe abstimmen lassen &amp; anschreiben</h2>
+      <p>Abstimmungen anlegen, Nachrichten an die Gruppe senden &ndash; und was danach mit den Antworten passiert. Kurz und visuell.</p>
+    </a>
+  </div>
+
+  <p style="margin-top:1.4rem;font-size:.86rem;color:var(--muted)">
+    Direkte PDF-Links:
+    <a href="orga-team.pdf">Orga-Team (PDF)</a> &middot;
+    <a href="gruppenleitung.pdf">Gruppenleitung (PDF)</a>
+  </p>
+
+  <footer>Adress-Zentrale &middot; läuft mit GRUEZE (GRUppen-Erreichbarkeits-ZEntrale).</footer>
+</div>
+</body>
+</html>

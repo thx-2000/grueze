@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.8.0
+
+**Hilfe &amp; Anleitungen in der App**
+
+- Neuer Menüpunkt **„Hilfe &amp; Anleitungen"** in der Seitenleiste. Dahinter zwei
+  bebilderte Schritt-für-Schritt-Anleitungen:
+  - **fürs Orga-Team** – Kontakte, Gruppen, Rundmails, Grüße, Termine
+  - **für Gruppenleitungen** – Abstimmungen anlegen, Nachrichten an die Gruppe
+    senden und was danach mit den Antworten passiert
+- Jede Anleitung gibt es direkt als **PDF** (`/hilfe/orga-team.pdf`,
+  `/hilfe/gruppenleitung.pdf`) und im Browser mit einem „Als PDF speichern"-Knopf.
+- Auf der Gruppen-Übersicht ist die Gruppenleitungs-Kurzanleitung direkt verlinkt.
+- **Namensklärung:** GRUEZE steht für **GRU**ppen-**E**rreichbarkeits-**ZE**ntrale
+  (klingt wie „Grüezi"). README, Doku, Footer-Tooltip und die GitHub-Beschreibung
+  entsprechend korrigiert.
+
 ## 1.7.1
 
 **„Als diese Person anmelden" aus dem Kontakt**

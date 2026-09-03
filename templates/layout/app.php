@@ -114,6 +114,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                     <span class="rail-group">Verwaltung</span>
                     <a class="<?= $onAdminHub ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung')) ?>"><span class="rail-ic"><?= icon('sliders') ?></span>Einstellungen</a>
                 <?php endif; ?>
+                <a href="<?= e(url('/hilfe/')) ?>" target="_blank" rel="noopener"><span class="rail-ic"><?= icon('help') ?></span>Hilfe &amp; Anleitungen</a>
             </nav>
 
             <div class="rail-foot">
@@ -205,7 +206,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
             <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>
             <?php if ($appVersion !== ''): ?>
                 <span aria-hidden="true">|</span>
-                <span class="site-footer-version"<?= $systemLabel === 'GRUEZE' ? ' title="GRUEZE: Anspielung auf „Grüezi“ und Kurzform von „Grüß-Zentrale“"' : '' ?>><?= $systemLabel !== '' ? e($systemLabel) . ' ' : '' ?>v<?= e($appVersion) ?></span>
+                <span class="site-footer-version"<?= $systemLabel === 'GRUEZE' ? ' title="GRUEZE steht für GRUppen-Erreichbarkeits-ZEntrale (und klingt wie „Grüezi“)"' : '' ?>><?= $systemLabel !== '' ? e($systemLabel) . ' ' : '' ?>v<?= e($appVersion) ?></span>
             <?php endif; ?>
             <?php if ($publicSiteUrl !== ''): ?>
                 <span aria-hidden="true">|</span>

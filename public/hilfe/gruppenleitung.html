@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Anleitung für Gruppenleitungen · Adress-Zentrale</title>
+<meta name="description" content="Kurz und visuell: als Gruppenleitung Abstimmungen anlegen, Nachrichten an die Gruppe senden – und was danach mit den Antworten passiert.">
+<style>
+  @import url("../assets/css/fonts.css");
+
+  :root {
+    --bg: #f2f5ef; --surface: #ffffff; --surface-sunken: #eef2ea;
+    --ink: #19231d; --muted: #586159; --border: #dbe1d5; --hairline: #e7ebe2;
+    --primary: #2e6b41; --primary-strong: #245334; --primary-soft: #e4efe6;
+    --warn: #9a4a26; --warn-soft: #f6e9e1;
+    --shadow: 0 1px 2px rgba(25,35,29,.04), 0 8px 24px -12px rgba(25,35,29,.14);
+    --radius: 14px;
+    --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --font-body: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10140f; --surface: #171c15; --surface-sunken: #1e241b;
+      --ink: #e9ede6; --muted: #a2aa9f; --border: #2f362d; --hairline: #262d23;
+      --primary: #6bbf7e; --primary-strong: #82cf93; --primary-soft: #1d2a1e;
+      --warn: #d68a5c; --warn-soft: #2a201a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 17px; line-height: 1.62; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: clamp(1.4rem, 4vw, 3.4rem) clamp(1.1rem, 4vw, 1.8rem) 4rem; }
+
+  .topbar { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+  .backlink { font-size: .9rem; color: var(--primary-strong); text-decoration: none; }
+  .backlink:hover { text-decoration: underline; }
+  .printbtn {
+    font: inherit; font-size: .86rem; font-weight: 600; background: var(--surface);
+    color: var(--primary-strong); border: 1px solid var(--border); border-radius: 9px;
+    padding: .4rem .8rem; cursor: pointer;
+  }
+  .printbtn:hover { background: var(--primary-soft); }
+
+  .eyebrow { font-size: .74rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--primary-strong); margin: 0 0 .7rem; }
+  h1 {
+    font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560;
+    font-size: clamp(2rem, 6vw, 2.8rem); line-height: 1.08; letter-spacing: -.01em;
+    text-wrap: balance; margin: 0 0 .6rem;
+  }
+  .lede { font-size: 1.08rem; color: var(--muted); max-width: 60ch; margin: 0 0 1.6rem; }
+
+  .quick {
+    background: var(--primary-soft); border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+    border-radius: var(--radius); padding: 1.05rem 1.2rem; display: grid; gap: .5rem; margin-bottom: 2.6rem;
+  }
+  .quick h2 { font-size: .95rem; margin: 0; font-family: var(--font-body); font-weight: 700; }
+  .quick ul { margin: 0; padding-left: 1.1rem; font-size: .96rem; }
+  .quick li { margin: .15rem 0; }
+  .quick li::marker { color: var(--primary); }
+
+  .tasks { display: grid; gap: 1.4rem; counter-reset: task; }
+  .task {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1.35rem clamp(1.1rem, 4vw, 1.6rem) 1.5rem;
+  }
+  .task-head { display: flex; align-items: center; gap: .7rem; margin-bottom: .15rem; }
+  .task-ic { width: 34px; height: 34px; flex: none; display: grid; place-items: center; border-radius: 9px; background: var(--primary-soft); color: var(--primary-strong); }
+  .task-ic svg { width: 19px; height: 19px; }
+  .task h2 {
+    font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560;
+    font-size: 1.32rem; line-height: 1.15; margin: 0; text-wrap: balance;
+  }
+  .task h2::before {
+    counter-increment: task; content: counter(task) " · ";
+    color: var(--muted); font-family: var(--font-body); font-weight: 700; font-size: .8em;
+  }
+  .goal { color: var(--muted); font-size: .96rem; margin: .35rem 0 1rem; }
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: .55rem; }
+  ol.steps > li { position: relative; padding-left: 2.1rem; font-size: .98rem; }
+  ol.steps > li::before {
+    counter-increment: step; content: counter(step); position: absolute; left: 0; top: .05rem;
+    width: 1.5rem; height: 1.5rem; display: grid; place-items: center; border-radius: 50%;
+    background: var(--surface-sunken); border: 1px solid var(--border);
+    font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--primary-strong);
+  }
+  ol.steps b { font-weight: 600; }
+  kbd {
+    font-family: var(--font-body); font-size: .86em; font-weight: 600; background: var(--surface-sunken);
+    border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px; padding: .05em .42em; white-space: nowrap;
+  }
+
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 1rem 0 .2rem;
+    padding: .85rem; background: var(--surface-sunken); border-radius: 10px; border: 1px solid var(--hairline);
+  }
+  .flow .caption {
+    flex-basis: 100%; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; margin-bottom: .1rem;
+  }
+  .flow span.node {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    padding: .28rem .7rem; font-size: .84rem; font-weight: 500; white-space: nowrap;
+  }
+  .flow span.arr { color: var(--muted); font-size: .95rem; }
+
+  .tip {
+    display: flex; gap: .6rem; margin-top: 1rem; padding: .7rem .85rem; border-radius: 9px;
+    background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+    font-size: .9rem; line-height: 1.5;
+  }
+  .tip svg { width: 17px; height: 17px; flex: none; color: var(--warn); margin-top: .16rem; }
+  .tip.calm { background: var(--surface-sunken); border-color: var(--hairline); }
+  .tip.calm svg { color: var(--primary-strong); }
+
+  .outcome {
+    margin-top: 1rem; border: 1px solid var(--border); border-radius: 11px; overflow: hidden;
+  }
+  .outcome-row {
+    display: grid; grid-template-columns: 132px 1fr; gap: .9rem;
+    padding: .7rem .95rem; font-size: .92rem;
+  }
+  .outcome-row + .outcome-row { border-top: 1px solid var(--hairline); }
+  .outcome-row b { color: var(--primary-strong); font-weight: 600; }
+
+  .section-title { font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560; font-size: 1.5rem; margin: 3.2rem 0 .8rem; text-wrap: balance; }
+  .knowhow { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: .9rem; margin-top: 1rem; }
+  .know { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: .9rem 1rem; }
+  .know h3 { font-size: .92rem; margin: 0 0 .25rem; }
+  .know p { margin: 0; font-size: .88rem; color: var(--muted); line-height: 1.5; }
+
+  footer { margin-top: 3.2rem; padding-top: 1.2rem; border-top: 1px solid var(--hairline); font-size: .84rem; color: var(--muted); }
+  a { color: var(--primary-strong); }
+  a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
+
+  @media (max-width: 520px) { .outcome-row { grid-template-columns: 1fr; gap: .2rem; } }
+  @media print {
+    :root { --shadow: none; }
+    body { background: #fff; color: #000; font-size: 10.5pt; }
+    .wrap { max-width: none; padding: 0; }
+    .topbar { display: none; }
+    .task, .quick, .know, .outcome { break-inside: avoid; box-shadow: none; }
+    .section-title { break-after: avoid; }
+    .task-head { break-after: avoid; }
+    a { color: #000; text-decoration: none; }
+    h1 { font-size: 22pt; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a class="backlink" href="./">&larr; Alle Anleitungen</a>
+    <button class="printbtn" type="button" onclick="window.print()">Als PDF speichern / drucken</button>
+  </div>
+
+  <p class="eyebrow">Kurzanleitung &middot; Gruppenleitung</p>
+  <h1>Deine Gruppe abstimmen lassen &amp; anschreiben</h1>
+  <p class="lede">
+    Du bist <b>Leitung</b> einer Gruppe. Das heißt: du darfst diese eine Gruppe
+    selbst verwalten &ndash; Mitglieder, Nachrichten, Abstimmungen &ndash; ganz ohne
+    Admin-Rechte. Alles findest du unter <kbd>Gruppen</kbd> in der Seitenleiste.
+  </p>
+
+  <div class="quick">
+    <h2>In 30 Sekunden</h2>
+    <ul>
+      <li><b>Nachricht an die Gruppe</b> &ndash; eine Mail an alle Mitglieder. Antworten kommen zu dir.</li>
+      <li><b>Abstimmung anlegen</b> &ndash; Meinungsabstimmung (Ja/Vielleicht/Nein) oder Terminfindung (Datumsvorschläge).</li>
+      <li><b>Nur die Gruppe sieht es</b> &ndash; Nachrichten und Abstimmungen sind für Außenstehende unsichtbar.</li>
+      <li>Du kannst eine Abstimmung <b>schließen</b>, einen <b>Termin festlegen</b> und den <b>Versand sperren</b>, wenn nötig.</li>
+    </ul>
+  </div>
+
+  <div class="tasks">
+
+    <section class="task" id="nachricht">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></span>
+        <h2>Nachricht an die Gruppe</h2>
+      </div>
+      <p class="goal">Eine Mail an alle Mitglieder mit Mailadresse. Reine Info oder Frage &ndash; Antworten laufen bei dir auf.</p>
+      <div class="flow">
+        <span class="caption">So läuft es ab</span>
+        <span class="node">Gruppe öffnen</span><span class="arr">&rarr;</span>
+        <span class="node">Nachricht an die Gruppe</span><span class="arr">&rarr;</span>
+        <span class="node">Betreff + Text</span><span class="arr">&rarr;</span>
+        <span class="node">Senden</span>
+      </div>
+      <ol class="steps">
+        <li><kbd>Gruppen</kbd> &rarr; deine Gruppe &rarr; <kbd>Nachricht an die Gruppe</kbd>.</li>
+        <li><b>Betreff</b> und <b>Text</b> schreiben. Oben steht, an wie viele Personen die Mail geht.</li>
+        <li><kbd>An die Gruppe senden</kbd> und die Sicherheitsfrage bestätigen.</li>
+      </ol>
+      <div class="outcome">
+        <div class="outcome-row"><b>Empfänger</b><span>Alle Mitglieder mit hinterlegter Mailadresse. Wer keine hat, wird übersprungen &ndash; das steht in deiner Bestätigung.</span></div>
+        <div class="outcome-row"><b>Antworten</b><span>Gehen <b>direkt an dich</b> (deine Login-Mailadresse), nicht an den ganzen Verteiler.</span></div>
+        <div class="outcome-row"><b>Bestätigung</b><span>Du bekommst danach eine Mail: an wen zugestellt wurde (Namen), was fehlschlug, wer keine Adresse hat.</span></div>
+        <div class="outcome-row"><b>Grenze</b><span>Weich: 2&nbsp;Gruppen-Mails pro Person und Tag. Ab der dritten kommt ein Hinweis &ndash; die Mail geht trotzdem raus, aber das Admin-Team wird informiert.</span></div>
+      </div>
+    </section>
+
+    <section class="task" id="abstimmung">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg></span>
+        <h2>Abstimmung anlegen</h2>
+      </div>
+      <p class="goal">Zwei Arten: eine Frage mit Antwortmöglichkeiten &ndash; oder mehrere Datumsvorschläge.</p>
+      <ol class="steps">
+        <li><kbd>Gruppen</kbd> &rarr; deine Gruppe &rarr; <kbd>Abstimmungen</kbd> &rarr; <kbd>Neue Abstimmung</kbd>.</li>
+        <li>Art wählen: <b>Meinungsabstimmung</b> (Frage + Möglichkeiten, jede:r stimmt je Möglichkeit mit Ja&nbsp;/&nbsp;Vielleicht&nbsp;/&nbsp;Nein) oder <b>Terminfindung</b> (Datumsvorschläge zur Auswahl).</li>
+        <li>Frage/Titel und die Möglichkeiten bzw. Datumsvorschläge eintragen.</li>
+        <li>Optional: eine <b>Frist</b> setzen &ndash; dann schließt die Abstimmung von selbst und erinnert 48&nbsp;Stunden vorher alle, die noch fehlen.</li>
+        <li>Optional: einstellen, wer nach dem Schließen <b>automatisch das Ergebnis per Mail</b> bekommt.</li>
+        <li><kbd>Abstimmung anlegen</kbd>. Alle Gruppenmitglieder sind automatisch dabei; neue Mitglieder werden später nachgetragen.</li>
+      </ol>
+      <div class="tip calm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+        <span>Sag der Gruppe per <b>Nachricht an die Gruppe</b> Bescheid, dass eine Abstimmung läuft. Die Mitglieder finden sie dann unter <kbd>Gruppen</kbd> &rarr; <kbd>Abstimmungen</kbd> und stimmen dort im eingeloggten Zustand ab &ndash; kein Extra-Link nötig.</span>
+      </div>
+    </section>
+
+    <section class="task" id="antworten">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9m5 10V5m5 14v-7m5 7V8"/></svg></span>
+        <h2>Was mit den Antworten passiert</h2>
+      </div>
+      <p class="goal">Du siehst den Stand jederzeit und entscheidest, wann Schluss ist.</p>
+      <div class="outcome">
+        <div class="outcome-row"><b>Während sie läuft</b><span>Auf der Abstimmungsseite siehst du <b>live</b> je Möglichkeit die Zahlen (Ja/Vielleicht/Nein) und wie viele Mitglieder schon abgestimmt haben. Alle können ihre Stimme bis zum Ende ändern.</span></div>
+        <div class="outcome-row"><b>Frist erreicht</b><span>Ist eine Frist gesetzt, schließt die Abstimmung automatisch. Ohne Frist schließt du sie selbst über <kbd>Jetzt schließen</kbd>.</span></div>
+        <div class="outcome-row"><b>Terminfindung</b><span>Nach dem Sammeln wählst du unter <kbd>Termin festlegen</kbd> den Vorschlag, der es geworden ist.</span></div>
+        <div class="outcome-row"><b>Ergebnis-Mail</b><span>Wenn beim Anlegen eingestellt: geht nach dem Schließen (bei Terminfindung: nach dem Festlegen) automatisch an den gewählten Kreis &ndash; mit den Zahlen bzw. dem festgelegten Termin.</span></div>
+        <div class="outcome-row"><b>Sichtbarkeit</b><span>Nur Gruppenmitglieder sehen die Abstimmung. Ein:e Admin sieht sie zwar in der Terminübersicht, aber mit dem Hinweis, dass sie zur Gruppe gehört.</span></div>
+      </div>
+    </section>
+
+    <section class="task" id="mitglieder">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.7-3 2.8-4.5 5.5-4.5S13.8 16 14.5 19"/><path d="M16 8h5M18.5 5.5v5"/></svg></span>
+        <h2>Mitglieder &amp; Beitritte</h2>
+      </div>
+      <p class="goal">Wer in der Gruppe ist, bestimmst du (bzw. das Orga-Team).</p>
+      <ol class="steps">
+        <li>In der Gruppe: <kbd>Mitglieder wählen</kbd> &ndash; Personen aus dem Adressbuch an- oder abhaken, <kbd>Mitgliederkreis speichern</kbd>.</li>
+        <li>Ist die Gruppe <b>nicht offen</b>, können sich Leute per <b>Beitrittsanfrage</b> melden. Die siehst du oben in der Gruppe und klickst <kbd>Aufnehmen</kbd> oder <kbd>Ablehnen</kbd>.</li>
+        <li>Läuft der Gruppen-Versand aus dem Ruder: <kbd>Versand sperren</kbd>. Dann kann niemand außer Admin an die Gruppe schreiben, bis du wieder freigibst.</li>
+      </ol>
+    </section>
+
+  </div>
+
+  <h2 class="section-title">Gut zu wissen</h2>
+  <div class="knowhow">
+    <div class="know">
+      <h3>Kein Login, keine Teilnahme</h3>
+      <p>An Gruppen-Abstimmungen stimmt man eingeloggt ab. Mitglieder ohne Zugang kann das Orga-Team freischalten.</p>
+    </div>
+    <div class="know">
+      <h3>Reply-To bist du</h3>
+      <p>Antworten auf Gruppen-Mails landen in deinem Postfach &ndash; nicht bei allen. Für eine echte Runde besser eine Abstimmung.</p>
+    </div>
+    <div class="know">
+      <h3>Frist braucht Cron</h3>
+      <p>Automatisches Schließen und die 48-h-Erinnerung laufen nur, wenn beim Hoster ein Cronjob eingerichtet ist (Admin-Sache).</p>
+    </div>
+    <div class="know">
+      <h3>Löschen ist Admin/Orga</h3>
+      <p>Die ganze Gruppe löschen können nur Konten mit „Gruppen verwalten". Du verwaltest den Inhalt.</p>
+    </div>
+  </div>
+
+  <footer>
+    Adress-Zentrale &middot; läuft mit GRUEZE (GRUppen-Erreichbarkeits-ZEntrale).
+    Diese Anleitung gilt für Mitglieder, die zur <b>Gruppenleitung</b> ernannt wurden.
+  </footer>
+
+</div>
+</body>
+</html>

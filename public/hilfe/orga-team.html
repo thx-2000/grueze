@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Anleitung fürs Orga-Team · Adress-Zentrale</title>
+<meta name="description" content="Kurzanleitung: was das Orga-Team in der Adress-Zentrale machen kann – Kontakte, Gruppen, Rundmails, Grüße, Termine – Schritt für Schritt.">
+<style>
+  @import url("../assets/css/fonts.css");
+
+  :root {
+    --bg: #f2f5ef;
+    --surface: #ffffff;
+    --surface-sunken: #eef2ea;
+    --ink: #19231d;
+    --muted: #586159;
+    --border: #dbe1d5;
+    --hairline: #e7ebe2;
+    --primary: #2e6b41;
+    --primary-strong: #245334;
+    --primary-soft: #e4efe6;
+    --warn: #9a4a26;
+    --warn-soft: #f6e9e1;
+    --shadow: 0 1px 2px rgba(25,35,29,.04), 0 8px 24px -12px rgba(25,35,29,.14);
+    --radius: 14px;
+    --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --font-body: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10140f; --surface: #171c15; --surface-sunken: #1e241b;
+      --ink: #e9ede6; --muted: #a2aa9f; --border: #2f362d; --hairline: #262d23;
+      --primary: #6bbf7e; --primary-strong: #82cf93; --primary-soft: #1d2a1e;
+      --warn: #d68a5c; --warn-soft: #2a201a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 17px; line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: clamp(1.4rem, 4vw, 3.4rem) clamp(1.1rem, 4vw, 1.8rem) 4rem; }
+
+  .topbar {
+    display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
+    justify-content: space-between; margin-bottom: 2rem;
+  }
+  .backlink { font-size: .9rem; color: var(--primary-strong); text-decoration: none; }
+  .backlink:hover { text-decoration: underline; }
+  .printbtn {
+    font: inherit; font-size: .86rem; font-weight: 600;
+    background: var(--surface); color: var(--primary-strong);
+    border: 1px solid var(--border); border-radius: 9px;
+    padding: .4rem .8rem; cursor: pointer;
+  }
+  .printbtn:hover { background: var(--primary-soft); }
+
+  .eyebrow {
+    font-size: .74rem; font-weight: 600; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--primary-strong); margin: 0 0 .7rem;
+  }
+  h1 {
+    font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560;
+    font-size: clamp(2rem, 6vw, 2.9rem); line-height: 1.08; letter-spacing: -.01em;
+    text-wrap: balance; margin: 0 0 .6rem;
+  }
+  .lede { font-size: 1.08rem; color: var(--muted); max-width: 62ch; margin: 0 0 1.6rem; }
+
+  .quick {
+    background: var(--primary-soft);
+    border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+    border-radius: var(--radius); padding: 1.05rem 1.2rem;
+    display: grid; gap: .5rem; margin-bottom: 2.6rem;
+  }
+  .quick h2 { font-size: .95rem; margin: 0; font-family: var(--font-body); font-weight: 700; }
+  .quick ul { margin: 0; padding-left: 1.1rem; font-size: .96rem; }
+  .quick li { margin: .15rem 0; }
+  .quick li::marker { color: var(--primary); }
+
+  .navmap {
+    display: grid; grid-template-columns: minmax(0, 190px) 1fr;
+    gap: clamp(1rem, 4vw, 1.8rem); align-items: start;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 1.2rem; margin-bottom: 3rem;
+  }
+  .rail {
+    background: var(--surface-sunken); border: 1px solid var(--hairline);
+    border-radius: 11px; padding: .7rem .6rem; display: grid; gap: .12rem; font-size: .9rem;
+  }
+  .rail .brand {
+    display: flex; align-items: center; gap: .5rem;
+    font-family: var(--font-display); font-weight: 600; padding: .35rem .5rem .55rem;
+  }
+  .rail .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--primary); flex: none; }
+  .rail a, .rail span.item {
+    display: flex; align-items: center; gap: .55rem; padding: .42rem .5rem;
+    border-radius: 8px; color: var(--ink); text-decoration: none;
+  }
+  .rail .on { background: var(--primary-soft); color: var(--primary-strong); font-weight: 600; }
+  .rail svg { width: 17px; height: 17px; flex: none; }
+  .navmap-copy p { margin: 0 0 .6rem; font-size: .96rem; }
+  .navmap-copy p:last-child { margin-bottom: 0; }
+
+  .tasks { display: grid; gap: 1.4rem; counter-reset: task; }
+  .task {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 1.35rem clamp(1.1rem, 4vw, 1.6rem) 1.5rem;
+  }
+  .task-head { display: flex; align-items: center; gap: .7rem; margin-bottom: .15rem; }
+  .task-ic {
+    width: 34px; height: 34px; flex: none; display: grid; place-items: center;
+    border-radius: 9px; background: var(--primary-soft); color: var(--primary-strong);
+  }
+  .task-ic svg { width: 19px; height: 19px; }
+  .task h2 {
+    font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560;
+    font-size: 1.32rem; line-height: 1.15; margin: 0; text-wrap: balance;
+  }
+  .task h2::before {
+    counter-increment: task; content: counter(task) " · ";
+    color: var(--muted); font-family: var(--font-body); font-weight: 700; font-size: .8em;
+  }
+  .goal { color: var(--muted); font-size: .96rem; margin: .35rem 0 1rem; }
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: .55rem; }
+  ol.steps > li { position: relative; padding-left: 2.1rem; font-size: .98rem; }
+  ol.steps > li::before {
+    counter-increment: step; content: counter(step);
+    position: absolute; left: 0; top: .05rem; width: 1.5rem; height: 1.5rem;
+    display: grid; place-items: center; border-radius: 50%;
+    background: var(--surface-sunken); border: 1px solid var(--border);
+    font-size: .78rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--primary-strong);
+  }
+  ol.steps b { font-weight: 600; }
+  kbd {
+    font-family: var(--font-body); font-size: .86em; font-weight: 600;
+    background: var(--surface-sunken); border: 1px solid var(--border);
+    border-bottom-width: 2px; border-radius: 6px; padding: .05em .42em; white-space: nowrap;
+  }
+  .ph {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .84em;
+    background: var(--primary-soft); color: var(--primary-strong); padding: .1em .4em; border-radius: 5px;
+  }
+
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .4rem;
+    margin: 1rem 0 .2rem; padding: .85rem; background: var(--surface-sunken);
+    border-radius: 10px; border: 1px solid var(--hairline);
+  }
+  .flow .caption {
+    flex-basis: 100%; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; margin-bottom: .1rem;
+  }
+  .flow span.node {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    padding: .28rem .7rem; font-size: .84rem; font-weight: 500; white-space: nowrap;
+  }
+  .flow span.arr { color: var(--muted); font-size: .95rem; }
+
+  .tip {
+    display: flex; gap: .6rem; margin-top: 1rem; padding: .7rem .85rem; border-radius: 9px;
+    background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+    font-size: .9rem; line-height: 1.5;
+  }
+  .tip svg { width: 17px; height: 17px; flex: none; color: var(--warn); margin-top: .16rem; }
+  .tip.calm { background: var(--surface-sunken); border-color: var(--hairline); }
+  .tip.calm svg { color: var(--primary-strong); }
+
+  .section-title {
+    font-family: var(--font-display); font-optical-sizing: auto; font-weight: 560;
+    font-size: 1.5rem; margin: 3.4rem 0 .8rem; text-wrap: balance;
+  }
+  .admin-only { background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius); padding: 1.1rem 1.3rem; }
+  .admin-only p { margin: 0 0 .6rem; font-size: .95rem; }
+  .admin-only ul { margin: 0; padding-left: 1.15rem; color: var(--muted); font-size: .93rem; }
+  .admin-only li { margin: .2rem 0; }
+
+  .knowhow { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: .9rem; margin-top: 1rem; }
+  .know { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: .9rem 1rem; }
+  .know h3 { font-size: .92rem; margin: 0 0 .25rem; display: flex; align-items: center; gap: .45rem; }
+  .know h3 svg { width: 16px; height: 16px; color: var(--primary-strong); flex: none; }
+  .know p { margin: 0; font-size: .88rem; color: var(--muted); line-height: 1.5; }
+
+  footer {
+    margin-top: 3.4rem; padding-top: 1.2rem; border-top: 1px solid var(--hairline);
+    font-size: .84rem; color: var(--muted);
+  }
+  a { color: var(--primary-strong); }
+  a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
+
+  @media (max-width: 560px) { .navmap { grid-template-columns: 1fr; } .rail { max-width: 260px; } }
+
+  @media print {
+    :root { --shadow: none; }
+    body { background: #fff; color: #000; font-size: 10.5pt; }
+    .wrap { max-width: none; padding: 0; }
+    .topbar { display: none; }
+    .task, .navmap, .quick, .admin-only, .know { break-inside: avoid; box-shadow: none; }
+    .task { border-color: #bbb; }
+    .section-title { break-after: avoid; }
+    .task-head { break-after: avoid; }
+    a { color: #000; text-decoration: none; }
+    h1 { font-size: 22pt; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <a class="backlink" href="./">&larr; Alle Anleitungen</a>
+    <button class="printbtn" type="button" onclick="window.print()">Als PDF speichern / drucken</button>
+  </div>
+
+  <p class="eyebrow">Kurzanleitung &middot; Orga-Team</p>
+  <h1>Was du in der Adress-Zentrale machen kannst</h1>
+  <p class="lede">
+    Als Orga-Mitglied pflegst du die Kontakte, bildest Gruppen, schreibst
+    Rundmails, verschickst Grüße und organisierst Termine. Alles läuft über die
+    Seitenleiste links. Hier steht für jede Aufgabe, wo du klickst und in welcher
+    Reihenfolge.
+  </p>
+
+  <div class="quick">
+    <h2>In 30 Sekunden</h2>
+    <ul>
+      <li><b>Adressbuch</b> &ndash; Menschen anlegen und pflegen, suchen, mit Kategorien und Tags gruppieren.</li>
+      <li><b>Gruppen</b> &ndash; feste Runden (Kurs, Ausschuss, Fahrgemeinschaft) mit eigener Mail und eigenen Abstimmungen.</li>
+      <li><b>Nachrichten</b> &ndash; eine Rundmail an alle oder an eine ausgewählte Gruppe.</li>
+      <li><b>Termine</b> &ndash; ein Datum abstimmen lassen, optional mit Frist und automatischer Ergebnis-Mail.</li>
+      <li><b>Mein Eintrag</b> (unten links) &ndash; deine eigenen Daten und dein Passwort.</li>
+    </ul>
+  </div>
+
+  <div class="navmap">
+    <nav class="rail" aria-label="Beispiel-Seitenleiste">
+      <div class="brand"><span class="dot"></span> Adress&#8288;-&#8288;Zentrale</div>
+      <span class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg> Start</span>
+      <a class="on" href="#adressbuch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6z"/><path d="M6 4v16"/><circle cx="12.5" cy="10" r="2"/><path d="M9.5 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4"/></svg> Adressbuch</a>
+      <a href="#nachrichten"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg> Nachrichten</a>
+      <a href="#termine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9h17M8 3v3M16 3v3"/></svg> Termine</a>
+      <a href="#gruppen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="9" r="2.4"/><path d="M3.5 18c.6-2.4 2.3-3.6 4.5-3.6S12 15.6 12.5 18M11.5 18c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6"/></svg> Gruppen</a>
+      <a href="#einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.3"/><circle cx="8" cy="17" r="2.3"/></svg> Einstellungen</a>
+      <span class="item" style="margin-top:.5rem;color:var(--muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 19c1-3.2 3.7-4.6 6.5-4.6S17.5 15.8 18.5 19"/></svg> Mein Eintrag</span>
+    </nav>
+    <div class="navmap-copy">
+      <p><b>Die Seitenleiste ist deine Werkzeugkiste.</b> Der markierte Punkt zeigt, wo du gerade bist.</p>
+      <p><b>&bdquo;Mein Eintrag&ldquo;</b> ganz unten führt zu deinen eigenen Daten, deinem Passwort, deinen Gruppen und offenen Abstimmungen.</p>
+      <p>&bdquo;Einstellungen&ldquo; siehst du als Orga-Mitglied auch &ndash; aber nur die Kacheln, die dir gehören (Kategorien &amp; Tags, Gruppen, Mail-Text, Grüße-Pool, Versandprotokoll). Zugänge, Design und Datensicherung sind Admin-Sache.</p>
+    </div>
+  </div>
+
+  <div class="tasks">
+
+    <section class="task" id="anmelden">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M14 12H21m0 0-3-3m3 3-3 3"/></svg></span>
+        <h2>Anmelden &amp; dein eigener Eintrag</h2>
+      </div>
+      <p class="goal">Reinkommen und die eigenen Daten aktuell halten.</p>
+      <ol class="steps">
+        <li>Die Adresse der Zentrale im Browser öffnen und mit <b>E-Mail + Passwort</b> anmelden. Beim ersten Mal unten <kbd>Passwort vergessen?</kbd> nutzen, um dir eins zu setzen.</li>
+        <li>Schneller geht es später mit einem <b>Passkey</b> (Face&nbsp;ID / Fingerabdruck): <kbd>Mein Eintrag</kbd> &rarr; <kbd>Passkeys</kbd> &rarr; <kbd>Passkey hinzufügen</kbd>.</li>
+        <li>Unter <kbd>Mein Eintrag</kbd> siehst du &bdquo;Das haben wir zu dir&ldquo;. Was nicht stimmt, änderst du direkt; unten erscheint dann <kbd>Änderungen speichern</kbd>.</li>
+      </ol>
+      <div class="tip calm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+        <span>Interne Notizen der Verwaltung sind hier nicht sichtbar &ndash; auch nicht für dich selbst.</span>
+      </div>
+    </section>
+
+    <section class="task" id="adressbuch">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6z"/><path d="M6 4v16"/><circle cx="12.5" cy="10" r="2"/><path d="M9.5 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4"/></svg></span>
+        <h2>Adressbuch: Menschen pflegen</h2>
+      </div>
+      <p class="goal">Kontakte anlegen, korrigieren, gruppieren und finden.</p>
+      <ol class="steps">
+        <li><b>Neu:</b> <kbd>Adressbuch</kbd> &rarr; <kbd>+ Person hinzufügen</kbd>. Pflicht sind nur Vor- und Nachname.</li>
+        <li><b>Ändern:</b> auf einen Namen klicken. Die ganze Seite ist bearbeitbar; die Speichern-Leiste erscheint erst nach einer Änderung.</li>
+        <li><b>Suchen:</b> Feld oben (Name, Geburtsname, Ort). Über <kbd>Filter</kbd> zusätzlich nach Kategorie, Tag, <b>Gruppe</b> oder &bdquo;ohne Mailadresse&ldquo;.</li>
+        <li><b>Gruppieren:</b> jede Person bekommt eine <b>Kategorie</b> (z.&nbsp;B. Stimmlage, Jahrgang) und beliebig viele <b>Tags</b>. Spalten <kbd>Tags</kbd> und <kbd>Gruppen</kbd> lassen sich über <kbd>Spalten</kbd> einblenden und per Klick auf die Überschrift sortieren.</li>
+        <li><b>Sammelbearbeitung:</b> im Modus <kbd>Auswählen</kbd> mehrere Kontakte markieren, dann Kategorie/Tags setzen &ndash; oder direkt <kbd>Aus der Auswahl eine neue Gruppe machen</kbd>.</li>
+        <li><b>Export:</b> unter den Filtern <kbd>CSV exportieren</kbd> für Excel/Numbers.</li>
+      </ol>
+      <div class="tip calm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path d="m4 4 16 16"/></svg>
+        <span>Das <b>Auge oben rechts</b> ist der Blickschutz: ein Klick macht alle Mailadressen, Nummern und Adressen unkenntlich &ndash; praktisch, wenn jemand auf deinen Bildschirm schaut.</span>
+      </div>
+    </section>
+
+    <section class="task" id="vollstaendigkeit">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 8.5-8.5"/><path d="M12 12V6"/><path d="m8.5 15 3.5-3"/></svg></span>
+        <h2>Vollständigkeit: Lücken finden</h2>
+      </div>
+      <p class="goal">Sehen, bei wem eine Mailadresse oder Telefonnummer fehlt &ndash; und es sofort nachtragen.</p>
+      <ol class="steps">
+        <li><kbd>Einstellungen</kbd> &rarr; <kbd>Vollständigkeit</kbd> (oder von der Startseite über &bdquo;Steht an&ldquo;).</li>
+        <li>Oben stehen die Zahlen: gesamt, ohne Mail, ohne Telefon. Ein Klick filtert die Liste.</li>
+        <li>Pro Person: <kbd>Bearbeiten</kbd> zum Nachtragen &ndash; oder <kbd>Schreiben</kbd>, um genau diese Person nach ihren Daten zu fragen.</li>
+      </ol>
+    </section>
+
+    <section class="task" id="gruppen">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="9" r="2.4"/><path d="M3.5 18c.6-2.4 2.3-3.6 4.5-3.6S12 15.6 12.5 18M11.5 18c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6"/></svg></span>
+        <h2>Gruppen: feste Runden aufsetzen</h2>
+      </div>
+      <p class="goal">Eine Gruppe (Kurs, Ausschuss, Fahrgemeinschaft) anlegen &ndash; danach kann sie sich weitgehend selbst organisieren.</p>
+      <ol class="steps">
+        <li><kbd>Einstellungen</kbd> &rarr; <kbd>Gruppen</kbd> &rarr; Name eintragen &rarr; <kbd>Gruppe anlegen</kbd>. Schneller aus vorhandenen Daten: in <kbd>Kategorien &amp; Tags</kbd> bei einem Tag <kbd>Als Gruppe anlegen</kbd>, oder im Adressbuch <kbd>Aus der Auswahl eine neue Gruppe machen</kbd>.</li>
+        <li>In der Gruppe: <b>Mitglieder wählen</b> (gleicher Picker wie bei Terminen), Beschreibung eintragen.</li>
+        <li><b>Offene Gruppe:</b> Schalter setzen &ndash; dann darf jede angemeldete Person selbst bei- und austreten. Sonst laufen Beitritte über <b>Beitrittsanfragen</b>, die du in der Gruppe annimmst oder ablehnst.</li>
+        <li><b>Gruppenleitung:</b> ein Mitglied zur Leitung machen (<kbd>Zur Leitung machen</kbd>). Die Leitung darf die Gruppe dann selbst verwalten &ndash; Mitglieder, Nachrichten, Abstimmungen &ndash; ohne Admin-Rechte. Dafür gibt es eine eigene Kurzanleitung.</li>
+        <li>Jedes Mitglied kann der Gruppe eine <b>Nachricht</b> schicken und <b>Abstimmungen</b> anlegen. Bei Missbrauch: in der Gruppe <kbd>Versand sperren</kbd>.</li>
+      </ol>
+      <div class="tip calm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>
+        <span>Gruppen-Mails haben eine weiche Grenze von 2&nbsp;pro Person und Tag. Ab der dritten wird das Admin-Team automatisch per Mail informiert &ndash; für Admins gilt die Grenze nicht.</span>
+      </div>
+    </section>
+
+    <section class="task" id="nachrichten">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></span>
+        <h2>Nachrichten: eine Rundmail schreiben</h2>
+      </div>
+      <p class="goal">Eine personalisierte Mail an alle oder an eine ausgewählte Gruppe.</p>
+      <div class="flow">
+        <span class="caption">So läuft es ab</span>
+        <span class="node">Empfänger wählen</span><span class="arr">&rarr;</span>
+        <span class="node">Text schreiben</span><span class="arr">&rarr;</span>
+        <span class="node">Testmail an mich</span><span class="arr">&rarr;</span>
+        <span class="node">Versand starten</span>
+      </div>
+      <ol class="steps">
+        <li><kbd>Nachrichten</kbd> öffnen. Oben den <b>Empfängerkreis</b> wählen: alle mit Mailadresse &middot; eine Kategorie &middot; bestimmte Tags &middot; eine gespeicherte Liste. Die Zahl daneben zeigt live, wie viele das sind.</li>
+        <li><b>Betreff</b> und <b>Text</b> schreiben. Platzhalter werden pro Person ersetzt: <span class="ph">{Anrede}</span> <span class="ph">{Vorname}</span> <span class="ph">{Nachname}</span>. Aus &bdquo;<span class="ph">{Anrede}</span> <span class="ph">{Vorname}</span>,&ldquo; wird z.&nbsp;B. &bdquo;Liebe Anna,&ldquo;.</li>
+        <li>Oft derselbe Kreis? An der Senden-Zeile <kbd>Als Liste speichern</kbd>.</li>
+        <li><kbd>Testmail an mich</kbd> &ndash; die Mail einmal im eigenen Postfach prüfen.</li>
+        <li><kbd>Versand starten</kbd>. Die nächste Seite zeigt den Fortschritt &ndash; <b>Fenster offen lassen</b>, bis alle durch sind.</li>
+        <li>Was rausging (und was fehlschlug) steht später unter <kbd>Einstellungen</kbd> &rarr; <kbd>Versandprotokoll</kbd>.</li>
+      </ol>
+      <div class="tip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4M12 17v.5"/></svg>
+        <span>Wer keine Mailadresse hinterlegt hat, bekommt die Rundmail nicht &ndash; vorher kurz die <b>Vollständigkeit</b> checken.</span>
+      </div>
+    </section>
+
+    <section class="task" id="gruesse">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="16" height="11" rx="1"/><path d="M3 9h18v3H3zM12 9v11"/><path d="M12 9C10 9 8 8 8 6.5S10 5 12 9ZM12 9c2 0 4-1 4-2.5S14 5 12 9Z"/></svg></span>
+        <h2>Grüße-Pool: Geburtstage &amp; Weihnachten</h2>
+      </div>
+      <p class="goal">Herzliche Kurz-Wünsche verschicken, ohne dass alle die gleiche Mail bekommen.</p>
+      <ol class="steps">
+        <li><kbd>Einstellungen</kbd> &rarr; <kbd>Grüße-Pool</kbd>. Kurze Texte für <b>Geburtstag</b> und <b>Weihnachten</b> &ndash; ändern, ergänzen, abschalten. Platzhalter wie <span class="ph">{Vorname}</span> funktionieren auch hier.</li>
+        <li><b>Weihnachten:</b> <kbd>Weihnachtsgrüße</kbd> &rarr; Empfänger wählen &rarr; <kbd>Vorschau</kbd>. Jede Person bekommt zufällig einen anderen Text; <kbd>Neu mischen</kbd> würfelt neu.</li>
+        <li><b>Geburtstage:</b> <kbd>Geburtstage</kbd> zeigt, wer bald Geburtstag hat (Zeitraum wählbar). Vorschau, ggf. mischen, verschicken.</li>
+        <li>Passt die Vorschau, unten <kbd>&hellip; Grüße verschicken</kbd>.</li>
+      </ol>
+    </section>
+
+    <section class="task" id="termine">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9h17M8 3v3M16 3v3"/><path d="m9 14 2 2 4-4"/></svg></span>
+        <h2>Termine: Datum finden &amp; einladen</h2>
+      </div>
+      <p class="goal">Ein gemeinsames Datum abstimmen &ndash; auch mit Leuten, die keinen Login haben.</p>
+      <div class="flow">
+        <span class="caption">So läuft es ab</span>
+        <span class="node">Termin anlegen</span><span class="arr">&rarr;</span>
+        <span class="node">Teilnehmerkreis</span><span class="arr">&rarr;</span>
+        <span class="node">Links verschicken</span><span class="arr">&rarr;</span>
+        <span class="node">Ergebnis festlegen</span>
+      </div>
+      <ol class="steps">
+        <li><kbd>Termine</kbd> &rarr; <kbd>Neuer Termin</kbd>. Typ wählen: <b>Datumsabstimmung</b> (mehrere Vorschläge), <b>fester Termin</b> (nur Zu-/Absagen) oder <b>Abstimmung ohne Datum</b>.</li>
+        <li>Eckdaten und Datumsvorschläge eintragen. Optional: eine <b>Frist</b> setzen &ndash; dann schließt die Abstimmung von selbst, und 48&nbsp;Stunden vorher wird an alle erinnert, die noch nicht abgestimmt haben.</li>
+        <li>Optional: einstellen, wer nach dem Schließen <b>automatisch das Ergebnis per Mail</b> bekommt (alle Abstimmenden / alle Eingeladenen / nur Orga / nur Admin).</li>
+        <li><b>Teilnehmerkreis</b> aus dem Adressbuch zusammenstellen &ndash; einzeln oder über <kbd>+ Kategorie</kbd>.</li>
+        <li><kbd>An alle Teilnehmer</kbd> öffnet den Nachrichten-Bildschirm mit vorbelegtem Kreis. <span class="ph">{Abstimmungslink}</span> wird für jede Person durch <b>ihren persönlichen Link</b> ersetzt.</li>
+        <li>Die Leute stimmen über den Link ab &ndash; <b>ohne Login</b>, Name ist vorausgefüllt. In der Ergebnismatrix siehst du, wer wann kann.</li>
+        <li>Steht das Datum: <kbd>Als Termin festlegen</kbd>. Danach kannst du &bdquo;nur Zusagen&ldquo; oder &bdquo;nur Offene&ldquo; nochmal anschreiben. Erledigtes wandert über <kbd>Archivieren</kbd> aus der Liste.</li>
+      </ol>
+      <div class="tip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <span>Die Abstimmungs-Links sind <b>persönlich</b>. Nicht in einen Gruppenchat posten &ndash; sonst stimmt jemand für eine andere Person ab. Zum Weiterleiten gibt es &bdquo;Alle Links kopieren&ldquo; mit Namenszuordnung.</span>
+      </div>
+      <div class="tip calm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+        <span>Damit Frist-Schließen und Erinnerungen zuverlässig laufen, muss beim Hoster ein <b>Cronjob</b> eingerichtet sein (Admin-Sache, siehe Instanz-Doku). Ohne den passiert die Automatik nur, wenn jemand die Seite öffnet.</span>
+      </div>
+    </section>
+
+    <section class="task" id="einstellungen">
+      <div class="task-head">
+        <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.3"/><circle cx="8" cy="17" r="2.3"/></svg></span>
+        <h2>Einstellungen, die dir gehören</h2>
+      </div>
+      <p class="goal">Ein paar Dinge stellst du selbst ein, den Rest macht ein Admin.</p>
+      <ol class="steps">
+        <li><b>Kategorien &amp; Tags:</b> anlegen, umbenennen, löschen. Beim Löschen einer Kategorie verlieren Kontakte nur die Zuordnung, nicht ihre Daten.</li>
+        <li><b>Gruppen:</b> siehe Punkt 4.</li>
+        <li><b>Mail-Fuß &amp; Betreff-Präfix:</b> <kbd>Mail-Einstellungen</kbd>. Der Fuß hängt automatisch unter jeder Rundmail. Die technischen Mailserver-Daten sieht nur ein Admin.</li>
+        <li><b>Grüße-Pool</b> &ndash; siehe Punkt 6.</li>
+      </ol>
+    </section>
+
+  </div>
+
+  <h2 class="section-title">Das macht nur ein Admin</h2>
+  <div class="admin-only">
+    <p>Damit du nicht danach suchst &ndash; diese Bereiche sind bewusst der Administration vorbehalten:</p>
+    <ul>
+      <li>Zugänge anlegen und sperren, Rollen und Rechte, Passkeys zurücksetzen</li>
+      <li>&bdquo;Als diese Person anmelden&ldquo; (die Sicht einer Person prüfen)</li>
+      <li>Name, Logo, Farben (Themes), Login-Texte</li>
+      <li>Impressum und Datenschutzerklärung</li>
+      <li>Datensicherung, System-Updates, Cronjob</li>
+      <li>das Änderungsprotokoll (wer hat wann was geändert)</li>
+    </ul>
+    <p style="margin:.7rem 0 0;color:var(--muted)">Brauchst du etwas davon, wende dich an eine:n Admin.</p>
+  </div>
+
+  <h2 class="section-title">Gut zu wissen</h2>
+  <div class="knowhow">
+    <div class="know">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path d="m4 4 16 16"/></svg> Blickschutz</h3>
+      <p>Das Auge oben rechts verwischt alle persönlichen Werte. Zustand bleibt pro Gerät gespeichert.</p>
+    </div>
+    <div class="know">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Testmail zuerst</h3>
+      <p>Vor jedem Serienversand einmal &bdquo;Testmail an mich&ldquo; &ndash; spart peinliche Korrektur-Mails.</p>
+    </div>
+    <div class="know">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg> Löschen wirkt sofort</h3>
+      <p>Kontakt löschen entfernt ihn dauerhaft, ein verknüpfter Login wird deaktiviert. Kurz überlegen.</p>
+    </div>
+    <div class="know">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg> Fortschritt abwarten</h3>
+      <p>Beim Versand das Fenster offen lassen, bis alle Empfänger durch sind.</p>
+    </div>
+  </div>
+
+  <footer>
+    Adress-Zentrale &middot; läuft mit GRUEZE (GRUppen-Erreichbarkeits-ZEntrale).
+    Diese Anleitung gilt für die Rolle &bdquo;Team&ldquo; (Orga). Fragen, die hier
+    nicht beantwortet sind, klärt ein:e Admin.
+  </footer>
+
+</div>
+</body>
+</html>

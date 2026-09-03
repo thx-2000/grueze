@@ -1,6 +1,7 @@
 # Neue Instanz aufsetzen (White-Label)
 
-Das Produkt heißt **GRUEZE** (Grüß-Zentrale). Jede Installation ist eine
+Das Produkt heißt **GRUEZE** – **GRU**ppen-**E**rreichbarkeits-**ZE**ntrale
+(und klingt wie „Grüezi"). Jede Installation ist eine
 **Instanz** davon und bekommt einen eigenen Namen. Eine frische Installation
 startet markenneutral mit generischen Texten und dem Theme `hell`; alles
 Instanzspezifische wird danach eingestellt, nicht im Code geändert.

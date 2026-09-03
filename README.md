@@ -1,6 +1,7 @@
 # GRUEZE
 
-**GRUEZE** (Grüß‑Zentrale) ist eine kleine, ruhige Web‑App zum Verwalten von
+**GRUEZE** – **GRU**ppen‑**E**rreichbarkeits‑**ZE**ntrale (und klingt wie „Grüezi") –
+ist eine kleine, ruhige Web‑App zum Verwalten von
 Kontakten, Rundmails und Terminen – gedacht für Gruppen, die sich selbst
 organisieren: Vereine, Familien, Abschlussjahrgänge, Chöre, JGA‑Runden, kleine
 Firmen. Kein Framework, kein Build‑Schritt, läuft auf klassischem PHP‑Webspace.

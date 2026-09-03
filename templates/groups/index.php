@@ -33,7 +33,7 @@
                             <p class="group-card-desc"><?= e($group['description']) ?></p>
                         <?php endif; ?>
                         <?php if (($group['my_role'] ?? 'member') === 'lead'): ?>
-                            <p class="group-card-lead"><?= icon('key') ?><span>Du bist Gruppenleitung<?php if ((int) ($group['pending_requests'] ?? 0) > 0): ?> · <?= (int) $group['pending_requests'] ?> Beitrittsanfrage<?= (int) $group['pending_requests'] === 1 ? '' : 'n' ?><?php endif; ?></span></p>
+                            <p class="group-card-lead"><?= icon('key') ?><span>Du bist Gruppenleitung<?php if ((int) ($group['pending_requests'] ?? 0) > 0): ?> · <?= (int) $group['pending_requests'] ?> Beitrittsanfrage<?= (int) $group['pending_requests'] === 1 ? '' : 'n' ?><?php endif; ?> · <a href="<?= e(url('/hilfe/gruppenleitung.html')) ?>" target="_blank" rel="noopener">Kurzanleitung</a></span></p>
                         <?php endif; ?>
                         <div class="group-card-actions">
                             <a class="compact-action" href="<?= e(url('/gruppen/abstimmungen?id=' . (int) $group['id'])) ?>"><?= icon('check') ?><span>Abstimmungen</span></a>
