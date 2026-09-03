@@ -14,8 +14,36 @@ final class ContactRepository
     /** Tage, die ein Kontakt im Papierkorb bleibt, bevor er endgültig gelöscht wird. */
     public const TRASH_DAYS = 30;
 
+    private static bool $schemaChecked = false;
+
     public function __construct(private PDO $pdo)
     {
+        $this->ensureSchema();
+    }
+
+    /**
+     * Archiv-/Papierkorb-Spalten notfalls selbst nachziehen – falls neuer Code
+     * hochgeladen wurde, bevor „Verwaltung → Aktualisieren" gelaufen ist. Die
+     * eigentliche Migration `2026-09-19-kontakt-papierkorb` bleibt maßgeblich;
+     * das hier verhindert nur den 500er im Zeitfenster dazwischen.
+     */
+    private function ensureSchema(): void
+    {
+        if (self::$schemaChecked) {
+            return;
+        }
+        self::$schemaChecked = true;
+
+        try {
+            $this->pdo->exec(
+                'ALTER TABLE contacts
+                    ADD COLUMN IF NOT EXISTS archived_at DATETIME NULL,
+                    ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL,
+                    ADD COLUMN IF NOT EXISTS retired_by INT UNSIGNED NULL'
+            );
+        } catch (\Throwable) {
+            // Migration holt es nach; Repository bleibt lauffähig.
+        }
     }
 
     /**

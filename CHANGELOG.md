@@ -3,6 +3,13 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.13.1
+
+**Fix:** Nach dem Hochladen von 1.13.0 zeigte die Startseite einen Serverfehler,
+solange „Verwaltung → Aktualisieren" noch nicht gelaufen war (die neuen
+Archiv-Spalten fehlten). Das Adressbuch zieht die Spalten jetzt notfalls selbst
+nach – die Seite bleibt im Zeitfenster bis zur Migration bedienbar.
+
 ## 1.13.0
 
 **Archiv & Papierkorb für Kontakte**
