@@ -141,10 +141,24 @@ final class EventScheduler
         return match ($mode) {
             'voted' => $this->events->resultContactRecipients($eventId, true),
             'invited' => $this->events->resultContactRecipients($eventId, false),
-            'orga' => $this->userRecipients(['admin', 'orga']),
+            'orga' => $this->userRecipients($this->orgaTeamRoleNames()),
             'admin' => $this->userRecipients(['admin']),
             default => [],
         };
+    }
+
+    /**
+     * Wer zählt zum „Orga-Team"? Die Rollen aus dem Recht `orga.contact_target`
+     * plus immer Admin – so bleibt es nach einem Umbenennen des Rollen-
+     * Schlüssels korrekt (der Wert wird beim Rename mitgezogen).
+     *
+     * @return list<string>
+     */
+    private function orgaTeamRoleNames(): array
+    {
+        $roles = $this->settings->permissionMatrix()['orga.contact_target'] ?? [];
+
+        return array_values(array_unique(array_merge(['admin'], $roles)));
     }
 
     /**

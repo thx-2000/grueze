@@ -55,7 +55,8 @@ Das reduziert Timeout-Risiken auf Shared Hosting und macht eine Fortschrittsanze
 ## Zeitgesteuerte Aufgaben
 
 `EventScheduler` erledigt die Abstimmungs-Automatik (Fristen schließen,
-48-Stunden-Erinnerung an Nicht-Abstimmende, Ergebnis-Mail nach dem Schließen).
+48-Stunden-Erinnerung an Nicht-Abstimmende, Ergebnis-Mail nach dem Schließen);
+`GreetingScheduler` den optionalen täglichen Geburtstagsgruß.
 Einstiegspunkt ist die Route `/intern/cron?key=…` (`CronController`), abgesichert
 über `app.cron_key` mit `hash_equals`. Für selten besuchte Instanzen läuft in
 `public/index.php` eine gedrosselte Rückfallebene (max. 1×/Stunde, über das

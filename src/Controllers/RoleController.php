@@ -92,6 +92,40 @@ final class RoleController extends BaseController
         Redirect::to(self::RETURN_PATH);
     }
 
+    /**
+     * Den internen Schlüssel einer Rolle ändern. „admin" bleibt fix. Rechte-,
+     * Sichtbarkeits- und Registrierungs-Einstellungen ziehen automatisch mit.
+     */
+    public function renameSlug(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $id = (int) $request->input('id');
+        $role = $id > 0 ? $this->roles->find($id) : null;
+        if ($role === null) {
+            flash('error', 'Rolle nicht gefunden.');
+            Redirect::to(self::RETURN_PATH);
+        }
+        if ($role['name'] === RoleRepository::PROTECTED_NAME) {
+            flash('error', 'Der Schlüssel der Admin-Rolle ist fest.');
+            Redirect::to(self::RETURN_PATH);
+        }
+
+        $desired = trim((string) $request->input('slug'));
+        $result = $this->roles->renameSlug($id, $desired);
+        if ($result === null) {
+            flash('error', 'Ungültiger Schlüssel. Erlaubt sind Kleinbuchstaben, Ziffern und Bindestriche.');
+            Redirect::to(self::RETURN_PATH);
+        }
+
+        if ($result['old'] !== $result['new']) {
+            $this->settings->renameRoleEverywhere($result['old'], $result['new']);
+        }
+        flash('success', 'Schlüssel geändert: ' . $result['old'] . ' → ' . $result['new'] . '.');
+        Redirect::to(self::RETURN_PATH);
+    }
+
     public function delete(Request $request): void
     {
         $this->requirePermission('users.manage');

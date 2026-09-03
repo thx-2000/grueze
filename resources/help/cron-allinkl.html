@@ -146,8 +146,9 @@
   <h1>Cronjob bei All-Inkl einrichten</h1>
   <p class="lede">
     Einmalig, dauert 5&nbsp;Minuten. Danach schließen sich Abstimmungen zur Frist
-    von selbst, Nicht-Abstimmende werden 48&nbsp;Stunden vorher erinnert und
-    Ergebnis-Mails gehen automatisch raus.
+    von selbst, Nicht-Abstimmende werden 48&nbsp;Stunden vorher erinnert,
+    Ergebnis-Mails gehen automatisch raus &ndash; und, falls eingeschaltet, der
+    tägliche Geburtstagsgruß.
   </p>
 
   <div class="why">
@@ -205,13 +206,16 @@
       <p class="goal">Prüfen, dass der Aufruf funktioniert.</p>
       <ol class="steps">
         <li>Die URL <code>https://DEINE-DOMAIN/intern/cron?key=DEIN_SCHLUESSEL</code> einmal im Browser öffnen.</li>
-        <li>Richtig ist eine schlichte Textausgabe:
+        <li>Richtig ist eine schlichte Textausgabe (die Zahlen zeigen, was gerade zu tun war):
           <pre>ok
 closed=0
 reminded=0
 results=0
 mails=0
-errors=0</pre>
+errors=0
+greet_sent=0
+greet_failed=0
+greet_skipped=0</pre>
         </li>
         <li>Kommt stattdessen <b>&bdquo;Nicht gefunden.&ldquo;</b>: Schlüssel stimmt nicht mit <code>config.php</code> überein, oder die geänderte <code>config.php</code> ist noch nicht auf dem Server.</li>
       </ol>

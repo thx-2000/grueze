@@ -5,7 +5,9 @@
         Anzeigename und Beschreibung frei wählen, eigene Rollen anlegen. Was
         eine Rolle darf und sieht, wird unter <a href="<?= e(url('/settings/permissions')) ?>">Berechtigungen</a>
         und <a href="<?= e(url('/settings/visibility')) ?>">Sichtbarkeit</a> festgelegt.
-        <strong>Admin</strong> hat immer alle Rechte.
+        <strong>Admin</strong> hat immer alle Rechte; ihr Schlüssel ist fest.
+        Der interne Schlüssel der anderen Rollen lässt sich ändern &ndash; Rechte-,
+        Sichtbarkeits- und Registrierungs-Einstellungen ziehen dabei automatisch mit.
     </p>
 </header>
 
@@ -23,11 +25,22 @@
                         <input type="text" name="description" value="<?= e((string) $role['description']) ?>" aria-label="Beschreibung der Rolle" placeholder="Kurzbeschreibung">
                     </div>
                     <div class="role-edit-meta">
-                        <span class="taxo-count" title="Interner Schlüssel – für Rechte-Zuordnung, nicht änderbar"><code><?= e((string) $role['name']) ?></code></span>
-                        <span class="taxo-count"><?= e((string) $role['user_count']) ?> <?= (int) $role['user_count'] === 1 ? 'Benutzer' : 'Benutzer' ?></span>
+                        <span class="taxo-count"><?= e((string) $role['user_count']) ?> Benutzer</span>
                         <button type="submit" class="ghost-button compact-action">Speichern</button>
                     </div>
                 </form>
+                <?php if ($role['protected']): ?>
+                    <p class="role-slug"><span class="muted">Interner Schlüssel:</span> <code><?= e((string) $role['name']) ?></code> <span class="muted">(fest)</span></p>
+                <?php else: ?>
+                    <form method="post" action="<?= e(url('/settings/roles/schluessel')) ?>" class="role-slug-form">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <input type="hidden" name="id" value="<?= e((string) $role['id']) ?>">
+                        <label><span class="muted">Interner Schlüssel</span>
+                            <input type="text" name="slug" value="<?= e((string) $role['name']) ?>" pattern="[a-z0-9-]+" maxlength="40" aria-label="Interner Schlüssel">
+                        </label>
+                        <button type="submit" class="ghost-button compact-action">Schlüssel ändern</button>
+                    </form>
+                <?php endif; ?>
                 <?php if ($role['protected']): ?>
                     <span class="role-lock" title="Geschützt"><?= icon('lock') ?></span>
                 <?php elseif ((int) $role['user_count'] > 0): ?>

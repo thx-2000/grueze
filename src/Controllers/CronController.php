@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Request;
 use App\Services\EventScheduler;
+use App\Services\GreetingScheduler;
 
 /**
  * Einstiegspunkt für zeitgesteuerte Aufgaben (Abstimmungs-Automatik).
@@ -19,8 +20,10 @@ use App\Services\EventScheduler;
  */
 final class CronController
 {
-    public function __construct(private EventScheduler $scheduler)
-    {
+    public function __construct(
+        private EventScheduler $scheduler,
+        private GreetingScheduler $greetings,
+    ) {
     }
 
     public function run(Request $request): void
@@ -41,6 +44,9 @@ final class CronController
 
         try {
             $stats = $this->scheduler->run();
+            foreach ($this->greetings->run() as $key => $value) {
+                $stats['greet_' . $key] = $value;
+            }
             echo "ok\n";
             foreach ($stats as $key => $value) {
                 echo $key . '=' . (int) $value . "\n";

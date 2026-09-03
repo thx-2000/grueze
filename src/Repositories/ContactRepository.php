@@ -250,6 +250,38 @@ final class ContactRepository
         )->fetchAll();
     }
 
+    /**
+     * Kontakte, die heute Geburtstag haben UND eine Mailadresse hinterlegt
+     * haben – für den automatischen Geburtstagsversand.
+     *
+     * @return list<array{id:int, vorname:string, nachname:string, email:string}>
+     */
+    public function birthdaysToday(): array
+    {
+        $stmt = $this->pdo->query(
+            "SELECT c.id, c.vorname, c.nachname,
+                    (SELECT email FROM contact_emails ce WHERE ce.contact_id = c.id ORDER BY ce.id LIMIT 1) AS email
+             FROM contacts c
+             WHERE c.geburtstag IS NOT NULL
+               AND DATE_FORMAT(c.geburtstag, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')"
+        );
+
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $email = trim((string) ($row['email'] ?? ''));
+            if ($email !== '') {
+                $out[] = [
+                    'id' => (int) $row['id'],
+                    'vorname' => (string) $row['vorname'],
+                    'nachname' => (string) $row['nachname'],
+                    'email' => $email,
+                ];
+            }
+        }
+
+        return $out;
+    }
+
     public function find(int $id): ?array
     {
         $stmt = $this->pdo->prepare(

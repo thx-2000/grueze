@@ -156,10 +156,8 @@ final class RegistrationController extends BaseController
         }
 
         $roleName = $this->settings->registrationSettings()['default_role'];
-        if ($roleName === 'admin') {
-            $roleName = 'stufenmitglied';
-        }
-        $roleId = $this->users->roleIdByName($roleName) ?? $this->users->roleIdByName('stufenmitglied');
+        $roleId = $roleName !== 'admin' ? $this->users->roleIdByName($roleName) : null;
+        $roleId ??= $this->leastPrivilegedRoleId();
         if ($roleId === null) {
             flash('error', 'Es ist keine passende Rolle hinterlegt. Bitte an das Orga-Team wenden.');
             Redirect::to('/login');
@@ -239,11 +237,14 @@ final class RegistrationController extends BaseController
         // niemals „admin" sein – sonst würde jede Selbst-Registrierung ein
         // Admin-Konto anlegen.
         $requestedRole = trim((string) $request->input('default_role'));
-        $validRoles = array_column(array_filter(
+        $nonAdmin = array_values(array_filter(
             $this->users->roles(),
             static fn (array $r): bool => (string) $r['name'] !== 'admin'
-        ), 'name');
-        $defaultRole = in_array($requestedRole, $validRoles, true) ? $requestedRole : 'stufenmitglied';
+        ));
+        $validRoles = array_column($nonAdmin, 'name');
+        $defaultRole = in_array($requestedRole, $validRoles, true)
+            ? $requestedRole
+            : (string) ($nonAdmin[0]['name'] ?? '');
 
         $this->settings->set('registration_self_enabled', $request->input('self_enabled') !== null ? '1' : '0');
         $this->settings->set('registration_default_role', $defaultRole);
@@ -331,5 +332,35 @@ final class RegistrationController extends BaseController
         } catch (\Throwable) {
             return 'Die Mail konnte nicht versendet werden – bitte den Link manuell weitergeben.';
         }
+    }
+
+    /**
+     * Fallback für die Standard-Registrierungsrolle: die Nicht-Admin-Rolle mit
+     * den wenigsten Rechten. Nur nötig, wenn die konfigurierte Rolle nicht mehr
+     * existiert (z. B. nach einer Schlüssel-Änderung, die nicht mitgezogen wurde).
+     */
+    private function leastPrivilegedRoleId(): ?int
+    {
+        $matrix = $this->settings->permissionMatrix();
+        $best = null;
+        $bestCount = PHP_INT_MAX;
+        foreach ($this->users->roles() as $role) {
+            $name = (string) $role['name'];
+            if ($name === 'admin') {
+                continue;
+            }
+            $count = 0;
+            foreach ($matrix as $roles) {
+                if (in_array($name, $roles, true)) {
+                    $count++;
+                }
+            }
+            if ($count < $bestCount) {
+                $bestCount = $count;
+                $best = (int) $role['id'];
+            }
+        }
+
+        return $best;
     }
 }

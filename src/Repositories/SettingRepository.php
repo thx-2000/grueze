@@ -202,6 +202,48 @@ final class SettingRepository
         $this->permissionMatrixCache = null;
     }
 
+    /**
+     * Wird nach dem Umbenennen des internen Rollen-Schlüssels aufgerufen: alle
+     * Rechte-/Sichtbarkeitslisten und die Standard-Registrierungsrolle auf den
+     * neuen Namen umschreiben. Dabei werden bislang nur per Default geltende
+     * Werte fest gespeichert, damit kein Code-Default mehr den alten Namen führt.
+     */
+    public function renameRoleEverywhere(string $old, string $new): void
+    {
+        if ($old === '' || $new === '' || $old === $new) {
+            return;
+        }
+
+        $rename = static function (array $roles) use ($old, $new): array {
+            $out = [];
+            foreach ($roles as $role) {
+                $role = $role === $old ? $new : $role;
+                if ($role !== '' && !in_array($role, $out, true)) {
+                    $out[] = $role;
+                }
+            }
+
+            return $out;
+        };
+
+        foreach ($this->fieldVisibility() as $field => $roles) {
+            $this->set('security_visibility_' . $field, implode(',', $rename($roles)));
+        }
+        foreach ($this->permissionMatrix() as $permission => $roles) {
+            $this->set('security_permission_' . str_replace('.', '_', $permission), implode(',', $rename($roles)));
+        }
+
+        // Standard-Registrierungsrolle: auch den (nicht gespeicherten)
+        // eingebauten Default „stufenmitglied" mitziehen.
+        $currentDefault = trim((string) $this->get('registration_default_role', ''));
+        if ($currentDefault === $old || ($currentDefault === '' && $old === 'stufenmitglied')) {
+            $this->set('registration_default_role', $new);
+        }
+
+        $this->fieldVisibilityCache = null;
+        $this->permissionMatrixCache = null;
+    }
+
     private function removeRoleFromSetting(string $key, string $roleName): void
     {
         $stored = $this->get($key);

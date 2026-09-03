@@ -3499,6 +3499,36 @@ a.completeness-tile:hover {
     padding: 0.4rem;
 }
 
+.role-slug-form,
+.role-slug {
+    flex-basis: 100%;
+    margin: 0.2rem 0 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+}
+
+.role-slug-form label {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.role-slug-form input {
+    width: auto;
+    flex: 0 0 14rem;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+}
+
+.role-slug code {
+    font-size: 0.8rem;
+    background: var(--fill-ghost);
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-sm);
+}
+
 .role-add {
     display: flex;
     gap: 0.6rem;

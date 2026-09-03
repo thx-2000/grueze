@@ -250,7 +250,11 @@ final class GroupMailService
     {
         $recipients = $this->groups->leadRecipients((int) $group['id']);
         if ($recipients === []) {
-            foreach ($this->users->activeByRoleNames(['admin', 'orga']) as $user) {
+            $orgaRoles = array_values(array_unique(array_merge(
+                ['admin'],
+                $this->settings->permissionMatrix()['orga.contact_target'] ?? []
+            )));
+            foreach ($this->users->activeByRoleNames($orgaRoles) as $user) {
                 $email = trim((string) ($user['email'] ?? ''));
                 if ($email !== '') {
                     $recipients[] = ['name' => trim((string) ($user['name'] ?? '')), 'email' => $email];

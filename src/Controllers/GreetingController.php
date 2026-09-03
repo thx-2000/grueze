@@ -42,7 +42,36 @@ final class GreetingController extends BaseController
         $this->render('settings/greetings', [
             'birthday' => $this->greetings->byOccasion('birthday'),
             'christmas' => $this->greetings->byOccasion('christmas'),
+            'autoBirthday' => [
+                'enabled' => $this->settings->get('greetings_birthday_auto') === '1',
+                'time' => trim((string) $this->settings->get('greetings_birthday_auto_time', '')) ?: '08:00',
+                'subject' => trim((string) $this->settings->get('greetings_birthday_auto_subject', '')) ?: 'Alles Gute zum Geburtstag!',
+                'last_run' => (string) $this->settings->get('greetings_birthday_auto_last_run', ''),
+            ],
         ]);
+    }
+
+    /** Automatischen Geburtstagsversand ein-/ausschalten und Uhrzeit/Betreff setzen. */
+    public function saveAutoBirthday(Request $request): void
+    {
+        $this->requirePermission('settings.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $enabled = $request->input('auto_enabled') === '1';
+        $timeRaw = trim((string) $request->input('auto_time'));
+        $time = preg_match('/^(\d{1,2}):(\d{2})$/', $timeRaw, $m)
+            ? sprintf('%02d:%02d', min(23, (int) $m[1]), min(59, (int) $m[2]))
+            : '08:00';
+        $subject = trim((string) $request->input('auto_subject')) ?: 'Alles Gute zum Geburtstag!';
+
+        $this->settings->set('greetings_birthday_auto', $enabled ? '1' : '0');
+        $this->settings->set('greetings_birthday_auto_time', $time);
+        $this->settings->set('greetings_birthday_auto_subject', mb_substr($subject, 0, 190));
+
+        flash('success', $enabled
+            ? 'Automatischer Geburtstagsversand ist aktiv – täglich ab ' . $time . ' Uhr.'
+            : 'Automatischer Geburtstagsversand ist aus.');
+        Redirect::to('/verwaltung/gruesse');
     }
 
     public function store(Request $request): void

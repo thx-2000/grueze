@@ -51,6 +51,7 @@ use App\Services\BackupService;
 use App\Services\CsvExportService;
 use App\Services\ContactImportService;
 use App\Services\EventScheduler;
+use App\Services\GreetingScheduler;
 use App\Services\GroupMailService;
 use App\Services\MailService;
 use App\Services\MigrationService;
@@ -262,8 +263,17 @@ try {
         Container::get(MailService::class),
         Container::get(LogRepository::class)
     ));
+    Container::factory(GreetingScheduler::class, static fn () => new GreetingScheduler(
+        Container::get(ContactRepository::class),
+        Container::get(GreetingRepository::class),
+        Container::get(SettingRepository::class),
+        Container::get(UserRepository::class),
+        Container::get(MailService::class),
+        Container::get(LogRepository::class)
+    ));
     Container::factory(CronController::class, static fn () => new CronController(
-        Container::get(EventScheduler::class)
+        Container::get(EventScheduler::class),
+        Container::get(GreetingScheduler::class)
     ));
     Container::factory(GroupRepository::class, static fn () => new GroupRepository(Container::get(PDO::class)));
     Container::factory(GroupMailService::class, static fn () => new GroupMailService(
@@ -352,6 +362,7 @@ try {
             $schedulerSettings = Container::get(SettingRepository::class);
             if (time() - (int) $schedulerSettings->get('scheduler_last_run', '0') > 3600) {
                 Container::get(EventScheduler::class)->run();
+                Container::get(GreetingScheduler::class)->run();
             }
         } catch (\Throwable) {
             // Automatik darf den laufenden Request nie stören.
@@ -434,6 +445,7 @@ try {
 
     $router->get('/verwaltung/gruesse', [GreetingController::class, 'manage']);
     $router->post('/verwaltung/gruesse', [GreetingController::class, 'store']);
+    $router->post('/verwaltung/gruesse/automatik', [GreetingController::class, 'saveAutoBirthday']);
     $router->post('/verwaltung/gruesse/bearbeiten', [GreetingController::class, 'update']);
     $router->post('/verwaltung/gruesse/loeschen', [GreetingController::class, 'delete']);
     $router->get('/gruesse/weihnachten', [GreetingController::class, 'christmasForm']);
@@ -524,6 +536,7 @@ try {
     $router->get('/settings/roles', [\App\Controllers\RoleController::class, 'index']);
     $router->post('/settings/roles/store', [\App\Controllers\RoleController::class, 'store']);
     $router->post('/settings/roles/update', [\App\Controllers\RoleController::class, 'update']);
+    $router->post('/settings/roles/schluessel', [\App\Controllers\RoleController::class, 'renameSlug']);
     $router->post('/settings/roles/delete', [\App\Controllers\RoleController::class, 'delete']);
 
     $router->dispatch(new Request());

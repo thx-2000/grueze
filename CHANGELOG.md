@@ -3,6 +3,24 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.10.0
+
+**Geburtstagsgrüße automatisch verschicken**
+
+- Unter **Verwaltung → Grüße-Pool** lässt sich der automatische Versand
+  einschalten: täglich ab einer wählbaren Uhrzeit bekommt jede Person, die
+  heute Geburtstag hat und eine Mailadresse hinterlegt hat, einen zufällig aus
+  dem Pool gezogenen Geburtstagsgruß (mit Anrede und Mail-Fuß). Betreff frei
+  wählbar, `{Vorname}` wird ersetzt.
+- Läuft über den Cronjob (wie die Abstimmungs-Automatik). Ist keiner
+  eingerichtet oder kein Geburtstagsgruß aktiv, passiert nichts.
+
+**Interner Rollenschlüssel änderbar**
+
+- Der technische Schlüssel jeder Rolle (außer Admin) lässt sich unter
+  **Verwaltung → Rollen** ändern. Rechte-, Sichtbarkeits- und
+  Registrierungs-Einstellungen werden dabei automatisch mitgezogen.
+
 ## 1.9.1
 
 - Die **Cronjob-Anleitung** ist jetzt nur noch für Admins zugänglich

@@ -84,6 +84,70 @@ final class RoleRepository
         $stmt->execute(['label' => $label, 'description' => $description, 'id' => $id]);
     }
 
+    /**
+     * Internen Schlüssel einer Rolle ändern. „admin" bleibt fix. Die Rechte- und
+     * Sichtbarkeitseinträge zieht der Aufrufer nach (SettingRepository).
+     *
+     * @return array{old: string, new: string}|null  null = nicht möglich
+     */
+    public function renameSlug(int $id, string $desiredSlug): ?array
+    {
+        $this->ensureSchema();
+        $role = $this->find($id);
+        if ($role === null || $role['name'] === self::PROTECTED_NAME) {
+            return null;
+        }
+
+        $slug = $this->slugify($desiredSlug);
+        if ($slug === '' || $slug === self::PROTECTED_NAME) {
+            return null;
+        }
+        if ($slug === $role['name']) {
+            return ['old' => $role['name'], 'new' => $slug];
+        }
+
+        $suffix = 2;
+        $candidate = $slug;
+        while ($this->slugTaken($candidate, $id)) {
+            $candidate = substr($slug, 0, 37) . '-' . $suffix;
+            $suffix++;
+        }
+
+        $this->pdo->prepare('UPDATE roles SET name = :name WHERE id = :id')
+            ->execute(['name' => $candidate, 'id' => $id]);
+
+        return ['old' => (string) $role['name'], 'new' => $candidate];
+    }
+
+    /** Erste Nicht-Admin-Rolle (kleinste id) – Fallback für die Standard-Rolle. */
+    public function firstNonAdminName(): ?string
+    {
+        $this->ensureSchema();
+        $stmt = $this->pdo->query(
+            "SELECT name FROM roles WHERE name <> '" . self::PROTECTED_NAME . "' ORDER BY id LIMIT 1"
+        );
+        $name = $stmt->fetchColumn();
+
+        return $name !== false ? (string) $name : null;
+    }
+
+    private function slugify(string $value): string
+    {
+        $slug = strtolower(trim($value));
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug) ?? '';
+        $slug = trim($slug, '-');
+
+        return substr($slug, 0, 40);
+    }
+
+    private function slugTaken(string $slug, int $exceptId): bool
+    {
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM roles WHERE name = :name AND id <> :id');
+        $stmt->execute(['name' => $slug, 'id' => $exceptId]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     public function delete(int $id): void
     {
         $stmt = $this->pdo->prepare('DELETE FROM roles WHERE id = :id');

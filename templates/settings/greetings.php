@@ -15,6 +15,37 @@ $groups = [
     </div>
 </header>
 
+<section class="detail-card">
+    <h2>Geburtstage automatisch verschicken</h2>
+    <p class="field-hint">Wenn aktiv, prüft das System täglich ab der eingestellten Uhrzeit, wer heute Geburtstag hat <strong>und</strong> eine Mailadresse hinterlegt hat, und schickt automatisch einen zufällig gezogenen Geburtstagsgruß. Braucht einen eingerichteten Cronjob (Verwaltung → System).</p>
+    <form method="post" action="<?= e(url('/verwaltung/gruesse/automatik')) ?>" class="form-grid">
+        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+        <label class="checkbox-row full-width">
+            <input type="checkbox" name="auto_enabled" value="1" <?= !empty($autoBirthday['enabled']) ? 'checked' : '' ?>>
+            <span>Automatischen Geburtstagsversand einschalten</span>
+        </label>
+        <label>
+            <span>Uhrzeit</span>
+            <input type="time" name="auto_time" value="<?= e((string) ($autoBirthday['time'] ?? '08:00')) ?>">
+        </label>
+        <label>
+            <span>Betreff <span class="field-hint">(<code>{Vorname}</code> wird ersetzt)</span></span>
+            <input type="text" name="auto_subject" maxlength="190" value="<?= e((string) ($autoBirthday['subject'] ?? '')) ?>">
+        </label>
+        <div class="form-actions full-width">
+            <button type="submit">Speichern</button>
+        </div>
+    </form>
+    <p class="field-hint">
+        <?php if (!empty($autoBirthday['last_run'])): ?>
+            Zuletzt gelaufen: <?= e(format_date($autoBirthday['last_run'])) ?>.
+        <?php else: ?>
+            Noch nicht gelaufen.
+        <?php endif; ?>
+        Der Text wird aus den aktiven <strong>Geburtstagsgrüßen</strong> unten gezogen – ist keiner aktiv, passiert nichts.
+    </p>
+</section>
+
 <?php foreach ($groups as $occasion => [$title, $hint, $items]): ?>
     <section class="detail-card">
         <h2><?= e($title) ?> <span class="muted">(<?= count(array_filter($items, static fn (array $g): bool => (int) $g['is_active'] === 1)) ?> aktiv)</span></h2>
