@@ -16,6 +16,7 @@ use App\Repositories\UserRepository;
 use App\Services\CsvExportService;
 use App\Services\ContactImportService;
 use App\Services\UploadService;
+use App\Services\VCardService;
 use App\Services\Validator;
 use App\Support\Redirect;
 
@@ -32,7 +33,8 @@ final class ContactController extends BaseController
         private CsvExportService $csv,
         private ContactImportService $imports,
         private GroupRepository $groups,
-        private DataCheckRepository $dataChecks
+        private DataCheckRepository $dataChecks,
+        private VCardService $vcards
     ) {
         parent::__construct($auth);
     }
@@ -601,6 +603,46 @@ final class ContactController extends BaseController
             'direction' => (string) $request->input('direction', 'asc'),
         ];
         $this->csv->stream($this->contacts->search($filters));
+    }
+
+    /**
+     * vCard-Export (.vcf): einzelner Kontakt (`?id=`), aktuelle Auswahl
+     * (`selected_contacts[]` per POST) oder die gefilterte Liste (GET).
+     */
+    public function vcard(Request $request): never
+    {
+        $this->requirePermission('contacts.export');
+
+        $singleId = (int) $request->input('id');
+        $selected = array_values(array_unique(array_filter(
+            array_map('intval', (array) $request->input('selected_contacts', [])),
+            static fn (int $id): bool => $id > 0
+        )));
+
+        if ($singleId > 0) {
+            $contact = $this->contacts->find($singleId);
+            if (!$contact || !empty($contact['archived_at']) || !empty($contact['deleted_at'])) {
+                flash('error', 'Kontakt nicht gefunden.');
+                Redirect::to('/kontakte');
+            }
+            $name = trim($contact['vorname'] . ' ' . $contact['nachname']) ?: 'kontakt';
+            $this->vcards->stream([$contact], $name . '.vcf');
+        }
+
+        if ($selected !== []) {
+            $contacts = $this->contacts->findManyByIds($selected);
+            $this->vcards->stream($contacts, 'kontakte-auswahl.vcf');
+        }
+
+        $filters = [
+            'q' => trim((string) $request->input('q', '')),
+            'category_id' => (string) $request->input('category_id', ''),
+            'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
+            'group_ids' => array_map('intval', (array) $request->input('group_ids', [])),
+            'sort' => (string) $request->input('sort', ''),
+            'direction' => (string) $request->input('direction', 'asc'),
+        ];
+        $this->vcards->stream($this->contacts->search($filters), 'kontakte.vcf');
     }
 
     public function bulkUpdate(Request $request): void

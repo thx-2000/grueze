@@ -81,6 +81,9 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <?php if (!empty($contact['created_at'])): ?>
                 <span class="muted">im Adressbuch seit <?= e(format_date(substr((string) $contact['created_at'], 0, 10))) ?></span>
             <?php endif; ?>
+            <?php if (can('contacts.export') && empty($contact['archived_at']) && empty($contact['deleted_at'])): ?>
+                <a class="linkish" href="<?= e(url('/contacts/vcard?id=' . (int) $contact['id'])) ?>"><?= icon('contacts') ?><span>Als vCard</span></a>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </header>

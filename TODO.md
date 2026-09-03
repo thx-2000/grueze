@@ -35,7 +35,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   3. **Handy & Alltag** – teilweise:
      - Startseiten-Widget (Geburtstage der Woche + Abstimmungen mit offenen
        Rückmeldungen) – **v1.17.0 erledigt**.
-     - offen: vCard (`.vcf`)-Export für einzelne/ausgewählte Kontakte.
+     - vCard (`.vcf`)-Export einzeln / Auswahl / gefilterte Liste – **v1.18.0
+       erledigt**.
      - offen: PWA-Manifest (Web-App zum Home-Bildschirm).
   4. **Sicherheit nachziehen** – offen: Verschlüsselung von Backup-ZIPs /
      Mail-Zugangsdaten „at rest" · Reset-Token ins Pfad-Segment statt Query (L8).

@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.18.0
+
+**vCard-Export (.vcf)**
+
+- Einzelner Kontakt: „Als vCard" auf der Kontaktseite.
+- Auswahl: im Auswahl-Modus des Adressbuchs der Knopf „vCard".
+- Ganze (gefilterte) Liste: „vCard exportieren" neben „CSV exportieren".
+- Die Datei (vCard 3.0) lässt sich direkt in Apple Kontakte, Google Kontakte,
+  Outlook oder auf dem Handy importieren – mit Name, Adresse, allen Mail- und
+  Telefonnummern, Geburtstag, Kategorie/Tags und Notiz.
+
 ## 1.17.0
 
 **Startseite: Geburtstage & offene Rückmeldungen auf einen Blick**

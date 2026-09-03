@@ -122,6 +122,7 @@ try {
     ));
     Container::factory(UploadService::class, static fn () => new UploadService());
     Container::factory(CsvExportService::class, static fn () => new CsvExportService());
+    Container::factory(\App\Services\VCardService::class, static fn () => new \App\Services\VCardService());
     Container::factory(XlsxReader::class, static fn () => new XlsxReader());
     Container::factory(MailService::class, static fn () => new MailService(Container::get(LogRepository::class)));
     Container::factory(ContactImportService::class, static fn () => new ContactImportService(
@@ -181,7 +182,8 @@ try {
         Container::get(CsvExportService::class),
         Container::get(ContactImportService::class),
         Container::get(GroupRepository::class),
-        Container::get(\App\Repositories\DataCheckRepository::class)
+        Container::get(\App\Repositories\DataCheckRepository::class),
+        Container::get(\App\Services\VCardService::class)
     ));
     Container::factory(\App\Controllers\DataCheckController::class, static fn () => new \App\Controllers\DataCheckController(
         Container::get(Auth::class),
@@ -425,6 +427,8 @@ try {
     $router->post('/contacts/bulk-update', [ContactController::class, 'bulkUpdate']);
     $router->post('/contacts/gruppe-aus-auswahl', [ContactController::class, 'groupFromSelection']);
     $router->get('/contacts/export', [ContactController::class, 'export']);
+    $router->get('/contacts/vcard', [ContactController::class, 'vcard']);
+    $router->post('/contacts/vcard', [ContactController::class, 'vcard']);
 
     $router->post('/categories/store', [CategoryController::class, 'store']);
     $router->post('/tags/store', [TagController::class, 'store']);

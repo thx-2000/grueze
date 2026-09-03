@@ -296,6 +296,7 @@ $ownFields = $ownContact !== null ? [
             <?php endif; ?>
             <?php if (can('contacts.export')): ?>
                 <a class="ghost-button" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>"><?= icon('upload') ?><span>CSV exportieren</span></a>
+                <a class="ghost-button" href="<?= e(url('/contacts/vcard?' . http_build_query($filters))) ?>"><?= icon('contacts') ?><span>vCard exportieren</span></a>
             <?php endif; ?>
             <?php if ($canManage && ($duplicateCount ?? 0) > 0): ?>
                 <a class="ghost-button" href="<?= e(url('/kontakte/dubletten')) ?>"><?= icon('contacts') ?><span>Doppelt? (<?= (int) $duplicateCount ?>)</span></a>
@@ -359,6 +360,9 @@ $ownFields = $ownContact !== null ? [
                         <button type="submit" class="button-link"><?= icon('edit') ?><span>E-Mail verfassen</span></button>
                     <?php elseif ($canSendSingleContactMail): ?>
                         <button type="submit" class="button-link"><?= icon('message-send') ?><span>Person kontaktieren</span></button>
+                    <?php endif; ?>
+                    <?php if (can('contacts.export')): ?>
+                        <button type="submit" class="ghost-button" formaction="<?= e(url('/contacts/vcard')) ?>" formmethod="post"><?= icon('contacts') ?><span>vCard</span></button>
                     <?php endif; ?>
                     <button type="button" class="ghost-button" data-select-mode-exit><?= icon('close') ?><span>Fertig</span></button>
                 </div>
