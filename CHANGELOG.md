@@ -3,6 +3,21 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.7.0
+
+**Adressbuch und Gruppen verzahnt**
+
+- **Spalte „Gruppen"** in der Kontaktliste (über „Spalten" zuschaltbar), plus
+  ein **Gruppen-Filter** neben dem Tag-Filter.
+- Die Spalten **„Tags" und „Gruppen"** sind jetzt anklickbar und sortieren die
+  Liste danach – so stehen gleiche Tags/Gruppen untereinander.
+- **„Aus Tag eine Gruppe machen"** (Verwaltung → Kategorien & Tags): legt eine
+  Gruppe mit dem Tag-Namen an und übernimmt alle Kontakte mit diesem Tag.
+  Auf Wunsch wird der Tag danach gelöscht.
+- **„Aus der Auswahl eine neue Gruppe machen"** in der Sammelbearbeitung des
+  Adressbuchs: markierte Kontakte direkt zu einer neuen Gruppe zusammenfassen.
+- Beide Wege brauchen zusätzlich das Recht „Gruppen verwalten".
+
 ## 1.6.0
 
 **Beitrittsanfragen für Gruppen**

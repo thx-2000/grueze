@@ -34,6 +34,23 @@ final class TagRepository
         $stmt->execute(['name' => $name]);
     }
 
+    public function find(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM tags WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetch() ?: null;
+    }
+
+    /** @return list<int> Kontakt-IDs mit diesem Tag */
+    public function contactIdsForTag(int $tagId): array
+    {
+        $stmt = $this->pdo->prepare('SELECT contact_id FROM contact_tags WHERE tag_id = :id');
+        $stmt->execute(['id' => $tagId]);
+
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
     public function rename(int $id, string $name): void
     {
         $stmt = $this->pdo->prepare('UPDATE tags SET name = :name WHERE id = :id');

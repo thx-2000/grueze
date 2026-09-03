@@ -53,6 +53,25 @@ final class ContactRepository
             )';
         }
 
+        $groupIds = array_values(array_filter(
+            array_map('intval', (array) ($filters['group_ids'] ?? [])),
+            static fn (int $id): bool => $id > 0
+        ));
+        if ($groupIds !== []) {
+            $placeholders = [];
+            foreach ($groupIds as $index => $groupId) {
+                $placeholder = 'group_id_' . $index;
+                $placeholders[] = ':' . $placeholder;
+                $params[$placeholder] = $groupId;
+            }
+            $sql .= ' AND EXISTS (
+                SELECT 1
+                FROM contact_group_members
+                WHERE contact_group_members.contact_id = contacts.id
+                AND contact_group_members.group_id IN (' . implode(', ', $placeholders) . ')
+            )';
+        }
+
         if (!empty($filters['without_email'])) {
             $sql .= ' AND NOT EXISTS (
                 SELECT 1 FROM contact_emails
@@ -105,15 +124,20 @@ final class ContactRepository
                 WHERE 1=1' . $clause['sql'];
         $params = $clause['params'];
 
-        $allowedSorts = ['nachname', 'vorname', 'category_name', 'ort', 'geburtstag', 'created_at'];
+        $allowedSorts = ['nachname', 'vorname', 'category_name', 'ort', 'geburtstag', 'created_at', 'tags', 'groups'];
         $sort = in_array($filters['sort'] ?? '', $allowedSorts, true) ? $filters['sort'] : 'vorname';
         $direction = strtolower((string) ($filters['direction'] ?? 'asc')) === 'desc' ? 'DESC' : 'ASC';
+        $firstTag = '(SELECT MIN(t.name) FROM contact_tags ct JOIN tags t ON t.id = ct.tag_id WHERE ct.contact_id = contacts.id)';
+        $firstGroup = '(SELECT MIN(g.name) FROM contact_group_members m JOIN contact_groups g ON g.id = m.group_id WHERE m.contact_id = contacts.id)';
         $sortSql = match ($sort) {
             'vorname' => "contacts.vorname {$direction}, contacts.nachname ASC",
             'category_name' => "categories.name {$direction}, contacts.nachname ASC, contacts.vorname ASC",
             'ort' => "contacts.ort {$direction}, contacts.nachname ASC, contacts.vorname ASC",
             'geburtstag' => "contacts.geburtstag {$direction}, contacts.nachname ASC, contacts.vorname ASC",
             'created_at' => "contacts.created_at {$direction}, contacts.nachname ASC, contacts.vorname ASC",
+            // Kontakte ohne Tag/Gruppe (NULL) sortieren ans Ende.
+            'tags' => "{$firstTag} IS NULL, {$firstTag} {$direction}, contacts.nachname ASC, contacts.vorname ASC",
+            'groups' => "{$firstGroup} IS NULL, {$firstGroup} {$direction}, contacts.nachname ASC, contacts.vorname ASC",
             default => "contacts.nachname {$direction}, contacts.vorname ASC",
         };
         $sql .= " ORDER BY {$sortSql}";
@@ -493,6 +517,7 @@ final class ContactRepository
         $contact['emails'] = $this->emailsForContact($contactId);
         $contact['phones'] = $this->phonesForContact($contactId);
         $contact['tags'] = $this->tagsForContact($contactId);
+        $contact['groups'] = $this->groupsForContact($contactId);
         $contact['linked_user'] = $this->linkedUserForContact($contactId);
     }
 
@@ -522,6 +547,25 @@ final class ContactRepository
         $stmt->execute(['contact_id' => $contactId]);
 
         return $stmt->fetchAll();
+    }
+
+    /** @return list<array{id:int,name:string}> Gruppen dieses Kontakts */
+    private function groupsForContact(int $contactId): array
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                'SELECT g.id, g.name
+                 FROM contact_groups g
+                 JOIN contact_group_members m ON m.group_id = g.id
+                 WHERE m.contact_id = :contact_id
+                 ORDER BY g.name'
+            );
+            $stmt->execute(['contact_id' => $contactId]);
+
+            return $stmt->fetchAll();
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     private function linkedUserForContact(int $contactId): ?array

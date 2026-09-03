@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\CategoryRepository;
+use App\Repositories\GroupRepository;
 use App\Repositories\TagRepository;
 use App\Support\Redirect;
 
@@ -22,7 +23,8 @@ final class TaxonomyController extends BaseController
     public function __construct(
         Auth $auth,
         private CategoryRepository $categories,
-        private TagRepository $tags
+        private TagRepository $tags,
+        private GroupRepository $groups
     ) {
         parent::__construct($auth);
     }
@@ -119,5 +121,53 @@ final class TaxonomyController extends BaseController
         }
 
         Redirect::to(self::RETURN_PATH);
+    }
+
+    /**
+     * Aus einem Tag eine Gruppe machen: legt eine Gruppe mit dem Tag-Namen an
+     * und nimmt alle Kontakte mit diesem Tag auf. Optional wird der Tag danach
+     * gelöscht. Braucht zusätzlich `groups.manage`.
+     */
+    public function tagToGroup(Request $request): void
+    {
+        $this->requirePermission('categories.manage');
+        if (!$this->auth->can('groups.manage')) {
+            flash('error', 'Zum Anlegen von Gruppen fehlt dir die Berechtigung.');
+            Redirect::to(self::RETURN_PATH);
+        }
+        Csrf::validate($request->input('_csrf'));
+
+        $tag = $this->tags->find((int) $request->input('id'));
+        if ($tag === null) {
+            Redirect::to(self::RETURN_PATH);
+        }
+
+        $name = (string) $tag['name'];
+        if ($this->groups->nameExists($name)) {
+            flash('error', 'Eine Gruppe „' . $name . '" gibt es schon. Bitte den Tag erst umbenennen.');
+            Redirect::to(self::RETURN_PATH);
+        }
+
+        $contactIds = $this->tags->contactIdsForTag((int) $tag['id']);
+        $groupId = $this->groups->create(
+            ['name' => $name, 'description' => 'Aus dem Tag „' . $name . '" erstellt.', 'is_open' => false],
+            (int) ($this->auth->user()['id'] ?? 0) ?: null
+        );
+        $this->groups->syncMembers($groupId, $contactIds);
+
+        $deleted = false;
+        if ($request->input('delete_tag') === '1') {
+            $this->tags->delete((int) $tag['id']);
+            $deleted = true;
+        }
+
+        flash('success', sprintf(
+            'Gruppe „%s" mit %d %s angelegt%s.',
+            $name,
+            count($contactIds),
+            count($contactIds) === 1 ? 'Mitglied' : 'Mitgliedern',
+            $deleted ? ' – Tag gelöscht' : ''
+        ));
+        Redirect::to('/verwaltung/gruppen/detail?id=' . $groupId);
     }
 }

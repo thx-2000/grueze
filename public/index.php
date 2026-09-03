@@ -175,7 +175,8 @@ try {
         Container::get(LogRepository::class),
         Container::get(UploadService::class),
         Container::get(CsvExportService::class),
-        Container::get(ContactImportService::class)
+        Container::get(ContactImportService::class),
+        Container::get(GroupRepository::class)
     ));
     Container::factory(UserController::class, static fn () => new UserController(
         Container::get(Auth::class),
@@ -208,7 +209,8 @@ try {
     Container::factory(TaxonomyController::class, static fn () => new TaxonomyController(
         Container::get(Auth::class),
         Container::get(CategoryRepository::class),
-        Container::get(TagRepository::class)
+        Container::get(TagRepository::class),
+        Container::get(GroupRepository::class)
     ));
     Container::factory(LogController::class, static fn () => new LogController(
         Container::get(Auth::class),
@@ -387,6 +389,7 @@ try {
     $router->post('/contacts/update', [ContactController::class, 'update']);
     $router->post('/contacts/delete', [ContactController::class, 'delete']);
     $router->post('/contacts/bulk-update', [ContactController::class, 'bulkUpdate']);
+    $router->post('/contacts/gruppe-aus-auswahl', [ContactController::class, 'groupFromSelection']);
     $router->get('/contacts/export', [ContactController::class, 'export']);
 
     $router->post('/categories/store', [CategoryController::class, 'store']);
@@ -396,6 +399,7 @@ try {
     $router->post('/verwaltung/kategorien-tags/kategorie/loeschen', [TaxonomyController::class, 'deleteCategory']);
     $router->post('/verwaltung/kategorien-tags/tag', [TaxonomyController::class, 'saveTag']);
     $router->post('/verwaltung/kategorien-tags/tag/loeschen', [TaxonomyController::class, 'deleteTag']);
+    $router->post('/verwaltung/kategorien-tags/tag/als-gruppe', [TaxonomyController::class, 'tagToGroup']);
     $router->get('/users', [UserController::class, 'index']);
     $router->get('/account', [UserController::class, 'account']);
     $router->post('/mein-eintrag', [ContactController::class, 'updateOwnProfile']);

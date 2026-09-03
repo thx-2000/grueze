@@ -1,5 +1,6 @@
 <?php
-$renderRows = static function (array $items, string $saveAction, string $deleteAction, string $csrfToken, string $singular): void {
+$canMakeGroup = can('groups.manage');
+$renderRows = static function (array $items, string $saveAction, string $deleteAction, string $csrfToken, string $singular, bool $offerGroup = false): void {
     foreach ($items as $item):
         $count = (int) ($item['contact_count'] ?? 0);
         ?>
@@ -17,6 +18,14 @@ $renderRows = static function (array $items, string $saveAction, string $deleteA
                 <button type="submit" class="danger-button icon-button" title="Löschen" aria-label="Löschen"><?= icon('trash') ?></button>
             </form>
         </div>
+        <?php if ($offerGroup): ?>
+            <form method="post" action="<?= e(url('/verwaltung/kategorien-tags/tag/als-gruppe')) ?>" class="taxo-to-group" data-confirm="Aus dem Tag „<?= e($item['name']) ?>“ eine Gruppe mit <?= e((string) $count) ?> Mitgliedern anlegen?">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $item['id']) ?>">
+                <button type="submit" class="linkish"><?= icon('contacts') ?><span>Als Gruppe anlegen</span></button>
+                <label class="inline-toggle"><input type="checkbox" name="delete_tag" value="1"><span>Tag danach löschen</span></label>
+            </form>
+        <?php endif; ?>
         <?php
     endforeach;
 };
@@ -52,7 +61,7 @@ $renderRows = static function (array $items, string $saveAction, string $deleteA
         <p class="muted">Noch keine Tags angelegt.</p>
     <?php else: ?>
         <div class="taxo-list">
-            <?php $renderRows($tags, '/verwaltung/kategorien-tags/tag', '/verwaltung/kategorien-tags/tag/loeschen', $csrfToken, 'Tag'); ?>
+            <?php $renderRows($tags, '/verwaltung/kategorien-tags/tag', '/verwaltung/kategorien-tags/tag/loeschen', $csrfToken, 'Tag', $canMakeGroup); ?>
         </div>
     <?php endif; ?>
 

@@ -8,6 +8,7 @@ use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
+use App\Repositories\GroupRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
@@ -28,7 +29,8 @@ final class ContactController extends BaseController
         private LogRepository $logs,
         private UploadService $uploads,
         private CsvExportService $csv,
-        private ContactImportService $imports
+        private ContactImportService $imports,
+        private GroupRepository $groups
     ) {
         parent::__construct($auth);
     }
@@ -40,6 +42,7 @@ final class ContactController extends BaseController
             'q' => trim((string) $request->input('q', '')),
             'category_id' => (string) $request->input('category_id', ''),
             'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
+            'group_ids' => array_map('intval', (array) $request->input('group_ids', [])),
             'without_email' => (string) $request->input('without_email', '') === '1' ? '1' : '',
             'without_phone' => (string) $request->input('without_phone', '') === '1' ? '1' : '',
             'sort' => (string) $request->input('sort', 'vorname'),
@@ -56,6 +59,7 @@ final class ContactController extends BaseController
             'contacts' => $contacts,
             'categories' => $this->categories->all(),
             'tags' => $this->tags->all(),
+            'groups' => $this->groups->all(),
             'filters' => $filters,
             'phoneLabels' => config('defaults.phone_labels', []),
             'ownContact' => $ownContact,
@@ -508,6 +512,53 @@ final class ContactController extends BaseController
         $this->logs->addAudit((int) $this->auth->user()['id'], null, 'updated', $message);
         flash('success', $message);
         Redirect::to('/kontakte');
+    }
+
+    /**
+     * Aus der aktuellen Auswahl eine neue Gruppe machen. Braucht zusätzlich
+     * `groups.manage`.
+     */
+    public function groupFromSelection(Request $request): void
+    {
+        $this->requirePermission('contacts.manage');
+        if (!$this->auth->can('groups.manage')) {
+            flash('error', 'Zum Anlegen von Gruppen fehlt dir die Berechtigung.');
+            Redirect::to('/kontakte');
+        }
+        Csrf::validate($request->input('_csrf'));
+
+        $contactIds = array_values(array_unique(array_filter(
+            array_map('intval', (array) $request->input('selected_contacts', [])),
+            static fn (int $id): bool => $id > 0
+        )));
+        $name = trim((string) $request->input('group_name'));
+
+        if ($contactIds === []) {
+            flash('error', 'Bitte zuerst Kontakte auswählen.');
+            Redirect::to('/kontakte');
+        }
+        if ($name === '') {
+            flash('error', 'Bitte einen Namen für die Gruppe angeben.');
+            Redirect::to('/kontakte');
+        }
+        if ($this->groups->nameExists($name)) {
+            flash('error', 'Eine Gruppe mit diesem Namen gibt es schon.');
+            Redirect::to('/kontakte');
+        }
+
+        $groupId = $this->groups->create(
+            ['name' => $name, 'description' => '', 'is_open' => false],
+            (int) ($this->auth->user()['id'] ?? 0) ?: null
+        );
+        $this->groups->syncMembers($groupId, $contactIds);
+
+        flash('success', sprintf(
+            'Gruppe „%s" mit %d %s angelegt.',
+            $name,
+            count($contactIds),
+            count($contactIds) === 1 ? 'Mitglied' : 'Mitgliedern'
+        ));
+        Redirect::to('/verwaltung/gruppen/detail?id=' . $groupId);
     }
 
     /**

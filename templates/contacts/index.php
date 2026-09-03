@@ -2,6 +2,8 @@
 $contactCount = count($contacts);
 $supportEmail = trim((string) branding_value('branding_support_email', ''));
 $activeTagIds = array_map('intval', (array) ($filters['tag_ids'] ?? []));
+$activeGroupIds = array_map('intval', (array) ($filters['group_ids'] ?? []));
+$groups = $groups ?? [];
 
 $visibleContactFields = [
     'address' => can_view_contact_field('address'),
@@ -15,7 +17,7 @@ $canViewPrivateDetails = in_array(true, $visibleContactFields, true);
 
 // Zusatzspalten der Tabelle. Standard: aus – zuschaltbar über „Spalten",
 // gemerkt pro Gerät (localStorage). Reihenfolge = Anzeigereihenfolge.
-$optionalColumns = ['tags' => 'Tags'];
+$optionalColumns = ['tags' => 'Tags', 'gruppen' => 'Gruppen'];
 if ($visibleContactFields['address']) {
     $optionalColumns['adresse'] = 'Adresse';
 }
@@ -51,11 +53,13 @@ foreach ($contacts as $contact) {
 $hasActiveFilter = ($filters['q'] ?? '') !== ''
     || ($filters['category_id'] ?? '') !== ''
     || $activeTagIds !== []
+    || $activeGroupIds !== []
     || ($filters['without_email'] ?? '') === '1'
     || ($filters['without_phone'] ?? '') === '1';
 $advancedFilterActive = ($filters['sort'] ?? 'vorname') !== 'vorname'
     || ($filters['direction'] ?? 'asc') !== 'asc'
     || $activeTagIds !== []
+    || $activeGroupIds !== []
     || ($filters['without_email'] ?? '') === '1'
     || ($filters['without_phone'] ?? '') === '1';
 
@@ -211,6 +215,8 @@ $ownFields = $ownContact !== null ? [
                             <option value="category_name" <?= $currentSort === 'category_name' ? 'selected' : '' ?>>Kategorie</option>
                             <option value="ort" <?= $currentSort === 'ort' ? 'selected' : '' ?>>Ort</option>
                             <option value="geburtstag" <?= $currentSort === 'geburtstag' ? 'selected' : '' ?>>Geburtstag</option>
+                            <option value="tags" <?= $currentSort === 'tags' ? 'selected' : '' ?>>Tags</option>
+                            <option value="groups" <?= $currentSort === 'groups' ? 'selected' : '' ?>>Gruppen</option>
                             <option value="created_at" <?= $currentSort === 'created_at' ? 'selected' : '' ?>>Angelegt</option>
                         </select>
                     </label>
@@ -236,6 +242,20 @@ $ownFields = $ownContact !== null ? [
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php if ($groups !== []): ?>
+                        <div class="filter-tags" role="group" aria-label="Nach Gruppen filtern">
+                            <span>Gruppen</span>
+                            <div class="tag-picker">
+                                <?php foreach ($groups as $group): ?>
+                                    <?php $selected = in_array((int) $group['id'], $activeGroupIds, true); ?>
+                                    <label class="tag-option<?= $selected ? ' is-selected' : '' ?>">
+                                        <input type="checkbox" name="group_ids[]" value="<?= e((string) $group['id']) ?>" <?= $selected ? 'checked' : '' ?>>
+                                        <span><?= e($group['name']) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     <div class="filter-tags" role="group" aria-label="Fehlende Angaben">
                         <span>Fehlende Angaben</span>
                         <label class="inline-toggle">
@@ -350,7 +370,8 @@ $ownFields = $ownContact !== null ? [
                         <th scope="col" aria-sort="<?= e($ariaSort('nachname')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('nachname')) ?>">Name</a></th>
                         <th scope="col" aria-sort="<?= e($ariaSort('category_name')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('category_name')) ?>">Kategorie</a></th>
                         <th scope="col">Status</th>
-                        <?php if (isset($optionalColumns['tags'])): ?><th data-col="tags" scope="col">Tags</th><?php endif; ?>
+                        <?php if (isset($optionalColumns['tags'])): ?><th data-col="tags" scope="col" aria-sort="<?= e($ariaSort('tags')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('tags')) ?>">Tags</a></th><?php endif; ?>
+                        <?php if (isset($optionalColumns['gruppen'])): ?><th data-col="gruppen" scope="col" aria-sort="<?= e($ariaSort('groups')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('groups')) ?>">Gruppen</a></th><?php endif; ?>
                         <?php if (isset($optionalColumns['adresse'])): ?><th data-col="adresse" scope="col" aria-sort="<?= e($ariaSort('ort')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('ort')) ?>">Adresse</a></th><?php endif; ?>
                         <?php if (isset($optionalColumns['geburtstag'])): ?><th data-col="geburtstag" scope="col" aria-sort="<?= e($ariaSort('geburtstag')) ?>"><a class="sort-link" href="<?= e($buildSortUrl('geburtstag')) ?>">Geburtstag</a></th><?php endif; ?>
                         <?php if (isset($optionalColumns['emails'])): ?><th data-col="emails" scope="col">E-Mail</th><?php endif; ?>
@@ -382,6 +403,15 @@ $ownFields = $ownContact !== null ? [
                                     <div class="tag-cluster">
                                         <?php foreach ($contact['tags'] as $tag): ?>
                                             <span class="tag tag-secondary" style="<?= e(tag_style($tag['name'])) ?>"><?= e($tag['name']) ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </td>
+                            <?php endif; ?>
+                            <?php if (isset($optionalColumns['gruppen'])): ?>
+                                <td data-col="gruppen">
+                                    <div class="tag-cluster">
+                                        <?php foreach (($contact['groups'] ?? []) as $group): ?>
+                                            <span class="tag tag-group"><?= e($group['name']) ?></span>
                                         <?php endforeach; ?>
                                     </div>
                                 </td>
@@ -471,10 +501,13 @@ $ownFields = $ownContact !== null ? [
 
                     <?= $renderChips($statusChips($contact)) ?>
 
-                    <?php if ($contact['tags'] !== []): ?>
+                    <?php if ($contact['tags'] !== [] || ($contact['groups'] ?? []) !== []): ?>
                         <div class="tag-cluster">
                             <?php foreach ($contact['tags'] as $tag): ?>
                                 <span class="tag tag-secondary" style="<?= e(tag_style($tag['name'])) ?>"><?= e($tag['name']) ?></span>
+                            <?php endforeach; ?>
+                            <?php foreach (($contact['groups'] ?? []) as $group): ?>
+                                <span class="tag tag-group"><?= e($group['name']) ?></span>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
@@ -575,6 +608,17 @@ $ownFields = $ownContact !== null ? [
                                 <?= icon('edit') ?><span>Auf Auswahl anwenden</span>
                             </button>
                         </div>
+                        <?php if (can('groups.manage')): ?>
+                            <div class="bulk-group-from-selection">
+                                <label>
+                                    <span>Aus der Auswahl eine neue Gruppe machen</span>
+                                    <input type="text" name="group_name" maxlength="120" placeholder="Name der Gruppe">
+                                </label>
+                                <button type="submit" class="ghost-button" formaction="<?= e(url('/contacts/gruppe-aus-auswahl')) ?>" formmethod="post">
+                                    <?= icon('contacts') ?><span>Gruppe anlegen</span>
+                                </button>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </details>
