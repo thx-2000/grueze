@@ -16,10 +16,14 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   ergänzen (Aktion von TH). Kurztext dafür: siehe unten bzw. Chat 2026-09-03.
 - **Lizenz:** Name in `LICENSE` von TH bestätigt (2026-09-03) – erledigt.
 
-Ideen, falls es weitergeht (kein Muss – v1.0.0 ist erreicht, Backlog leer):
+- **GitHub-Repo:** öffentlich seit 2026-09-03.
+- **Grüße automatisch am Tag:** umgesetzt v1.10.0 (GreetingScheduler).
+- **Interner Rollenschlüssel umbenennbar:** umgesetzt v1.10.0.
+
+Ideen, falls es weitergeht (kein Muss):
 - Echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows – nur am
   Gerät machbar.
-- Termine: Ranking-Variante; „Grüße automatisch am Tag" (braucht Cron).
+- Termine: Ranking-Variante.
 - Reset-Token ins Pfad-Segment statt Query (kosmetische Härtung, siehe L8).
 - Optionale Verschlüsselung von Backup-ZIPs / Mail-Zugangsdaten „at rest".
 
