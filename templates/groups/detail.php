@@ -47,13 +47,23 @@ ksort($byCategory);
     <?php if ($members === []): ?>
         <p class="field-hint">Noch niemand in der Gruppe. Wähle die Personen aus dem Adressbuch.</p>
     <?php else: ?>
-        <ul class="group-member-list">
+        <p class="field-hint">Die <strong>Gruppenleitung</strong> darf diese Gruppe verwalten (Mitglieder, Nachricht, Abstimmungen) – auch ohne globales Recht.</p>
+        <ul class="group-member-rows">
             <?php foreach ($members as $member): ?>
+                <?php $isLead = ($member['role'] ?? 'member') === 'lead'; ?>
                 <li>
-                    <span><?= e(trim($member['vorname'] . ' ' . $member['nachname'])) ?></span>
-                    <?php if (trim((string) ($member['email'] ?? '')) === ''): ?>
-                        <span class="status-chip is-warn">keine Mail</span>
-                    <?php endif; ?>
+                    <span class="group-member-name">
+                        <?= e(trim($member['vorname'] . ' ' . $member['nachname'])) ?>
+                        <?php if ($isLead): ?><span class="events-status is-open">Leitung</span><?php endif; ?>
+                        <?php if (trim((string) ($member['email'] ?? '')) === ''): ?><span class="status-chip is-warn">keine Mail</span><?php endif; ?>
+                    </span>
+                    <form method="post" action="<?= e(url('/verwaltung/gruppen/leitung')) ?>">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
+                        <input type="hidden" name="contact_id" value="<?= e((string) $member['contact_id']) ?>">
+                        <input type="hidden" name="role" value="<?= $isLead ? 'member' : 'lead' ?>">
+                        <button type="submit" class="linkish"><?= $isLead ? 'Leitung entfernen' : 'Zur Leitung machen' ?></button>
+                    </form>
                 </li>
             <?php endforeach; ?>
         </ul>
@@ -119,12 +129,14 @@ ksort($byCategory);
     <?php endif; ?>
 </section>
 
-<section class="detail-card detail-danger">
-    <h2>Gruppe löschen</h2>
-    <p class="muted">Entfernt die Gruppe und alle Mitgliedszuordnungen. Die Kontakte selbst bleiben unberührt.</p>
-    <form method="post" action="<?= e(url('/verwaltung/gruppen/loeschen')) ?>" data-confirm="Gruppe „<?= e($group['name']) ?>“ endgültig löschen?">
-        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
-        <button type="submit" class="danger-button"><?= icon('trash') ?><span>Löschen</span></button>
-    </form>
-</section>
+<?php if (!empty($canDelete)): ?>
+    <section class="detail-card detail-danger">
+        <h2>Gruppe löschen</h2>
+        <p class="muted">Entfernt die Gruppe und alle Mitgliedszuordnungen. Die Kontakte selbst bleiben unberührt.</p>
+        <form method="post" action="<?= e(url('/verwaltung/gruppen/loeschen')) ?>" data-confirm="Gruppe „<?= e($group['name']) ?>“ endgültig löschen?">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
+            <button type="submit" class="danger-button"><?= icon('trash') ?><span>Löschen</span></button>
+        </form>
+    </section>
+<?php endif; ?>

@@ -89,6 +89,28 @@ final class GroupRepository
         return $stmt->fetchColumn() !== false;
     }
 
+    /** Gruppenleitung: darf die eigene Gruppe verwalten, ohne globales Recht. */
+    public function isLead(int $groupId, int $contactId): bool
+    {
+        if ($contactId <= 0) {
+            return false;
+        }
+        $stmt = $this->pdo->prepare(
+            "SELECT 1 FROM contact_group_members WHERE group_id = :g AND contact_id = :c AND role = 'lead'"
+        );
+        $stmt->execute(['g' => $groupId, 'c' => $contactId]);
+
+        return $stmt->fetchColumn() !== false;
+    }
+
+    public function setMemberRole(int $groupId, int $contactId, string $role): void
+    {
+        $role = $role === 'lead' ? 'lead' : 'member';
+        $this->pdo->prepare(
+            'UPDATE contact_group_members SET role = :r WHERE group_id = :g AND contact_id = :c'
+        )->execute(['r' => $role, 'g' => $groupId, 'c' => $contactId]);
+    }
+
     /**
      * Gruppen, in denen dieser Kontakt Mitglied ist – für „Meine Gruppen".
      *

@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.5.0
+
+**Gruppen: Terminfindung & Gruppenleitung (Stufe E)**
+
+- **Terminfindung in der Gruppe:** Neben der Meinungsabstimmung können Gruppen
+  jetzt auch Datumsvorschläge zur Auswahl stellen. Die Leitung legt danach den
+  Termin fest; die Ergebnis-Mail geht dann automatisch raus.
+- **Gruppenleitung:** Ein Mitglied lässt sich unter Verwaltung → Gruppen zur
+  Leitung ernennen. Die Leitung darf die eigene Gruppe verwalten (Mitglieder,
+  Beschreibung, Nachricht sperren/freigeben, Abstimmungen schließen und
+  Termine festlegen) – ganz ohne globales „Gruppen verwalten"-Recht. Löschen
+  bleibt der globalen Verwaltung vorbehalten.
+- „Meine Gruppen" zeigt der Leitung einen direkten „Verwalten"-Zugang.
+
+Damit ist die Gruppen-Funktion (Stufen A–E) abgeschlossen.
+
 ## 1.4.0
 
 **Gruppen-Abstimmung (Stufe D)**

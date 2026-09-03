@@ -463,12 +463,14 @@ try {
     $router->post('/gruppen/abstimmung', [GroupPollController::class, 'store']);
     $router->post('/gruppen/abstimmung/stimme', [GroupPollController::class, 'vote']);
     $router->post('/gruppen/abstimmung/schliessen', [GroupPollController::class, 'close']);
+    $router->post('/gruppen/abstimmung/festlegen', [GroupPollController::class, 'decide']);
     $router->post('/verwaltung/gruppen/sperre', [GroupController::class, 'toggleMailLock']);
     $router->get('/verwaltung/gruppen', [GroupController::class, 'manage']);
     $router->get('/verwaltung/gruppen/detail', [GroupController::class, 'detail']);
     $router->post('/verwaltung/gruppen', [GroupController::class, 'store']);
     $router->post('/verwaltung/gruppen/speichern', [GroupController::class, 'updateGroup']);
     $router->post('/verwaltung/gruppen/mitglieder', [GroupController::class, 'updateMembers']);
+    $router->post('/verwaltung/gruppen/leitung', [GroupController::class, 'setMemberRole']);
     $router->post('/verwaltung/gruppen/loeschen', [GroupController::class, 'deleteGroup']);
     $router->post('/mail/compose', [MailController::class, 'compose']);
     $router->get('/mail/compose', [MailController::class, 'compose']);

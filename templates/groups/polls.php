@@ -30,6 +30,7 @@ $statusLabel = ['open' => 'läuft', 'closed' => 'beendet', 'decided' => 'entschi
                         <span class="events-row-title"><?= e($poll['title']) ?></span>
                         <span class="events-row-meta">
                             <span class="events-status is-<?= e($poll['status']) ?>"><?= e($statusLabel[$poll['status']] ?? $poll['status']) ?></span>
+                            · <?= ($poll['kind'] ?? 'poll') === 'date_poll' ? 'Terminfindung' : 'Abstimmung' ?>
                             · <?= e((string) $poll['answered_count']) ?>/<?= e((string) $poll['participant_count']) ?> haben abgestimmt
                             <?php if ($poll['status'] === 'open' && trim((string) ($poll['closes_at'] ?? '')) !== ''): ?>
                                 · Frist <?= e(time_until_hint($poll['closes_at'])) ?>

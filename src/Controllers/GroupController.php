@@ -162,17 +162,9 @@ final class GroupController extends BaseController
 
     public function toggleMailLock(Request $request): void
     {
-        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
-        if (!$this->auth->can('groups.manage') && !$this->auth->isAdmin()) {
-            flash('error', 'Dafür fehlt dir die Berechtigung.');
-            Redirect::to('/gruppen');
-        }
         $id = (int) $request->input('id');
-        $group = $this->groups->find($id);
-        if ($group === null) {
-            Redirect::to('/verwaltung/gruppen');
-        }
+        $this->requireGroupManage($id);
 
         $lock = $request->input('lock') === '1';
         $this->groups->setMailLocked($id, $lock);
@@ -185,12 +177,13 @@ final class GroupController extends BaseController
     {
         $contactId = (int) ($this->auth->user()['contact_id'] ?? 0);
         $isMember = $this->groups->isMember((int) $group['id'], $contactId);
-        $isManager = $this->auth->can('groups.manage');
+        $isManager = $this->auth->can('groups.manage') || $this->groups->isLead((int) $group['id'], $contactId);
 
         if (!$isMember && !$isManager) {
             return false;
         }
-        if ((int) ($group['mail_locked'] ?? 0) === 1 && !$this->auth->isAdmin()) {
+        // Notbremse: nur Admin und Gruppenleitung/Verwaltung dürfen bei Sperre noch senden.
+        if ((int) ($group['mail_locked'] ?? 0) === 1 && !$this->auth->isAdmin() && !$isManager) {
             return false;
         }
 
@@ -207,12 +200,7 @@ final class GroupController extends BaseController
 
     public function detail(Request $request): void
     {
-        $this->requirePermission('groups.manage');
-        $group = $this->groups->find((int) $request->input('id'));
-        if ($group === null) {
-            flash('error', 'Gruppe nicht gefunden.');
-            Redirect::to('/verwaltung/gruppen');
-        }
+        $group = $this->requireGroupManage((int) $request->input('id'));
 
         $memberIds = array_map(static fn (array $m): int => (int) $m['contact_id'], $group['members']);
 
@@ -220,6 +208,7 @@ final class GroupController extends BaseController
             'group' => $group,
             'memberIds' => $memberIds,
             'contacts' => $this->contacts->search(['sort' => 'nachname', 'direction' => 'asc']),
+            'canDelete' => $this->auth->can('groups.manage'),
         ]);
     }
 
@@ -245,12 +234,9 @@ final class GroupController extends BaseController
 
     public function updateGroup(Request $request): void
     {
-        $this->requirePermission('groups.manage');
         Csrf::validate($request->input('_csrf'));
         $id = (int) $request->input('id');
-        if ($this->groups->find($id) === null) {
-            Redirect::to('/verwaltung/gruppen');
-        }
+        $this->requireGroupManage($id);
 
         $data = $this->groupData($request);
         if ($data['name'] === '') {
@@ -269,15 +255,28 @@ final class GroupController extends BaseController
 
     public function updateMembers(Request $request): void
     {
-        $this->requirePermission('groups.manage');
         Csrf::validate($request->input('_csrf'));
         $id = (int) $request->input('id');
-        if ($this->groups->find($id) === null) {
-            Redirect::to('/verwaltung/gruppen');
-        }
+        $this->requireGroupManage($id);
 
         $this->groups->syncMembers($id, (array) $request->input('contact_ids', []));
         flash('success', 'Mitgliederkreis aktualisiert.');
+        Redirect::to('/verwaltung/gruppen/detail?id=' . $id);
+    }
+
+    /** Ein Mitglied zur Gruppenleitung machen oder das wieder zurücknehmen. */
+    public function setMemberRole(Request $request): void
+    {
+        Csrf::validate($request->input('_csrf'));
+        $id = (int) $request->input('id');
+        $this->requireGroupManage($id);
+
+        $contactId = (int) $request->input('contact_id');
+        $role = $request->input('role') === 'lead' ? 'lead' : 'member';
+        if ($this->groups->isMember($id, $contactId)) {
+            $this->groups->setMemberRole($id, $contactId, $role);
+            flash('success', $role === 'lead' ? 'Zur Gruppenleitung ernannt.' : 'Leitung zurückgenommen.');
+        }
         Redirect::to('/verwaltung/gruppen/detail?id=' . $id);
     }
 
@@ -288,6 +287,28 @@ final class GroupController extends BaseController
         $this->groups->delete((int) $request->input('id'));
         flash('success', 'Gruppe gelöscht.');
         Redirect::to('/verwaltung/gruppen');
+    }
+
+    /**
+     * Zugriff auf die Gruppen-Verwaltung: globales `groups.manage` ODER
+     * Gruppenleitung dieser Gruppe. Gibt die Gruppe zurück oder leitet um.
+     */
+    private function requireGroupManage(int $id): array
+    {
+        $this->requireAuth();
+        $group = $this->groups->find($id);
+        if ($group === null) {
+            flash('error', 'Gruppe nicht gefunden.');
+            Redirect::to($this->auth->can('groups.manage') ? '/verwaltung/gruppen' : '/gruppen');
+        }
+
+        $contactId = (int) ($this->auth->user()['contact_id'] ?? 0);
+        if (!$this->auth->can('groups.manage') && !$this->groups->isLead($id, $contactId)) {
+            flash('error', 'Diese Gruppe kannst du nicht verwalten.');
+            Redirect::to('/gruppen');
+        }
+
+        return $group;
     }
 
     private function groupData(Request $request): array

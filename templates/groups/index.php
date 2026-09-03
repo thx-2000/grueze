@@ -32,8 +32,14 @@
                         <?php if (trim((string) ($group['description'] ?? '')) !== ''): ?>
                             <p class="group-card-desc"><?= e($group['description']) ?></p>
                         <?php endif; ?>
+                        <?php if (($group['my_role'] ?? 'member') === 'lead'): ?>
+                            <p class="group-card-lead"><?= icon('key') ?><span>Du bist Gruppenleitung</span></p>
+                        <?php endif; ?>
                         <div class="group-card-actions">
                             <a class="compact-action" href="<?= e(url('/gruppen/abstimmungen?id=' . (int) $group['id'])) ?>"><?= icon('check') ?><span>Abstimmungen</span></a>
+                            <?php if (($group['my_role'] ?? 'member') === 'lead' || !empty($canManage)): ?>
+                                <a class="compact-action" href="<?= e(url('/verwaltung/gruppen/detail?id=' . (int) $group['id'])) ?>"><?= icon('sliders') ?><span>Verwalten</span></a>
+                            <?php endif; ?>
                             <?php if ((int) ($group['mail_locked'] ?? 0) === 1): ?>
                                 <span class="field-hint">Gruppen-Versand ist gesperrt.</span>
                             <?php else: ?>
