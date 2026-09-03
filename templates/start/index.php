@@ -86,3 +86,59 @@ if (($stats['without_phone'] ?? 0) > 0) {
         · <?= e((string) ($stats['total'] ?? 0)) ?> Kontakte
     </p>
 </section>
+
+<?php $birthdays = $birthdays ?? []; $pendingEvents = $pendingEvents ?? []; ?>
+
+<?php if ($pendingEvents !== []): ?>
+    <section class="panel start-widget" aria-labelledby="startEventsTitle">
+        <div class="start-board-head">
+            <h2 id="startEventsTitle">Offene Rückmeldungen</h2>
+            <p class="muted">Abstimmungen, bei denen noch nicht alle geantwortet haben.</p>
+        </div>
+        <ul class="start-widget-list">
+            <?php foreach ($pendingEvents as $ev): ?>
+                <li>
+                    <a href="<?= e(url('/termine/detail?id=' . $ev['id'])) ?>">
+                        <span class="start-widget-main"><?= e($ev['title']) ?></span>
+                        <span class="start-widget-meta">
+                            <?= (int) $ev['answered_count'] ?>&nbsp;/&nbsp;<?= (int) $ev['participant_count'] ?> geantwortet<?php
+                            if (trim((string) ($ev['closes_at'] ?? '')) !== ''):
+                                ?> · Frist <?= e(time_until_hint($ev['closes_at'])) ?><?php
+                            endif; ?>
+                        </span>
+                        <?= icon('chevron-right') ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </section>
+<?php endif; ?>
+
+<?php if ($birthdays !== []): ?>
+    <section class="panel start-widget" aria-labelledby="startBirthdaysTitle">
+        <div class="start-board-head">
+            <h2 id="startBirthdaysTitle">Geburtstage diese Woche</h2>
+            <p class="muted">Die nächsten sieben Tage.</p>
+        </div>
+        <ul class="start-widget-list">
+            <?php foreach ($birthdays as $b): ?>
+                <li>
+                    <a href="<?= e(url('/contacts/edit?id=' . $b['id'])) ?>">
+                        <span class="start-widget-main"><?= e(trim($b['vorname'] . ' ' . $b['nachname'])) ?></span>
+                        <span class="start-widget-meta">
+                            <?php if ($b['in_days'] === 0): ?>
+                                <strong>heute</strong>
+                            <?php elseif ($b['in_days'] === 1): ?>
+                                morgen
+                            <?php else: ?>
+                                in <?= (int) $b['in_days'] ?> Tagen
+                            <?php endif; ?>
+                            · <?= e(format_date($b['geburtstag'])) ?><?php if ($b['turning'] !== null): ?> · wird <?= (int) $b['turning'] ?><?php endif; ?>
+                        </span>
+                        <?= icon('chevron-right') ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </section>
+<?php endif; ?>

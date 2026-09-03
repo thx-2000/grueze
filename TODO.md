@@ -32,9 +32,11 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
      - Daten-Check-Link (Token, ohne Login, /meine-daten) zum Prüfen und
        Korrigieren der eigenen Stammdaten/Adresse/Kontaktwege – v1.14.0.
      - Dubletten-Finder + Zusammenführen (/kontakte/dubletten) – v1.15.0.
-  3. **Handy & Alltag** – offen: PWA-Manifest · Startseiten-Widget
-     (Geburtstage der Woche + Termine mit offenen Rückmeldungen) · vCard
-     (`.vcf`)-Export für einzelne/ausgewählte Kontakte.
+  3. **Handy & Alltag** – teilweise:
+     - Startseiten-Widget (Geburtstage der Woche + Abstimmungen mit offenen
+       Rückmeldungen) – **v1.17.0 erledigt**.
+     - offen: vCard (`.vcf`)-Export für einzelne/ausgewählte Kontakte.
+     - offen: PWA-Manifest (Web-App zum Home-Bildschirm).
   4. **Sicherheit nachziehen** – offen: Verschlüsselung von Backup-ZIPs /
      Mail-Zugangsdaten „at rest" · Reset-Token ins Pfad-Segment statt Query (L8).
 

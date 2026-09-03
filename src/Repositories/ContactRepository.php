@@ -293,6 +293,46 @@ final class ContactRepository
     }
 
     /**
+     * Kontakte mit Geburtstag in den nächsten $days Tagen (heute eingeschlossen),
+     * für das Startseiten-Widget. Sortiert nach Nähe.
+     *
+     * @return list<array{id:int, vorname:string, nachname:string, geburtstag:string, in_days:int, turning:?int}>
+     */
+    public function upcomingBirthdays(int $days = 7): array
+    {
+        $rows = $this->pdo->query(
+            'SELECT id, vorname, nachname, geburtstag
+             FROM contacts
+             WHERE geburtstag IS NOT NULL
+               AND archived_at IS NULL AND deleted_at IS NULL'
+        )->fetchAll();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $countdown = birthday_countdown((string) $row['geburtstag']);
+            if ($countdown === null || $countdown > $days) {
+                continue;
+            }
+            $birthYear = (int) substr((string) $row['geburtstag'], 0, 4);
+            $turning = $birthYear > 1900
+                ? (int) (new \DateTimeImmutable('today'))->modify('+' . $countdown . ' days')->format('Y') - $birthYear
+                : null;
+            $out[] = [
+                'id' => (int) $row['id'],
+                'vorname' => (string) $row['vorname'],
+                'nachname' => (string) $row['nachname'],
+                'geburtstag' => (string) $row['geburtstag'],
+                'in_days' => $countdown,
+                'turning' => $turning,
+            ];
+        }
+
+        usort($out, static fn (array $a, array $b): int => $a['in_days'] <=> $b['in_days']);
+
+        return $out;
+    }
+
+    /**
      * Kontakte, die heute Geburtstag haben UND eine Mailadresse hinterlegt
      * haben – für den automatischen Geburtstagsversand.
      *

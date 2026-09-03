@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.17.0
+
+**Startseite: Geburtstage & offene Rückmeldungen auf einen Blick**
+
+- Die Startseite zeigt jetzt **„Offene Rückmeldungen"** – laufende Abstimmungen,
+  bei denen noch nicht alle geantwortet haben, mit Stand und Frist.
+- Und **„Geburtstage diese Woche"** – die nächsten sieben Tage, mit Datum und
+  dem Alter, das die Person erreicht.
+- Beide Blöcke erscheinen nur, wenn es etwas zu zeigen gibt, und richten sich
+  nach den Rechten (Termine verwalten bzw. Geburtstage sehen dürfen).
+
 ## 1.16.0
 
 **Teilnehmerkreis: Auswahl nach Tag oder Gruppe**

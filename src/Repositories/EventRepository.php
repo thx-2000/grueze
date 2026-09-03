@@ -43,6 +43,45 @@ final class EventRepository
         return $events;
     }
 
+    /**
+     * Laufende Abstimmungen (ohne Gruppen-Polls), bei denen noch nicht alle
+     * geantwortet haben – für das Startseiten-Widget.
+     *
+     * @return list<array{id:int, title:string, kind:string, closes_at:?string, participant_count:int, answered_count:int}>
+     */
+    public function openWithPendingResponses(): array
+    {
+        $rows = $this->pdo->query(
+            "SELECT events.id, events.title, events.kind, events.closes_at,
+                    (SELECT COUNT(*) FROM event_participants ep WHERE ep.event_id = events.id) AS participant_count
+             FROM events
+             WHERE events.status = 'open' AND events.group_id IS NULL
+             ORDER BY COALESCE(events.closes_at, '9999-12-31') ASC, events.created_at ASC"
+        )->fetchAll();
+
+        $out = [];
+        foreach ($rows as $row) {
+            $participants = (int) $row['participant_count'];
+            if ($participants === 0) {
+                continue;
+            }
+            $answered = $this->answeredParticipantCount((int) $row['id']);
+            if ($answered >= $participants) {
+                continue;
+            }
+            $out[] = [
+                'id' => (int) $row['id'],
+                'title' => (string) $row['title'],
+                'kind' => (string) $row['kind'],
+                'closes_at' => $row['closes_at'] !== null ? (string) $row['closes_at'] : null,
+                'participant_count' => $participants,
+                'answered_count' => $answered,
+            ];
+        }
+
+        return $out;
+    }
+
     public function find(int $id): ?array
     {
         $stmt = $this->pdo->prepare(
