@@ -54,7 +54,10 @@ $hasEmail = $editing && ($contact['emails'] ?? []) !== [];
 $hasPhone = $editing && ($contact['phones'] ?? []) !== [];
 
 $actionLabel = static fn (string $a): string => match ($a) {
-    'created' => 'angelegt', 'deleted' => 'gelöscht', default => 'geändert',
+    'created' => 'angelegt', 'deleted' => 'gelöscht',
+    'impersonation_started' => 'Sitzung als Person gestartet',
+    'impersonation_stopped' => 'Sitzung als Person beendet',
+    default => 'geändert',
 };
 ?>
 <p class="detail-backlink"><a href="<?= e(url('/kontakte')) ?>"><?= icon('chevron-right') ?>Zurück zum Adressbuch</a></p>
@@ -242,6 +245,28 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <input type="hidden" name="contact_id" value="<?= e((string) $contact['id']) ?>">
             <div class="toolbar-actions">
                 <button type="submit" class="button-link"><?= icon('mail') ?><span>Einladungslink erstellen &amp; schicken</span></button>
+            </div>
+        </form>
+    </section>
+<?php endif; ?>
+
+<?php
+$canImpersonateThis = $editing
+    && empty($isImpersonating)
+    && can('users.manage')
+    && $linkedUser !== null
+    && (int) ($linkedUser['is_active'] ?? 0) === 1
+    && (int) ($linkedUser['id'] ?? 0) !== (int) ($currentUser['id'] ?? 0);
+?>
+<?php if ($canImpersonateThis): ?>
+    <section class="detail-card">
+        <h2>Als diese Person anmelden</h2>
+        <p class="muted">Zum Prüfen: Du siehst und bedienst das System dann genau wie <strong><?= e($fullName) ?></strong>. Oben in der Seitenleiste kommst du mit einem Klick wieder zu deinem eigenen Zugang zurück. Alle Aktionen währenddessen werden im Änderungsverlauf dir zugeordnet.</p>
+        <form method="post" action="<?= e(url('/users/impersonate')) ?>">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <input type="hidden" name="user_id" value="<?= e((string) $linkedUser['id']) ?>">
+            <div class="toolbar-actions">
+                <button type="submit" class="ghost-button"><?= icon('login') ?><span>Anmelden als <?= e(trim((string) ($contact['vorname'] ?? '')) ?: $fullName) ?></span></button>
             </div>
         </form>
     </section>

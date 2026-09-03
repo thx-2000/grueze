@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.7.1
+
+**„Als diese Person anmelden" aus dem Kontakt**
+
+- Auf der Kontaktseite einer Person mit eigenem Zugang gibt es jetzt den Knopf
+  **„Anmelden als …"**. Damit sieht und bedient man das System genau wie diese
+  Person; über die Seitenleiste geht es mit einem Klick zurück zum eigenen
+  Konto. Sichtbar nur für Konten mit „Benutzer verwalten".
+- Start und Ende so einer Sitzung stehen jetzt sauber im Änderungsprotokoll –
+  vorher scheiterte der Protokolleintrag still (das ENUM `audit_log.action`
+  kannte die beiden Werte nicht). Alle Aktionen während der Sitzung bleiben
+  dem steuernden Admin zugeordnet.
+
 ## 1.7.0
 
 **Adressbuch und Gruppen verzahnt**
