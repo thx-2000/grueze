@@ -3,6 +3,20 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.11.0
+
+**Zur Abstimmung einladen – mit vorbereitetem Text**
+
+- „Teilnehmer erreichen" auf der Terminseite öffnet jetzt eine **fertig
+  formulierte Einladung**: Bitte um Rückmeldung, der persönliche Link je Person,
+  automatisch das **Fristende** und der normale Mail-Fuß. Text und
+  Empfängerkreis lassen sich vor dem Versand noch anpassen. „Nur an Offene"
+  schickt dieselbe Mail als Erinnerung.
+- Nach dem Speichern des Teilnehmerkreises weist ein Hinweis direkt darauf hin.
+- **Gruppen-Abstimmungen:** auf der Abstimmungsseite gibt es für die Leitung
+  „Mitglieder per Nachricht informieren" – öffnet eine vorbereitete Nachricht an
+  die Gruppe mit Titel, Fristende und Hinweis, wo abgestimmt wird.
+
 ## 1.10.0
 
 **Geburtstagsgrüße automatisch verschicken**

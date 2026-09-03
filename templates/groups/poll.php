@@ -124,6 +124,12 @@ $optLabel = static fn (array $o): string => event_option_label($o);
 <section class="detail-card">
     <h2>Teilnahme</h2>
     <p class="muted"><?= (int) $event['answered_count'] ?> von <?= count($event['participants']) ?> Mitgliedern haben abgestimmt.</p>
+    <?php if ($canManage && $isOpen): ?>
+        <div class="toolbar-actions">
+            <a class="ghost-button" href="<?= e(url('/gruppen/nachricht?id=' . $groupId)) ?>"><?= icon('mail') ?><span>Mitglieder per Nachricht informieren</span></a>
+        </div>
+        <p class="field-hint">Öffnet eine vorbereitete Nachricht an die Gruppe – mit Titel, Fristende und Hinweis, wo abgestimmt wird. Text noch anpassbar.</p>
+    <?php endif; ?>
 </section>
 
 <?php if ($canManage && $isOpen): ?>

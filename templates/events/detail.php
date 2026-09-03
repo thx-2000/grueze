@@ -333,13 +333,17 @@ ksort($byCategory);
             <form method="post" action="<?= e(url('/termine/nachricht')) ?>" class="event-message-actions">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
-                <p class="field-hint">Nachricht mit Platzhalter <code>{Abstimmungslink}</code> – der wird je Person durch den persönlichen Link ersetzt.</p>
+                <p class="field-hint">
+                    Öffnet eine vorbereitete Mail: Bitte um Rückmeldung, der persönliche Link je Person
+                    (<code>{Abstimmungslink}</code>)<?php if ($closesAt !== '' && $event['status'] === 'open'): ?>, das Fristende (<?= e(format_deadline($closesAt)) ?>)<?php endif; ?>
+                    und der normale Mail-Fuß. Text und Empfängerkreis lassen sich dort noch anpassen.
+                </p>
                 <div class="toolbar-actions">
-                    <button type="submit" name="filter" value="all" class="button-link"><?= icon('mail') ?><span>An alle Teilnehmer</span></button>
+                    <button type="submit" name="filter" value="all" class="button-link"><?= icon('mail') ?><span>Einladung an alle Teilnehmer</span></button>
                     <?php if ($event['status'] === 'decided'): ?>
                         <button type="submit" name="filter" value="confirmed" class="ghost-button">Nur an Zusagen</button>
                     <?php endif; ?>
-                    <button type="submit" name="filter" value="pending" class="ghost-button">Nur an Offene</button>
+                    <button type="submit" name="filter" value="pending" class="ghost-button">Nur an Offene (Erinnerung)</button>
                 </div>
             </form>
         <?php endif; ?>

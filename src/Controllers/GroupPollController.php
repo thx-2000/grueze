@@ -157,11 +157,35 @@ final class GroupPollController extends BaseController
             }
         }
 
+        $canManage = $this->mayManagePoll($event);
+
+        // Fertigen Ankündigungstext für „Nachricht an die Gruppe" bereitlegen.
+        if ($canManage && $event['status'] === 'open') {
+            $closesAt = trim((string) ($event['closes_at'] ?? ''));
+            $lines = [
+                'Hallo zusammen,',
+                '',
+                'in unserer Gruppe läuft eine Abstimmung: „' . $event['title'] . '".',
+                'Bitte stimmt ab unter „Gruppen" → „Abstimmungen" (Login nötig).',
+            ];
+            if ($closesAt !== '') {
+                $lines[] = '';
+                $lines[] = 'Die Abstimmung endet am ' . format_deadline($closesAt) . '.';
+            }
+            $lines[] = '';
+            $lines[] = 'Danke!';
+            $_SESSION['group_mail_prefill'] = [
+                'group_id' => (int) $event['group_id'],
+                'subject' => 'Bitte abstimmen: ' . $event['title'],
+                'message' => implode("\n", $lines),
+            ];
+        }
+
         $this->render('groups/poll', [
             'event' => $event,
             'myParticipantId' => $mine['participant_id'] ?? null,
             'myAnswers' => $myAnswers,
-            'canManage' => $this->mayManagePoll($event),
+            'canManage' => $canManage,
         ]);
     }
 

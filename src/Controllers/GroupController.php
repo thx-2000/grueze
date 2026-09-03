@@ -171,11 +171,18 @@ final class GroupController extends BaseController
             static fn (array $m): bool => ($m['role'] ?? 'member') === 'lead'
         ));
 
+        // Vorbelegter Ankündigungstext (z. B. von einer neuen Abstimmung)?
+        $prefill = $_SESSION['group_mail_prefill'] ?? null;
+        unset($_SESSION['group_mail_prefill']);
+        $matchesGroup = is_array($prefill) && (int) ($prefill['group_id'] ?? 0) === (int) $group['id'];
+
         $this->render('groups/compose', [
             'group' => $group,
             'recipientCount' => count($withEmail),
             'noEmailCount' => count($members) - count($withEmail),
             'leadCount' => $leadCount,
+            'prefillSubject' => $matchesGroup ? (string) $prefill['subject'] : '',
+            'prefillMessage' => $matchesGroup ? (string) $prefill['message'] : '',
             'sentToday' => $this->auth->isAdmin() ? 0 : $this->groupMail->sentTodayBy($userId),
             'softLimit' => $this->groupMail->softLimit(),
             'isAdmin' => $this->auth->isAdmin(),

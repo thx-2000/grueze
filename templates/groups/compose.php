@@ -34,11 +34,11 @@ $otherLeads = max(0, ($leadCount ?? 0) - 1);
         <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
         <label class="full-width">
             <span>Betreff <span class="required-marker" aria-hidden="true">*</span></span>
-            <input type="text" name="subject" maxlength="160" required value="<?= e(old('subject')) ?>">
+            <input type="text" name="subject" maxlength="160" required value="<?= e(old('subject', $prefillSubject ?? '')) ?>">
         </label>
         <label class="full-width">
             <span>Nachricht <span class="required-marker" aria-hidden="true">*</span></span>
-            <textarea name="message" rows="10" required><?= e(old('message')) ?></textarea>
+            <textarea name="message" rows="10" required><?= e(old('message', $prefillMessage ?? '')) ?></textarea>
         </label>
         <fieldset class="full-width reply-to-choice">
             <legend>Antworten gehen an</legend>

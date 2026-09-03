@@ -123,7 +123,10 @@ final class EventController extends BaseController
         }
 
         $this->events->syncParticipants($id, (array) $request->input('contact_ids', []));
-        flash('success', 'Teilnehmerkreis aktualisiert.');
+        $count = count($this->events->participantContactIds($id, 'all'));
+        flash('success', $count > 0 && $this->auth->can('mail.send')
+            ? 'Teilnehmerkreis gespeichert. Jetzt kannst du unter „Teilnehmer erreichen" alle per Mail einladen.'
+            : 'Teilnehmerkreis aktualisiert.');
         Redirect::to('/termine/detail?id=' . $id);
     }
 
@@ -210,15 +213,38 @@ final class EventController extends BaseController
             Redirect::to('/termine/detail?id=' . $id);
         }
 
-        $link = $event['status'] === 'decided'
-            ? "Der Termin steht: {Abstimmungslink}"
-            : "Bitte trag dich hier ein: {Abstimmungslink}";
+        $isPoll = ($event['kind'] ?? '') === 'poll';
+        $noun = $isPoll ? 'Abstimmung' : 'Terminabstimmung';
+        $closesAt = trim((string) ($event['closes_at'] ?? ''));
+
+        if ($event['status'] === 'decided') {
+            $subject = ($isPoll ? 'Ergebnis' : 'Termin steht') . ': ' . $event['title'];
+            $message = "{Anrede} {Vorname},\n\n"
+                . 'die ' . $noun . ' „' . $event['title'] . "\" ist entschieden.\n"
+                . "Hier ist das Ergebnis: {Abstimmungslink}\n\nDanke euch!";
+        } else {
+            $subject = 'Bitte abstimmen: ' . $event['title'];
+            $lines = [
+                '{Anrede} {Vorname},',
+                '',
+                'für „' . $event['title'] . '" brauchen wir noch deine Rückmeldung.',
+                'Über deinen persönlichen Link kannst du direkt abstimmen:',
+                '{Abstimmungslink}',
+            ];
+            if ($closesAt !== '') {
+                $lines[] = '';
+                $lines[] = 'Die ' . $noun . ' läuft noch bis ' . format_deadline($closesAt) . '.';
+            }
+            $lines[] = '';
+            $lines[] = 'Vielen Dank!';
+            $message = implode("\n", $lines);
+        }
 
         $_SESSION['mail_draft'] = [
             'contact_ids' => $contactIds,
             'event_id' => $id,
-            'subject' => 'Termin: ' . $event['title'],
-            'message' => "{Anrede} {Vorname},\n\n" . $link . "\n\nDanke!",
+            'subject' => $subject,
+            'message' => $message,
             'salutation_mode' => 'auto',
         ];
         Redirect::to('/rundmail');
