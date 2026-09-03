@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.15.0
+
+**Dubletten-Finder & Zusammenführen**
+
+- Neue Seite **Adressbuch → „Doppelt?"**: findet Kontakte, die vermutlich
+  doppelt angelegt wurden (gleicher Name oder gleiche Mailadresse) und fasst
+  sie zu Gruppen zusammen.
+- Pro Gruppe wählst du den Hauptkontakt; die anderen werden hineingeführt und
+  danach gelöscht. Übernommen wird **alles**: E-Mail-Adressen, Telefonnummern,
+  Tags, Gruppen-Mitgliedschaften (inkl. Leitung), Termin-Rückmeldungen und der
+  Änderungsverlauf. Leere Felder des Hauptkontakts werden aus den anderen
+  aufgefüllt, Notizen zusammengehängt.
+- Hat der Hauptkontakt noch keinen Zugang, übernimmt er einen vorhandenen
+  Login des zusammengeführten Kontakts.
+- Kein neues Datenbank-Schema.
+
 ## 1.14.0
 
 **Daten-Check-Link – Kontakte pflegen ihre Daten selbst, ohne Login**

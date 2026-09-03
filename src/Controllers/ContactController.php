@@ -68,6 +68,9 @@ final class ContactController extends BaseController
             'retiredCount' => can('contacts.delete')
                 ? array_sum($this->contacts->retiredCounts())
                 : 0,
+            'duplicateCount' => can('contacts.manage')
+                ? $this->contacts->duplicateClusterCount()
+                : 0,
         ]);
     }
 
@@ -510,6 +513,81 @@ final class ContactController extends BaseController
         $this->logs->addAudit((int) $this->auth->user()['id'], null, 'deleted', 'Kontakt endgültig gelöscht: ' . $name . '.');
         flash('success', $name . ' wurde endgültig gelöscht.');
         Redirect::to('/kontakte/archiv');
+    }
+
+    /** Dubletten-Finder: Kontakte, die vermutlich doppelt angelegt wurden. */
+    public function duplicates(): void
+    {
+        $this->requirePermission('contacts.manage');
+        $clusters = $this->contacts->duplicateClusters();
+        $this->redactHiddenFields2($clusters);
+
+        $this->render('contacts/duplicates', [
+            'clusters' => $clusters,
+            'canMerge' => can('contacts.delete'),
+        ]);
+    }
+
+    /** Zwei oder mehr Kontakte zu einem zusammenführen. */
+    public function merge(Request $request): void
+    {
+        $this->requirePermission('contacts.manage');
+        Csrf::validate($request->input('_csrf'));
+        if (!can('contacts.delete')) {
+            flash('error', 'Zum Zusammenführen fehlt die Berechtigung zum Löschen von Kontakten.');
+            Redirect::to('/kontakte/dubletten');
+        }
+
+        $primaryId = (int) $request->input('primary_id');
+        $secondaryIds = array_values(array_unique(array_filter(
+            array_map('intval', (array) $request->input('secondary_ids', [])),
+            static fn (int $id): bool => $id > 0 && $id !== $primaryId
+        )));
+
+        $primary = $this->contacts->find($primaryId);
+        if (!$primary || $secondaryIds === []) {
+            flash('error', 'Bitte einen Haupt-Kontakt und mindestens einen weiteren wählen.');
+            Redirect::to('/kontakte/dubletten');
+        }
+
+        $userId = (int) $this->auth->user()['id'];
+        $mergedNames = [];
+        $filled = [];
+        $notes = [];
+        foreach ($secondaryIds as $sid) {
+            $sec = $this->contacts->find($sid);
+            if (!$sec) {
+                continue;
+            }
+            $result = $this->contacts->merge($primaryId, $sid, $userId);
+            $mergedNames[] = trim($sec['vorname'] . ' ' . $sec['nachname']);
+            $filled = array_merge($filled, $result['filled']);
+            if ($result['note'] !== '') {
+                $notes[] = $result['note'];
+            }
+        }
+
+        $filled = array_values(array_unique($filled));
+        $summary = 'Zusammengeführt mit: ' . implode(', ', $mergedNames) . '.'
+            . ($filled !== [] ? ' Ergänzt: ' . implode(', ', $filled) . '.' : '');
+        $this->logs->addAudit($userId, $primaryId, 'updated', $summary);
+
+        flash('success', trim('Kontakte zusammengeführt. ' . implode(' ', $notes)));
+        Redirect::to('/contacts/edit?id=' . $primaryId);
+    }
+
+    /**
+     * Wie redactHiddenFields, aber über die Cluster-Struktur des Dubletten-Finders.
+     *
+     * @param array<int,array{reason:string,contacts:array<int,array<string,mixed>>}> $clusters
+     */
+    private function redactHiddenFields2(array &$clusters): void
+    {
+        $ownContactId = (int) ($this->auth->user()['contact_id'] ?? 0);
+        foreach ($clusters as &$cluster) {
+            $this->redactHiddenFields($cluster['contacts'], $ownContactId);
+        }
+        unset($cluster);
     }
 
     public function export(Request $request): never

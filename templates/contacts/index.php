@@ -297,6 +297,9 @@ $ownFields = $ownContact !== null ? [
             <?php if (can('contacts.export')): ?>
                 <a class="ghost-button" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>"><?= icon('upload') ?><span>CSV exportieren</span></a>
             <?php endif; ?>
+            <?php if ($canManage && ($duplicateCount ?? 0) > 0): ?>
+                <a class="ghost-button" href="<?= e(url('/kontakte/dubletten')) ?>"><?= icon('contacts') ?><span>Doppelt? (<?= (int) $duplicateCount ?>)</span></a>
+            <?php endif; ?>
             <?php if (can('contacts.delete')): ?>
                 <a class="ghost-button" href="<?= e(url('/kontakte/archiv')) ?>"><?= icon('archive') ?><span>Archiv &amp; Papierkorb<?= $retiredCount > 0 ? ' (' . (int) $retiredCount . ')' : '' ?></span></a>
             <?php endif; ?>

@@ -24,13 +24,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   1. **Termine rund machen** – umgesetzt v1.12.0: `.ics`-Kalenderdatei für
      festgelegte Termine (auch in der Mail), automatische Erinnerung X Tage
      vorher, Freitext-Anmerkung beim Abstimmen.
-  2. **Datenpflege leichter** – teilweise:
+  2. **Datenpflege leichter** – **komplett erledigt**:
      - Archiv & Papierkorb für Kontakte (Archiv dauerhaft ODER 30-Tage-
-       Papierkorb, automatische Endlöschung per Cron) – **v1.13.0 erledigt**.
+       Papierkorb, automatische Endlöschung per Cron) – v1.13.0.
      - Daten-Check-Link (Token, ohne Login, /meine-daten) zum Prüfen und
-       Korrigieren der eigenen Stammdaten/Adresse/Kontaktwege – **v1.14.0
-       erledigt**.
-     - offen: Dubletten-Finder + Zusammenführen.
+       Korrigieren der eigenen Stammdaten/Adresse/Kontaktwege – v1.14.0.
+     - Dubletten-Finder + Zusammenführen (/kontakte/dubletten) – v1.15.0.
   3. **Handy & Alltag** – offen: PWA-Manifest · Startseiten-Widget
      (Geburtstage der Woche + Termine mit offenen Rückmeldungen) · vCard
      (`.vcf`)-Export für einzelne/ausgewählte Kontakte.

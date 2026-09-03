@@ -419,6 +419,8 @@ try {
     $router->post('/contacts/endgueltig-loeschen', [ContactController::class, 'purge']);
     $router->post('/contacts/datencheck', [\App\Controllers\DataCheckController::class, 'createLink']);
     $router->post('/contacts/datencheck/widerrufen', [\App\Controllers\DataCheckController::class, 'revokeLink']);
+    $router->get('/kontakte/dubletten', [ContactController::class, 'duplicates']);
+    $router->post('/contacts/zusammenfuehren', [ContactController::class, 'merge']);
     $router->post('/contacts/bulk-update', [ContactController::class, 'bulkUpdate']);
     $router->post('/contacts/gruppe-aus-auswahl', [ContactController::class, 'groupFromSelection']);
     $router->get('/contacts/export', [ContactController::class, 'export']);

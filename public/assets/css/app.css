@@ -3428,6 +3428,106 @@ a.completeness-tile:hover {
     flex: 0 0 auto;
 }
 
+/* Dubletten-Finder. */
+.dup-cluster-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.8rem;
+    margin-bottom: 0.6rem;
+}
+
+.dup-cluster-head h2 {
+    margin: 0;
+}
+
+.dup-list {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+    display: grid;
+    gap: 0.8rem;
+}
+
+.dup-entry {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: start;
+    gap: 0.4rem 1rem;
+    padding: 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md, 10px);
+    background: var(--surface-veil, transparent);
+}
+
+.dup-entry:has(input[name="primary_id"]:checked) {
+    border-color: var(--accent-edge, var(--color-primary));
+    background: var(--color-highlight, transparent);
+}
+
+.dup-primary,
+.dup-merge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-text-muted, inherit);
+    white-space: nowrap;
+}
+
+.dup-card {
+    min-width: 0;
+}
+
+.dup-name {
+    margin: 0 0 0.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+
+.dup-fields {
+    margin: 0;
+    display: grid;
+    gap: 0.15rem;
+    font-size: 0.9rem;
+}
+
+.dup-fields > div {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.dup-fields dt {
+    flex: 0 0 5.5rem;
+    color: var(--color-text-muted, inherit);
+}
+
+.dup-fields dd {
+    margin: 0;
+    min-width: 0;
+    word-break: break-word;
+}
+
+.dup-open {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 620px) {
+    .dup-entry {
+        grid-template-columns: auto auto;
+    }
+
+    .dup-card {
+        grid-column: 1 / -1;
+    }
+}
+
 .retire-choice form {
     margin: 0;
     display: flex;
