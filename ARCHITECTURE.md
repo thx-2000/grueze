@@ -40,6 +40,16 @@ Das Mailing nutzt einen zweistufigen Ablauf:
 
 Das reduziert Timeout-Risiken auf Shared Hosting und macht eine Fortschrittsanzeige im Browser möglich. Wenn PHPMailer vorhanden ist, wird SMTP genutzt; andernfalls gibt es einen einfachen Fallback über `mail()`.
 
+## Zeitgesteuerte Aufgaben
+
+`EventScheduler` erledigt die Abstimmungs-Automatik (Fristen schließen,
+48-Stunden-Erinnerung an Nicht-Abstimmende, Ergebnis-Mail nach dem Schließen).
+Einstiegspunkt ist die Route `/intern/cron?key=…` (`CronController`), abgesichert
+über `app.cron_key` mit `hash_equals`. Für selten besuchte Instanzen läuft in
+`public/index.php` eine gedrosselte Rückfallebene (max. 1×/Stunde, über das
+`app_settings`-Flag `scheduler_last_run`). Jeder Job ist idempotent und über
+Zeitstempel-Spalten am Event gegen Doppelversand gesichert.
+
 ## White-Label und Upgrades
 
 Zwei feste Regeln für alle künftigen Änderungen:

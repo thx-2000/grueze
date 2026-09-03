@@ -110,6 +110,37 @@ $kindMeta = [
         </div>
     </section>
 
+    <?php if ($kind !== 'fixed_date'): ?>
+        <section class="detail-card">
+            <h2>Frist &amp; Ergebnis (optional)</h2>
+            <p class="field-hint">Mit einer Frist schließt die Abstimmung automatisch. 48&nbsp;Stunden vorher bekommt jede:r, der noch nicht abgestimmt hat, eine Erinnerung.</p>
+            <div class="form-grid">
+                <label>
+                    <span>Abstimmung endet am</span>
+                    <input type="datetime-local" name="closes_at" value="<?= e(old('closes_at')) ?>" min="<?= e(date('Y-m-d\TH:i')) ?>">
+                </label>
+                <label>
+                    <span>Ergebnis danach mailen an</span>
+                    <select name="result_recipients">
+                        <?php
+                        $recipientChoices = [
+                            '' => 'Niemanden automatisch',
+                            'voted' => 'Alle, die abgestimmt haben',
+                            'invited' => 'Alle Eingeladenen',
+                            'orga' => 'Nur das Orga-Team',
+                            'admin' => 'Nur die Admins',
+                        ];
+                        $current = (string) old('result_recipients');
+                        ?>
+                        <?php foreach ($recipientChoices as $value => $label): ?>
+                            <option value="<?= e($value) ?>" <?= $current === $value ? 'selected' : '' ?>><?= e($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+            </div>
+        </section>
+    <?php endif; ?>
+
     <div class="detail-save-bar" data-save-bar>
         <span class="detail-save-hint">Termin anlegen.</span>
         <div class="detail-save-actions">

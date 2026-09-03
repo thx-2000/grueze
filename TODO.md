@@ -5,6 +5,16 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Gruppen (Stufe B–E):** eigene Gruppen-Objekte, „Meine Gruppen" für
+  Mitglieder, Gruppen-Mail mit Soft-Limit (2/Tag) + Notbremse +
+  Bestätigungsmail an den Versender, Gruppen-Abstimmungen, offene Gruppen.
+  Stufe A (Abstimmungs-Fristen + Ergebnis-Mail für alle Termine) ist in
+  v1.1.0 umgesetzt.
+- **Cron einrichten:** `app.cron_key` in `config/config.php` setzen und beim
+  Hoster einen 15-Minuten-Aufruf von `/intern/cron?key=…` anlegen
+  (`docs/NEUE-INSTANZ.md`, Abschnitt 7). Ohne echten Cron greift nur die
+  gedrosselte Rückfallebene bei Seitenaufrufen.
+
 - **buymeacoffee:** das Projekt GRUEZE auf der eigenen buymeacoffee-Seite
   ergänzen/beschreiben (Aktion von TH – nicht im Code). Link im Code:
   `branding.product_donate_url` = `https://buymeacoffee.com/thomashageleit`.

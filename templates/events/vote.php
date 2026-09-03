@@ -2,7 +2,8 @@
 $personName = trim($p['vorname'] . ' ' . $p['nachname']);
 $ownName = trim((string) ($ownName ?? ''));
 $foreign = $ownName !== '' && mb_strtolower($ownName) !== mb_strtolower($personName);
-$closed = $p['status'] === 'archived';
+$closed = in_array($p['status'], ['closed', 'archived'], true);
+$closesAt = trim((string) ($p['closes_at'] ?? ''));
 $decidedId = (int) ($p['decided_option_id'] ?? 0);
 $kind = (string) ($p['kind'] ?? 'date_poll');
 $isFixed = $kind === 'fixed_date';
@@ -43,6 +44,8 @@ $optionTitle = static fn (array $option): string => event_option_label($option);
 
     <?php if ($closed): ?>
         <p class="vote-alert"><span>Diese Abstimmung ist abgeschlossen.</span></p>
+    <?php elseif ($closesAt !== ''): ?>
+        <p class="vote-deadline"><?= icon('clock') ?><span>Rückmeldung bis <strong><?= e(format_deadline($closesAt)) ?></strong> · <?= e(time_until_hint($closesAt)) ?></span></p>
     <?php endif; ?>
 
     <?php if ($p['options'] === []): ?>

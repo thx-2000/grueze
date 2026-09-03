@@ -1,5 +1,5 @@
 <?php
-$statusLabel = ['open' => 'Abstimmung läuft', 'decided' => 'Termin steht', 'archived' => 'Archiviert'];
+$statusLabel = ['open' => 'Abstimmung läuft', 'closed' => 'Abstimmung beendet', 'decided' => 'Termin steht', 'archived' => 'Archiviert'];
 $kindLabel = ['date_poll' => 'Datumsabstimmung', 'fixed_date' => 'Fester Termin', 'poll' => 'Abstimmung'];
 ?>
 <header class="contacts-header">
@@ -49,6 +49,9 @@ $kindLabel = ['date_poll' => 'Datumsabstimmung', 'fixed_date' => 'Fester Termin'
                                 · <?= e((string) $optionCount) ?> <?= $optionCount === 1 ? 'Vorschlag' : 'Vorschläge' ?>
                             <?php endif; ?>
                             · <?= e((string) $event['answered_count']) ?>/<?= e((string) $event['participant_count']) ?> geantwortet
+                            <?php if ($event['status'] === 'open' && trim((string) ($event['closes_at'] ?? '')) !== ''): ?>
+                                · Frist <?= e(time_until_hint($event['closes_at'])) ?>
+                            <?php endif; ?>
                         </span>
                     </a>
                     <?= icon('chevron-right') ?>

@@ -186,10 +186,15 @@ foreach ($phones as $i => $entry) {
                     <a href="<?= e(url('/abstimmen?token=' . $ev['token'])) ?>">
                         <span class="account-events-title"><?= e($ev['title']) ?></span>
                         <span class="account-events-meta">
-                            <?php if ((int) $ev['has_answered'] === 1): ?>
+                            <?php if ($ev['status'] === 'closed'): ?>
+                                <span class="status-chip">beendet</span>
+                            <?php elseif ((int) $ev['has_answered'] === 1): ?>
                                 <span class="status-chip is-ok">geantwortet</span> – ändern
                             <?php else: ?>
                                 <span class="status-chip is-warn">offen</span> – jetzt abstimmen
+                            <?php endif; ?>
+                            <?php if ($ev['status'] === 'open' && trim((string) ($ev['closes_at'] ?? '')) !== ''): ?>
+                                <span class="muted">· Frist <?= e(time_until_hint($ev['closes_at'])) ?></span>
                             <?php endif; ?>
                         </span>
                     </a>

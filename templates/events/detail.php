@@ -1,6 +1,15 @@
 <?php
-$statusLabel = ['open' => 'Abstimmung läuft', 'decided' => 'Termin steht', 'archived' => 'Archiviert'];
+$statusLabel = ['open' => 'Abstimmung läuft', 'closed' => 'Abstimmung beendet', 'decided' => 'Termin steht', 'archived' => 'Archiviert'];
 $today = (new DateTimeImmutable('now'))->format('Y-m-d');
+$closesAt = trim((string) ($event['closes_at'] ?? ''));
+$closesAtLocal = $closesAt !== '' ? str_replace(' ', 'T', substr($closesAt, 0, 16)) : '';
+$resultRecipients = (string) ($event['result_recipients'] ?? '');
+$recipientLabels = [
+    'voted' => 'Alle, die abgestimmt haben',
+    'invited' => 'Alle Eingeladenen',
+    'orga' => 'Nur das Orga-Team',
+    'admin' => 'Nur die Admins',
+];
 $options = $event['options'];
 $participants = $event['participants'];
 $tally = $event['tally'];
@@ -31,6 +40,30 @@ ksort($byCategory);
         <span class="muted">angelegt von <?= e($event['creator_name']) ?></span>
     </div>
 </header>
+
+<?php if ($closesAt !== '' && !$isFixed): ?>
+    <section class="detail-card event-deadline-card">
+        <div>
+            <h2>Frist</h2>
+            <p>
+                <?php if ($event['status'] === 'open'): ?>
+                    Endet <strong><?= e(format_deadline($closesAt)) ?></strong> · <?= e(time_until_hint($closesAt)) ?>
+                <?php else: ?>
+                    War auf <strong><?= e(format_deadline($closesAt)) ?></strong> gesetzt.
+                <?php endif; ?>
+            </p>
+            <?php if ($resultRecipients !== '' && isset($recipientLabels[$resultRecipients])): ?>
+                <p class="muted">Ergebnis-Mail nach dem Schließen: <?= e($recipientLabels[$resultRecipients]) ?><?= $event['result_mail_sent_at'] ? ' · bereits verschickt' : '' ?>.</p>
+            <?php endif; ?>
+        </div>
+        <form method="post" action="<?= e(url('/termine/frist')) ?>" class="event-deadline-form">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
+            <label><span>Neue Frist</span><input type="datetime-local" name="closes_at" value="<?= e($closesAtLocal) ?>" min="<?= e(date('Y-m-d\TH:i')) ?>"></label>
+            <button type="submit" class="ghost-button"><?= icon('clock') ?><span>Frist setzen</span></button>
+        </form>
+    </section>
+<?php endif; ?>
 
 <?php if (!$isPoll && $event['status'] === 'decided'): ?>
     <?php foreach ($options as $option): ?>
@@ -141,6 +174,28 @@ ksort($byCategory);
             <?php endif; ?>
         </div>
     </section>
+
+    <?php if (!$isFixed): ?>
+        <section class="detail-card">
+            <h2>Frist &amp; Ergebnis</h2>
+            <p class="field-hint">Frist leer lassen = die Abstimmung schließt nicht von selbst. 48&nbsp;Stunden vor der Frist geht eine Erinnerung an alle raus, die noch nicht abgestimmt haben.</p>
+            <div class="form-grid">
+                <label>
+                    <span>Abstimmung endet am</span>
+                    <input type="datetime-local" name="closes_at" value="<?= e($closesAtLocal) ?>">
+                </label>
+                <label>
+                    <span>Ergebnis danach mailen an</span>
+                    <select name="result_recipients">
+                        <option value="" <?= $resultRecipients === '' ? 'selected' : '' ?>>Niemanden automatisch</option>
+                        <?php foreach ($recipientLabels as $value => $label): ?>
+                            <option value="<?= e($value) ?>" <?= $resultRecipients === $value ? 'selected' : '' ?>><?= e($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+            </div>
+        </section>
+    <?php endif; ?>
 
     <div class="detail-save-bar" hidden data-save-bar>
         <span class="detail-save-hint">Ungespeicherte Änderungen.</span>
@@ -319,6 +374,21 @@ ksort($byCategory);
     <h2>Termin abschließen</h2>
     <p class="muted">Archivierte Termine verschwinden aus der Übersicht, bleiben aber im Archiv. Löschen entfernt alles unwiderruflich.</p>
     <div class="toolbar-actions">
+        <?php if ($event['status'] === 'open' && !$isFixed): ?>
+            <form method="post" action="<?= e(url('/termine/status')) ?>">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
+                <input type="hidden" name="status" value="closed">
+                <button type="submit" class="ghost-button"><?= icon('lock') ?><span>Abstimmung jetzt schließen</span></button>
+            </form>
+        <?php elseif ($event['status'] === 'closed'): ?>
+            <form method="post" action="<?= e(url('/termine/status')) ?>">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
+                <input type="hidden" name="status" value="open">
+                <button type="submit" class="ghost-button"><?= icon('unlock') ?><span>Wieder öffnen</span></button>
+            </form>
+        <?php endif; ?>
         <?php if ($event['status'] !== 'archived'): ?>
             <form method="post" action="<?= e(url('/termine/status')) ?>">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

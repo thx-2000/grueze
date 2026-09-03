@@ -7,6 +7,7 @@ use App\Controllers\AuthController;
 use App\Controllers\BackupController;
 use App\Controllers\CategoryController;
 use App\Controllers\ContactController;
+use App\Controllers\CronController;
 use App\Controllers\EventController;
 use App\Controllers\GreetingController;
 use App\Controllers\LegalController;
@@ -45,6 +46,7 @@ use App\Repositories\UserRepository;
 use App\Services\BackupService;
 use App\Services\CsvExportService;
 use App\Services\ContactImportService;
+use App\Services\EventScheduler;
 use App\Services\MailService;
 use App\Services\MigrationService;
 use App\Services\PasswordResetService;
@@ -246,6 +248,16 @@ try {
         Container::get(CategoryRepository::class),
         Container::get(LogRepository::class)
     ));
+    Container::factory(EventScheduler::class, static fn () => new EventScheduler(
+        Container::get(EventRepository::class),
+        Container::get(UserRepository::class),
+        Container::get(SettingRepository::class),
+        Container::get(MailService::class),
+        Container::get(LogRepository::class)
+    ));
+    Container::factory(CronController::class, static fn () => new CronController(
+        Container::get(EventScheduler::class)
+    ));
     Container::factory(MailController::class, static fn () => new MailController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
@@ -302,6 +314,20 @@ try {
             );
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
+        }
+    }
+
+    // Rückfallebene ohne echten Cron: selten je Request die Abstimmungs-Automatik
+    // (Fristen schließen, Erinnerungen, Ergebnis-Mails) anstoßen – aber höchstens
+    // einmal pro Stunde. Zuverlässiger ist ein echter Aufruf von /intern/cron.
+    if (random_int(1, 20) === 1) {
+        try {
+            $schedulerSettings = Container::get(SettingRepository::class);
+            if (time() - (int) $schedulerSettings->get('scheduler_last_run', '0') > 3600) {
+                Container::get(EventScheduler::class)->run();
+            }
+        } catch (\Throwable) {
+            // Automatik darf den laufenden Request nie stören.
         }
     }
 
@@ -397,8 +423,11 @@ try {
     $router->post('/termine/status', [EventController::class, 'setStatus']);
     $router->post('/termine/loeschen', [EventController::class, 'delete']);
     $router->post('/termine/nachricht', [EventController::class, 'messageParticipants']);
+    $router->post('/termine/frist', [EventController::class, 'extendDeadline']);
     $router->get('/abstimmen', [EventController::class, 'vote']);
     $router->post('/abstimmen', [EventController::class, 'submitVote']);
+    $router->get('/intern/cron', [CronController::class, 'run']);
+    $router->post('/intern/cron', [CronController::class, 'run']);
     $router->post('/mail/compose', [MailController::class, 'compose']);
     $router->get('/mail/compose', [MailController::class, 'compose']);
     $router->post('/mail/compose-all', [MailController::class, 'composeAll']);

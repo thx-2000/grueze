@@ -17,6 +17,12 @@ return [
         // aus: im Normalfall macht das ein Admin bewusst über
         // "Verwaltung → Aktualisieren" (dort mit optionaler Vorab-Sicherung).
         'auto_migrate' => false,
+        // Geheimer Schlüssel für den Cron-Endpunkt /intern/cron. Nur mit diesem
+        // Schlüssel läuft die Abstimmungs-Automatik (Fristen schließen,
+        // Erinnerungen, Ergebnis-Mails) verlässlich. Beliebige lange
+        // Zufallskette; leer lassen deaktiviert die URL (dann greift nur die
+        // gedrosselte Rückfallebene bei Seitenaufrufen). Siehe docs/NEUE-INSTANZ.md.
+        'cron_key' => '',
     ],
 
     // Startwerte für Name, Links und Texte. Auflösung: Admin-Oberfläche

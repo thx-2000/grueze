@@ -156,12 +156,17 @@ CREATE TABLE events (
     time_note VARCHAR(190) NULL,
     cost_note VARCHAR(190) NULL,
     bring_note VARCHAR(190) NULL,
-    status ENUM('open', 'decided', 'archived') NOT NULL DEFAULT 'open',
+    status ENUM('open', 'closed', 'decided', 'archived') NOT NULL DEFAULT 'open',
+    closes_at DATETIME NULL,
+    result_recipients VARCHAR(16) NULL,
+    reminder_sent_at DATETIME NULL,
+    result_mail_sent_at DATETIME NULL,
     decided_option_id INT UNSIGNED NULL,
     created_by INT UNSIGNED NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_events_status (status),
+    KEY idx_events_closes_at (closes_at),
     CONSTRAINT fk_events_user FOREIGN KEY (created_by) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

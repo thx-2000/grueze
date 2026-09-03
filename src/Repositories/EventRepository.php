@@ -135,8 +135,10 @@ final class EventRepository
     {
         $kind = in_array($data['kind'] ?? '', ['date_poll', 'fixed_date', 'poll'], true) ? $data['kind'] : 'date_poll';
         $stmt = $this->pdo->prepare(
-            'INSERT INTO events (title, kind, description, location, time_note, cost_note, bring_note, created_by)
-             VALUES (:title, :kind, :description, :location, :time_note, :cost_note, :bring_note, :created_by)'
+            'INSERT INTO events (title, kind, description, location, time_note, cost_note, bring_note,
+                 closes_at, result_recipients, created_by)
+             VALUES (:title, :kind, :description, :location, :time_note, :cost_note, :bring_note,
+                 :closes_at, :result_recipients, :created_by)'
         );
         $stmt->execute([
             'title' => $data['title'],
@@ -146,6 +148,8 @@ final class EventRepository
             'time_note' => $data['time_note'] ?: null,
             'cost_note' => $data['cost_note'] ?: null,
             'bring_note' => $data['bring_note'] ?: null,
+            'closes_at' => $this->normalizeClosesAt($data['closes_at'] ?? null),
+            'result_recipients' => $this->normalizeResultRecipients($data['result_recipients'] ?? null),
             'created_by' => $userId,
         ]);
 
@@ -154,9 +158,15 @@ final class EventRepository
 
     public function updateDetails(int $id, array $data): void
     {
+        $current = $this->pdo->prepare('SELECT closes_at FROM events WHERE id = :id');
+        $current->execute(['id' => $id]);
+        $oldClosesAt = (string) ($current->fetchColumn() ?: '');
+        $newClosesAt = $this->normalizeClosesAt($data['closes_at'] ?? null);
+
         $stmt = $this->pdo->prepare(
             'UPDATE events SET title = :title, description = :description, location = :location,
-                 time_note = :time_note, cost_note = :cost_note, bring_note = :bring_note
+                 time_note = :time_note, cost_note = :cost_note, bring_note = :bring_note,
+                 closes_at = :closes_at, result_recipients = :result_recipients
              WHERE id = :id'
         );
         $stmt->execute([
@@ -167,7 +177,17 @@ final class EventRepository
             'time_note' => $data['time_note'] ?: null,
             'cost_note' => $data['cost_note'] ?: null,
             'bring_note' => $data['bring_note'] ?: null,
+            'closes_at' => $newClosesAt,
+            'result_recipients' => $this->normalizeResultRecipients($data['result_recipients'] ?? null),
         ]);
+
+        // Neue Frist gesetzt oder verschoben: anstehende Automatik-Mails wieder
+        // scharf schalten (Erinnerung + Ergebnisversand).
+        if ($newClosesAt !== null && $newClosesAt !== $oldClosesAt) {
+            $this->pdo->prepare(
+                'UPDATE events SET reminder_sent_at = NULL, result_mail_sent_at = NULL WHERE id = :id'
+            )->execute(['id' => $id]);
+        }
     }
 
     /**
@@ -278,7 +298,7 @@ final class EventRepository
     public function openEventsForContact(int $contactId): array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT e.id, e.title, e.kind, e.status, ep.token,
+            'SELECT e.id, e.title, e.kind, e.status, e.closes_at, ep.token,
                     EXISTS(SELECT 1 FROM event_responses r WHERE r.participant_id = ep.id) AS has_answered,
                     (SELECT MIN(option_date) FROM event_options WHERE event_options.event_id = e.id AND option_date IS NOT NULL) AS earliest_date
              FROM event_participants ep
@@ -345,11 +365,185 @@ final class EventRepository
 
     public function setStatus(int $eventId, string $status): void
     {
-        if (!in_array($status, ['open', 'decided', 'archived'], true)) {
+        if (!in_array($status, ['open', 'closed', 'decided', 'archived'], true)) {
             return;
         }
         $this->pdo->prepare('UPDATE events SET status = :status WHERE id = :id')
             ->execute(['status' => $status, 'id' => $eventId]);
+    }
+
+    /**
+     * Frist verlängern / neu setzen. Reaktiviert eine bereits geschlossene
+     * Abstimmung und schaltet Erinnerung + Ergebnisversand wieder scharf.
+     */
+    public function extendDeadline(int $eventId, ?string $closesAt): void
+    {
+        $normalized = $this->normalizeClosesAt($closesAt);
+        $this->pdo->prepare(
+            "UPDATE events
+                SET closes_at = :closes_at,
+                    status = IF(status = 'closed', 'open', status),
+                    reminder_sent_at = NULL,
+                    result_mail_sent_at = NULL
+              WHERE id = :id"
+        )->execute(['closes_at' => $normalized, 'id' => $eventId]);
+    }
+
+    // -------------------------------------------------------- Automatik / Cron
+
+    /** @return list<int> offene Abstimmungen, deren Frist abgelaufen ist */
+    public function idsDueForClose(): array
+    {
+        $rows = $this->pdo->query(
+            "SELECT id FROM events
+              WHERE status = 'open' AND closes_at IS NOT NULL AND closes_at <= NOW()"
+        )->fetchAll(PDO::FETCH_COLUMN);
+
+        return array_map('intval', $rows);
+    }
+
+    /**
+     * @return list<int> offene Abstimmungen, deren Frist in den nächsten 48 h
+     *   liegt und für die noch keine Erinnerung verschickt wurde
+     */
+    public function idsDueForReminder(): array
+    {
+        $rows = $this->pdo->query(
+            "SELECT id FROM events
+              WHERE status = 'open'
+                AND reminder_sent_at IS NULL
+                AND closes_at IS NOT NULL
+                AND closes_at > NOW()
+                AND closes_at <= DATE_ADD(NOW(), INTERVAL 48 HOUR)"
+        )->fetchAll(PDO::FETCH_COLUMN);
+
+        return array_map('intval', $rows);
+    }
+
+    /**
+     * @return list<int> geschlossene Abstimmungen mit Ergebnis-Verteiler, für
+     *   die noch keine Ergebnis-Mail raus ist
+     */
+    public function idsDueForResultMail(): array
+    {
+        // date_poll: erst wenn das Orga-Team den Termin festgelegt hat.
+        // poll: sobald die Abstimmung geschlossen ist.
+        $rows = $this->pdo->query(
+            "SELECT id FROM events
+              WHERE result_mail_sent_at IS NULL
+                AND result_recipients IN ('voted', 'invited', 'orga', 'admin')
+                AND (
+                    (kind = 'date_poll' AND status = 'decided')
+                    OR (kind = 'poll' AND status IN ('closed', 'decided', 'archived'))
+                )"
+        )->fetchAll(PDO::FETCH_COLUMN);
+
+        return array_map('intval', $rows);
+    }
+
+    public function markReminderSent(int $eventId): void
+    {
+        $this->pdo->prepare('UPDATE events SET reminder_sent_at = NOW() WHERE id = :id')
+            ->execute(['id' => $eventId]);
+    }
+
+    public function markResultMailSent(int $eventId): void
+    {
+        $this->pdo->prepare('UPDATE events SET result_mail_sent_at = NOW() WHERE id = :id')
+            ->execute(['id' => $eventId]);
+    }
+
+    /**
+     * Teilnehmer mit Mailadresse, die noch keine Rückmeldung abgegeben haben.
+     *
+     * @return list<array{name: string, email: string, token: string}>
+     */
+    public function nonVoterRecipients(int $eventId): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT c.vorname, c.nachname, ep.token,
+                    (SELECT email FROM contact_emails WHERE contact_emails.contact_id = c.id ORDER BY contact_emails.id LIMIT 1) AS email
+               FROM event_participants ep
+               JOIN contacts c ON c.id = ep.contact_id
+              WHERE ep.event_id = :event_id
+                AND NOT EXISTS (SELECT 1 FROM event_responses r WHERE r.participant_id = ep.id)
+              ORDER BY c.nachname, c.vorname"
+        );
+        $stmt->execute(['event_id' => $eventId]);
+
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $email = trim((string) ($row['email'] ?? ''));
+            if ($email === '') {
+                continue;
+            }
+            $out[] = [
+                'name' => trim($row['vorname'] . ' ' . $row['nachname']),
+                'email' => $email,
+                'token' => (string) $row['token'],
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Kontakt-Empfänger für die Ergebnis-Mail.
+     *
+     * @param bool $onlyVoted true = nur Personen mit mindestens einer Rückmeldung
+     * @return list<array{name: string, email: string}>
+     */
+    public function resultContactRecipients(int $eventId, bool $onlyVoted): array
+    {
+        $having = $onlyVoted
+            ? 'AND EXISTS (SELECT 1 FROM event_responses r WHERE r.participant_id = ep.id)'
+            : '';
+        $stmt = $this->pdo->prepare(
+            "SELECT c.vorname, c.nachname,
+                    (SELECT email FROM contact_emails WHERE contact_emails.contact_id = c.id ORDER BY contact_emails.id LIMIT 1) AS email
+               FROM event_participants ep
+               JOIN contacts c ON c.id = ep.contact_id
+              WHERE ep.event_id = :event_id {$having}
+              ORDER BY c.nachname, c.vorname"
+        );
+        $stmt->execute(['event_id' => $eventId]);
+
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $email = trim((string) ($row['email'] ?? ''));
+            if ($email === '') {
+                continue;
+            }
+            $out[] = ['name' => trim($row['vorname'] . ' ' . $row['nachname']), 'email' => $email];
+        }
+
+        return $out;
+    }
+
+    /** Zulässige Werte für den Ergebnis-Verteiler. */
+    private function normalizeResultRecipients(mixed $value): ?string
+    {
+        $value = is_string($value) ? trim($value) : '';
+
+        return in_array($value, ['voted', 'invited', 'orga', 'admin'], true) ? $value : null;
+    }
+
+    /**
+     * `datetime-local`-Wert (ohne Sekunden) auf `Y-m-d H:i:s` normalisieren.
+     * Ungültige oder leere Werte werden zu NULL.
+     */
+    private function normalizeClosesAt(mixed $value): ?string
+    {
+        $value = is_string($value) ? trim($value) : '';
+        if ($value === '') {
+            return null;
+        }
+        $value = str_replace('T', ' ', $value);
+        try {
+            return (new \DateTimeImmutable($value))->format('Y-m-d H:i:s');
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     public function delete(int $eventId): void
@@ -368,7 +562,7 @@ final class EventRepository
         $stmt = $this->pdo->prepare(
             'SELECT ep.id AS participant_id, ep.token, ep.event_id,
                     c.vorname, c.nachname,
-                    e.title, e.kind, e.description, e.location, e.time_note, e.cost_note, e.bring_note, e.status, e.decided_option_id
+                    e.title, e.kind, e.description, e.location, e.time_note, e.cost_note, e.bring_note, e.status, e.closes_at, e.decided_option_id
              FROM event_participants ep
              JOIN contacts c ON c.id = ep.contact_id
              JOIN events e ON e.id = ep.event_id

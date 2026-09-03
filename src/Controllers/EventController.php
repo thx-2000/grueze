@@ -149,8 +149,31 @@ final class EventController extends BaseController
         $id = (int) $request->input('id');
         $status = (string) $request->input('status');
         $this->events->setStatus($id, $status);
-        flash('success', $status === 'archived' ? 'Termin archiviert.' : 'Termin wieder geöffnet.');
+        $message = match ($status) {
+            'archived' => 'Termin archiviert.',
+            'closed' => 'Abstimmung geschlossen.',
+            default => 'Termin wieder geöffnet.',
+        };
+        flash('success', $message);
         Redirect::to($status === 'archived' ? '/termine' : '/termine/detail?id=' . $id);
+    }
+
+    /**
+     * Frist verlängern / neu setzen. Reaktiviert eine geschlossene Abstimmung
+     * und schaltet Erinnerung + Ergebnisversand wieder scharf.
+     */
+    public function extendDeadline(Request $request): void
+    {
+        $this->requirePermission('events.manage');
+        Csrf::validate($request->input('_csrf'));
+        $id = (int) $request->input('id');
+        if ($this->events->find($id) === null) {
+            Redirect::to('/termine');
+        }
+
+        $this->events->extendDeadline($id, trim((string) $request->input('closes_at')) ?: null);
+        flash('success', 'Frist aktualisiert.');
+        Redirect::to('/termine/detail?id=' . $id);
     }
 
     public function delete(Request $request): void
@@ -232,7 +255,7 @@ final class EventController extends BaseController
             return;
         }
 
-        if ($participant['status'] === 'archived') {
+        if (in_array($participant['status'], ['closed', 'archived'], true)) {
             flash('error', 'Diese Abstimmung ist abgeschlossen.');
             Redirect::to('/abstimmen?token=' . rawurlencode($token));
         }
@@ -263,6 +286,8 @@ final class EventController extends BaseController
             'time_note' => trim((string) $request->input('time_note')),
             'cost_note' => trim((string) $request->input('cost_note')),
             'bring_note' => trim((string) $request->input('bring_note')),
+            'closes_at' => trim((string) $request->input('closes_at')),
+            'result_recipients' => trim((string) $request->input('result_recipients')),
         ];
     }
 

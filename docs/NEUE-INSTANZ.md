@@ -74,6 +74,30 @@ Verwaltung → Mail-Einstellungen: Absender/Mailserver, Betreff-Präfixe und der
 Mail-Fuß. Bleibt der Mail-Fuß leer, wird ein knapper, aus dem Branding
 abgeleiteter Standardtext verwendet.
 
+## 7. Cron für die Abstimmungs-Automatik
+
+Abstimmungen mit Frist schließen sich selbst, verschicken 48&nbsp;Stunden vorher
+eine Erinnerung an alle, die noch nicht abgestimmt haben, und mailen nach dem
+Schließen das Ergebnis an den gewählten Verteiler. Damit das verlässlich (auch
+ohne Seitenbesuche) passiert, braucht die Instanz einen regelmäßigen Aufruf.
+
+1. In `config/config.php` unter `app.cron_key` eine lange Zufallskette setzen,
+   z.&nbsp;B. `openssl rand -hex 24`.
+2. Beim Hoster einen Cron-Job anlegen, der etwa alle 15&nbsp;Minuten diese URL
+   abruft (bei All-Inkl.: KAS → Cronjobs → „URL aufrufen"):
+
+   ```
+   https://DEINE-DOMAIN/intern/cron?key=DEIN_SCHLUESSEL
+   ```
+
+   Alternativ per Shell-Cron: `curl -s "https://…/intern/cron?key=…" >/dev/null`
+
+Ohne gesetzten Schlüssel antwortet die URL mit 404. Für sehr selten genutzte
+Instanzen gibt es zusätzlich eine gedrosselte Rückfallebene: bei Seitenaufrufen
+wird die Automatik höchstens einmal pro Stunde nebenbei angestoßen. Ein echter
+Cron bleibt aber die empfohlene Lösung – sonst hängen fällige Erinnerungen und
+Ergebnis-Mails, bis jemand die Seite öffnet.
+
 ## Bestehende Instanz aktualisieren
 
 Ein neuer Upload darf vorhandene Daten nie überschreiben. Instanzspezifische

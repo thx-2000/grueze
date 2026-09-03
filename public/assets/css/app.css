@@ -5075,6 +5075,51 @@ body { display: block; }
     color: var(--color-success);
 }
 
+.events-status.is-closed {
+    background: color-mix(in srgb, var(--color-text) 10%, transparent);
+    color: var(--color-text-soft, var(--color-text));
+}
+
+/* --- Abstimmungs-Frist --- */
+.event-deadline-card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+.event-deadline-card > div {
+    flex: 1 1 16rem;
+}
+
+.event-deadline-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+
+.event-deadline-form label {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+}
+
+.vote-deadline {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm, 8px);
+    background: var(--fill-ghost);
+    font-size: 0.9rem;
+}
+
+.vote-deadline .icon {
+    flex: none;
+}
+
 /* --- Datumsvorschläge --- */
 .date-options {
     display: grid;

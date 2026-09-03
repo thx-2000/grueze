@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.0.0';
+    return '1.1.0';
 }
 
 /**
@@ -697,6 +697,56 @@ function format_datetime(?string $value): string
     }
 }
 
+/** „Fr, 12. Sep 2026 um 18:00 Uhr" – für Abstimmungs-Fristen. */
+function format_deadline(?string $value): string
+{
+    if ($value === null || trim($value) === '') {
+        return '';
+    }
+
+    try {
+        $date = new DateTimeImmutable($value);
+    } catch (Throwable) {
+        return (string) $value;
+    }
+
+    return format_weekday_date($date->format('Y-m-d')) . ' um ' . $date->format('H:i') . ' Uhr';
+}
+
+/**
+ * Grobe Restzeit bis zu einem Zeitpunkt: „noch 3 Tage", „noch 5 Stunden",
+ * „endet in wenigen Minuten" oder „abgelaufen". Leerer String ohne Wert.
+ */
+function time_until_hint(?string $value): string
+{
+    if ($value === null || trim($value) === '') {
+        return '';
+    }
+
+    try {
+        $target = new DateTimeImmutable($value);
+    } catch (Throwable) {
+        return '';
+    }
+
+    $seconds = $target->getTimestamp() - time();
+    if ($seconds <= 0) {
+        return 'abgelaufen';
+    }
+    if ($seconds < 3600) {
+        return 'endet in wenigen Minuten';
+    }
+    if ($seconds < 86400) {
+        $hours = (int) round($seconds / 3600);
+
+        return 'noch ' . $hours . ' ' . ($hours === 1 ? 'Stunde' : 'Stunden');
+    }
+
+    $days = (int) ceil($seconds / 86400);
+
+    return 'noch ' . $days . ' ' . ($days === 1 ? 'Tag' : 'Tage');
+}
+
 function contact_value_label(int $count, string $none, string $one, string $many): string
 {
     return match (true) {
@@ -790,6 +840,7 @@ function icon(string $name): string
         'chevron-right' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.3 6.7L10.7 5.3l6.7 6.7l-6.7 6.7l-1.4-1.4l5.3-5.3l-5.3-5.3Z"/></svg>',
         'check' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.55 17.15L4.4 12l1.4-1.4l3.75 3.75l8.25-8.25L19.2 9.3l-9.65 9.65Z"/></svg>',
         'calendar' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h2v2h6V2h2v2h2a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V2ZM5 9v10h14V9H5Zm2 3h4v4H7v-4Z"/></svg>',
+        'clock' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20a10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16Zm-1 3h2v5.4l3.7 2.14l-1 1.72L11 13V7Z"/></svg>',
         'link' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a1 1 0 0 0 1.4 0l4-4a3 3 0 0 0-4.2-4.2l-1.5 1.5l1.4 1.4l1.5-1.5a1 1 0 0 1 1.4 1.4l-4 4a1 1 0 0 0 0 1.4Zm2.8-2.8a1 1 0 0 0-1.4 0l-4 4a3 3 0 0 0 4.2 4.2l1.5-1.5l-1.4-1.4l-1.5 1.5a1 1 0 0 1-1.4-1.4l4-4a1 1 0 0 0 0-1.4Z"/></svg>',
         'x' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5L5 6.4L10.6 12L5 17.6L6.4 19L12 13.4L17.6 19L19 17.6L13.4 12L19 6.4L17.6 5L12 10.6L6.4 5Z"/></svg>',
         'menu' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg>',

@@ -3,6 +3,23 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.1.0
+
+**Abstimmungs-Fristen & Ergebnis-Mail (Stufe A)**
+
+- Termine und Abstimmungen können ein **Ende** bekommen. Ist die Frist erreicht,
+  schließt die Abstimmung von selbst (neuer Status „Abstimmung beendet").
+- **48 Stunden vor Fristende** geht automatisch eine Erinnerung an alle, die
+  noch nicht abgestimmt haben – mit ihrem persönlichen Link.
+- Beim Anlegen (oder später) lässt sich wählen, wer **nach dem Schließen das
+  Ergebnis per Mail** bekommt: alle Abstimmenden, alle Eingeladenen, nur das
+  Orga-Team, nur die Admins – oder niemand.
+- **Frist verlängern:** eine neue Frist setzen reaktiviert eine bereits
+  geschlossene Abstimmung und schaltet Erinnerung + Ergebnisversand wieder scharf.
+- Neuer Cron-Endpunkt `/intern/cron?key=…` für den verlässlichen Betrieb; als
+  Rückfallebene stößt sich die Automatik bei Seitenaufrufen höchstens einmal pro
+  Stunde selbst an. Einrichtung: `docs/NEUE-INSTANZ.md`, Abschnitt 7.
+
 ## 1.0.0
 
 Erste stabile Version. Schwerpunkt: der komplette **Security-Audit**
