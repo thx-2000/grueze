@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.2.0
+
+**Gruppen (Stufe B)**
+
+- Neue **Personengruppen** quer zu Kategorie und Tag – z. B. ein Kurs, ein
+  Ausschuss oder eine Fahrgemeinschaft. Eine Person kann in mehreren Gruppen sein.
+- **Verwaltung → Gruppen** (Recht `groups.manage`, Standard Team + Admin):
+  Gruppen anlegen, beschreiben und Mitglieder aus dem Adressbuch wählen.
+- **Meine Gruppen** (`/gruppen`) für alle mit verknüpftem Kontakt: eigene
+  Gruppen sehen, **offenen Gruppen selbst bei- und austreten**.
+- Grundlage für Gruppen-Mail und Gruppen-Abstimmung (folgende Stufen).
+
 ## 1.1.0
 
 **Abstimmungs-Fristen & Ergebnis-Mail (Stufe A)**

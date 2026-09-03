@@ -13,6 +13,7 @@ $groups = [
         ['settings.manage', '/settings/mail-footer', 'mail', 'Mail-Einstellungen', 'Absender, Mailserver, Betreff-Präfixe und Mail-Fuß.'],
         ['users.manage', '/admin/legal/impressum', 'sliders', 'Rechtliches', 'Impressum und Datenschutzerklärung bearbeiten.'],
         ['categories.manage', '/verwaltung/kategorien-tags', 'sliders', 'Kategorien & Tags', 'Kategorien und Tags anlegen, umbenennen und löschen.'],
+        ['groups.manage', '/verwaltung/gruppen', 'contacts', 'Gruppen', 'Personengruppen anlegen und Mitglieder pflegen – für Gruppen-Mail und -Abstimmung.'],
         ['settings.manage', '/verwaltung/gruesse', 'sparkles', 'Grüße-Pool', 'Standard-Wünsche für Geburtstag und Weihnachten pflegen; Weihnachtsgrüße gemischt verschicken.'],
     ],
     'System' => [

@@ -22,6 +22,8 @@ Die Anwendung ist als kleine SSR-PHP-App ohne Framework aufgebaut. `public/index
 - `contacts`: Stammdaten je Person
 - `contact_emails`, `contact_phones`: 1:n-Erweiterungen für mehrere Kontaktwege
 - `categories`: einfache Gruppierung für Klasse, Orga-Team oder ähnliche Cluster
+- `contact_groups`, `contact_group_members`: frei definierbare Personengruppen
+  quer zu Kategorie/Tag (Mitgliedschaft am Kontakt, `is_open` = Selbst-Beitritt)
 - `password_resets`, `login_attempts`: Sicherheit für Reset und Brute-Force-Schutz
 - `audit_log`, `mail_log`: Nachvollziehbarkeit von Änderungen und Versand
 

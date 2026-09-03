@@ -10,6 +10,7 @@ use App\Controllers\ContactController;
 use App\Controllers\CronController;
 use App\Controllers\EventController;
 use App\Controllers\GreetingController;
+use App\Controllers\GroupController;
 use App\Controllers\LegalController;
 use App\Controllers\LogController;
 use App\Controllers\MailController;
@@ -35,6 +36,7 @@ use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
 use App\Repositories\EventRepository;
 use App\Repositories\GreetingRepository;
+use App\Repositories\GroupRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\PasskeyRepository;
 use App\Repositories\RegistrationInviteRepository;
@@ -258,6 +260,12 @@ try {
     Container::factory(CronController::class, static fn () => new CronController(
         Container::get(EventScheduler::class)
     ));
+    Container::factory(GroupRepository::class, static fn () => new GroupRepository(Container::get(PDO::class)));
+    Container::factory(GroupController::class, static fn () => new GroupController(
+        Container::get(Auth::class),
+        Container::get(GroupRepository::class),
+        Container::get(ContactRepository::class)
+    ));
     Container::factory(MailController::class, static fn () => new MailController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
@@ -428,6 +436,16 @@ try {
     $router->post('/abstimmen', [EventController::class, 'submitVote']);
     $router->get('/intern/cron', [CronController::class, 'run']);
     $router->post('/intern/cron', [CronController::class, 'run']);
+
+    $router->get('/gruppen', [GroupController::class, 'mine']);
+    $router->post('/gruppen/beitreten', [GroupController::class, 'join']);
+    $router->post('/gruppen/verlassen', [GroupController::class, 'leave']);
+    $router->get('/verwaltung/gruppen', [GroupController::class, 'manage']);
+    $router->get('/verwaltung/gruppen/detail', [GroupController::class, 'detail']);
+    $router->post('/verwaltung/gruppen', [GroupController::class, 'store']);
+    $router->post('/verwaltung/gruppen/speichern', [GroupController::class, 'updateGroup']);
+    $router->post('/verwaltung/gruppen/mitglieder', [GroupController::class, 'updateMembers']);
+    $router->post('/verwaltung/gruppen/loeschen', [GroupController::class, 'deleteGroup']);
     $router->post('/mail/compose', [MailController::class, 'compose']);
     $router->get('/mail/compose', [MailController::class, 'compose']);
     $router->post('/mail/compose-all', [MailController::class, 'composeAll']);

@@ -5,11 +5,19 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
-- **Gruppen (Stufe B–E):** eigene Gruppen-Objekte, „Meine Gruppen" für
-  Mitglieder, Gruppen-Mail mit Soft-Limit (2/Tag) + Notbremse +
-  Bestätigungsmail an den Versender, Gruppen-Abstimmungen, offene Gruppen.
-  Stufe A (Abstimmungs-Fristen + Ergebnis-Mail für alle Termine) ist in
-  v1.1.0 umgesetzt.
+- **Gruppen:** Stufe A (Abstimmungs-Fristen + Ergebnis-Mail) in v1.1.0,
+  Stufe B (Gruppen-Objekte, Verwaltung, „Meine Gruppen", offene Gruppen) in
+  v1.2.0. Offen:
+  - **Stufe C – Gruppen-Mail:** jedes Mitglied darf an alle der Gruppe mailen
+    (einfacher Editor). Soft-Limit 2 Mails/Person/Tag – ab der 3. deutlicher
+    Hinweis + Info an den Admin. Admin/Orga-Notbremse „Versand für Gruppe X
+    stoppen". Limits gelten nicht für Admin. Bestätigungsmail an den Versender
+    (an wen ging es, welche Fehler → an Admin wenden, Admin in BCC bei Fehlern).
+  - **Stufe D – Gruppen-Abstimmung:** Abstimmung nur für eine Gruppe sichtbar;
+    Admin sieht alles mit Hinweis „nicht für dich, sondern für Gruppe X".
+  - **Stufe E – Feinschliff:** ggf. Gruppenleitung (`role='lead'`) mit
+    Verwaltungsrecht ohne globales `groups.manage`; Beitritts-Anfragen für
+    nicht-offene Gruppen.
 - **Cron einrichten:** `app.cron_key` in `config/config.php` setzen und beim
   Hoster einen 15-Minuten-Aufruf von `/intern/cron?key=…` anlegen
   (`docs/NEUE-INSTANZ.md`, Abschnitt 7). Ohne echten Cron greift nur die

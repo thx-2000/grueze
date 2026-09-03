@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.1.0';
+    return '1.2.0';
 }
 
 /**
@@ -480,6 +480,19 @@ function system_update_pending(): bool
     }
 }
 
+/** Ob der „Gruppen"-Menüpunkt für die aktuelle Person angezeigt werden soll. */
+function nav_show_groups(): bool
+{
+    try {
+        $user = App\Core\Container::get(App\Core\Auth::class)->user();
+        $contactId = (int) ($user['contact_id'] ?? 0);
+
+        return App\Core\Container::get(App\Repositories\GroupRepository::class)->navVisibleFor($contactId);
+    } catch (Throwable) {
+        return false;
+    }
+}
+
 /**
  * Kurzer Abschnittsname für den <title>. Ergibt zusammen mit dem Instanznamen
  * einen sprechenden Tab-/Verlaufseintrag. Rein intern – die Seite ist nicht
@@ -515,6 +528,9 @@ function page_title(string $path): string
         '/termine/neu'               => 'Neuer Termin',
         '/termine/detail'            => 'Termin',
         '/abstimmen'                 => 'Abstimmen',
+        '/gruppen'                   => 'Meine Gruppen',
+        '/verwaltung/gruppen'        => 'Gruppen',
+        '/verwaltung/gruppen/detail' => 'Gruppe',
         '/verwaltung'                => 'Einstellungen',
         '/verwaltung/kategorien-tags' => 'Kategorien & Tags',
         '/users'                     => 'Benutzer',
