@@ -3,6 +3,20 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.14.0
+
+**Daten-Check-Link – Kontakte pflegen ihre Daten selbst, ohne Login**
+
+- Auf jeder Kontaktseite gibt es jetzt „Daten-Check-Link": einen Link ohne
+  Login, über den die betreffende Person ihre eigenen Stammdaten, Adresse und
+  Kontaktwege prüfen und korrigieren kann.
+- Kategorie, Tags, interne Notizen und ein verknüpfter Zugang bleiben dabei
+  unangetastet – wie beim eingeloggten Selbst-Service „Mein Eintrag".
+- Der Link ist 30 Tage gültig (einstellbar), pro Kontakt ist immer nur einer
+  aktiv, und er lässt sich jederzeit zurückziehen. Jede Änderung landet im
+  Änderungsverlauf des Kontakts.
+- Der Token steht nur als Hash in der Datenbank.
+
 ## 1.13.1
 
 **Fix:** Nach dem Hochladen von 1.13.0 zeigte die Startseite einen Serverfehler,

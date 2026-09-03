@@ -145,6 +145,12 @@ return [
         'mail_max_recipients' => 250,
     ],
 
+    'contacts' => [
+        // Wie lange ein „Daten-Check"-Link (ohne Login, /meine-daten?token=…)
+        // gültig ist. Danach muss die Verwaltung einen neuen erzeugen.
+        'data_check_days' => 30,
+    ],
+
     'defaults' => [
         'country' => 'Deutschland',
         // Leer lassen = die eingebauten (branding-abhängigen) Vorgaben nutzen.

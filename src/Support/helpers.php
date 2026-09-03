@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.13.1';
+    return '1.14.0';
 }
 
 /**
@@ -513,6 +513,7 @@ function page_title(string $path): string
         '/setup/admin'               => 'Ersteinrichtung',
         '/kontakte'                  => 'Adressbuch',
         '/kontakte/archiv'           => 'Archiv & Papierkorb',
+        '/meine-daten'               => 'Daten-Check',
         '/search'                    => 'Suche',
         '/contacts/create'           => 'Neuer Kontakt',
         '/contacts/edit'             => 'Kontakt',

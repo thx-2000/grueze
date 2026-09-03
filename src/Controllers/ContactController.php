@@ -8,6 +8,7 @@ use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
+use App\Repositories\DataCheckRepository;
 use App\Repositories\GroupRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\TagRepository;
@@ -30,7 +31,8 @@ final class ContactController extends BaseController
         private UploadService $uploads,
         private CsvExportService $csv,
         private ContactImportService $imports,
-        private GroupRepository $groups
+        private GroupRepository $groups,
+        private DataCheckRepository $dataChecks
     ) {
         parent::__construct($auth);
     }
@@ -322,6 +324,12 @@ final class ContactController extends BaseController
             Redirect::to('/kontakte');
         }
 
+        $freshLink = null;
+        if (($_SESSION['data_check_link']['contact_id'] ?? 0) === (int) $contact['id']) {
+            $freshLink = (string) $_SESSION['data_check_link']['url'];
+            unset($_SESSION['data_check_link']);
+        }
+
         $this->render('contacts/detail', [
             'contact' => $contact,
             'categories' => $this->categories->all(),
@@ -331,6 +339,8 @@ final class ContactController extends BaseController
             'history' => can('audit.view')
                 ? $this->logs->contactAuditTrail((int) $contact['id'])
                 : [],
+            'dataCheckActive' => $this->dataChecks->activeForContact((int) $contact['id']),
+            'dataCheckFreshLink' => $freshLink,
         ]);
     }
 

@@ -168,6 +168,7 @@ try {
         Container::get(PasswordResetService::class),
         Container::get(PasskeyRepository::class)
     ));
+    Container::factory(\App\Repositories\DataCheckRepository::class, static fn () => new \App\Repositories\DataCheckRepository(Container::get(PDO::class)));
     Container::factory(ContactController::class, static fn () => new ContactController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
@@ -178,7 +179,14 @@ try {
         Container::get(UploadService::class),
         Container::get(CsvExportService::class),
         Container::get(ContactImportService::class),
-        Container::get(GroupRepository::class)
+        Container::get(GroupRepository::class),
+        Container::get(\App\Repositories\DataCheckRepository::class)
+    ));
+    Container::factory(\App\Controllers\DataCheckController::class, static fn () => new \App\Controllers\DataCheckController(
+        Container::get(Auth::class),
+        Container::get(ContactRepository::class),
+        Container::get(\App\Repositories\DataCheckRepository::class),
+        Container::get(LogRepository::class)
     ));
     Container::factory(UserController::class, static fn () => new UserController(
         Container::get(Auth::class),
@@ -353,6 +361,7 @@ try {
                 (int) config('security.token_hit_retention_days', 120)
             );
             Container::get(ContactRepository::class)->pruneTrashedContacts();
+            Container::get(\App\Repositories\DataCheckRepository::class)->purgeExpired();
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
         }
@@ -408,6 +417,8 @@ try {
     $router->get('/kontakte/archiv', [ContactController::class, 'retiredList']);
     $router->post('/contacts/wiederherstellen', [ContactController::class, 'restore']);
     $router->post('/contacts/endgueltig-loeschen', [ContactController::class, 'purge']);
+    $router->post('/contacts/datencheck', [\App\Controllers\DataCheckController::class, 'createLink']);
+    $router->post('/contacts/datencheck/widerrufen', [\App\Controllers\DataCheckController::class, 'revokeLink']);
     $router->post('/contacts/bulk-update', [ContactController::class, 'bulkUpdate']);
     $router->post('/contacts/gruppe-aus-auswahl', [ContactController::class, 'groupFromSelection']);
     $router->get('/contacts/export', [ContactController::class, 'export']);
@@ -475,6 +486,8 @@ try {
     $router->get('/termine/termin.ics', [EventController::class, 'ical']);
     $router->get('/abstimmen', [EventController::class, 'vote']);
     $router->post('/abstimmen', [EventController::class, 'submitVote']);
+    $router->get('/meine-daten', [\App\Controllers\DataCheckController::class, 'show']);
+    $router->post('/meine-daten', [\App\Controllers\DataCheckController::class, 'save']);
     $router->get('/intern/cron', [CronController::class, 'run']);
     $router->post('/intern/cron', [CronController::class, 'run']);
 

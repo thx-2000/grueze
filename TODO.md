@@ -27,8 +27,9 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   2. **Datenpflege leichter** – teilweise:
      - Archiv & Papierkorb für Kontakte (Archiv dauerhaft ODER 30-Tage-
        Papierkorb, automatische Endlöschung per Cron) – **v1.13.0 erledigt**.
-     - offen: Self-Service-Link (Token, ohne Login) zum Korrigieren der
-       eigenen Daten.
+     - Daten-Check-Link (Token, ohne Login, /meine-daten) zum Prüfen und
+       Korrigieren der eigenen Stammdaten/Adresse/Kontaktwege – **v1.14.0
+       erledigt**.
      - offen: Dubletten-Finder + Zusammenführen.
   3. **Handy & Alltag** – offen: PWA-Manifest · Startseiten-Widget
      (Geburtstage der Woche + Termine mit offenen Rückmeldungen) · vCard

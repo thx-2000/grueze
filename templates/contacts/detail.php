@@ -311,7 +311,42 @@ $canImpersonateThis = $editing
 <?php
 $isArchived = $editing && !empty($contact['archived_at']);
 $isTrashed = $editing && !empty($contact['deleted_at']);
+$dataCheckActive = $dataCheckActive ?? null;
+$dataCheckFreshLink = $dataCheckFreshLink ?? null;
 ?>
+
+<?php if ($editing && can('contacts.manage') && !$isArchived && !$isTrashed): ?>
+    <section class="detail-card">
+        <h2>Daten-Check-Link</h2>
+        <p class="muted">Ein Link ohne Login, über den <strong><?= e($fullName) ?></strong> die eigenen Stammdaten, die Adresse und die Kontaktwege selbst prüfen und korrigieren kann. Kategorie, Tags, Notizen und der Zugang bleiben unberührt.</p>
+
+        <?php if ($dataCheckFreshLink !== null): ?>
+            <div class="copy-field">
+                <label class="visually-hidden" for="dataCheckLink">Daten-Check-Link</label>
+                <input type="text" id="dataCheckLink" value="<?= e($dataCheckFreshLink) ?>" readonly spellcheck="false">
+                <button type="button" class="ghost-button" data-copy="#dataCheckLink"><?= icon('copy') ?><span>Kopieren</span></button>
+            </div>
+            <p class="field-hint">Diesen Link jetzt kopieren und der Person schicken – er wird später nicht noch einmal angezeigt.</p>
+        <?php elseif ($dataCheckActive !== null): ?>
+            <p><span class="status-chip is-ok">aktiver Link</span> gültig bis <strong><?= e(format_date(substr((string) $dataCheckActive['expires_at'], 0, 10))) ?></strong><?= !empty($dataCheckActive['used_at']) ? ' · zuletzt genutzt ' . e(format_date(substr((string) $dataCheckActive['used_at'], 0, 10))) : ' · noch nicht geöffnet' ?>.</p>
+        <?php endif; ?>
+
+        <div class="toolbar-actions">
+            <form method="post" action="<?= e(url('/contacts/datencheck')) ?>">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+                <button type="submit" class="ghost-button"><?= icon('link') ?><span><?= $dataCheckActive !== null ? 'Neuen Link erzeugen' : 'Link erzeugen' ?></span></button>
+            </form>
+            <?php if ($dataCheckActive !== null): ?>
+                <form method="post" action="<?= e(url('/contacts/datencheck/widerrufen')) ?>" data-confirm="Den aktiven Daten-Check-Link für „<?= e($fullName) ?>“ ungültig machen?">
+                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                    <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+                    <button type="submit" class="ghost-button">Link zurückziehen</button>
+                </form>
+            <?php endif; ?>
+        </div>
+    </section>
+<?php endif; ?>
 <?php if ($editing && can('contacts.delete') && ($isArchived || $isTrashed)): ?>
     <section class="detail-card detail-danger">
         <h2><?= $isTrashed ? 'Im Papierkorb' : 'Im Archiv' ?></h2>
