@@ -8,12 +8,14 @@ use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\ContactRepository;
 use App\Repositories\GroupRepository;
+use App\Services\GroupMailService;
 use App\Support\Redirect;
 
 /**
- * Gruppen (Stufe B). Verwalten braucht `groups.manage` (Standard: Team + Admin).
+ * Gruppen (Stufe B/C). Verwalten braucht `groups.manage` (Standard: Team + Admin).
  * „Meine Gruppen" (`/gruppen`) sieht jede:r eingeloggte Person mit verknüpftem
- * Kontakt: eigene Gruppen ansehen, offenen Gruppen selbst bei-/austreten.
+ * Kontakt: eigene Gruppen ansehen, offenen Gruppen selbst bei-/austreten, der
+ * eigenen Gruppe eine Nachricht schicken.
  */
 final class GroupController extends BaseController
 {
@@ -21,6 +23,7 @@ final class GroupController extends BaseController
         \App\Core\Auth $auth,
         private GroupRepository $groups,
         private ContactRepository $contacts,
+        private GroupMailService $groupMail,
     ) {
         parent::__construct($auth);
     }
@@ -77,6 +80,121 @@ final class GroupController extends BaseController
         $this->groups->removeMember($groupId, $contactId);
         flash('success', 'Du bist aus der Gruppe „' . $group['name'] . '" ausgetreten.');
         Redirect::to('/gruppen');
+    }
+
+    // ------------------------------------------------------------ Gruppen-Mail
+
+    public function composeMail(Request $request): void
+    {
+        $this->requireAuth();
+        $group = $this->groups->find((int) $request->input('id'));
+        if ($group === null || !$this->canSendMailToGroup($group)) {
+            flash('error', 'Für diese Gruppe kannst du keine Nachricht schreiben.');
+            Redirect::to('/gruppen');
+        }
+
+        $userId = (int) ($this->auth->user()['id'] ?? 0);
+        $members = $group['members'];
+        $withEmail = array_filter($members, static fn (array $m): bool => trim((string) ($m['email'] ?? '')) !== '');
+
+        $this->render('groups/compose', [
+            'group' => $group,
+            'recipientCount' => count($withEmail),
+            'noEmailCount' => count($members) - count($withEmail),
+            'sentToday' => $this->auth->isAdmin() ? 0 : $this->groupMail->sentTodayBy($userId),
+            'softLimit' => $this->groupMail->softLimit(),
+            'isAdmin' => $this->auth->isAdmin(),
+        ]);
+    }
+
+    public function sendMail(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+        $group = $this->groups->find((int) $request->input('id'));
+        if ($group === null || !$this->canSendMailToGroup($group)) {
+            flash('error', 'Für diese Gruppe kannst du keine Nachricht schreiben.');
+            Redirect::to('/gruppen');
+        }
+
+        $subject = trim((string) $request->input('subject'));
+        $message = trim((string) $request->input('message'));
+        if ($subject === '' || $message === '') {
+            flash('error', 'Bitte Betreff und Nachricht ausfüllen.');
+            Redirect::to('/gruppen/nachricht?id=' . (int) $group['id']);
+        }
+
+        $members = $group['members'];
+        $recipientCount = count(array_filter(
+            $members,
+            static fn (array $m): bool => trim((string) ($m['email'] ?? '')) !== ''
+        ));
+        if ($recipientCount === 0) {
+            flash('error', 'In dieser Gruppe hat niemand eine Mailadresse hinterlegt.');
+            Redirect::to('/gruppen/nachricht?id=' . (int) $group['id']);
+        }
+        if ($recipientCount > $this->groupMail->maxRecipients()) {
+            flash('error', 'Diese Gruppe ist zu groß für den einfachen Versand. Bitte über „Nachrichten" senden.');
+            Redirect::to('/gruppen');
+        }
+
+        $result = $this->groupMail->send(
+            $group,
+            (array) $this->auth->user(),
+            $subject,
+            $message,
+            $this->auth->isAdmin()
+        );
+
+        $msg = 'Nachricht an ' . $result['sent'] . ' ' . ($result['sent'] === 1 ? 'Person' : 'Personen') . ' verschickt.';
+        if ($result['failed'] > 0) {
+            $msg .= ' Bei ' . $result['failed'] . ' gab es einen Fehler – das Admin-Team wurde informiert.';
+        }
+        if ($result['skipped'] > 0) {
+            $msg .= ' ' . $result['skipped'] . ' ohne Mailadresse übersprungen.';
+        }
+        if ($result['softLimitHit']) {
+            $msg .= ' Hinweis: Du hast heute schon mehrere Gruppen-Mails geschickt – das Orga-Team sieht das.';
+        }
+        flash($result['failed'] > 0 ? 'error' : 'success', $msg);
+        Redirect::to('/gruppen');
+    }
+
+    public function toggleMailLock(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+        if (!$this->auth->can('groups.manage') && !$this->auth->isAdmin()) {
+            flash('error', 'Dafür fehlt dir die Berechtigung.');
+            Redirect::to('/gruppen');
+        }
+        $id = (int) $request->input('id');
+        $group = $this->groups->find($id);
+        if ($group === null) {
+            Redirect::to('/verwaltung/gruppen');
+        }
+
+        $lock = $request->input('lock') === '1';
+        $this->groups->setMailLocked($id, $lock);
+        flash('success', $lock ? 'Gruppen-Versand gesperrt.' : 'Gruppen-Versand wieder freigegeben.');
+        Redirect::to('/verwaltung/gruppen/detail?id=' . $id);
+    }
+
+    /** Darf die aktuelle Person dieser Gruppe eine Nachricht schicken? */
+    private function canSendMailToGroup(array $group): bool
+    {
+        $contactId = (int) ($this->auth->user()['contact_id'] ?? 0);
+        $isMember = $this->groups->isMember((int) $group['id'], $contactId);
+        $isManager = $this->auth->can('groups.manage');
+
+        if (!$isMember && !$isManager) {
+            return false;
+        }
+        if ((int) ($group['mail_locked'] ?? 0) === 1 && !$this->auth->isAdmin()) {
+            return false;
+        }
+
+        return true;
     }
 
     // ------------------------------------------------------------- Verwaltung

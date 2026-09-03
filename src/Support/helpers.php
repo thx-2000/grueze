@@ -247,7 +247,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.2.0';
+    return '1.3.0';
 }
 
 /**
@@ -529,6 +529,7 @@ function page_title(string $path): string
         '/termine/detail'            => 'Termin',
         '/abstimmen'                 => 'Abstimmen',
         '/gruppen'                   => 'Meine Gruppen',
+        '/gruppen/nachricht'         => 'Nachricht an die Gruppe',
         '/verwaltung/gruppen'        => 'Gruppen',
         '/verwaltung/gruppen/detail' => 'Gruppe',
         '/verwaltung'                => 'Einstellungen',

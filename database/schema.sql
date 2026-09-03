@@ -229,6 +229,7 @@ CREATE TABLE IF NOT EXISTS contact_groups (
     name VARCHAR(120) NOT NULL,
     description VARCHAR(500) NULL,
     is_open TINYINT(1) NOT NULL DEFAULT 0,
+    mail_locked TINYINT(1) NOT NULL DEFAULT 0,
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -246,6 +247,22 @@ CREATE TABLE IF NOT EXISTS contact_group_members (
     KEY idx_group_member_contact (contact_id),
     CONSTRAINT fk_cgm_group FOREIGN KEY (group_id) REFERENCES contact_groups(id) ON DELETE CASCADE,
     CONSTRAINT fk_cgm_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS group_mail_log (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    group_id INT UNSIGNED NOT NULL,
+    sender_user_id INT UNSIGNED NULL,
+    sender_name VARCHAR(190) NOT NULL,
+    subject VARCHAR(190) NOT NULL,
+    recipient_count INT NOT NULL DEFAULT 0,
+    error_count INT NOT NULL DEFAULT 0,
+    soft_limit_hit TINYINT(1) NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_group_mail_log_sender (sender_user_id, created_at),
+    KEY idx_group_mail_log_group (group_id, created_at),
+    CONSTRAINT fk_gml_group FOREIGN KEY (group_id) REFERENCES contact_groups(id) ON DELETE CASCADE,
+    CONSTRAINT fk_gml_user FOREIGN KEY (sender_user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS greetings (

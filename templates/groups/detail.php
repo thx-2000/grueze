@@ -92,6 +92,32 @@ ksort($byCategory);
     </form>
 </section>
 
+<section class="detail-card">
+    <h2>Gruppen-Nachricht</h2>
+    <?php if ((int) ($group['mail_locked'] ?? 0) === 1): ?>
+        <p class="muted">Der Gruppen-Versand ist zurzeit <strong>gesperrt</strong>. Mitglieder und Team können nicht an die Gruppe schreiben (Admins schon).</p>
+        <div class="toolbar-actions">
+            <form method="post" action="<?= e(url('/verwaltung/gruppen/sperre')) ?>">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
+                <input type="hidden" name="lock" value="0">
+                <button type="submit" class="ghost-button"><?= icon('unlock') ?><span>Versand wieder freigeben</span></button>
+            </form>
+        </div>
+    <?php else: ?>
+        <p class="muted">Jedes Mitglied darf der Gruppe eine Nachricht schicken (weiche Grenze: 2 pro Person und Tag). Bei Missbrauch hier stoppen.</p>
+        <div class="toolbar-actions">
+            <a class="ghost-button" href="<?= e(url('/gruppen/nachricht?id=' . (int) $group['id'])) ?>"><?= icon('mail') ?><span>Nachricht schreiben</span></a>
+            <form method="post" action="<?= e(url('/verwaltung/gruppen/sperre')) ?>" data-confirm="Gruppen-Versand für „<?= e($group['name']) ?>“ sperren?">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
+                <input type="hidden" name="lock" value="1">
+                <button type="submit" class="ghost-button"><?= icon('lock') ?><span>Versand sperren</span></button>
+            </form>
+        </div>
+    <?php endif; ?>
+</section>
+
 <section class="detail-card detail-danger">
     <h2>Gruppe löschen</h2>
     <p class="muted">Entfernt die Gruppe und alle Mitgliedszuordnungen. Die Kontakte selbst bleiben unberührt.</p>

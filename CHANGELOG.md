@@ -3,6 +3,24 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.3.0
+
+**Gruppen-Mail (Stufe C)**
+
+- Jedes Gruppenmitglied kann der ganzen Gruppe eine Nachricht schreiben
+  (`/gruppen` → „Nachricht an die Gruppe"). Betreff + Text, Antworten gehen
+  direkt an die absendende Person. Team/Admin können das auch „von oben".
+- **Weiche Tagesgrenze** (Standard 2 Gruppen-Mails pro Person und Tag): ab der
+  dritten kommt ein deutlicher Hinweis, die Mail geht trotzdem raus – und das
+  Admin-Team wird per Mail informiert. Für Admins gilt keine Grenze.
+- **Bestätigungsmail** an den Absender: an wen (Namen) zugestellt wurde, welche
+  fehlgeschlagen sind, wer keine Mailadresse hat. Bei Fehlern zusätzlich eine
+  Info an die Admins.
+- **Notbremse:** unter Verwaltung → Gruppen lässt sich der Versand pro Gruppe
+  sperren (Admin darf dann weiterhin, Admin/Team hebt die Sperre auf).
+- Alle Gruppen-Mails erscheinen im Versandprotokoll. Config: `groups`-Block in
+  `config.example.php` (`mail_soft_limit`, `mail_max_recipients`).
+
 ## 1.2.0
 
 **Gruppen (Stufe B)**

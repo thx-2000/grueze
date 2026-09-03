@@ -184,6 +184,44 @@ final class GroupRepository
         $this->pdo->prepare('DELETE FROM contact_groups WHERE id = :id')->execute(['id' => $id]);
     }
 
+    public function setMailLocked(int $id, bool $locked): void
+    {
+        $this->pdo->prepare('UPDATE contact_groups SET mail_locked = :v WHERE id = :id')
+            ->execute(['v' => $locked ? 1 : 0, 'id' => $id]);
+    }
+
+    /** Anzahl Gruppen-Mails, die dieser Account heute schon verschickt hat. */
+    public function senderMailsToday(int $userId): int
+    {
+        if ($userId <= 0) {
+            return 0;
+        }
+        $stmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM group_mail_log
+             WHERE sender_user_id = :uid AND created_at >= :midnight'
+        );
+        $stmt->execute(['uid' => $userId, 'midnight' => date('Y-m-d 00:00:00')]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function logGroupMail(array $data): void
+    {
+        $this->pdo->prepare(
+            'INSERT INTO group_mail_log
+                (group_id, sender_user_id, sender_name, subject, recipient_count, error_count, soft_limit_hit)
+             VALUES (:group_id, :sender_user_id, :sender_name, :subject, :recipient_count, :error_count, :soft_limit_hit)'
+        )->execute([
+            'group_id' => $data['group_id'],
+            'sender_user_id' => $data['sender_user_id'] ?: null,
+            'sender_name' => $data['sender_name'],
+            'subject' => mb_substr((string) $data['subject'], 0, 190),
+            'recipient_count' => (int) $data['recipient_count'],
+            'error_count' => (int) $data['error_count'],
+            'soft_limit_hit' => !empty($data['soft_limit_hit']) ? 1 : 0,
+        ]);
+    }
+
     public function nameExists(string $name, int $exceptId = 0): bool
     {
         $stmt = $this->pdo->prepare(
@@ -254,6 +292,7 @@ final class GroupRepository
                     name VARCHAR(120) NOT NULL,
                     description VARCHAR(500) NULL,
                     is_open TINYINT(1) NOT NULL DEFAULT 0,
+                    mail_locked TINYINT(1) NOT NULL DEFAULT 0,
                     created_by INT UNSIGNED NULL,
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -271,6 +310,26 @@ final class GroupRepository
                     KEY idx_group_member_contact (contact_id),
                     CONSTRAINT fk_cgm_group FOREIGN KEY (group_id) REFERENCES contact_groups(id) ON DELETE CASCADE,
                     CONSTRAINT fk_cgm_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+            );
+            $this->pdo->exec(
+                'ALTER TABLE contact_groups ADD COLUMN IF NOT EXISTS mail_locked TINYINT(1) NOT NULL DEFAULT 0'
+            );
+            $this->pdo->exec(
+                'CREATE TABLE IF NOT EXISTS group_mail_log (
+                    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    group_id INT UNSIGNED NOT NULL,
+                    sender_user_id INT UNSIGNED NULL,
+                    sender_name VARCHAR(190) NOT NULL,
+                    subject VARCHAR(190) NOT NULL,
+                    recipient_count INT NOT NULL DEFAULT 0,
+                    error_count INT NOT NULL DEFAULT 0,
+                    soft_limit_hit TINYINT(1) NOT NULL DEFAULT 0,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    KEY idx_group_mail_log_sender (sender_user_id, created_at),
+                    KEY idx_group_mail_log_group (group_id, created_at),
+                    CONSTRAINT fk_gml_group FOREIGN KEY (group_id) REFERENCES contact_groups(id) ON DELETE CASCADE,
+                    CONSTRAINT fk_gml_user FOREIGN KEY (sender_user_id) REFERENCES users(id) ON DELETE SET NULL
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
             );
         } catch (\Throwable) {

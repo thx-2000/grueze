@@ -5181,6 +5181,30 @@ body { display: block; }
     font-size: 0.85rem;
 }
 
+.group-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+    margin-top: auto;
+}
+
+.group-card-actions .field-hint {
+    margin: 0;
+}
+
+.group-notice {
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--danger-veil);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+
+.group-notice p {
+    margin: 0.2rem 0;
+    font-size: 0.92rem;
+}
+
 /* --- Datumsvorschläge --- */
 .date-options {
     display: grid;

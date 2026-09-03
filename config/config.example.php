@@ -136,6 +136,15 @@ return [
             'image/webp',
         ],
     ],
+    // Gruppen-Mail (Stufe C): weiche Tagesgrenze je Person – darüber geht die
+    // Mail trotzdem raus, aber das Admin-Team wird informiert. Für Admins gilt
+    // keine Grenze. `mail_max_recipients` schützt vor Timeouts auf Shared
+    // Hosting – größere Gruppen bitte über „Nachrichten" (Rundmail) anschreiben.
+    'groups' => [
+        'mail_soft_limit' => 2,
+        'mail_max_recipients' => 250,
+    ],
+
     'defaults' => [
         'country' => 'Deutschland',
         // Leer lassen = die eingebauten (branding-abhängigen) Vorgaben nutzen.

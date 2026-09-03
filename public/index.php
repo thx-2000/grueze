@@ -49,6 +49,7 @@ use App\Services\BackupService;
 use App\Services\CsvExportService;
 use App\Services\ContactImportService;
 use App\Services\EventScheduler;
+use App\Services\GroupMailService;
 use App\Services\MailService;
 use App\Services\MigrationService;
 use App\Services\PasswordResetService;
@@ -261,10 +262,18 @@ try {
         Container::get(EventScheduler::class)
     ));
     Container::factory(GroupRepository::class, static fn () => new GroupRepository(Container::get(PDO::class)));
+    Container::factory(GroupMailService::class, static fn () => new GroupMailService(
+        Container::get(GroupRepository::class),
+        Container::get(UserRepository::class),
+        Container::get(SettingRepository::class),
+        Container::get(MailService::class),
+        Container::get(LogRepository::class)
+    ));
     Container::factory(GroupController::class, static fn () => new GroupController(
         Container::get(Auth::class),
         Container::get(GroupRepository::class),
-        Container::get(ContactRepository::class)
+        Container::get(ContactRepository::class),
+        Container::get(GroupMailService::class)
     ));
     Container::factory(MailController::class, static fn () => new MailController(
         Container::get(Auth::class),
@@ -440,6 +449,9 @@ try {
     $router->get('/gruppen', [GroupController::class, 'mine']);
     $router->post('/gruppen/beitreten', [GroupController::class, 'join']);
     $router->post('/gruppen/verlassen', [GroupController::class, 'leave']);
+    $router->get('/gruppen/nachricht', [GroupController::class, 'composeMail']);
+    $router->post('/gruppen/nachricht', [GroupController::class, 'sendMail']);
+    $router->post('/verwaltung/gruppen/sperre', [GroupController::class, 'toggleMailLock']);
     $router->get('/verwaltung/gruppen', [GroupController::class, 'manage']);
     $router->get('/verwaltung/gruppen/detail', [GroupController::class, 'detail']);
     $router->post('/verwaltung/gruppen', [GroupController::class, 'store']);

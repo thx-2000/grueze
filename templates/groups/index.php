@@ -32,15 +32,22 @@
                         <?php if (trim((string) ($group['description'] ?? '')) !== ''): ?>
                             <p class="group-card-desc"><?= e($group['description']) ?></p>
                         <?php endif; ?>
-                        <?php if ((int) $group['is_open'] === 1): ?>
-                            <form method="post" action="<?= e(url('/gruppen/verlassen')) ?>" data-confirm="Gruppe „<?= e($group['name']) ?>“ verlassen?">
-                                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                                <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
-                                <button type="submit" class="ghost-button compact-action">Austreten</button>
-                            </form>
-                        <?php else: ?>
-                            <p class="field-hint">Vom Orga-Team verwaltet.</p>
-                        <?php endif; ?>
+                        <div class="group-card-actions">
+                            <?php if ((int) ($group['mail_locked'] ?? 0) === 1): ?>
+                                <span class="field-hint">Gruppen-Versand ist gesperrt.</span>
+                            <?php else: ?>
+                                <a class="compact-action" href="<?= e(url('/gruppen/nachricht?id=' . (int) $group['id'])) ?>"><?= icon('mail') ?><span>Nachricht an die Gruppe</span></a>
+                            <?php endif; ?>
+                            <?php if ((int) $group['is_open'] === 1): ?>
+                                <form method="post" action="<?= e(url('/gruppen/verlassen')) ?>" data-confirm="Gruppe „<?= e($group['name']) ?>“ verlassen?">
+                                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                                    <input type="hidden" name="id" value="<?= e((string) $group['id']) ?>">
+                                    <button type="submit" class="ghost-button compact-action">Austreten</button>
+                                </form>
+                            <?php else: ?>
+                                <span class="field-hint">Vom Orga-Team verwaltet.</span>
+                            <?php endif; ?>
+                        </div>
                     </li>
                 <?php endforeach; ?>
             </ul>

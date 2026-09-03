@@ -23,7 +23,10 @@ Die Anwendung ist als kleine SSR-PHP-App ohne Framework aufgebaut. `public/index
 - `contact_emails`, `contact_phones`: 1:n-Erweiterungen für mehrere Kontaktwege
 - `categories`: einfache Gruppierung für Klasse, Orga-Team oder ähnliche Cluster
 - `contact_groups`, `contact_group_members`: frei definierbare Personengruppen
-  quer zu Kategorie/Tag (Mitgliedschaft am Kontakt, `is_open` = Selbst-Beitritt)
+  quer zu Kategorie/Tag (Mitgliedschaft am Kontakt, `is_open` = Selbst-Beitritt,
+  `mail_locked` = Notbremse für die Gruppen-Mail)
+- `group_mail_log`: ein Eintrag je Gruppen-Mail-Versand (weiche Tagesgrenze,
+  Nachvollziehbarkeit)
 - `password_resets`, `login_attempts`: Sicherheit für Reset und Brute-Force-Schutz
 - `audit_log`, `mail_log`: Nachvollziehbarkeit von Änderungen und Versand
 

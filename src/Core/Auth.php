@@ -142,6 +142,14 @@ final class Auth
         return $this->resolvePermission($this->user(), $permission);
     }
 
+    /** Rolle „admin" – für Sonderfälle wie „Limits gelten nicht für Admin". */
+    public function isAdmin(): bool
+    {
+        $user = $this->user();
+
+        return $user !== null && (string) ($user['role_name'] ?? '') === 'admin';
+    }
+
     public function canAsOriginal(string $permission): bool
     {
         return $this->resolvePermission($this->originalUser(), $permission);
