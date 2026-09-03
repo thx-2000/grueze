@@ -308,15 +308,49 @@ $canImpersonateThis = $editing
     </section>
 <?php endif; ?>
 
-<?php if ($editing && can('contacts.delete')): ?>
+<?php
+$isArchived = $editing && !empty($contact['archived_at']);
+$isTrashed = $editing && !empty($contact['deleted_at']);
+?>
+<?php if ($editing && can('contacts.delete') && ($isArchived || $isTrashed)): ?>
     <section class="detail-card detail-danger">
-        <h2>Kontakt löschen</h2>
-        <p class="muted">Entfernt den Kontakt dauerhaft. Ein verknüpfter Login wird deaktiviert.</p>
-        <form method="post" action="<?= e(url('/contacts/delete')) ?>" data-confirm="Kontakt „<?= e($fullName) ?>“ wirklich löschen?">
-            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-            <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
-            <button type="submit" class="danger-button"><?= icon('trash') ?><span>Kontakt löschen</span></button>
-        </form>
+        <h2><?= $isTrashed ? 'Im Papierkorb' : 'Im Archiv' ?></h2>
+        <p class="muted">
+            <?php if ($isTrashed): ?>
+                Dieser Kontakt liegt im Papierkorb und wird automatisch endgültig gelöscht. Bis dahin kannst du ihn zurückholen.
+            <?php else: ?>
+                Dieser Kontakt ruht im Archiv – er taucht nicht mehr im Adressbuch, in Mailings oder Abstimmungen auf, bleibt aber dauerhaft erhalten.
+            <?php endif; ?>
+        </p>
+        <div class="toolbar-actions">
+            <form method="post" action="<?= e(url('/contacts/wiederherstellen')) ?>">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+                <button type="submit"><?= icon('check') ?><span>Zurück ins Adressbuch</span></button>
+            </form>
+            <a class="ghost-button" href="<?= e(url('/kontakte/archiv')) ?>">Archiv &amp; Papierkorb</a>
+        </div>
+    </section>
+<?php elseif ($editing && can('contacts.delete')): ?>
+    <section class="detail-card detail-danger">
+        <h2>Kontakt aus dem Adressbuch nehmen</h2>
+        <p class="muted">Ein verknüpfter Login wird dabei deaktiviert.</p>
+        <div class="retire-choice">
+            <form method="post" action="<?= e(url('/contacts/delete')) ?>" data-confirm="„<?= e($fullName) ?>“ ins Archiv legen?">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+                <input type="hidden" name="mode" value="archive">
+                <button type="submit" class="ghost-button"><?= icon('archive') ?><span>Ins Archiv</span></button>
+                <span class="field-hint">Bleibt dauerhaft erhalten, jederzeit zurückholbar.</span>
+            </form>
+            <form method="post" action="<?= e(url('/contacts/delete')) ?>" data-confirm="„<?= e($fullName) ?>“ in den Papierkorb legen? Nach 30 Tagen wird der Kontakt endgültig gelöscht.">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+                <input type="hidden" name="mode" value="trash">
+                <button type="submit" class="danger-button"><?= icon('trash') ?><span>In den Papierkorb</span></button>
+                <span class="field-hint">30 Tage Aufbewahrung, dann endgültig weg.</span>
+            </form>
+        </div>
     </section>
 <?php endif; ?>
 

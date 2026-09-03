@@ -3350,6 +3350,74 @@ a.completeness-tile:hover {
     font-size: 0.88rem;
 }
 
+/* Archiv & Papierkorb + Ruhestellen-Auswahl auf der Kontaktseite. */
+.retired-list {
+    list-style: none;
+    margin: 0.4rem 0 0;
+    padding: 0;
+    display: grid;
+}
+
+.retired-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem 1rem;
+    padding: 0.85rem 0.15rem;
+}
+
+.retired-row + .retired-row {
+    border-top: 1px solid var(--color-border);
+}
+
+.retired-person {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+.retired-person strong {
+    display: inline;
+    margin: 0;
+}
+
+.retired-meta {
+    flex-basis: 100%;
+    font-size: 0.85rem;
+}
+
+.retired-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.retired-actions form {
+    margin: 0;
+}
+
+.retired-actions .ghost-button,
+.retired-actions .danger-button {
+    font-size: 0.88rem;
+}
+
+.retire-choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.retire-choice form {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    max-width: 22rem;
+}
+
 .completeness-clear {
     display: flex;
     align-items: center;

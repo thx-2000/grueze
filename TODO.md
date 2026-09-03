@@ -12,8 +12,7 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 - **Cron:** eingerichtet auf der produktiven Instanz (all-inkl, 15-Min-Aufruf
   von `/intern/cron?key=…`, Test lief ok – 2026-09-03). Anleitung für künftige
   Instanzen: Verwaltung → System → „Cronjob einrichten" (`/hilfe/cron`).
-- **buymeacoffee:** das Projekt GRUEZE auf der eigenen buymeacoffee-Seite
-  ergänzen (Aktion von TH). Kurztext dafür: siehe unten bzw. Chat 2026-09-03.
+- **buymeacoffee:** GRUEZE auf der buymeacoffee-Seite ergänzt (TH, 2026-09-03) – erledigt.
 - **Lizenz:** Name in `LICENSE` von TH bestätigt (2026-09-03) – erledigt.
 
 - **GitHub-Repo:** öffentlich seit 2026-09-03.
@@ -25,9 +24,12 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   1. **Termine rund machen** – umgesetzt v1.12.0: `.ics`-Kalenderdatei für
      festgelegte Termine (auch in der Mail), automatische Erinnerung X Tage
      vorher, Freitext-Anmerkung beim Abstimmen.
-  2. **Datenpflege leichter** – offen: Self-Service-Link (Token, ohne Login)
-     zum Korrigieren der eigenen Daten · Dubletten-Finder + Zusammenführen ·
-     30-Tage-Papierkorb für Kontakte.
+  2. **Datenpflege leichter** – teilweise:
+     - Archiv & Papierkorb für Kontakte (Archiv dauerhaft ODER 30-Tage-
+       Papierkorb, automatische Endlöschung per Cron) – **v1.13.0 erledigt**.
+     - offen: Self-Service-Link (Token, ohne Login) zum Korrigieren der
+       eigenen Daten.
+     - offen: Dubletten-Finder + Zusammenführen.
   3. **Handy & Alltag** – offen: PWA-Manifest · Startseiten-Widget
      (Geburtstage der Woche + Termine mit offenen Rückmeldungen) · vCard
      (`.vcf`)-Export für einzelne/ausgewählte Kontakte.

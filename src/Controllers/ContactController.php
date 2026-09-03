@@ -63,6 +63,9 @@ final class ContactController extends BaseController
             'filters' => $filters,
             'phoneLabels' => config('defaults.phone_labels', []),
             'ownContact' => $ownContact,
+            'retiredCount' => can('contacts.delete')
+                ? array_sum($this->contacts->retiredCounts())
+                : 0,
         ]);
     }
 
@@ -420,20 +423,83 @@ final class ContactController extends BaseController
         Redirect::to('/account');
     }
 
-    public function delete(Request $request): void
+    /**
+     * Kontakt aus dem aktiven Bestand nehmen – wahlweise ins Archiv (bleibt
+     * dauerhaft, jederzeit zurückholbar) oder in den Papierkorb (nach 30 Tagen
+     * endgültig weg). Ein verknüpfter Login wird deaktiviert.
+     */
+    public function retire(Request $request): void
+    {
+        $this->requirePermission('contacts.delete');
+        Csrf::validate($request->input('_csrf'));
+        $id = (int) $request->input('id');
+        $mode = $request->input('mode') === 'archive' ? 'archive' : 'trash';
+        $contact = $this->contacts->find($id);
+        if (!$contact) {
+            flash('error', 'Kontakt nicht gefunden.');
+            Redirect::to('/kontakte');
+        }
+
+        $this->users->deactivateByContactId($id);
+        $name = trim($contact['vorname'] . ' ' . $contact['nachname']);
+        $userId = (int) $this->auth->user()['id'];
+
+        if ($mode === 'archive') {
+            $this->contacts->archive($id, $userId);
+            $this->logs->addAudit($userId, $id, 'updated', 'Kontakt ins Archiv gelegt: ' . $name . '.');
+            flash('success', $name . ' liegt jetzt im Archiv. Du kannst den Kontakt jederzeit zurückholen.');
+        } else {
+            $this->contacts->trash($id, $userId);
+            $this->logs->addAudit($userId, $id, 'deleted', 'Kontakt in den Papierkorb gelegt: ' . $name . '.');
+            flash('success', $name . ' liegt jetzt im Papierkorb und wird in ' . ContactRepository::TRASH_DAYS . ' Tagen endgültig gelöscht.');
+        }
+
+        Redirect::to('/kontakte');
+    }
+
+    /** Archiv & Papierkorb – Übersicht mit Zurückholen / endgültig löschen. */
+    public function retiredList(): void
+    {
+        $this->requirePermission('contacts.delete');
+        $lists = $this->contacts->retired();
+
+        $this->render('contacts/retired', [
+            'archived' => $lists['archived'],
+            'trashed' => $lists['trashed'],
+            'trashDays' => ContactRepository::TRASH_DAYS,
+        ]);
+    }
+
+    public function restore(Request $request): void
     {
         $this->requirePermission('contacts.delete');
         Csrf::validate($request->input('_csrf'));
         $id = (int) $request->input('id');
         $contact = $this->contacts->find($id);
+        if (!$contact) {
+            flash('error', 'Kontakt nicht gefunden.');
+            Redirect::to('/kontakte/archiv');
+        }
+
+        $this->contacts->restore($id);
+        $name = trim($contact['vorname'] . ' ' . $contact['nachname']);
+        $this->logs->addAudit((int) $this->auth->user()['id'], $id, 'updated', 'Kontakt wiederhergestellt: ' . $name . '.');
+        flash('success', $name . ' ist wieder im aktiven Adressbuch. Ein früher verknüpfter Login bleibt deaktiviert – bei Bedarf unter „Zugänge" wieder aktivieren.');
+        Redirect::to('/kontakte/archiv');
+    }
+
+    public function purge(Request $request): void
+    {
+        $this->requirePermission('contacts.delete');
+        Csrf::validate($request->input('_csrf'));
+        $id = (int) $request->input('id');
+        $contact = $this->contacts->find($id);
+        $name = $contact ? trim($contact['vorname'] . ' ' . $contact['nachname']) : 'Kontakt';
         $this->users->deactivateByContactId($id);
-        $this->contacts->delete($id);
-        $details = $contact
-            ? 'Kontakt wurde gelöscht: ' . $contact['vorname'] . ' ' . $contact['nachname'] . '.'
-            : 'Kontakt wurde gelöscht.';
-        $this->logs->addAudit((int) $this->auth->user()['id'], null, 'deleted', $details);
-        flash('success', 'Der Kontakt wurde gelöscht.');
-        Redirect::to('/kontakte');
+        $this->contacts->purge($id);
+        $this->logs->addAudit((int) $this->auth->user()['id'], null, 'deleted', 'Kontakt endgültig gelöscht: ' . $name . '.');
+        flash('success', $name . ' wurde endgültig gelöscht.');
+        Redirect::to('/kontakte/archiv');
     }
 
     public function export(Request $request): never

@@ -8,6 +8,12 @@ use PDO;
 
 final class ContactRepository
 {
+    /** „Lebende" Kontakte: weder archiviert noch im Papierkorb. */
+    private const LIVE = ' AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL';
+
+    /** Tage, die ein Kontakt im Papierkorb bleibt, bevor er endgültig gelöscht wird. */
+    public const TRASH_DAYS = 30;
+
     public function __construct(private PDO $pdo)
     {
     }
@@ -88,7 +94,7 @@ final class ContactRepository
             )';
         }
 
-        return ['sql' => $sql, 'params' => $params];
+        return ['sql' => self::LIVE . $sql, 'params' => $params];
     }
 
     /**
@@ -164,10 +170,11 @@ final class ContactRepository
                     ) AS has_email
              FROM contacts
              LEFT JOIN categories ON categories.id = contacts.category_id
-             WHERE contacts.vorname LIKE :term_vorname
+             WHERE (contacts.vorname LIKE :term_vorname
                 OR contacts.nachname LIKE :term_nachname
                 OR contacts.geburtsname LIKE :term_geburtsname
-                OR contacts.ort LIKE :term_ort
+                OR contacts.ort LIKE :term_ort)
+                AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL
              ORDER BY contacts.vorname ASC, contacts.nachname ASC
              LIMIT ' . (int) $limit
         );
@@ -199,7 +206,8 @@ final class ContactRepository
                     SELECT 1 FROM contact_phones cp
                     WHERE cp.contact_id = contacts.id AND TRIM(COALESCE(cp.phone, "")) <> ""
                 ) THEN 1 ELSE 0 END) AS without_phone
-             FROM contacts'
+             FROM contacts
+             WHERE contacts.archived_at IS NULL AND contacts.deleted_at IS NULL'
         )->fetch();
 
         return [
@@ -218,6 +226,7 @@ final class ContactRepository
                  FROM contacts
                  JOIN contact_emails ON contact_emails.contact_id = contacts.id
                  WHERE contact_emails.email IS NOT NULL AND contact_emails.email <> ""
+                   AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL
                  ORDER BY contacts.vorname ASC, contacts.nachname ASC'
             )->fetchAll(\PDO::FETCH_COLUMN)
         );
@@ -227,7 +236,11 @@ final class ContactRepository
     public function findIdByEmail(string $email): ?int
     {
         $stmt = $this->pdo->prepare(
-            'SELECT contact_id FROM contact_emails WHERE LOWER(TRIM(email)) = LOWER(TRIM(:email)) ORDER BY id LIMIT 1'
+            'SELECT ce.contact_id
+             FROM contact_emails ce
+             JOIN contacts c ON c.id = ce.contact_id
+             WHERE LOWER(TRIM(ce.email)) = LOWER(TRIM(:email)) AND c.deleted_at IS NULL
+             ORDER BY ce.id LIMIT 1'
         );
         $stmt->execute(['email' => $email]);
         $id = $stmt->fetchColumn();
@@ -246,7 +259,8 @@ final class ContactRepository
             'SELECT contacts.id, contacts.vorname, contacts.nachname, contacts.geburtstag,
                     (SELECT email FROM contact_emails WHERE contact_emails.contact_id = contacts.id ORDER BY contact_emails.id LIMIT 1) AS email
              FROM contacts
-             WHERE contacts.geburtstag IS NOT NULL'
+             WHERE contacts.geburtstag IS NOT NULL
+               AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL'
         )->fetchAll();
     }
 
@@ -263,6 +277,7 @@ final class ContactRepository
                     (SELECT email FROM contact_emails ce WHERE ce.contact_id = c.id ORDER BY ce.id LIMIT 1) AS email
              FROM contacts c
              WHERE c.geburtstag IS NOT NULL
+               AND c.archived_at IS NULL AND c.deleted_at IS NULL
                AND DATE_FORMAT(c.geburtstag, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')"
         );
 
@@ -308,6 +323,7 @@ final class ContactRepository
             [
                 'sql' => 'SELECT id FROM contacts
                           WHERE vorname = :vorname AND nachname = :nachname AND COALESCE(geburtsname, \'\') = :geburtsname
+                          AND deleted_at IS NULL
                           LIMIT 1',
                 'params' => [
                     'vorname' => $vorname,
@@ -318,6 +334,7 @@ final class ContactRepository
             [
                 'sql' => 'SELECT id FROM contacts
                           WHERE vorname = :vorname AND nachname = :nachname
+                          AND deleted_at IS NULL
                           LIMIT 1',
                 'params' => [
                     'vorname' => $vorname,
@@ -330,6 +347,7 @@ final class ContactRepository
             $variants[] = [
                 'sql' => 'SELECT id FROM contacts
                           WHERE vorname = :vorname AND geburtsname = :geburtsname
+                          AND deleted_at IS NULL
                           LIMIT 1',
                 'params' => [
                     'vorname' => $vorname,
@@ -424,10 +442,104 @@ final class ContactRepository
         $this->syncTags($id, $data['tag_ids'] ?? []);
     }
 
-    public function delete(int $id): void
+    /** Kontakt ins Archiv legen – ruht dauerhaft, wird nie automatisch gelöscht. */
+    public function archive(int $id, int $userId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE contacts SET archived_at = NOW(), deleted_at = NULL, retired_by = :uid WHERE id = :id'
+        );
+        $stmt->execute(['id' => $id, 'uid' => $userId]);
+    }
+
+    /** Kontakt in den Papierkorb legen – nach TRASH_DAYS Tagen endgültig weg. */
+    public function trash(int $id, int $userId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE contacts SET deleted_at = NOW(), archived_at = NULL, retired_by = :uid WHERE id = :id'
+        );
+        $stmt->execute(['id' => $id, 'uid' => $userId]);
+    }
+
+    /** Kontakt aus Archiv oder Papierkorb zurückholen. */
+    public function restore(int $id): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE contacts SET archived_at = NULL, deleted_at = NULL, retired_by = NULL WHERE id = :id'
+        );
+        $stmt->execute(['id' => $id]);
+    }
+
+    /** Kontakt endgültig aus der Datenbank entfernen. */
+    public function purge(int $id): void
     {
         $stmt = $this->pdo->prepare('DELETE FROM contacts WHERE id = :id');
         $stmt->execute(['id' => $id]);
+    }
+
+    /**
+     * Archivierte und im Papierkorb liegende Kontakte – für die Übersicht
+     * „Archiv & Papierkorb".
+     *
+     * @return array{archived: list<array<string,mixed>>, trashed: list<array<string,mixed>>}
+     */
+    public function retired(): array
+    {
+        $rows = $this->pdo->query(
+            'SELECT contacts.*, categories.name AS category_name,
+                    u.name AS retired_by_name,
+                    DATEDIFF(DATE_ADD(contacts.deleted_at, INTERVAL ' . self::TRASH_DAYS . ' DAY), NOW()) AS purge_in_days
+             FROM contacts
+             LEFT JOIN categories ON categories.id = contacts.category_id
+             LEFT JOIN users u ON u.id = contacts.retired_by
+             WHERE contacts.archived_at IS NOT NULL OR contacts.deleted_at IS NOT NULL
+             ORDER BY COALESCE(contacts.deleted_at, contacts.archived_at) DESC'
+        )->fetchAll();
+
+        $out = ['archived' => [], 'trashed' => []];
+        foreach ($rows as &$row) {
+            $this->hydrateContact($row);
+            $out[$row['deleted_at'] !== null ? 'trashed' : 'archived'][] = $row;
+        }
+
+        return $out;
+    }
+
+    /** IDs, die lange genug im Papierkorb liegen und endgültig gelöscht werden. */
+    public function idsToPurge(int $days = self::TRASH_DAYS): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT id FROM contacts WHERE deleted_at IS NOT NULL AND deleted_at < (NOW() - INTERVAL :days DAY)'
+        );
+        $stmt->execute(['days' => $days]);
+
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    /** Papierkorb aufräumen: alles endgültig löschen, was älter als TRASH_DAYS ist. */
+    public function pruneTrashedContacts(int $days = self::TRASH_DAYS): int
+    {
+        $ids = $this->idsToPurge($days);
+        foreach ($ids as $id) {
+            $this->purge($id);
+        }
+
+        return count($ids);
+    }
+
+    /** @return array{archived:int, trashed:int} */
+    public function retiredCounts(): array
+    {
+        $row = $this->pdo->query(
+            'SELECT
+                SUM(archived_at IS NOT NULL) AS archived,
+                SUM(deleted_at IS NOT NULL) AS trashed
+             FROM contacts'
+        )->fetch();
+
+        return [
+            'archived' => (int) ($row['archived'] ?? 0),
+            'trashed' => (int) ($row['trashed'] ?? 0),
+        ];
     }
 
     public function findManyByIds(array $ids): array

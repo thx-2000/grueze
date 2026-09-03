@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Request;
+use App\Repositories\ContactRepository;
 use App\Services\EventScheduler;
 use App\Services\GreetingScheduler;
 
@@ -23,6 +24,7 @@ final class CronController
     public function __construct(
         private EventScheduler $scheduler,
         private GreetingScheduler $greetings,
+        private ContactRepository $contacts,
     ) {
     }
 
@@ -47,6 +49,7 @@ final class CronController
             foreach ($this->greetings->run() as $key => $value) {
                 $stats['greet_' . $key] = $value;
             }
+            $stats['contacts_purged'] = $this->contacts->pruneTrashedContacts();
             echo "ok\n";
             foreach ($stats as $key => $value) {
                 echo $key . '=' . (int) $value . "\n";

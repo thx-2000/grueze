@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.13.0
+
+**Archiv & Papierkorb für Kontakte**
+
+- Beim Entfernen eines Kontakts gibt es jetzt zwei Wege: **ins Archiv**
+  (bleibt dauerhaft erhalten, jederzeit zurückholbar) oder **in den
+  Papierkorb** (30 Tage Aufbewahrung, dann automatisch endgültig gelöscht).
+- Neue Seite **Adressbuch → „Archiv & Papierkorb"**: Kontakte zurückholen,
+  vom Archiv in den Papierkorb schieben oder sofort endgültig löschen.
+- Archivierte und im Papierkorb liegende Kontakte tauchen nicht mehr im
+  Adressbuch, in Mailings, Geburtstagsgrüßen, der Suche oder in Gruppen auf.
+- Das automatische Aufräumen des Papierkorbs läuft über den Cronjob.
+
 ## 1.12.0
 
 **Termine rund gemacht**

@@ -45,8 +45,13 @@ CREATE TABLE contacts (
     photo_path VARCHAR(255) NULL,
     created_by INT UNSIGNED NOT NULL,
     updated_by INT UNSIGNED NOT NULL,
+    archived_at DATETIME NULL,
+    deleted_at DATETIME NULL,
+    retired_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_contacts_archived (archived_at),
+    KEY idx_contacts_deleted (deleted_at),
     CONSTRAINT fk_contacts_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
     CONSTRAINT fk_contacts_created_by FOREIGN KEY (created_by) REFERENCES users(id),
     CONSTRAINT fk_contacts_updated_by FOREIGN KEY (updated_by) REFERENCES users(id)

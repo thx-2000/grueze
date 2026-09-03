@@ -275,7 +275,8 @@ try {
     ));
     Container::factory(CronController::class, static fn () => new CronController(
         Container::get(EventScheduler::class),
-        Container::get(GreetingScheduler::class)
+        Container::get(GreetingScheduler::class),
+        Container::get(ContactRepository::class)
     ));
     Container::factory(GroupRepository::class, static fn () => new GroupRepository(Container::get(PDO::class)));
     Container::factory(GroupMailService::class, static fn () => new GroupMailService(
@@ -351,6 +352,7 @@ try {
             Container::get(EventRepository::class)->pruneTokenHits(
                 (int) config('security.token_hit_retention_days', 120)
             );
+            Container::get(ContactRepository::class)->pruneTrashedContacts();
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
         }
@@ -402,7 +404,10 @@ try {
     $router->post('/contacts/store', [ContactController::class, 'store']);
     $router->get('/contacts/edit', [ContactController::class, 'edit']);
     $router->post('/contacts/update', [ContactController::class, 'update']);
-    $router->post('/contacts/delete', [ContactController::class, 'delete']);
+    $router->post('/contacts/delete', [ContactController::class, 'retire']);
+    $router->get('/kontakte/archiv', [ContactController::class, 'retiredList']);
+    $router->post('/contacts/wiederherstellen', [ContactController::class, 'restore']);
+    $router->post('/contacts/endgueltig-loeschen', [ContactController::class, 'purge']);
     $router->post('/contacts/bulk-update', [ContactController::class, 'bulkUpdate']);
     $router->post('/contacts/gruppe-aus-auswahl', [ContactController::class, 'groupFromSelection']);
     $router->get('/contacts/export', [ContactController::class, 'export']);

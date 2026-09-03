@@ -61,6 +61,7 @@ final class GroupRepository
              FROM contact_group_members m
              JOIN contacts c ON c.id = m.contact_id
              WHERE m.group_id = :group_id
+               AND c.archived_at IS NULL AND c.deleted_at IS NULL
              ORDER BY c.nachname ASC, c.vorname ASC'
         );
         $stmt->execute(['group_id' => $groupId]);
@@ -71,7 +72,13 @@ final class GroupRepository
     /** @return list<int> */
     public function memberContactIds(int $groupId): array
     {
-        $stmt = $this->pdo->prepare('SELECT contact_id FROM contact_group_members WHERE group_id = :group_id');
+        $stmt = $this->pdo->prepare(
+            'SELECT m.contact_id
+             FROM contact_group_members m
+             JOIN contacts c ON c.id = m.contact_id
+             WHERE m.group_id = :group_id
+               AND c.archived_at IS NULL AND c.deleted_at IS NULL'
+        );
         $stmt->execute(['group_id' => $groupId]);
 
         return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
@@ -401,7 +408,8 @@ final class GroupRepository
                     (SELECT email FROM contact_emails ce WHERE ce.contact_id = c.id ORDER BY ce.id LIMIT 1) AS email
              FROM contact_group_members m
              JOIN contacts c ON c.id = m.contact_id
-             WHERE m.group_id = :g AND m.role = 'lead'"
+             WHERE m.group_id = :g AND m.role = 'lead'
+               AND c.archived_at IS NULL AND c.deleted_at IS NULL"
         );
         $stmt->execute(['g' => $groupId]);
 
