@@ -5670,6 +5670,23 @@ body { display: block; }
     margin-bottom: 0.7rem;
 }
 
+.participant-pick-more {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.85rem;
+}
+
+.participant-pick-more span {
+    font-weight: 600;
+    color: var(--color-muted);
+}
+
+.participant-pick-more select {
+    max-width: 22rem;
+}
+
 .participant-list {
     max-height: 22rem;
     overflow-y: auto;

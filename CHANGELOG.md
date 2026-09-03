@@ -3,6 +3,16 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.16.0
+
+**Teilnehmerkreis: Auswahl nach Tag oder Gruppe**
+
+- Beim Festlegen des Teilnehmerkreises einer Abstimmung gibt es jetzt neben den
+  Kategorie-Knöpfen ein Auswahlfeld **„Auswahl ergänzen um alle aus …"**: ein
+  Klick auf eine Gruppe oder ein Tag hakt alle passenden Personen an.
+- Wie die Kategorie-Knöpfe ergänzt es die Auswahl (nimmt nichts weg) – mehrere
+  Tags/Gruppen lassen sich nacheinander kombinieren.
+
 ## 1.15.0
 
 **Dubletten-Finder & Zusammenführen**

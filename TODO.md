@@ -24,6 +24,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   1. **Termine rund machen** – umgesetzt v1.12.0: `.ics`-Kalenderdatei für
      festgelegte Termine (auch in der Mail), automatische Erinnerung X Tage
      vorher, Freitext-Anmerkung beim Abstimmen.
+     Nachtrag v1.16.0: Teilnehmerkreis auch nach Tag / Gruppe auswählbar
+     (Auswahlfeld „Auswahl ergänzen um alle aus …").
   2. **Datenpflege leichter** – **komplett erledigt**:
      - Archiv & Papierkorb für Kontakte (Archiv dauerhaft ODER 30-Tage-
        Papierkorb, automatische Endlöschung per Cron) – v1.13.0.

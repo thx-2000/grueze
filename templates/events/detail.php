@@ -25,10 +25,22 @@ $optionTitle = static fn (array $option): string => event_option_label($option);
 
 // Kontakte für den Teilnehmer-Picker nach Kategorie gruppieren.
 $byCategory = [];
+$pickerTags = [];
+$pickerGroups = [];
 foreach ($contacts as $contact) {
     $byCategory[(string) ($contact['category_name'] ?: 'Ohne Kategorie')][] = $contact;
+    foreach ($contact['tags'] ?? [] as $tag) {
+        $pickerTags[(int) $tag['id']] = (string) $tag['name'];
+    }
+    foreach ($contact['groups'] ?? [] as $group) {
+        $pickerGroups[(int) $group['id']] = (string) $group['name'];
+    }
 }
 ksort($byCategory);
+asort($pickerTags);
+asort($pickerGroups);
+
+$idList = static fn (array $rows): string => implode(',', array_map(static fn (array $r): int => (int) $r['id'], $rows));
 ?>
 <p class="detail-backlink"><a href="<?= e(url('/termine')) ?>"><?= icon('chevron-right') ?>Zurück zu den Terminen</a></p>
 
@@ -261,11 +273,33 @@ ksort($byCategory);
                         <button type="button" class="linkish" data-pick-category="<?= e($catName) ?>">+ <?= e($catName) ?></button>
                     <?php endforeach; ?>
                 </div>
+                <?php if ($pickerTags !== [] || $pickerGroups !== []): ?>
+                    <label class="participant-pick-more">
+                        <span>Auswahl ergänzen um alle aus …</span>
+                        <select data-pick-select>
+                            <option value="">Tag oder Gruppe wählen …</option>
+                            <?php if ($pickerGroups !== []): ?>
+                                <optgroup label="Gruppen">
+                                    <?php foreach ($pickerGroups as $gid => $gname): ?>
+                                        <option value="group:<?= (int) $gid ?>"><?= e($gname) ?></option>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endif; ?>
+                            <?php if ($pickerTags !== []): ?>
+                                <optgroup label="Tags">
+                                    <?php foreach ($pickerTags as $tid => $tname): ?>
+                                        <option value="tag:<?= (int) $tid ?>"><?= e($tname) ?></option>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endif; ?>
+                        </select>
+                    </label>
+                <?php endif; ?>
                 <div class="participant-list">
                     <?php foreach ($byCategory as $catName => $catContacts): ?>
                         <p class="participant-group"><?= e($catName) ?></p>
                         <?php foreach ($catContacts as $contact): ?>
-                            <label class="participant-option" data-category="<?= e($catName) ?>">
+                            <label class="participant-option" data-category="<?= e($catName) ?>" data-tags="<?= e($idList($contact['tags'] ?? [])) ?>" data-groups="<?= e($idList($contact['groups'] ?? [])) ?>">
                                 <input type="checkbox" name="contact_ids[]" value="<?= e((string) $contact['id']) ?>" <?= in_array((int) $contact['id'], $participantIds, true) ? 'checked' : '' ?>>
                                 <span><?= e(trim($contact['vorname'] . ' ' . $contact['nachname'])) ?><?php if (($contact['emails'] ?? []) === []): ?> <span class="status-chip is-warn">keine Mail</span><?php endif; ?></span>
                             </label>

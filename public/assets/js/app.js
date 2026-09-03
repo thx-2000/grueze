@@ -391,6 +391,21 @@ document.querySelectorAll('[data-participant-picker]').forEach((form) => {
             });
         });
     });
+    // Auswahl um alle aus einem Tag / einer Gruppe ergänzen.
+    form.querySelector('[data-pick-select]')?.addEventListener('change', (event) => {
+        const value = event.target.value;
+        if (!value) return;
+        const [kind, id] = value.split(':');
+        const attr = kind === 'group' ? 'groups' : 'tags';
+        form.querySelectorAll('.participant-option').forEach((option) => {
+            const ids = (option.dataset[attr] || '').split(',').filter(Boolean);
+            if (ids.includes(id)) {
+                const box = option.querySelector('input[type="checkbox"]');
+                if (box) box.checked = true;
+            }
+        });
+        event.target.value = '';
+    });
 });
 
 // Nachrichten-Seite: Empfängerkreis + Text auf einem Screen.
