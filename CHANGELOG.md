@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.19.0
+
+**Web-App fürs Handy („Zum Home-Bildschirm")**
+
+- Die Seite lässt sich jetzt auf iPhone und Android wie eine App auf den
+  Startbildschirm legen: eigenes Icon (in der Theme-Farbe, mit dem Kürzel der
+  Instanz), Vollbild ohne Browser-Leiste, Farbe der Statusleiste passend.
+- Ein schlanker Hintergrund-Cache beschleunigt das Laden von Design und
+  Skripten. Inhalte mit Kontaktdaten werden bewusst **nicht** zwischen­
+  gespeichert und laufen immer direkt übers Netz.
+
 ## 1.18.0
 
 **vCard-Export (.vcf)**

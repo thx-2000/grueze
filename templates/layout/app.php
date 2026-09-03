@@ -40,6 +40,12 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
         <meta name="description" content="<?= e($metaDescription) ?>">
     <?php endif; ?>
     <link rel="icon" href="<?= e(theme_favicon()) ?>">
+    <link rel="manifest" href="<?= e(url('/manifest.webmanifest')) ?>">
+    <meta name="theme-color" content="<?= e(branding_theme_color()) ?>">
+    <link rel="apple-touch-icon" href="<?= e(url('/app-icon.svg')) ?>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="<?= e($shortName !== '' ? $shortName : $appName) ?>">
     <script nonce="<?= e(csp_nonce()) ?>">
         // Blickschutz-Zustand vor dem ersten Paint setzen, damit Kontaktdaten nicht kurz aufblitzen.
         try {

@@ -123,6 +123,7 @@ try {
     Container::factory(UploadService::class, static fn () => new UploadService());
     Container::factory(CsvExportService::class, static fn () => new CsvExportService());
     Container::factory(\App\Services\VCardService::class, static fn () => new \App\Services\VCardService());
+    Container::factory(\App\Controllers\PwaController::class, static fn () => new \App\Controllers\PwaController());
     Container::factory(XlsxReader::class, static fn () => new XlsxReader());
     Container::factory(MailService::class, static fn () => new MailService(Container::get(LogRepository::class)));
     Container::factory(ContactImportService::class, static fn () => new ContactImportService(
@@ -387,6 +388,8 @@ try {
 
     $router = new Router();
     $router->get('/', [StartController::class, 'index']);
+    $router->get('/manifest.webmanifest', [\App\Controllers\PwaController::class, 'manifest']);
+    $router->get('/app-icon.svg', [\App\Controllers\PwaController::class, 'icon']);
     $router->get('/kontakte', [ContactController::class, 'index']);
     $router->get('/verwaltung', [AdminController::class, 'hub']);
     $router->get('/search', [SearchController::class, 'index']);

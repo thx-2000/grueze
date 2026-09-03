@@ -123,6 +123,22 @@ function branding_value(string $key, mixed $default = null): mixed
     return app_branding()[$key] ?? $default;
 }
 
+/** Primärfarbe des aktiven Themes – für <meta name="theme-color"> und PWA. */
+function branding_theme_color(): string
+{
+    try {
+        $tokens = App\Core\Container::get(App\Services\ThemeService::class)->activeTokens();
+        $color = trim((string) ($tokens['color_primary'] ?? ''));
+        if (preg_match('/^#[0-9a-fA-F]{3,8}$/', $color)) {
+            return $color;
+        }
+    } catch (Throwable) {
+        // Fallback unten.
+    }
+
+    return '#2e6b41';
+}
+
 function branding_theme_style(): string
 {
     try {
@@ -247,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.18.0';
+    return '1.19.0';
 }
 
 /**

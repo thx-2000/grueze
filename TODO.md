@@ -37,7 +37,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
        Rückmeldungen) – **v1.17.0 erledigt**.
      - vCard (`.vcf`)-Export einzeln / Auswahl / gefilterte Liste – **v1.18.0
        erledigt**.
-     - offen: PWA-Manifest (Web-App zum Home-Bildschirm).
+     - PWA (Manifest + Icon + schlanker Service Worker, „Zum Home-Bildschirm")
+       – **v1.19.0 erledigt**. Damit ist Batch 3 komplett.
   4. **Sicherheit nachziehen** – offen: Verschlüsselung von Backup-ZIPs /
      Mail-Zugangsdaten „at rest" · Reset-Token ins Pfad-Segment statt Query (L8).
 

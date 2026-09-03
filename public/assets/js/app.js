@@ -1066,3 +1066,11 @@ document.querySelectorAll('[data-confirm]').forEach((el) => {
         });
     }
 });
+
+// „Zum Home-Bildschirm hinzufügen": schlanker Service Worker (cacht nur
+// statische Assets, nie Seiten). Nur in sicheren Kontexten registrieren.
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
