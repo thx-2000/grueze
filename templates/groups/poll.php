@@ -36,6 +36,9 @@ $optLabel = static fn (array $o): string => event_option_label($o);
             <section class="detail-card event-decided">
                 <h2>Festgelegter Termin</h2>
                 <p class="event-decided-date"><?= e($optLabel($option)) ?><?= trim((string) ($event['location'] ?? '')) !== '' ? ' · ' . e($event['location']) : '' ?></p>
+                <?php if (trim((string) ($event['ical_uid'] ?? '')) !== '' && trim((string) ($option['option_date'] ?? '')) !== ''): ?>
+                    <p><a class="ghost-button" href="<?= e(url('/termine/termin.ics') . '?k=' . $event['ical_uid']) ?>"><?= icon('calendar') ?><span>In den Kalender</span></a></p>
+                <?php endif; ?>
             </section>
         <?php endif; ?>
     <?php endforeach; ?>
@@ -87,11 +90,25 @@ $optLabel = static fn (array $o): string => event_option_label($o);
             <?php endforeach; ?>
         </ul>
 
+        <?php
+        $myNote = '';
+        foreach ((array) ($event['participants'] ?? []) as $participant) {
+            if ((int) $participant['id'] === (int) $myParticipantId) {
+                $myNote = (string) ($participant['note'] ?? '');
+            }
+        }
+        ?>
         <?php if ($canVote): ?>
+            <label class="vote-note">
+                <span>Anmerkung (optional)</span>
+                <textarea name="note" rows="2" maxlength="500" placeholder="z. B. „kann erst ab 20 Uhr"><?= e($myNote) ?></textarea>
+            </label>
             <div class="toolbar-actions">
                 <button type="submit"><?= icon('check') ?><span>Rückmeldung speichern</span></button>
             </div>
             <p class="field-hint">Du kannst deine Antwort bis zum Ende der Abstimmung ändern.</p>
+        <?php elseif ($myNote !== ''): ?>
+            <p class="poll-option-mine">Deine Anmerkung: <strong><?= e($myNote) ?></strong></p>
         <?php endif; ?>
     </section>
 </form>
@@ -124,6 +141,19 @@ $optLabel = static fn (array $o): string => event_option_label($o);
 <section class="detail-card">
     <h2>Teilnahme</h2>
     <p class="muted"><?= (int) $event['answered_count'] ?> von <?= count($event['participants']) ?> Mitgliedern haben abgestimmt.</p>
+    <?php if ($canManage): ?>
+        <?php $notes = array_values(array_filter((array) ($event['participants'] ?? []), static fn (array $p): bool => trim((string) ($p['note'] ?? '')) !== '')); ?>
+        <?php if ($notes !== []): ?>
+            <div class="event-notes">
+                <h3>Anmerkungen</h3>
+                <ul>
+                    <?php foreach ($notes as $p): ?>
+                        <li><strong><?= e(trim($p['vorname'] . ' ' . $p['nachname'])) ?>:</strong> <?= e((string) $p['note']) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
     <?php if ($canManage && $isOpen): ?>
         <div class="toolbar-actions">
             <a class="ghost-button" href="<?= e(url('/gruppen/nachricht?id=' . $groupId)) ?>"><?= icon('mail') ?><span>Mitglieder per Nachricht informieren</span></a>

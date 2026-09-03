@@ -149,6 +149,7 @@ CREATE TABLE app_settings (
 
 CREATE TABLE events (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    ical_uid CHAR(32) NULL,
     title VARCHAR(190) NOT NULL,
     kind ENUM('date_poll', 'fixed_date', 'poll') NOT NULL DEFAULT 'date_poll',
     group_id INT UNSIGNED NULL,
@@ -162,6 +163,8 @@ CREATE TABLE events (
     result_recipients VARCHAR(16) NULL,
     reminder_sent_at DATETIME NULL,
     result_mail_sent_at DATETIME NULL,
+    remind_days_before TINYINT UNSIGNED NULL,
+    event_reminder_sent_at DATETIME NULL,
     decided_option_id INT UNSIGNED NULL,
     created_by INT UNSIGNED NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -169,6 +172,7 @@ CREATE TABLE events (
     KEY idx_events_status (status),
     KEY idx_events_closes_at (closes_at),
     KEY idx_events_group (group_id),
+    KEY idx_events_ical_uid (ical_uid),
     CONSTRAINT fk_events_user FOREIGN KEY (created_by) REFERENCES users(id)
     -- events.group_id: kein DB-Fremdschlüssel (Tabellenreihenfolge); wird in
     -- GroupRepository::delete() beim Löschen der Gruppe auf NULL gesetzt.
@@ -189,6 +193,7 @@ CREATE TABLE event_participants (
     event_id INT UNSIGNED NOT NULL,
     contact_id INT UNSIGNED NOT NULL,
     token CHAR(32) NOT NULL,
+    note VARCHAR(500) NULL,
     added_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_event_participant_token (token),
     UNIQUE KEY uq_event_participant (event_id, contact_id),

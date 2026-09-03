@@ -138,12 +138,13 @@ final class EventRepository
         $kind = in_array($data['kind'] ?? '', ['date_poll', 'fixed_date', 'poll'], true) ? $data['kind'] : 'date_poll';
         $groupId = (int) ($data['group_id'] ?? 0);
         $stmt = $this->pdo->prepare(
-            'INSERT INTO events (title, kind, group_id, description, location, time_note, cost_note, bring_note,
-                 closes_at, result_recipients, created_by)
-             VALUES (:title, :kind, :group_id, :description, :location, :time_note, :cost_note, :bring_note,
-                 :closes_at, :result_recipients, :created_by)'
+            'INSERT INTO events (ical_uid, title, kind, group_id, description, location, time_note, cost_note, bring_note,
+                 closes_at, result_recipients, remind_days_before, created_by)
+             VALUES (:ical_uid, :title, :kind, :group_id, :description, :location, :time_note, :cost_note, :bring_note,
+                 :closes_at, :result_recipients, :remind_days_before, :created_by)'
         );
         $stmt->execute([
+            'ical_uid' => bin2hex(random_bytes(16)),
             'title' => $data['title'],
             'kind' => $kind,
             'group_id' => $groupId > 0 ? $groupId : null,
@@ -154,6 +155,7 @@ final class EventRepository
             'bring_note' => $data['bring_note'] ?: null,
             'closes_at' => $this->normalizeClosesAt($data['closes_at'] ?? null),
             'result_recipients' => $this->normalizeResultRecipients($data['result_recipients'] ?? null),
+            'remind_days_before' => $this->normalizeRemindDays($data['remind_days_before'] ?? null),
             'created_by' => $userId,
         ]);
 
@@ -170,7 +172,8 @@ final class EventRepository
         $stmt = $this->pdo->prepare(
             'UPDATE events SET title = :title, description = :description, location = :location,
                  time_note = :time_note, cost_note = :cost_note, bring_note = :bring_note,
-                 closes_at = :closes_at, result_recipients = :result_recipients
+                 closes_at = :closes_at, result_recipients = :result_recipients,
+                 remind_days_before = :remind_days_before
              WHERE id = :id'
         );
         $stmt->execute([
@@ -183,6 +186,7 @@ final class EventRepository
             'bring_note' => $data['bring_note'] ?: null,
             'closes_at' => $newClosesAt,
             'result_recipients' => $this->normalizeResultRecipients($data['result_recipients'] ?? null),
+            'remind_days_before' => $this->normalizeRemindDays($data['remind_days_before'] ?? null),
         ]);
 
         // Neue Frist gesetzt oder verschoben: anstehende Automatik-Mails wieder
@@ -530,6 +534,63 @@ final class EventRepository
             ->execute(['id' => $eventId]);
     }
 
+    /**
+     * Festgelegte Termine, deren Datum in genau `remind_days_before` Tagen
+     * liegt und für die die Vorab-Erinnerung noch nicht raus ist.
+     *
+     * @return list<int>
+     */
+    public function idsDueForEventReminder(): array
+    {
+        $rows = $this->pdo->query(
+            "SELECT e.id
+               FROM events e
+               JOIN event_options o ON o.id = e.decided_option_id
+              WHERE e.status = 'decided'
+                AND e.remind_days_before IS NOT NULL
+                AND e.event_reminder_sent_at IS NULL
+                AND o.option_date IS NOT NULL
+                AND o.option_date = DATE_ADD(CURDATE(), INTERVAL e.remind_days_before DAY)"
+        )->fetchAll(PDO::FETCH_COLUMN);
+
+        return array_map('intval', $rows);
+    }
+
+    public function markEventReminderSent(int $eventId): void
+    {
+        $this->pdo->prepare('UPDATE events SET event_reminder_sent_at = NOW() WHERE id = :id')
+            ->execute(['id' => $eventId]);
+    }
+
+    /**
+     * Teilnehmer, die dem festgelegten Termin zugesagt haben („Ja"), mit Mail.
+     *
+     * @return list<array{name: string, email: string}>
+     */
+    public function decidedYesRecipients(int $eventId): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT c.vorname, c.nachname,
+                    (SELECT email FROM contact_emails ce WHERE ce.contact_id = c.id ORDER BY ce.id LIMIT 1) AS email
+               FROM event_participants ep
+               JOIN contacts c ON c.id = ep.contact_id
+               JOIN events e ON e.id = ep.event_id
+               JOIN event_responses r ON r.participant_id = ep.id AND r.option_id = e.decided_option_id
+              WHERE ep.event_id = :event_id AND r.answer = 'yes'"
+        );
+        $stmt->execute(['event_id' => $eventId]);
+
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $email = trim((string) ($row['email'] ?? ''));
+            if ($email !== '') {
+                $out[] = ['name' => trim($row['vorname'] . ' ' . $row['nachname']), 'email' => $email];
+            }
+        }
+
+        return $out;
+    }
+
     public function markResultMailSent(int $eventId): void
     {
         $this->pdo->prepare('UPDATE events SET result_mail_sent_at = NOW() WHERE id = :id')
@@ -629,6 +690,35 @@ final class EventRepository
         }
     }
 
+    /** Erinnerungs-Vorlauf in Tagen: 1–60, sonst NULL (= aus). */
+    private function normalizeRemindDays(mixed $value): ?int
+    {
+        $n = (int) $value;
+
+        return $n >= 1 && $n <= 60 ? $n : null;
+    }
+
+    public function findByIcalUid(string $uid): ?array
+    {
+        if (!preg_match('/^[a-f0-9]{32}$/i', $uid)) {
+            return null;
+        }
+        $stmt = $this->pdo->prepare(
+            'SELECT events.*, cg.name AS group_name
+             FROM events
+             LEFT JOIN contact_groups cg ON cg.id = events.group_id
+             WHERE events.ical_uid = :uid'
+        );
+        $stmt->execute(['uid' => $uid]);
+        $event = $stmt->fetch();
+        if (!$event) {
+            return null;
+        }
+        $event['options'] = $this->optionsForEvent((int) $event['id']);
+
+        return $event;
+    }
+
     public function delete(int $eventId): void
     {
         $this->pdo->prepare('DELETE FROM events WHERE id = :id')->execute(['id' => $eventId]);
@@ -643,9 +733,9 @@ final class EventRepository
     public function participantByToken(string $token): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT ep.id AS participant_id, ep.token, ep.event_id,
+            'SELECT ep.id AS participant_id, ep.token, ep.event_id, ep.note,
                     c.vorname, c.nachname,
-                    e.title, e.kind, e.description, e.location, e.time_note, e.cost_note, e.bring_note, e.status, e.closes_at, e.decided_option_id
+                    e.title, e.kind, e.description, e.location, e.time_note, e.cost_note, e.bring_note, e.status, e.closes_at, e.decided_option_id, e.ical_uid
              FROM event_participants ep
              JOIN contacts c ON c.id = ep.contact_id
              JOIN events e ON e.id = ep.event_id
@@ -667,6 +757,14 @@ final class EventRepository
     /**
      * Antworten eines Teilnehmers speichern. $answers = [optionId => yes|maybe|no].
      */
+    /** Freie Anmerkung des Teilnehmers speichern (leer = löschen). */
+    public function saveParticipantNote(int $participantId, string $note): void
+    {
+        $note = trim($note);
+        $this->pdo->prepare('UPDATE event_participants SET note = :note WHERE id = :pid')
+            ->execute(['note' => $note !== '' ? mb_substr($note, 0, 500) : null, 'pid' => $participantId]);
+    }
+
     public function saveResponses(int $participantId, array $answers, string $via): void
     {
         $validOptions = $this->pdo->prepare(
@@ -747,7 +845,7 @@ final class EventRepository
     private function participantsForEvent(int $eventId): array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT ep.id, ep.contact_id, ep.token, ep.added_at,
+            'SELECT ep.id, ep.contact_id, ep.token, ep.note, ep.added_at,
                     c.vorname, c.nachname,
                     (SELECT email FROM contact_emails WHERE contact_emails.contact_id = c.id ORDER BY contact_emails.id LIMIT 1) AS email
              FROM event_participants ep

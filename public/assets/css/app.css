@@ -5624,6 +5624,43 @@ body { display: block; }
     margin: 0;
 }
 
+/* Freie Anmerkung beim Abstimmen + Sammelanzeige für die Verwaltung. */
+.vote-note {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 1rem 0 0;
+    font-size: 0.9rem;
+}
+
+.vote-note span {
+    font-weight: 600;
+}
+
+.vote-note textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+.event-notes {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.event-notes h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+}
+
+.event-notes ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
 #allVoteLinks {
     font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
     font-size: 0.82rem;

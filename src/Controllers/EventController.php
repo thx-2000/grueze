@@ -10,6 +10,7 @@ use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
 use App\Repositories\EventRepository;
 use App\Repositories\LogRepository;
+use App\Services\IcalService;
 use App\Support\Redirect;
 
 /**
@@ -24,8 +25,39 @@ final class EventController extends BaseController
         private ContactRepository $contacts,
         private CategoryRepository $categories,
         private LogRepository $logs,
+        private IcalService $ical,
     ) {
         parent::__construct($auth);
+    }
+
+    /**
+     * Kalender-Download (.ics) für einen festgelegten Termin. Öffentlich – der
+     * `ical_uid`-Schlüssel ist nicht erratbar; der Inhalt (Titel, Datum, Ort)
+     * steht ohnehin in der Einladungs-/Ergebnismail.
+     */
+    public function ical(Request $request): void
+    {
+        $event = $this->events->findByIcalUid((string) $request->input('k', ''));
+        $body = $event !== null ? $this->ical->forEvent($event, $this->host()) : null;
+        if ($body === null) {
+            render_error_page(404, 'Kein Termin', 'Für diesen Link gibt es keinen festgelegten Termin.');
+
+            return;
+        }
+
+        $name = preg_replace('/[^A-Za-z0-9]+/', '-', (string) $event['title']) ?: 'termin';
+        header('Content-Type: text/calendar; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . trim($name, '-') . '.ics"');
+        header('X-Robots-Tag: noindex, nofollow');
+        echo $body;
+    }
+
+    private function host(): string
+    {
+        $base = (string) config('app.base_url', '');
+        $host = parse_url($base, PHP_URL_HOST);
+
+        return is_string($host) && $host !== '' ? $host : 'grueze.local';
     }
 
     // ------------------------------------------------------------- Verwaltung
@@ -221,7 +253,11 @@ final class EventController extends BaseController
             $subject = ($isPoll ? 'Ergebnis' : 'Termin steht') . ': ' . $event['title'];
             $message = "{Anrede} {Vorname},\n\n"
                 . 'die ' . $noun . ' „' . $event['title'] . "\" ist entschieden.\n"
-                . "Hier ist das Ergebnis: {Abstimmungslink}\n\nDanke euch!";
+                . 'Hier ist das Ergebnis: {Abstimmungslink}';
+            if (!$isPoll && trim((string) ($event['ical_uid'] ?? '')) !== '') {
+                $message .= "\n\nIn den Kalender: " . url('/termine/termin.ics') . '?k=' . $event['ical_uid'];
+            }
+            $message .= "\n\nDanke euch!";
         } else {
             $subject = 'Bitte abstimmen: ' . $event['title'];
             $lines = [
@@ -295,6 +331,7 @@ final class EventController extends BaseController
 
         $via = $this->auth->check() ? 'login' : 'token';
         $this->events->saveResponses((int) $participant['participant_id'], $answers, $via);
+        $this->events->saveParticipantNote((int) $participant['participant_id'], (string) $request->input('note', ''));
         $this->events->logTokenHit((int) $participant['participant_id'], $this->sourceHash());
 
         flash('success', 'Danke, deine Rückmeldung ist gespeichert.');
@@ -314,6 +351,7 @@ final class EventController extends BaseController
             'bring_note' => trim((string) $request->input('bring_note')),
             'closes_at' => trim((string) $request->input('closes_at')),
             'result_recipients' => trim((string) $request->input('result_recipients')),
+            'remind_days_before' => trim((string) $request->input('remind_days_before')),
         ];
     }
 

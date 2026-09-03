@@ -48,6 +48,10 @@ $optionTitle = static fn (array $option): string => event_option_label($option);
         <p class="vote-deadline"><?= icon('clock') ?><span>Rückmeldung bis <strong><?= e(format_deadline($closesAt)) ?></strong> · <?= e(time_until_hint($closesAt)) ?></span></p>
     <?php endif; ?>
 
+    <?php if ($kind !== 'poll' && $decidedId > 0 && trim((string) ($p['ical_uid'] ?? '')) !== ''): ?>
+        <p><a class="ghost-button" href="<?= e(url('/termine/termin.ics') . '?k=' . $p['ical_uid']) ?>"><?= icon('calendar') ?><span>In den Kalender</span></a></p>
+    <?php endif; ?>
+
     <?php if ($p['options'] === []): ?>
         <p class="muted">Es gibt noch keine Auswahlmöglichkeiten.</p>
     <?php else: ?>
@@ -69,6 +73,11 @@ $optionTitle = static fn (array $option): string => event_option_label($option);
                     </div>
                 </fieldset>
             <?php endforeach; ?>
+
+            <label class="vote-note">
+                <span>Anmerkung (optional)</span>
+                <textarea name="note" rows="2" maxlength="500" placeholder="z. B. „kann erst ab 20 Uhr"<?= $closed ? ' disabled' : '' ?>><?= e((string) ($p['note'] ?? '')) ?></textarea>
+            </label>
 
             <?php if (!$closed): ?>
                 <button type="submit" class="vote-submit">Rückmeldung speichern</button>

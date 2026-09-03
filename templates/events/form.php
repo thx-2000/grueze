@@ -141,6 +141,22 @@ $kindMeta = [
         </section>
     <?php endif; ?>
 
+    <?php if ($kind !== 'poll'): ?>
+        <section class="detail-card">
+            <h2>Erinnerung vor dem Termin (optional)</h2>
+            <p class="field-hint">Sobald der Termin feststeht, geht an alle Zusagen automatisch eine Erinnerung raus – mit „In den Kalender"-Link. Braucht einen eingerichteten Cronjob.</p>
+            <label>
+                <span>Erinnern</span>
+                <select name="remind_days_before">
+                    <option value="">keine Erinnerung</option>
+                    <?php foreach ([1, 2, 3, 5, 7, 14] as $d): ?>
+                        <option value="<?= $d ?>" <?= (string) old('remind_days_before') === (string) $d ? 'selected' : '' ?>><?= $d ?> <?= $d === 1 ? 'Tag' : 'Tage' ?> vorher</option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+        </section>
+    <?php endif; ?>
+
     <div class="detail-save-bar" data-save-bar>
         <span class="detail-save-hint">Termin anlegen.</span>
         <div class="detail-save-actions">

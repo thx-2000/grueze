@@ -85,6 +85,9 @@ ksort($byCategory);
                 <?php if ($yesList !== []): ?>
                     <p class="event-decided-names"><strong>Dabei:</strong> <?= e(implode(', ', array_map(static fn (array $p): string => trim($p['vorname'] . ' ' . $p['nachname']), $yesList))) ?></p>
                 <?php endif; ?>
+                <?php if (trim((string) ($event['ical_uid'] ?? '')) !== '' && trim((string) ($option['option_date'] ?? '')) !== ''): ?>
+                    <p><a class="ghost-button" href="<?= e(url('/termine/termin.ics') . '?k=' . $event['ical_uid']) ?>"><?= icon('calendar') ?><span>In den Kalender</span></a></p>
+                <?php endif; ?>
                 <?php if (!$isFixed): ?>
                     <form method="post" action="<?= e(url('/termine/ergebnis')) ?>" class="event-inline-form">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
@@ -200,6 +203,22 @@ ksort($byCategory);
                     </select>
                 </label>
             </div>
+        </section>
+    <?php endif; ?>
+
+    <?php if ($kind !== 'poll'): ?>
+        <section class="detail-card">
+            <h2>Erinnerung vor dem Termin</h2>
+            <p class="field-hint">Sobald der Termin feststeht, bekommen alle Zusagen automatisch eine Erinnerung mit „In den Kalender"-Link.</p>
+            <label>
+                <span>Erinnern</span>
+                <select name="remind_days_before">
+                    <option value="">keine Erinnerung</option>
+                    <?php $remind = (int) ($event['remind_days_before'] ?? 0); foreach ([1, 2, 3, 5, 7, 14] as $d): ?>
+                        <option value="<?= $d ?>" <?= $remind === $d ? 'selected' : '' ?>><?= $d ?> <?= $d === 1 ? 'Tag' : 'Tage' ?> vorher</option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
         </section>
     <?php endif; ?>
 
@@ -321,6 +340,18 @@ ksort($byCategory);
                 </div>
             <?php endif; ?>
         </form>
+
+        <?php $notes = array_values(array_filter($participants, static fn (array $p): bool => trim((string) ($p['note'] ?? '')) !== '')); ?>
+        <?php if ($notes !== []): ?>
+            <div class="event-notes">
+                <h3>Anmerkungen</h3>
+                <ul>
+                    <?php foreach ($notes as $p): ?>
+                        <li><strong><?= e(trim($p['vorname'] . ' ' . $p['nachname'])) ?>:</strong> <?= e((string) $p['note']) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
     </section>
 <?php endif; ?>
 

@@ -34,11 +34,11 @@ final class EventScheduler
     /**
      * Alle drei Aufgaben abarbeiten.
      *
-     * @return array{closed: int, reminded: int, results: int, mails: int, errors: int}
+     * @return array{closed: int, reminded: int, results: int, upcoming: int, mails: int, errors: int}
      */
     public function run(): array
     {
-        $stats = ['closed' => 0, 'reminded' => 0, 'results' => 0, 'mails' => 0, 'errors' => 0];
+        $stats = ['closed' => 0, 'reminded' => 0, 'results' => 0, 'upcoming' => 0, 'mails' => 0, 'errors' => 0];
 
         foreach ($this->events->idsDueForClose() as $eventId) {
             $this->events->setStatus($eventId, 'closed');
@@ -51,6 +51,14 @@ final class EventScheduler
             $stats['errors'] += $sent['failed'];
             $this->events->markReminderSent($eventId);
             $stats['reminded']++;
+        }
+
+        foreach ($this->events->idsDueForEventReminder() as $eventId) {
+            $sent = $this->sendEventReminder($eventId);
+            $stats['mails'] += $sent['sent'];
+            $stats['errors'] += $sent['failed'];
+            $this->events->markEventReminderSent($eventId);
+            $stats['upcoming']++;
         }
 
         foreach ($this->events->idsDueForResultMail() as $eventId) {
@@ -92,6 +100,48 @@ final class EventScheduler
                 . ($deadline !== '' ? 'Die Abstimmung endet am ' . $deadline . ".\n\n" : "\n\n")
                 . 'Hier ist dein persönlicher Link:' . "\n" . $base . '?token=' . $person['token'] . "\n\n"
                 . 'Danke!';
+            $failed += $this->deliver($identity, $person['email'], $subject, $body, (int) $event['created_by']) ? 0 : 1;
+            $sent += 1;
+        }
+
+        return ['sent' => $sent - $failed, 'failed' => $failed];
+    }
+
+    /** Vorab-Erinnerung X Tage vor dem festgelegten Termin an alle Zusagen. */
+    private function sendEventReminder(int $eventId): array
+    {
+        $event = $this->events->find($eventId);
+        if ($event === null) {
+            return ['sent' => 0, 'failed' => 0];
+        }
+
+        $recipients = $this->events->decidedYesRecipients($eventId);
+        if ($recipients === []) {
+            return ['sent' => 0, 'failed' => 0];
+        }
+
+        $when = '';
+        foreach ((array) ($event['options'] ?? []) as $o) {
+            if ((int) $o['id'] === (int) ($event['decided_option_id'] ?? 0)) {
+                $when = event_option_label($o);
+            }
+        }
+
+        $identity = $this->settings->mailIdentity();
+        $subject = $this->prefix() . ' Erinnerung: ' . $event['title'];
+        $ics = trim((string) ($event['ical_uid'] ?? '')) !== ''
+            ? url('/termine/termin.ics') . '?k=' . $event['ical_uid']
+            : '';
+
+        $sent = 0;
+        $failed = 0;
+        foreach ($recipients as $person) {
+            $body = 'Hallo ' . $this->firstName($person['name']) . ",\n\n"
+                . 'kurze Erinnerung: „' . $event['title'] . '"'
+                . ($when !== '' ? ' ist am ' . $when : ' steht bald an') . '.'
+                . (trim((string) ($event['location'] ?? '')) !== '' ? "\nOrt: " . $event['location'] : '')
+                . ($ics !== '' ? "\n\nIn den Kalender: " . $ics : '')
+                . "\n\nBis dann!";
             $failed += $this->deliver($identity, $person['email'], $subject, $body, (int) $event['created_by']) ? 0 : 1;
             $sent += 1;
         }
@@ -187,7 +237,12 @@ final class EventScheduler
         if ($decidedId > 0) {
             foreach ($options as $option) {
                 if ((int) $option['id'] === $decidedId) {
-                    return 'Festgelegt: ' . event_option_label($option);
+                    $line = 'Festgelegt: ' . event_option_label($option);
+                    if (trim((string) ($event['ical_uid'] ?? '')) !== '') {
+                        $line .= "\n\nIn den Kalender: " . url('/termine/termin.ics') . '?k=' . $event['ical_uid'];
+                    }
+
+                    return $line;
                 }
             }
         }

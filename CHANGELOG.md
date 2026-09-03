@@ -3,6 +3,21 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.12.0
+
+**Termine rund gemacht**
+
+- **In den Kalender:** Sobald ein Termin feststeht, gibt es auf der
+  Detailseite, im Abstimmungs-Link und in der Ergebnis-/Einladungsmail einen
+  **„In den Kalender"-Link** (`.ics`) – ein Klick übernimmt Titel, Datum,
+  Uhrzeit, Ort und Eckdaten in den eigenen Kalender.
+- **Erinnerung vor dem Termin:** Beim Anlegen oder Bearbeiten lässt sich
+  einstellen, dass alle Zusagen X Tage vorher automatisch eine Erinnerung
+  bekommen (mit Kalender-Link). Läuft über den Cronjob.
+- **Anmerkung beim Abstimmen:** Wer abstimmt, kann eine kurze Notiz
+  hinterlassen (z. B. „kann erst ab 20 Uhr"). Die Verwaltung bzw. Gruppenleitung
+  sieht alle Anmerkungen gesammelt auf der Detailseite.
+
 ## 1.11.0
 
 **Zur Abstimmung einladen – mit vorbereitetem Text**

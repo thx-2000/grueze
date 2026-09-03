@@ -20,12 +20,24 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 - **Grüße automatisch am Tag:** umgesetzt v1.10.0 (GreetingScheduler).
 - **Interner Rollenschlüssel umbenennbar:** umgesetzt v1.10.0.
 
+- **„Praktisch nützlich" – 4 Ausbaurichtungen** (von TH am 2026-09-03 komplett
+  bestellt):
+  1. **Termine rund machen** – umgesetzt v1.12.0: `.ics`-Kalenderdatei für
+     festgelegte Termine (auch in der Mail), automatische Erinnerung X Tage
+     vorher, Freitext-Anmerkung beim Abstimmen.
+  2. **Datenpflege leichter** – offen: Self-Service-Link (Token, ohne Login)
+     zum Korrigieren der eigenen Daten · Dubletten-Finder + Zusammenführen ·
+     30-Tage-Papierkorb für Kontakte.
+  3. **Handy & Alltag** – offen: PWA-Manifest · Startseiten-Widget
+     (Geburtstage der Woche + Termine mit offenen Rückmeldungen) · vCard
+     (`.vcf`)-Export für einzelne/ausgewählte Kontakte.
+  4. **Sicherheit nachziehen** – offen: Verschlüsselung von Backup-ZIPs /
+     Mail-Zugangsdaten „at rest" · Reset-Token ins Pfad-Segment statt Query (L8).
+
 Ideen, falls es weitergeht (kein Muss):
 - Echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows – nur am
   Gerät machbar.
 - Termine: Ranking-Variante.
-- Reset-Token ins Pfad-Segment statt Query (kosmetische Härtung, siehe L8).
-- Optionale Verschlüsselung von Backup-ZIPs / Mail-Zugangsdaten „at rest".
 
 - **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
   neu gruppieren und klarer benennen, Gesamtbedienung eleganter und

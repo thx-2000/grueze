@@ -216,6 +216,7 @@ final class GroupPollController extends BaseController
             }
         }
         $this->events->saveResponses((int) $mine['participant_id'], $answers, 'login');
+        $this->events->saveParticipantNote((int) $mine['participant_id'], (string) $request->input('note', ''));
 
         flash('success', 'Danke, deine Rückmeldung ist gespeichert.');
         Redirect::to('/gruppen/abstimmung?id=' . (int) $event['id']);

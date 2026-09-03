@@ -249,12 +249,14 @@ try {
         Container::get(TagRepository::class),
         Container::get(SettingRepository::class)
     ));
+    Container::factory(\App\Services\IcalService::class, static fn () => new \App\Services\IcalService());
     Container::factory(EventController::class, static fn () => new EventController(
         Container::get(Auth::class),
         Container::get(EventRepository::class),
         Container::get(ContactRepository::class),
         Container::get(CategoryRepository::class),
-        Container::get(LogRepository::class)
+        Container::get(LogRepository::class),
+        Container::get(\App\Services\IcalService::class)
     ));
     Container::factory(EventScheduler::class, static fn () => new EventScheduler(
         Container::get(EventRepository::class),
@@ -465,6 +467,7 @@ try {
     $router->post('/termine/loeschen', [EventController::class, 'delete']);
     $router->post('/termine/nachricht', [EventController::class, 'messageParticipants']);
     $router->post('/termine/frist', [EventController::class, 'extendDeadline']);
+    $router->get('/termine/termin.ics', [EventController::class, 'ical']);
     $router->get('/abstimmen', [EventController::class, 'vote']);
     $router->post('/abstimmen', [EventController::class, 'submitVote']);
     $router->get('/intern/cron', [CronController::class, 'run']);
