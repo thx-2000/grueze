@@ -45,7 +45,13 @@ foreach (($values['phones'] ?? []) as $i => $ph) {
 }
 
 $linkedUser = $editing ? ($contact['linked_user'] ?? null) : null;
-$loginEnabled = can('users.manage') && ($hasOld ? array_key_exists('login_enabled', $oldInput) : $linkedUser !== null);
+// Nach dem Speichern zeigt die Checkbox den tatsächlichen Login-Status
+// (is_active), nicht nur „gibt es überhaupt einen verknüpften Zugang" –
+// sonst erscheint ein deaktivierter Login beim nächsten Aufruf wieder als
+// angehakt und lässt sich scheinbar nicht abschalten.
+$loginEnabled = can('users.manage') && ($hasOld
+    ? array_key_exists('login_enabled', $oldInput)
+    : ($linkedUser !== null && (int) ($linkedUser['is_active'] ?? 0) === 1));
 $loginEmail = preg_replace('/^\s*mailto:\s*/i', '', $hasOld
     ? (string) ($oldInput['login_email'] ?? '')
     : (string) ($linkedUser['email'] ?? ($values['emails'][0]['email'] ?? '')));
