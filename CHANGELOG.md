@@ -3,6 +3,31 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.52.0
+
+**Neu: Dokumente-Bereich.**
+
+- Neuer Bereich „Dokumente" in der Seitenleiste: Ordner mit Dateien (PDF,
+  Word, Excel, PowerPoint, ODF, Text, ZIP oder Bild) – für Formulare,
+  Vorlagen und andere Dateien fürs Orga-Team.
+- **Gleiches Rechte-/Gruppen-Modell wie bei den Galerien:** drei globale
+  Rechte (Ansehen, Hochladen, Verwalten) – und zusätzlich kann Gruppenleitung
+  ohne globales Recht einen Ordner für die eigene Gruppe anlegen und
+  verwalten. Jeder Ordner kann seine Sichtbarkeit auf „alle angemeldeten
+  Personen" oder „nur die eigene Gruppe" einschränken.
+- Jede Datei hat einen Titel und optional eine Beschreibung (auch nachträglich
+  bearbeitbar). Ein **Direktlink** lässt sich kopieren und weitergeben –
+  ein berechtigtes Login ist zum Öffnen trotzdem nötig.
+- Eigene Uploads dürfen auch ohne Verwalten-Recht selbst bearbeitet/gelöscht
+  werden (wie bei Galerie-Medien).
+- **Kein Papierkorb** (wie bei Gruppen) – Löschen von Ordnern und Dateien ist
+  hier bewusst endgültig.
+- Dateien liegen unter `storage/documents/` (außerhalb des Webroots, getrennt
+  von den Galerie-Medien) und werden nicht mitrsynct – eigene Sicherung nötig.
+
+**Migration `2026-10-02-dokumente`** (zwei neue Tabellen: `document_folders`,
+`documents`).
+
 ## 1.51.0
 
 **Galerien für Gruppenleitung.**

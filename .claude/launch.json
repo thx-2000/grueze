@@ -1,0 +1,10 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "grueze-dev",
+      "url": "http://localhost:8095",
+      "port": 8095
+    }
+  ]
+}

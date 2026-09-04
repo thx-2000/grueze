@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.51.0';
+    return '1.52.0';
 }
 
 /**
@@ -595,6 +595,39 @@ function nav_show_galleries(): bool
 }
 
 /**
+ * Ob der „Dokumente"-Menüpunkt für die aktuelle Person angezeigt werden soll –
+ * gleiche Logik wie bei den Galerien (globale Rechte, Gruppenleitung, oder
+ * Mitglied einer Gruppe mit eigenem Ordner).
+ */
+function nav_show_documents(): bool
+{
+    if (can_any('documents.view', 'documents.upload', 'documents.manage')) {
+        return true;
+    }
+    try {
+        $user = App\Core\Container::get(App\Core\Auth::class)->user();
+        $contactId = (int) ($user['contact_id'] ?? 0);
+        if ($contactId <= 0) {
+            return false;
+        }
+        $groups = App\Core\Container::get(App\Repositories\GroupRepository::class)->forContact($contactId);
+        if ($groups === []) {
+            return false;
+        }
+        foreach ($groups as $group) {
+            if (($group['my_role'] ?? '') === 'lead') {
+                return true;
+            }
+        }
+        $groupIds = array_map(static fn (array $g): int => (int) $g['id'], $groups);
+
+        return App\Core\Container::get(App\Repositories\DocumentFolderRepository::class)->hasFoldersForGroups($groupIds);
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+/**
  * Kurzer Abschnittsname für den <title>. Ergibt zusammen mit dem Instanznamen
  * einen sprechenden Tab-/Verlaufseintrag. Rein intern – die Seite ist nicht
  * für Suchmaschinen bestimmt (noindex). Templates dürfen über die
@@ -622,6 +655,9 @@ function page_title(string $path): string
         '/galerien/ansehen'          => 'Galerie',
         '/galerien/papierkorb'       => 'Galerie-Papierkorb',
         '/galerien/auffang'          => 'Auffangraum',
+        '/dokumente'                 => 'Dokumente',
+        '/dokumente/neu'             => 'Neuer Ordner',
+        '/dokumente/ansehen'         => 'Ordner',
         '/meine-daten'               => 'Daten-Check',
         '/search'                    => 'Suche',
         '/contacts/create'           => 'Neuer Kontakt',
@@ -1006,6 +1042,8 @@ function icon(string $name): string
         'download' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3h2v8h3l-4 4l-4-4h3V3Zm-6 13h2v3h10v-3h2v3.5A1.5 1.5 0 0 1 17.5 21h-11A1.5 1.5 0 0 1 5 19.5V16Z"/></svg>',
         'drag' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Zm6 0a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3ZM9 10.5a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Zm6 0a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3ZM9 16a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Zm6 0a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Z"/></svg>',
         'star' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3l2.8 5.7l6.2.9l-4.5 4.4l1.1 6.2L12 17.3L6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>',
+        'folder' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h4.4a1.5 1.5 0 0 1 1.06.44L12.4 5.9H18.5A1.5 1.5 0 0 1 20 7.4v11.1a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13Z"/></svg>',
+        'file' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm7 1.5V8h4.5L13 3.5ZM8 13h8v1.5H8V13Zm0 3.5h8V18H8v-1.5ZM8 9.5h4V11H8V9.5Z"/></svg>',
     ];
 
     $svg = $icons[$name] ?? '';

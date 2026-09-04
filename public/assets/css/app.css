@@ -5870,6 +5870,76 @@ body.lightbox-open { overflow: hidden; }
 .gallery-restore[open] > summary { margin-bottom: 0.7rem; }
 .ghost-button.is-disabled { opacity: 0.5; pointer-events: none; }
 
+/* ============================================================================
+   Dokumente (Ordner mit Dateien – nutzt die Galerien-Karten-Klassen mit)
+   ========================================================================== */
+
+.document-folder-cover .icon { width: 2.6rem; height: 2.6rem; color: var(--color-secondary); opacity: 0.7; }
+
+.document-upload { display: grid; gap: 0.7rem; }
+.document-upload h3 { margin: 0; }
+
+.document-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+.document-row {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    padding: 0.8rem 0.9rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+.document-icon {
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-sunken);
+}
+.document-icon .icon { width: 1.4rem; height: 1.4rem; color: var(--color-muted); }
+.document-ext-badge {
+    position: absolute;
+    bottom: -0.3rem;
+    right: -0.4rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.05rem 0.3rem;
+    border-radius: 0.3rem;
+    background: var(--color-secondary);
+    color: var(--color-on-secondary, #fff);
+}
+.document-row-body { flex: 1 1 auto; min-width: 0; display: grid; gap: 0.2rem; }
+.document-row-body strong { font-family: var(--font-display); }
+.document-meta { font-size: 0.8rem; color: var(--color-muted); }
+.document-row-actions {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: flex-start;
+}
+.document-edit > summary { list-style: none; cursor: pointer; }
+.document-edit > summary::-webkit-details-marker { display: none; }
+.document-edit-body {
+    margin-top: 0.6rem;
+    padding: 0.8rem;
+    background: var(--surface-sunken);
+    border-radius: var(--radius-sm);
+    display: grid;
+    gap: 0.8rem;
+    min-width: min(28rem, 80vw);
+}
+
+@media (max-width: 640px) {
+    .document-row { flex-wrap: wrap; }
+    .document-edit-body { min-width: 0; }
+}
+
 .media-caption-text {
     flex: 1;
     min-width: 0;

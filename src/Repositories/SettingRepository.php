@@ -199,6 +199,9 @@ final class SettingRepository
             'galleries.view'       => ['orga', 'stufenmitglied'],
             'galleries.upload'     => ['orga', 'stufenmitglied'],
             'galleries.manage'     => ['orga'],
+            'documents.view'       => ['orga', 'stufenmitglied'],
+            'documents.upload'     => ['orga'],
+            'documents.manage'     => ['orga'],
             'orga.contact_target'  => ['orga'],
             'settings.manage'      => ['orga'],
         ];

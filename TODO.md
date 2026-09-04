@@ -118,6 +118,34 @@ Papierkorb (nur Admin sichtbar), Bilder nicht in die DB, Videos erlaubt.
   nicht gespeichert wird); Galerie-Eigentümerschaft nachträglich auf eine
   andere Gruppe übertragen (aktuell nur bei Neuanlage wählbar).
 
+## Dokumente (TH-Wunsch 2026-09-04, „Teil A")
+
+TH-Wunsch: Orga-Team und Gruppenleitung sollen Dokumente (Word/Excel/PDF/…)
+hochladen können, mit Ordnern, Beschreibung und Direktlink (weiterhin mit
+Login). Rechte/Gruppen-Modell auf TH-Wunsch identisch zu den Galerien.
+
+- **v1.52.0 erledigt.** Neuer Bereich „Dokumente". Rechte `documents.view` /
+  `documents.upload` / `documents.manage` (Standard: Team verwaltet+lädt hoch,
+  Team+Mitglieder sehen – anders als bei Galerien lädt „Mitglied" per Default
+  NICHT hoch, nur Team/Gruppenleitung, da TH explizit „Orga-Team (und
+  Gruppenleiter)" nannte). Ordner mit `owner_group_id`/`visible_group_id` –
+  gleiches Muster wie die Galerien-Gruppenleitung (v1.51.0): Gruppenleitung
+  legt/verwaltet eigenen Ordner ohne globales Recht, Sichtbarkeit „alle" oder
+  „nur eigene Gruppe" wählbar, globale Verwaltung schränkt jeden Ordner ein.
+  Eigene Uploads dürfen ohne Verwalten-Recht selbst bearbeitet/gelöscht
+  werden. Direktlink = normale angemeldete URL (kopierbar), kein Token.
+  **Bewusst kein Papierkorb** (wie bei Gruppen – Löschen ist endgültig).
+  Dateitypen per erlaubter Dateiendung (nicht per Server-MIME-Erkennung, da
+  Office-Formate auf manchen Hostern nur als „application/zip" erkannt
+  werden): PDF, Word, Excel, PowerPoint, ODF, Text, CSV, RTF, ZIP, JPG/PNG –
+  `config('documents.allowed_extensions')`. `storage/documents/` außerhalb
+  Webroot, getrennt von Galerie-Medien, nicht im ZIP-Backup und nicht
+  mitrsynct. Migration `2026-10-02-dokumente`.
+- **Feiner (offen):** Unterordner/Verschachtelung; Sortierung/Suche bei vielen
+  Dateien; Datei-Vorschau (aktuell öffnet der Browser die Datei direkt, PDF
+  meist inline, Office-Formate meist als Download); Medien-Sicherungsknopf
+  (wie bei Galerien) auch für Dokumente in der Verwaltung → Datensicherung.
+
 ## Account-Einladungen (TH-Fragen 2026-09-04)
 
 **Was es schon gibt:**
@@ -310,6 +338,18 @@ Stand betreffen.
     prominenter, sobald dieser Screen kommt.
   - Datenschutz-Feinheit: aktuell nur die Fremd-Link-Warnung, keine
     Mail-Bestätigung beim Abstimmen (bewusst so entschieden 2026-09).
+  - **Geplant, noch NICHT gebaut (TH-Wunsch 2026-09-04, „Teil B"):**
+    „Termine" (heute Voting + Ankündigung in einem System) in zwei Bereiche
+    trennen. TH-Entscheidung: **vollständige Trennung** (nicht nur Umbenennung).
+    1. „Abstimmungen" als eigener Navigationspunkt/Bereich – heutiges
+       poll/date_poll-Verhalten unverändert übernehmen, keine Datenmigration
+       nötig.
+    2. „Termine" neu bauen als reine Ankündigungsseite vom Orga-Team: Titel,
+       Zeitraum, Freitext-Info, Link-Liste (intern zu Dokumenten – jetzt via
+       Direktlink aus dem Dokumente-Bereich möglich, extern, intern zu einer
+       Abstimmung). Heutige `fixed_date`-Termine wandern hier rein.
+    3. Aufräumen: Hilfe-Seiten, iCal-Export, Gruppen-Verzahnung, Rail-Navigation.
+    Größerer Umbau, in eigenen Releases – noch nicht begonnen.
 
 - **„Mail ans Orga-Team"-Knopf**: **erledigt in v0.34.0** – `/orga-team`
   (`OrgaController`), Link in Seitenleiste + „Mein Konto". Ziel: feste

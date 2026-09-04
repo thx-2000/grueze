@@ -124,6 +124,9 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                 <?php if (nav_show_galleries()): ?>
                     <a class="<?= str_starts_with($currentPath, '/galerien') ? 'is-active' : '' ?>" href="<?= e(url('/galerien')) ?>"><span class="rail-ic"><?= icon('image') ?></span>Galerien</a>
                 <?php endif; ?>
+                <?php if (nav_show_documents()): ?>
+                    <a class="<?= str_starts_with($currentPath, '/dokumente') ? 'is-active' : '' ?>" href="<?= e(url('/dokumente')) ?>"><span class="rail-ic"><?= icon('folder') ?></span>Dokumente</a>
+                <?php endif; ?>
                 <?php if ($showAdminHub): ?>
                     <span class="rail-group">Verwaltung</span>
                     <a class="<?= $onAdminHub ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung')) ?>"><span class="rail-ic"><?= icon('sliders') ?></span>Einstellungen</a>

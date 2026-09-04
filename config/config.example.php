@@ -204,6 +204,36 @@ return [
         ],
     ],
 
+    // Dokumente-Bereich: Ordner mit Dateien (PDF, Word, Excel, …) fürs
+    // Orga-Team und für Gruppenleitung. Dateien liegen unter
+    // storage/documents/ (außerhalb des Webroots), separat von Galerien.
+    'documents' => [
+        'max_bytes' => 26214624, // 25 MiB
+        // Erlaubte Dateiendungen (klein geschrieben, ohne Punkt) → MIME-Typ
+        // für die Auslieferung. Die Endung entscheidet, nicht die vom Server
+        // erkannte MIME-Art (Office-Formate werden von manchen Hostern nur
+        // als „application/zip" erkannt).
+        'allowed_extensions' => [
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls' => 'application/vnd.ms-excel',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'ppt' => 'application/vnd.ms-powerpoint',
+            'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'odt' => 'application/vnd.oasis.opendocument.text',
+            'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
+            'odp' => 'application/vnd.oasis.opendocument.presentation',
+            'txt' => 'text/plain',
+            'csv' => 'text/csv',
+            'rtf' => 'application/rtf',
+            'zip' => 'application/zip',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+        ],
+    ],
+
     'defaults' => [
         'country' => 'Deutschland',
         // Leer lassen = die eingebauten (branding-abhängigen) Vorgaben nutzen.

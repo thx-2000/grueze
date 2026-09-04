@@ -435,6 +435,17 @@ try {
         Container::get(\App\Repositories\GalleryMediaRepository::class),
         Container::get(\App\Services\MediaService::class)
     ));
+    Container::factory(\App\Services\DocumentStorageService::class, static fn () => new \App\Services\DocumentStorageService());
+    Container::factory(\App\Repositories\DocumentFolderRepository::class, static fn () => new \App\Repositories\DocumentFolderRepository(Container::get(PDO::class)));
+    Container::factory(\App\Repositories\DocumentRepository::class, static fn () => new \App\Repositories\DocumentRepository(Container::get(PDO::class)));
+    Container::factory(\App\Controllers\DocumentController::class, static fn () => new \App\Controllers\DocumentController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\DocumentFolderRepository::class),
+        Container::get(\App\Repositories\DocumentRepository::class),
+        Container::get(\App\Services\DocumentStorageService::class),
+        Container::get(LogRepository::class),
+        Container::get(GroupRepository::class)
+    ));
 
     // Angemeldete Sitzung mitschreiben (Verwaltung → Anmeldungen). Wurde die
     // Sitzung aus der Ferne beendet, hier abmelden und zur Anmeldung schicken.
@@ -673,6 +684,17 @@ try {
     $router->post('/galerien/link/widerrufen', [\App\Controllers\GalleryController::class, 'revokeLink']);
     $router->get('/beitragen/{token}', [\App\Controllers\GalleryContributeController::class, 'form']);
     $router->post('/beitragen/{token}', [\App\Controllers\GalleryContributeController::class, 'upload']);
+
+    $router->get('/dokumente', [\App\Controllers\DocumentController::class, 'index']);
+    $router->get('/dokumente/neu', [\App\Controllers\DocumentController::class, 'createForm']);
+    $router->post('/dokumente', [\App\Controllers\DocumentController::class, 'store']);
+    $router->get('/dokumente/ansehen', [\App\Controllers\DocumentController::class, 'show']);
+    $router->post('/dokumente/speichern', [\App\Controllers\DocumentController::class, 'update']);
+    $router->post('/dokumente/loeschen', [\App\Controllers\DocumentController::class, 'deleteFolder']);
+    $router->post('/dokumente/hochladen', [\App\Controllers\DocumentController::class, 'upload']);
+    $router->post('/dokumente/datei/speichern', [\App\Controllers\DocumentController::class, 'documentUpdate']);
+    $router->post('/dokumente/datei/loeschen', [\App\Controllers\DocumentController::class, 'documentDelete']);
+    $router->get('/dokumente/datei', [\App\Controllers\DocumentController::class, 'file']);
     $router->get('/meine-daten', [\App\Controllers\DataCheckController::class, 'show']);
     $router->get('/meine-daten/{token}', [\App\Controllers\DataCheckController::class, 'show']);
     $router->post('/meine-daten', [\App\Controllers\DataCheckController::class, 'save']);

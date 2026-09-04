@@ -308,6 +308,11 @@ final class SettingsController extends BaseController
                     'galleries.upload' => 'Fotos und Videos in Galerien hochladen (und eigene Uploads bearbeiten)',
                     'galleries.manage' => 'Galerien anlegen, bearbeiten, löschen; fremde Medien verschieben/löschen; Sicherung',
                 ],
+                'Dokumente' => [
+                    'documents.view' => 'Ordner und Dateien ansehen und herunterladen',
+                    'documents.upload' => 'Dateien in Ordner hochladen (und eigene Uploads bearbeiten/löschen)',
+                    'documents.manage' => 'Ordner anlegen, bearbeiten, löschen; fremde Dateien bearbeiten/löschen',
+                ],
                 'Orga-Team' => [
                     'orga.contact_target' => 'Bekommt Nachrichten über den „Orga-Team schreiben"-Knopf',
                 ],

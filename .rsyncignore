@@ -30,6 +30,11 @@ storage/tmp/*
 storage/media/*
 !storage/media/.gitkeep
 !storage/media/.htaccess
+# Dokumente bleiben ebenso auf dem Server – gleiche Begründung wie bei den
+# Galerie-Medien (eigene Sicherung, nicht im ZIP-Backup).
+storage/documents/*
+!storage/documents/.gitkeep
+!storage/documents/.htaccess
 storage/backups/*
 !storage/backups/.gitkeep
 !storage/backups/.htaccess
