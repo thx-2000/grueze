@@ -3,6 +3,14 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.45.1
+
+**Hotfix zur Migration `2026-09-27`.** `RANDOM_BYTES()` gibt es erst ab
+MariaDB 10.10 – auf älteren Servern brach „Aktualisieren" mit
+„FUNCTION … RANDOM_BYTES does not exist" ab. Die Migration nutzt jetzt
+`SHA2(CONCAT(UUID(), RAND(), id))` (überall verfügbar). Wer v1.45.0 schon
+ohne Fehler aktualisiert hat, braucht nichts zu tun.
+
 ## 1.45.0
 
 **Sicherheits-Härtung aus dem zweiten Audit.**

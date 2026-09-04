@@ -15,9 +15,12 @@ ALTER TABLE events
 ALTER TABLE events
     ADD KEY IF NOT EXISTS idx_events_ical_uid (ical_uid);
 
--- Zufälliger Schlüssel (nicht UUID(): das ist zeit-/MAC-basiert und damit in
--- Grenzen erratbar). RANDOM_BYTES wird pro Zeile neu ausgewertet.
-UPDATE events SET ical_uid = LOWER(HEX(RANDOM_BYTES(16))) WHERE ical_uid IS NULL;
+-- Nicht ableitbarer Schlüssel: SHA-256 über UUID() + RAND() + id, auf 32 Hex
+-- gekürzt (nicht bloßes UUID(): das ist zeit-/MAC-basiert). SHA2 gibt es
+-- überall; RANDOM_BYTES erst ab MariaDB 10.10.
+UPDATE events
+SET ical_uid = SUBSTRING(SHA2(CONCAT(UUID(), RAND(), id), 256), 1, 32)
+WHERE ical_uid IS NULL;
 
 ALTER TABLE event_participants
     ADD COLUMN IF NOT EXISTS note VARCHAR(500) NULL AFTER token;
