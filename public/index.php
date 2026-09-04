@@ -262,6 +262,14 @@ try {
         Container::get(LogRepository::class)
     ));
     Container::factory(\App\Repositories\RecipientListRepository::class, static fn () => new \App\Repositories\RecipientListRepository(Container::get(PDO::class)));
+    Container::factory(\App\Services\MailRecipientResolver::class, static fn () => new \App\Services\MailRecipientResolver(
+        Container::get(ContactRepository::class),
+        Container::get(\App\Repositories\RecipientListRepository::class)
+    ));
+    Container::factory(\App\Services\MailComposer::class, static fn () => new \App\Services\MailComposer(
+        Container::get(Auth::class),
+        Container::get(SettingRepository::class)
+    ));
     Container::factory(EventRepository::class, static fn () => new EventRepository(Container::get(PDO::class)));
     Container::factory(GreetingRepository::class, static fn () => new GreetingRepository(Container::get(PDO::class)));
     Container::factory(RegistrationInviteRepository::class, static fn () => new RegistrationInviteRepository(Container::get(PDO::class)));
@@ -339,8 +347,14 @@ try {
         Container::get(UploadService::class),
         Container::get(CategoryRepository::class),
         Container::get(TagRepository::class),
+        Container::get(EventRepository::class),
+        Container::get(\App\Services\MailRecipientResolver::class),
+        Container::get(\App\Services\MailComposer::class)
+    ));
+    Container::factory(\App\Controllers\RecipientListController::class, static fn () => new \App\Controllers\RecipientListController(
+        Container::get(Auth::class),
         Container::get(\App\Repositories\RecipientListRepository::class),
-        Container::get(EventRepository::class)
+        Container::get(\App\Services\MailRecipientResolver::class)
     ));
     Container::factory(SettingsController::class, static fn () => new SettingsController(
         Container::get(Auth::class),
@@ -486,9 +500,9 @@ try {
 
     $router->get('/rundmail', [MailController::class, 'rundmail']);
     $router->get('/rundmail/anzahl', [MailController::class, 'recipientCount']);
-    $router->post('/rundmail/liste-speichern', [MailController::class, 'saveRecipientList']);
-    $router->post('/rundmail/liste-umbenennen', [MailController::class, 'renameRecipientList']);
-    $router->post('/rundmail/liste-loeschen', [MailController::class, 'deleteRecipientList']);
+    $router->post('/rundmail/liste-speichern', [\App\Controllers\RecipientListController::class, 'save']);
+    $router->post('/rundmail/liste-umbenennen', [\App\Controllers\RecipientListController::class, 'rename']);
+    $router->post('/rundmail/liste-loeschen', [\App\Controllers\RecipientListController::class, 'delete']);
     $router->get('/vollstaendigkeit', [\App\Controllers\CompletenessController::class, 'index']);
     $router->post('/vollstaendigkeit/teilen', [\App\Controllers\CompletenessController::class, 'share']);
 

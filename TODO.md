@@ -137,9 +137,11 @@ Stand betreffen.
        `ContactArchiveController`, `ContactPortController`,
        `CompletenessController`, `LinkedAccountService`, `ContactDiff`,
        `ContactFieldRedactor`.
-     - offen: `MailController` 826 Z. (Empfänger-Auflösung + Identität/
-       Antwortweg/Betreff/Fuß in Services ziehen, Empfängerlisten-CRUD in
-       eigenen Controller), `templates/contacts/index.php` 685 Z.
+     - v1.30.0: `MailController` 826 → ~500 Z.; raus in
+       `MailRecipientResolver`, `MailComposer`, `RecipientListController`,
+       `JsonResponse`.
+     - offen: `templates/contacts/index.php` 685 Z. (Teil-Partials:
+       Filterleiste, Tabelle, Karten, Auswahl-Modus-Leiste).
    - offen: Merge-/Dubletten-Logik aus `ContactRepository` in einen Service.
 
 - **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation

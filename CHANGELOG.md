@@ -3,6 +3,26 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.30.0
+
+**Nur Umbau unter der Haube – kein sichtbarer Unterschied, keine Migration.**
+
+Der `MailController` (~830 Zeilen) ist entzerrt:
+
+- **`MailRecipientResolver`** (Service) – „wer bekommt die Nachricht": den
+  gewählten Empfängerkreis (alle / Filter / gespeicherte Liste / Kategorie /
+  Tags / Auswahl) in Kontakt-IDs auflösen, dazu die Anzeigetexte.
+- **`MailComposer`** (Service) – „wie ist die Mail adressiert und
+  unterschrieben": Absender, Antwortweg, Betreff-Präfix, Anrede-Modus,
+  Mail-Fuß und der „eingeschränkte Kontaktaufnahme"-Modus.
+- **`RecipientListController`** – gespeicherte Empfängerlisten anlegen,
+  umbenennen, löschen.
+- **`JsonResponse`** (Support) – kleiner Helfer für die fetch()-Endpunkte.
+- `MailController` schrumpft auf ~500 Zeilen (Schreiben, Testmail, Versand
+  in Häppchen).
+- Alle URLs unverändert. Getestet: Empfängerkreis-Wahl, Live-Zahl,
+  Empfängerliste speichern/umbenennen/löschen, Schreiben-Seite.
+
 ## 1.29.0
 
 **Nur Umbau unter der Haube – kein sichtbarer Unterschied.**
