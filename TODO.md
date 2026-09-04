@@ -209,7 +209,8 @@ bestehende „Fester Termin"-Einträge **automatisch** in Ankündigungen
     (`$canAnnouncements`/`$canEvents`).
   - Hilfe-Seiten `orga-team.html` + `mitglied.html` an die Trennung
     angepasst (Navigation, „fester Termin" aus der Typenliste raus,
-    Hinweis-Kasten zu Ankündigungen). **PDFs dazu noch nicht neu erzeugt.**
+    Hinweis-Kasten zu Ankündigungen). ~~PDFs dazu noch nicht neu erzeugt.~~
+    **PDFs neu erzeugt (v1.53.1).**
   - **Getestet** (Docker, curl): Migration inkl. echter Alt-Daten
     („Grillabend" aus früherer Session + eigens angelegter Testfall) korrekt
     übernommen + archiviert; Abstimmungen-Bereich unverändert nutzbar;
@@ -219,9 +220,9 @@ bestehende „Fester Termin"-Einträge **automatisch** in Ankündigungen
     404 bei Direktzugriff); Gruppen-Abstimmung-Link routet korrekt auf
     `/gruppen/abstimmung`, normale Abstimmung auf `/abstimmungen/detail`;
     alle Testdaten danach entfernt.
-- **Feiner (offen):** PDFs der Hilfe-Seiten neu erzeugen; Audience-Picker
-  sind einfache Mehrfach-Selects ohne Live-Vorschau („X Personen sehen
-  das"); Medien-/Dateibereiche (Galerien, Dokumente) könnten künftig auch
+- **Feiner (offen):** Audience-Picker sind einfache Mehrfach-Selects ohne
+  Live-Vorschau („X Personen sehen das"); Medien-/Dateibereiche (Galerien,
+  Dokumente) könnten künftig auch
   an eine Termine-Ankündigung statt an eine Abstimmung verlinkbar sein
   (aktuell zeigt `galleries.event_id` weiter auf `events`/Abstimmungen).
 
@@ -424,7 +425,7 @@ Stand betreffen.
     Einschränkung + Links). Bestehende „Fester Termin"-Einträge automatisch
     übernommen. Details siehe Abschnitt „Dokumente" unten (Teil A) und die
     Projekt-Memory. Hilfe-Seiten (`orga-team.html`, `mitglied.html`) an die
-    neue Trennung angepasst – **PDFs dazu noch nicht neu erzeugt** (offen).
+    neue Trennung angepasst – PDFs neu erzeugt (v1.53.1).
 
 - **„Mail ans Orga-Team"-Knopf**: **erledigt in v0.34.0** – `/orga-team`
   (`OrgaController`), Link in Seitenleiste + „Mein Konto". Ziel: feste

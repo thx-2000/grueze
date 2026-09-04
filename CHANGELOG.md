@@ -3,6 +3,11 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.53.1
+
+Hilfe-PDFs (`orga-team.pdf`, `mitglied.pdf`) neu erzeugt – jetzt mit dem
+Wortlaut aus v1.53.0 (Abstimmungen/Termine getrennt). Keine Code-Änderung.
+
 ## 1.53.0
 
 **Termine und Abstimmungen sind jetzt getrennt.**

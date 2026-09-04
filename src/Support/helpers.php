@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.53.0';
+    return '1.53.1';
 }
 
 /**
