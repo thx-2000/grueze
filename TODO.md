@@ -49,6 +49,37 @@ Ideen, falls es weitergeht (kein Muss):
   Gerät machbar.
 - Termine: Ranking-Variante.
 
+## Zur Entscheidung – „lets discuss" (2026-09-04, noch NICHT beauftragt)
+
+Vier Themen, die TH zur Diskussion gestellt hat. Erst besprechen, dann
+entscheiden, ob/wie umgesetzt wird. Ausführliche Einschätzung je Thema im
+Chat vom 2026-09-04.
+
+1. **Genderneutrale/inklusive Ansprache**, wo keine Anrede (m/w) hinterlegt
+   ist. Ist-Stand: Mail-`{Anrede}` fällt bei fehlendem `geschlecht` schon auf
+   „Hallo <Vorname>" zurück (neutral). Zu klären: House-Style für den
+   Unbekannt-Fall (Neutralformulierung vs. Doppelpunkt vs. Sternchen), Umbau
+   des Formularfelds „Geschlecht m/w" → echtes „Anrede"-Feld (Hallo / Liebe /
+   Lieber / neutral), UI-Texte auf gegenderte Reststellen prüfen. Aufwand
+   klein–mittel, kein DB-Bruch nötig.
+2. **Code-Kommentierung** für Mitentwickler:innen prüfen und ergänzen –
+   Schwerpunkt `MailService` (fast unkommentiert), die großen Repos/Controller,
+   `app.js`. Plus: ist ein `ARCHITECTURE.md`-Refresh fällig?
+3. **Refactoring / Verschlankung**: `ContactController` (1050 Z.),
+   `ContactRepository` (1120 Z.), `MailController` (826 Z.), `app.css`
+   (6400 Z.), `app.js` (1076 Z.) sind Kandidaten. Tote CSS-Regeln aus dem
+   Redesign, wiederholte Payload-/Diff-Logik (Kontakt-Sanitize an 3 Stellen),
+   `templates/contacts/index.php` (667 Z.). Ziel: leichter wartbar, nicht
+   „Rewrite".
+4. **UX/IA-Review pro Rolle** mit aktuellem Feature-Stand: Seit dem letzten
+   Redesign (v0.23–0.30) kamen Gruppen, Hilfe, Archiv/Papierkorb, Dubletten,
+   Daten-Check, Start-Widgets, PWA dazu. Frage: sieht jede Rolle (Admin, Orga,
+   Gruppenleitung, Mitglied) das Wichtigste sofort und nichts Überflüssiges?
+   V. a. Adressbuch-Seite (viele Werkzeugleisten-Knöpfe), Verwaltungs-Hub,
+   Start je Rolle.
+
+- **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
+
 - **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
   neu gruppieren und klarer benennen, Gesamtbedienung eleganter und
   übersichtlicher machen. Vorgehen: zuerst erheben, welche Tätigkeiten am
