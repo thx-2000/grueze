@@ -304,7 +304,9 @@ final class SettingsController extends BaseController
                     'groups.manage' => 'Gruppen anlegen und Mitglieder verwalten',
                 ],
                 'Galerien' => [
-                    'galleries.manage' => 'Galerien und Medien (Fotos/Videos) verwalten',
+                    'galleries.view' => 'Galerien und Medien ansehen und herunterladen',
+                    'galleries.upload' => 'Fotos und Videos in Galerien hochladen (und eigene Uploads bearbeiten)',
+                    'galleries.manage' => 'Galerien anlegen, bearbeiten, löschen; fremde Medien verschieben/löschen; Sicherung',
                 ],
                 'Orga-Team' => [
                     'orga.contact_target' => 'Bekommt Nachrichten über den „Orga-Team schreiben"-Knopf',

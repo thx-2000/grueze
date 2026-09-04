@@ -14,6 +14,7 @@
     }
 
     var galleryId = uploadPanel ? uploadPanel.getAttribute('data-gallery-id') : '';
+    var canManage = grid ? grid.getAttribute('data-can-manage') === '1' : false;
     var countEl = document.querySelector('[data-media-count]');
     var emptyEl = document.querySelector('[data-media-empty]');
 
@@ -40,6 +41,7 @@
     var uploadUrl = uploadPanel ? uploadPanel.getAttribute('data-upload-url') : '';
     var pending = [];
     var running = false;
+    var needsReload = false;
 
     function humanBytes(b) {
         if (b >= 1073741824) return (b / 1073741824).toFixed(1) + ' GB';
@@ -108,7 +110,17 @@
     function pump() {
         if (running) return;
         var job = pending.shift();
-        if (!job) return;
+        if (!job) {
+            if (needsReload) {
+                needsReload = false;
+                var b = document.createElement('div');
+                b.className = 'gallery-reload-note';
+                b.innerHTML = 'Hochgeladen. <button type="button" class="linkish">Seite neu laden</button>, um alles anzuzeigen.';
+                b.querySelector('button').addEventListener('click', function () { location.reload(); });
+                queueEl.parentNode.insertBefore(b, queueEl.nextSibling);
+            }
+            return;
+        }
         running = true;
 
         var state = job.row.querySelector('.upload-row-state');
@@ -128,15 +140,23 @@
                 if (e.lengthComputable) fill.style.width = Math.round((e.loaded / e.total) * 100) + '%';
             });
             xhr.addEventListener('load', function () {
-                var res = {};
-                try { res = JSON.parse(xhr.responseText); } catch (e) { res = { ok: false }; }
-                if (xhr.status >= 200 && xhr.status < 300 && res.ok) {
+                var res = null;
+                try { res = JSON.parse(xhr.responseText); } catch (e) { res = null; }
+                var ok2xx = xhr.status >= 200 && xhr.status < 300;
+                if (ok2xx && res && res.ok) {
                     job.row.classList.add('is-done');
                     state.textContent = 'fertig';
                     fill.style.width = '100%';
                     addTile(res.media);
                     updateCount(1);
                     setTimeout(function () { job.row.remove(); if (!queueEl.children.length) queueEl.hidden = true; }, 1500);
+                } else if (ok2xx && !res) {
+                    // Server hat 2xx geliefert, aber keine saubere JSON-Antwort
+                    // (z. B. eine vorangestellte PHP-Warnung). Der Upload ist
+                    // vermutlich durch – nur die Anzeige braucht ein Neuladen.
+                    job.row.classList.add('is-done');
+                    state.textContent = 'hochgeladen · Seite neu laden';
+                    needsReload = true;
                 } else {
                     job.row.classList.add('is-error');
                     state.textContent = (res && res.error) || ('Fehler ' + xhr.status);
@@ -176,6 +196,9 @@
         var thumbInner = media.has_thumb
             ? '<img loading="lazy" alt="" src="' + media.thumb_url + '">'
             : '<span class="media-thumb-fallback">' + ic(media.kind === 'video' ? playD : imgD) + '</span>';
+        var coverBtn = canManage
+            ? '<button type="button" class="icon-button" data-set-cover title="Als Titelbild">' + ic('<path d="m12 3l2.8 5.7l6.2.9l-4.5 4.4l1.1 6.2L12 17.3L6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3Z"/>') + '</button>'
+            : '';
         li.innerHTML =
             '<button type="button" class="media-thumb" data-open-lightbox>'
             + thumbInner + playIcon + '</button>'
@@ -183,7 +206,7 @@
             + '<input type="text" class="media-caption" data-caption placeholder="Bildunterschrift …" maxlength="500" value="" aria-label="Bildunterschrift">'
             + '</div>'
             + '<div class="media-actions">'
-            + '<button type="button" class="icon-button" data-set-cover title="Als Titelbild">' + ic('<path d="m12 3l2.8 5.7l6.2.9l-4.5 4.4l1.1 6.2L12 17.3L6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3Z"/>') + '</button>'
+            + coverBtn
             + '<a class="icon-button" href="' + media.download_url + '" title="Herunterladen">' + ic('<path d="M11 3h2v8h3l-4 4l-4-4h3V3Zm-6 13h2v3h10v-3h2v3.5A1.5 1.5 0 0 1 17.5 21h-11A1.5 1.5 0 0 1 5 19.5V16Z"/>') + '</a>'
             + '<button type="button" class="icon-button is-danger" data-delete-media title="In den Papierkorb">' + ic('<path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm1 7h2v8h-2v-8Zm4 0h2v8h-2v-8ZM7 10h2v8H7v-8Z"/>') + '</button>'
             + '</div>';

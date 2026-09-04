@@ -10,6 +10,7 @@ use App\Repositories\EventRepository;
 use App\Repositories\GalleryMediaRepository;
 use App\Repositories\GalleryRepository;
 use App\Repositories\LogRepository;
+use App\Repositories\SettingRepository;
 use App\Services\MediaService;
 use App\Support\FileResponse;
 use App\Support\JsonResponse;
@@ -18,12 +19,22 @@ use RuntimeException;
 use ZipArchive;
 
 /**
- * Galerien: Foto-/Video-Sammlungen (z. B. pro Stufentreffen). Vorerst nur für
- * Rollen mit `galleries.manage` (Standard: nur Admin) – die feinere
- * Rechteverteilung (wer sieht/lädt hoch/verschiebt/löscht) kommt später.
+ * Galerien: Foto-/Video-Sammlungen (z. B. pro Stufentreffen).
+ *
+ * Drei Rechte:
+ *  - galleries.view    ansehen + herunterladen
+ *  - galleries.upload  Medien hochladen, eigene Uploads beschriften/löschen
+ *  - galleries.manage  Galerien anlegen/bearbeiten/löschen, fremde Medien
+ *                      verschieben/löschen, Titelbild, Sortierung, Sicherung
  */
 final class GalleryController extends BaseController
 {
+    private const NOTICE_KEY = 'gallery_usage_notice';
+    private const NOTICE_DEFAULT = 'Diese Aufnahmen sind für die Teilnehmenden des Treffens zum Ansehen gedacht. '
+        . 'Eine Weitergabe oder Veröffentlichung – etwa in sozialen Netzwerken – ist nur mit Einverständnis der '
+        . 'abgebildeten Personen zulässig.';
+    private const BACKUP_FORMAT = 1;
+
     public function __construct(
         \App\Core\Auth $auth,
         private GalleryRepository $galleries,
@@ -31,6 +42,7 @@ final class GalleryController extends BaseController
         private MediaService $storage,
         private EventRepository $events,
         private LogRepository $logs,
+        private SettingRepository $settings,
     ) {
         parent::__construct($auth);
     }
@@ -39,18 +51,23 @@ final class GalleryController extends BaseController
 
     public function index(): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireView();
 
         $this->render('galleries/index', [
             'galleries' => $this->galleries->all(),
-            'trashedCount' => count($this->galleries->trashed()),
+            'trashedCount' => $this->canManage() ? count($this->galleries->trashed()) : 0,
             'capabilities' => $this->storage->capabilities(),
+            'canManage' => $this->canManage(),
+            'canUpload' => $this->canUpload(),
+            'usageNotice' => $this->notice(),
+            'mediaBytes' => $this->canManage() ? $this->media->totalActiveBytes() : 0,
+            'backupMax' => (int) config('media.backup_max_bytes', 2147483648),
         ]);
     }
 
     public function createForm(): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireManage();
 
         $this->render('galleries/form', [
             'gallery' => null,
@@ -60,7 +77,7 @@ final class GalleryController extends BaseController
 
     public function store(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireManage();
         Csrf::validate($request->input('_csrf'));
 
         $data = $this->sanitize($request);
@@ -69,8 +86,8 @@ final class GalleryController extends BaseController
             Redirect::to('/galerien/neu');
         }
 
-        $id = $this->galleries->create($data, (int) ($this->auth->user()['id'] ?? 0) ?: null);
-        $this->logs->addAudit((int) ($this->auth->user()['id'] ?? 0), null, 'created', 'Galerie angelegt: „' . $data['title'] . '".');
+        $id = $this->galleries->create($data, $this->userId());
+        $this->logs->addAudit((int) $this->userId(), null, 'created', 'Galerie angelegt: „' . $data['title'] . '".');
         flash('success', 'Galerie angelegt. Jetzt Bilder und Videos hochladen.');
         Redirect::to('/galerien/ansehen?id=' . $id);
     }
@@ -79,7 +96,7 @@ final class GalleryController extends BaseController
 
     public function show(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireView();
 
         $gallery = $this->galleries->find((int) $request->input('id'));
         if ($gallery === null) {
@@ -94,12 +111,16 @@ final class GalleryController extends BaseController
             'items' => $items,
             'events' => $this->events->all(),
             'capabilities' => $this->storage->capabilities(),
+            'canManage' => $this->canManage(),
+            'canUpload' => $this->canUpload(),
+            'currentUserId' => (int) $this->userId(),
+            'usageNotice' => $this->notice(),
         ]);
     }
 
     public function update(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireManage();
         Csrf::validate($request->input('_csrf'));
 
         $gallery = $this->galleries->find((int) $request->input('id'));
@@ -118,11 +139,28 @@ final class GalleryController extends BaseController
         Redirect::to('/galerien/ansehen?id=' . $gallery['id']);
     }
 
+    /** Hinweistext (Urheber-/Persönlichkeitsrechte) ändern. */
+    public function updateNotice(Request $request): void
+    {
+        $this->requireManage();
+        Csrf::validate($request->input('_csrf'));
+
+        $text = trim((string) $request->input('usage_notice'));
+        $this->settings->set(self::NOTICE_KEY, $text !== '' ? mb_substr($text, 0, 1000) : self::NOTICE_DEFAULT);
+        flash('success', 'Hinweistext gespeichert.');
+        Redirect::to('/galerien');
+    }
+
     // ------------------------------------------------------------- Upload
 
     public function upload(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        // Ausgabe puffern: eine evtl. PHP-Warnung (aktives display_errors auf
+        // dem Server) darf die JSON-Antwort nicht zerschießen. JsonResponse
+        // verwirft den Puffer vor dem Senden.
+        ob_start();
+
+        $this->requireUpload();
         Csrf::validate($request->input('_csrf'));
 
         $gallery = $this->galleries->find((int) $request->input('gallery_id'));
@@ -141,7 +179,6 @@ final class GalleryController extends BaseController
             JsonResponse::send(['ok' => false, 'error' => 'Ungültiger Upload.'], 400);
         }
 
-        // Optionales, im Browser erzeugtes Video-Vorschaubild.
         $posterTmp = null;
         $poster = $request->file('poster');
         if ($poster && (int) ($poster['error'] ?? 1) === UPLOAD_ERR_OK && is_uploaded_file((string) $poster['tmp_name'])) {
@@ -159,7 +196,7 @@ final class GalleryController extends BaseController
             JsonResponse::send(['ok' => false, 'error' => $e->getMessage()], 422);
         }
 
-        $mediaId = $this->media->add((int) $gallery['id'], $meta, (int) ($this->auth->user()['id'] ?? 0) ?: null);
+        $mediaId = $this->media->add((int) $gallery['id'], $meta, $this->userId());
 
         JsonResponse::send([
             'ok' => true,
@@ -168,6 +205,7 @@ final class GalleryController extends BaseController
                 'kind' => $meta['kind'],
                 'name' => $meta['original_name'],
                 'has_thumb' => !empty($meta['thumb_path']),
+                'own' => true,
                 'thumb_url' => url('/galerien/datei?id=' . $mediaId . '&v=thumb'),
                 'full_url' => url('/galerien/datei?id=' . $mediaId . '&v=' . ($meta['kind'] === 'video' ? 'original' : 'web')),
                 'download_url' => url('/galerien/datei?id=' . $mediaId . '&v=original&dl=1'),
@@ -179,17 +217,20 @@ final class GalleryController extends BaseController
 
     public function mediaCaption(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        ob_start();
+        $this->requireView();
         Csrf::validate($request->input('_csrf'));
 
         $item = $this->mediaInGallery($request);
+        $this->requireMediaEdit($item);
         $this->media->updateCaption((int) $item['id'], trim((string) $request->input('caption')));
         JsonResponse::send(['ok' => true]);
     }
 
     public function mediaReorder(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        ob_start();
+        $this->requireManage();
         Csrf::validate($request->input('_csrf'));
 
         $gallery = $this->galleries->find((int) $request->input('gallery_id'));
@@ -203,17 +244,20 @@ final class GalleryController extends BaseController
 
     public function mediaDelete(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        ob_start();
+        $this->requireView();
         Csrf::validate($request->input('_csrf'));
 
         $item = $this->mediaInGallery($request);
+        $this->requireMediaEdit($item);
         $this->media->softDelete((int) $item['id']);
         JsonResponse::send(['ok' => true]);
     }
 
     public function setCover(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        ob_start();
+        $this->requireManage();
         Csrf::validate($request->input('_csrf'));
 
         $item = $this->mediaInGallery($request);
@@ -225,13 +269,13 @@ final class GalleryController extends BaseController
 
     public function deleteGallery(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireManage();
         Csrf::validate($request->input('_csrf'));
 
         $gallery = $this->galleries->find((int) $request->input('id'));
         if ($gallery !== null) {
             $this->galleries->softDelete((int) $gallery['id']);
-            $this->logs->addAudit((int) ($this->auth->user()['id'] ?? 0), null, 'deleted', 'Galerie in den Papierkorb: „' . $gallery['title'] . '".');
+            $this->logs->addAudit((int) $this->userId(), null, 'deleted', 'Galerie in den Papierkorb: „' . $gallery['title'] . '".');
             flash('success', '„' . $gallery['title'] . '" liegt im Papierkorb.');
         }
         Redirect::to('/galerien');
@@ -239,7 +283,7 @@ final class GalleryController extends BaseController
 
     public function trash(): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireManage();
         $this->render('galleries/trash', [
             'galleries' => $this->galleries->trashed(),
             'trashDays' => (int) config('media.trash_days', 30),
@@ -248,7 +292,7 @@ final class GalleryController extends BaseController
 
     public function restoreGallery(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireManage();
         Csrf::validate($request->input('_csrf'));
         $this->galleries->restore((int) $request->input('id'));
         flash('success', 'Galerie wiederhergestellt.');
@@ -257,7 +301,7 @@ final class GalleryController extends BaseController
 
     public function purgeGallery(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireManage();
         Csrf::validate($request->input('_csrf'));
 
         $gallery = $this->galleries->find((int) $request->input('id'), true);
@@ -266,7 +310,7 @@ final class GalleryController extends BaseController
                 $this->storage->deleteFiles($row);
             }
             $this->galleries->hardDelete((int) $gallery['id']);
-            $this->logs->addAudit((int) ($this->auth->user()['id'] ?? 0), null, 'deleted', 'Galerie endgültig gelöscht: „' . $gallery['title'] . '".');
+            $this->logs->addAudit((int) $this->userId(), null, 'deleted', 'Galerie endgültig gelöscht: „' . $gallery['title'] . '".');
             flash('success', 'Galerie endgültig gelöscht.');
         }
         Redirect::to('/galerien/papierkorb');
@@ -276,7 +320,7 @@ final class GalleryController extends BaseController
 
     public function file(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireView();
 
         $item = $this->media->find((int) $request->input('id'), true);
         if ($item === null) {
@@ -291,8 +335,6 @@ final class GalleryController extends BaseController
 
         $variant = (string) $request->input('v', 'web');
         $relative = match ($variant) {
-            // Kein Thumbnail (Video ohne Poster, GD fehlt) → 404, das Frontend
-            // zeigt dann ein Symbol statt eines kaputten Bildes.
             'thumb' => (string) ($item['thumb_path'] ?? ''),
             'original' => (string) $item['stored_path'],
             default => (string) ($item['web_path'] ?? '') ?: (string) $item['stored_path'],
@@ -329,7 +371,7 @@ final class GalleryController extends BaseController
 
     public function downloadZip(Request $request): void
     {
-        $this->requirePermission('galleries.manage');
+        $this->requireView();
 
         $gallery = $this->galleries->find((int) $request->input('id'));
         if ($gallery === null) {
@@ -343,13 +385,14 @@ final class GalleryController extends BaseController
             Redirect::to('/galerien/ansehen?id=' . $gallery['id']);
         }
 
-        $tmp = tempnam(sys_get_temp_dir(), 'gzip_') . '.zip';
+        $tmp = tempnam($this->storage->tmpDir(), 'gzip_') . '.zip';
         $zip = new ZipArchive();
         if ($zip->open($tmp, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             flash('error', 'Das ZIP konnte nicht erstellt werden.');
             Redirect::to('/galerien/ansehen?id=' . $gallery['id']);
         }
 
+        $zip->addFromString('HINWEIS.txt', $this->noticePlain());
         $used = [];
         $n = 1;
         foreach ($items as $item) {
@@ -357,14 +400,7 @@ final class GalleryController extends BaseController
             if ($abs === null) {
                 continue;
             }
-            $base = (string) ($item['original_name'] ?? '') !== ''
-                ? preg_replace('/[^A-Za-z0-9._-]+/', '_', (string) $item['original_name'])
-                : 'datei';
-            $entry = sprintf('%03d_%s', $n++, $base);
-            while (isset($used[$entry])) {
-                $entry = sprintf('%03d_%s', $n++, $base);
-            }
-            $used[$entry] = true;
+            $entry = $this->zipEntryName($n++, (string) ($item['original_name'] ?? ''), $used);
             $zip->addFile($abs, $entry);
         }
         $zip->close();
@@ -373,12 +409,268 @@ final class GalleryController extends BaseController
             session_write_close();
         }
 
-        $name = 'galerie-' . preg_replace('/[^a-z0-9]+/i', '-', mb_strtolower((string) $gallery['title'])) . '.zip';
+        $name = 'galerie-' . self::slug((string) $gallery['title']) . '.zip';
         register_shutdown_function(static fn () => @unlink($tmp));
         FileResponse::stream($tmp, 'application/zip', $name, 0);
     }
 
+    // ------------------------------------------------------ Medien-Sicherung
+
+    /** Komplette Medien-Sicherung als ZIP (alle Galerien + Manifest). */
+    public function backupExport(Request $request): void
+    {
+        $this->requireManage();
+
+        $max = (int) config('media.backup_max_bytes', 2147483648);
+        $total = $this->media->totalActiveBytes();
+        if ($max > 0 && $total > $max) {
+            flash('error', 'Die Medien sind zusammen ' . MediaService::humanBytes($total)
+                . ' groß – das ist mehr als das Sicherungs-Limit (' . MediaService::humanBytes($max)
+                . '). Bitte einzelne Galerien über „Als ZIP" sichern.');
+            Redirect::to('/galerien');
+        }
+
+        $galleries = $this->galleries->all();
+        if ($galleries === []) {
+            flash('error', 'Es gibt noch keine Galerie zum Sichern.');
+            Redirect::to('/galerien');
+        }
+
+        $tmp = tempnam($this->storage->tmpDir(), 'gbak_') . '.zip';
+        $zip = new ZipArchive();
+        if ($zip->open($tmp, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            flash('error', 'Die Sicherung konnte nicht erstellt werden.');
+            Redirect::to('/galerien');
+        }
+
+        $zip->addFromString('HINWEIS.txt', $this->noticePlain());
+        $manifest = [
+            'format' => self::BACKUP_FORMAT,
+            'exported_at' => date('c'),
+            'usage_notice' => $this->notice(),
+            'galleries' => [],
+        ];
+
+        $gi = 1;
+        foreach ($galleries as $gallery) {
+            $folder = sprintf('%03d-%s', $gi++, self::slug((string) $gallery['title']));
+            $items = $this->media->forGallery((int) $gallery['id'], (string) $gallery['sort_mode']);
+            $entryG = [
+                'title' => (string) $gallery['title'],
+                'description' => (string) ($gallery['description'] ?? ''),
+                'gallery_date' => $gallery['gallery_date'] ? substr((string) $gallery['gallery_date'], 0, 10) : null,
+                'sort_mode' => (string) $gallery['sort_mode'],
+                'event_title' => (string) ($gallery['event_title'] ?? ''),
+                'media' => [],
+            ];
+
+            $used = [];
+            $n = 1;
+            foreach ($items as $item) {
+                $abs = $this->storage->absolutePath((string) $item['stored_path']);
+                if ($abs === null) {
+                    continue;
+                }
+                $file = $folder . '/' . $this->zipEntryName($n++, (string) ($item['original_name'] ?? ''), $used);
+                $zip->addFile($abs, $file);
+                $entryG['media'][] = [
+                    'file' => $file,
+                    'kind' => (string) $item['kind'],
+                    'original_name' => (string) ($item['original_name'] ?? ''),
+                    'caption' => (string) ($item['caption'] ?? ''),
+                    'captured_at' => $item['captured_at'] ? substr((string) $item['captured_at'], 0, 19) : null,
+                ];
+            }
+            $manifest['galleries'][] = $entryG;
+        }
+
+        $zip->addFromString('manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $zip->close();
+
+        $this->logs->addAudit((int) $this->userId(), null, 'created', 'Medien-Sicherung heruntergeladen (' . count($galleries) . ' Galerien).');
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        register_shutdown_function(static fn () => @unlink($tmp));
+        FileResponse::stream($tmp, 'application/zip', 'galerien-medien-' . date('Y-m-d') . '.zip', 0);
+    }
+
+    /** Medien-Sicherung wieder einspielen – legt neue Galerien an (kein Merge). */
+    public function backupImport(Request $request): void
+    {
+        $this->requireManage();
+        Csrf::validate($request->input('_csrf'));
+
+        $file = $request->file('backup_file');
+        if (!$file || (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file((string) ($file['tmp_name'] ?? ''))) {
+            flash('error', 'Bitte eine Sicherungs-ZIP auswählen.');
+            Redirect::to('/galerien');
+        }
+        $max = (int) config('media.backup_max_bytes', 2147483648);
+        if ($max > 0 && (int) ($file['size'] ?? 0) > $max) {
+            flash('error', 'Die Datei ist größer als das Sicherungs-Limit.');
+            Redirect::to('/galerien');
+        }
+
+        $zip = new ZipArchive();
+        if ($zip->open((string) $file['tmp_name']) !== true) {
+            flash('error', 'Die Datei ließ sich nicht öffnen – ist es eine gültige ZIP?');
+            Redirect::to('/galerien');
+        }
+        $raw = $zip->getFromName('manifest.json');
+        $manifest = is_string($raw) ? json_decode($raw, true) : null;
+        if (!is_array($manifest) || (int) ($manifest['format'] ?? 0) !== self::BACKUP_FORMAT || !is_array($manifest['galleries'] ?? null)) {
+            $zip->close();
+            flash('error', 'In der ZIP fehlt ein passendes manifest.json.');
+            Redirect::to('/galerien');
+        }
+
+        $galleriesAdded = 0;
+        $mediaAdded = 0;
+        foreach ($manifest['galleries'] as $g) {
+            if (!is_array($g) || trim((string) ($g['title'] ?? '')) === '') {
+                continue;
+            }
+            $galleryId = $this->galleries->create([
+                'title' => mb_substr(trim((string) $g['title']), 0, 190),
+                'description' => mb_substr((string) ($g['description'] ?? ''), 0, 5000),
+                'gallery_date' => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($g['gallery_date'] ?? '')) ? $g['gallery_date'] : '',
+                'event_id' => null,
+                'sort_mode' => in_array($g['sort_mode'] ?? '', GalleryRepository::SORT_MODES, true) ? $g['sort_mode'] : 'captured',
+            ], $this->userId());
+            $galleriesAdded++;
+
+            foreach ((array) ($g['media'] ?? []) as $m) {
+                $inZip = (string) ($m['file'] ?? '');
+                if ($inZip === '' || str_contains($inZip, '..')) {
+                    continue;
+                }
+                $bytes = $zip->getFromName($inZip);
+                if ($bytes === false) {
+                    continue;
+                }
+                $tmpFile = tempnam($this->storage->tmpDir(), 'gimp_');
+                file_put_contents($tmpFile, $bytes);
+                try {
+                    $meta = $this->storage->adopt($tmpFile, (string) ($m['original_name'] ?? basename($inZip)));
+                    $capManifest = (string) ($m['captured_at'] ?? '');
+                    if (($meta['captured_at'] ?? null) === null && preg_match('/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/', $capManifest)) {
+                        $meta['captured_at'] = str_replace('T', ' ', $capManifest);
+                    }
+                    $mediaId = $this->media->add($galleryId, $meta, $this->userId());
+                    if (trim((string) ($m['caption'] ?? '')) !== '') {
+                        $this->media->updateCaption($mediaId, (string) $m['caption']);
+                    }
+                    $mediaAdded++;
+                } catch (RuntimeException) {
+                    // einzelne Datei überspringen
+                } finally {
+                    @unlink($tmpFile);
+                }
+            }
+        }
+        $zip->close();
+
+        $this->logs->addAudit((int) $this->userId(), null, 'created', "Medien-Sicherung eingespielt: {$galleriesAdded} Galerien, {$mediaAdded} Medien.");
+        flash('success', "Eingespielt: {$galleriesAdded} Galerien, {$mediaAdded} Medien (als neue Galerien).");
+        Redirect::to('/galerien');
+    }
+
     // --------------------------------------------------------------- intern
+
+    private function userId(): ?int
+    {
+        return (int) ($this->auth->user()['id'] ?? 0) ?: null;
+    }
+
+    private function canView(): bool
+    {
+        return can_any('galleries.view', 'galleries.upload', 'galleries.manage');
+    }
+
+    private function canUpload(): bool
+    {
+        return can_any('galleries.upload', 'galleries.manage');
+    }
+
+    private function canManage(): bool
+    {
+        return $this->auth->can('galleries.manage');
+    }
+
+    private function requireView(): void
+    {
+        $this->requireAuth();
+        if (!$this->canView()) {
+            throw new RuntimeException('Für die Galerien fehlt die Berechtigung.');
+        }
+    }
+
+    private function requireUpload(): void
+    {
+        $this->requireAuth();
+        if (!$this->canUpload()) {
+            throw new RuntimeException('Zum Hochladen fehlt die Berechtigung.');
+        }
+    }
+
+    private function requireManage(): void
+    {
+        $this->requireAuth();
+        if (!$this->canManage()) {
+            throw new RuntimeException('Zum Verwalten von Galerien fehlt die Berechtigung.');
+        }
+    }
+
+    /** Darf die aktuelle Person dieses Medium bearbeiten/löschen? */
+    private function requireMediaEdit(array $item): void
+    {
+        if ($this->canManage()) {
+            return;
+        }
+        $uid = $this->userId();
+        if ($uid !== null && (int) ($item['uploaded_by'] ?? 0) === $uid && $this->auth->can('galleries.upload')) {
+            return;
+        }
+        JsonResponse::send(['ok' => false, 'error' => 'Nur eigene Uploads oder mit Verwalten-Recht.'], 403);
+    }
+
+    private function notice(): string
+    {
+        $stored = $this->settings->get(self::NOTICE_KEY);
+
+        return $stored !== null && trim($stored) !== '' ? $stored : self::NOTICE_DEFAULT;
+    }
+
+    private function noticePlain(): string
+    {
+        return "Hinweis zur Nutzung\n===================\n\n" . $this->notice()
+            . "\n\nHeruntergeladen am " . date('d.m.Y') . ".\n";
+    }
+
+    /** @param array<string,bool> $used */
+    private function zipEntryName(int $n, string $originalName, array &$used): string
+    {
+        $base = $originalName !== ''
+            ? (preg_replace('/[^A-Za-z0-9._-]+/', '_', $originalName) ?: 'datei')
+            : 'datei';
+        $entry = sprintf('%03d_%s', $n, $base);
+        $i = $n;
+        while (isset($used[$entry])) {
+            $entry = sprintf('%03d_%s', ++$i, $base);
+        }
+        $used[$entry] = true;
+
+        return $entry;
+    }
+
+    private static function slug(string $text): string
+    {
+        $slug = preg_replace('/[^a-z0-9]+/i', '-', mb_strtolower(trim($text))) ?? '';
+
+        return trim($slug, '-') ?: 'galerie';
+    }
 
     /** @return array<string,mixed> */
     private function mediaInGallery(Request $request): array

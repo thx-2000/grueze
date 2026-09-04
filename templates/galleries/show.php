@@ -4,10 +4,14 @@
  * @var list<array<string,mixed>> $items
  * @var list<array<string,mixed>> $events
  * @var array<string,mixed> $capabilities
+ * @var bool $canManage
+ * @var bool $canUpload
+ * @var int $currentUserId
+ * @var string $usageNotice
  */
 $g = $gallery;
 $sortMode = (string) $g['sort_mode'];
-$manual = $sortMode === 'manual';
+$manual = $sortMode === 'manual' && $canManage;
 $maxImage = (int) config('media.max_image_bytes', 25165824);
 $maxVideo = (int) config('media.max_video_bytes', 524288000);
 ?>
@@ -28,16 +32,24 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
     </div>
     <div class="toolbar-actions">
         <?php if ($items !== []): ?>
-            <a class="ghost-button" href="<?= e(url('/galerien/zip?id=' . (int) $g['id'])) ?>"><?= icon('download') ?><span>Als ZIP</span></a>
+            <a class="ghost-button" href="<?= e(url('/galerien/zip?id=' . (int) $g['id'])) ?>" data-zip-link><?= icon('download') ?><span>Als ZIP</span></a>
         <?php endif; ?>
-        <form method="post" action="<?= e(url('/galerien/loeschen')) ?>" data-confirm="Galerie „<?= e($g['title']) ?>“ in den Papierkorb legen? (Mit allen Medien – rückholbar bis zum endgültigen Löschen.)">
-            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-            <input type="hidden" name="id" value="<?= e((string) $g['id']) ?>">
-            <button type="submit" class="danger-button"><?= icon('trash') ?><span>In den Papierkorb</span></button>
-        </form>
+        <?php if ($canManage): ?>
+            <form method="post" action="<?= e(url('/galerien/loeschen')) ?>" data-confirm="Galerie „<?= e($g['title']) ?>“ in den Papierkorb legen? (Mit allen Medien – rückholbar bis zum endgültigen Löschen.)">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $g['id']) ?>">
+                <button type="submit" class="danger-button"><?= icon('trash') ?><span>In den Papierkorb</span></button>
+            </form>
+        <?php endif; ?>
     </div>
 </header>
 
+<div class="gallery-notice" role="note">
+    <?= icon('eye') ?>
+    <p><?= e($usageNotice) ?></p>
+</div>
+
+<?php if ($canManage): ?>
 <details class="panel gallery-settings">
     <summary>Galerie-Details bearbeiten</summary>
     <form method="post" action="<?= e(url('/galerien/speichern')) ?>" class="stack">
@@ -79,7 +91,9 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
         </div>
     </form>
 </details>
+<?php endif; ?>
 
+<?php if ($canUpload): ?>
 <section class="panel gallery-upload" data-gallery-upload
          data-gallery-id="<?= e((string) $g['id']) ?>"
          data-upload-url="<?= e(url('/galerien/hochladen')) ?>"
@@ -93,29 +107,35 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
     </div>
     <ul class="upload-queue" data-upload-queue hidden></ul>
 </section>
+<?php endif; ?>
 
 <section class="panel gallery-media-panel">
     <?php if ($manual): ?>
         <p class="field-hint"><?= icon('drag') ?> Zum Umsortieren die Kacheln ziehen. (Gilt, solange „Manuell" als Sortierung eingestellt ist.)</p>
     <?php endif; ?>
     <ul class="media-grid<?= $manual ? ' is-sortable' : '' ?>" data-media-grid
+        data-can-manage="<?= $canManage ? '1' : '0' ?>"
         data-reorder-url="<?= e(url('/galerien/medien/sortieren')) ?>"
         data-caption-url="<?= e(url('/galerien/medien/beschriftung')) ?>"
         data-delete-url="<?= e(url('/galerien/medien/loeschen')) ?>"
         data-cover-url="<?= e(url('/galerien/cover')) ?>">
         <?php foreach ($items as $item): ?>
-            <?php view_partial('galleries/_media-item', ['item' => $item, 'gallery' => $g, 'csrfToken' => $csrfToken, 'manual' => $manual]); ?>
+            <?php view_partial('galleries/_media-item', [
+                'item' => $item, 'gallery' => $g, 'manual' => $manual,
+                'canManage' => $canManage, 'canUpload' => $canUpload, 'currentUserId' => $currentUserId,
+            ]); ?>
         <?php endforeach; ?>
     </ul>
     <p class="media-empty<?= $items === [] ? '' : ' is-hidden' ?>" data-media-empty>Noch keine Medien in dieser Galerie.</p>
 </section>
 
-<div class="lightbox" data-lightbox hidden>
+<div class="lightbox" data-lightbox hidden data-notice="<?= e($usageNotice) ?>">
     <button type="button" class="lightbox-close" data-lb-close aria-label="Schließen"><?= icon('close') ?></button>
     <button type="button" class="lightbox-nav lightbox-prev" data-lb-prev aria-label="Vorheriges"><?= icon('chevron-right') ?></button>
     <button type="button" class="lightbox-nav lightbox-next" data-lb-next aria-label="Nächstes"><?= icon('chevron-right') ?></button>
     <figure class="lightbox-stage" data-lb-stage></figure>
     <figcaption class="lightbox-caption" data-lb-caption></figcaption>
+    <p class="lightbox-notice"><?= e($usageNotice) ?></p>
 </div>
 
 <script src="<?= e(asset_url('/assets/js/gallery.js')) ?>" defer></script>

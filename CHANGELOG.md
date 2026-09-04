@@ -3,6 +3,32 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.48.0
+
+**Galerien: Rollen, Nutzungshinweis und eigener Sicherungs-Knopf.**
+
+- **Drei Rechte** statt einem:
+  - `galleries.view` – ansehen und herunterladen
+  - `galleries.upload` – Fotos/Videos hochladen, eigene Uploads beschriften/löschen
+  - `galleries.manage` – Galerien anlegen/bearbeiten/löschen, fremde Medien
+    verschieben/löschen, Titelbild, Sortierung, Sicherung
+  Standard nach dem Update: **Team** verwaltet, **Team + Mitglieder** sehen und
+  laden hoch. Anpassbar unter **Verwaltung → Berechtigungen** (Gruppe „Galerien").
+- **Nutzungshinweis** steht jetzt sichtbar beim Ansehen, in der Großansicht und
+  in **jeder heruntergeladenen ZIP-Datei** (als `HINWEIS.txt`): *„Diese Aufnahmen
+  sind für die Teilnehmenden … Veröffentlichung nur mit Einverständnis der
+  abgebildeten Personen."* Der Text ist über die Galerie-Übersicht editierbar.
+- **Sicherung der Medien im System** (nicht nur über den Hoster): „Alle Medien
+  sichern" lädt sämtliche Galerien mit Manifest als eine ZIP herunter; „Sicherung
+  einspielen" liest so eine ZIP wieder ein (legt neue Galerien an). Für sehr
+  große Bestände greift ein Größenlimit (`media.backup_max_bytes`, Standard 2 GB);
+  darüber einzelne Galerien über „Als ZIP".
+- **Fix Upload-Meldung „Fehler 200":** Wenn der Server bei aktivem
+  `display_errors` eine PHP-Warnung vor die JSON-Antwort schrieb, meldete der
+  Upload fälschlich einen Fehler, obwohl die Datei ankam. Die Upload-Endpunkte
+  puffern jetzt und liefern reines JSON; die Oberfläche fängt den Rest ab.
+  (Empfehlung: `app.debug` in der Produktiv-`config.php` auf `false`.)
+
 ## 1.47.0
 
 **Neu: Galerien (Fotos & Videos).** Stufe 1 – vorerst nur für die Verwaltung.

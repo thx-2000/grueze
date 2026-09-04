@@ -196,6 +196,17 @@ final class GalleryMediaRepository
         return $stmt->fetchAll();
     }
 
+    /** Gesamtgröße aller aktiven Medien in Bytes – für die Sicherungs-Vorschau. */
+    public function totalActiveBytes(): int
+    {
+        return (int) $this->pdo->query(
+            'SELECT COALESCE(SUM(m.byte_size), 0)
+             FROM gallery_media m
+             JOIN galleries g ON g.id = m.gallery_id
+             WHERE m.deleted_at IS NULL AND g.deleted_at IS NULL'
+        )->fetchColumn();
+    }
+
     public function countForGallery(int $galleryId): int
     {
         $stmt = $this->pdo->prepare(

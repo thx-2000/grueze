@@ -196,7 +196,9 @@ final class SettingRepository
             'mail.view_log'        => ['orga'],
             'events.manage'        => ['orga'],
             'groups.manage'        => ['orga'],
-            'galleries.manage'     => [],
+            'galleries.view'       => ['orga', 'stufenmitglied'],
+            'galleries.upload'     => ['orga', 'stufenmitglied'],
+            'galleries.manage'     => ['orga'],
             'orga.contact_target'  => ['orga'],
             'settings.manage'      => ['orga'],
         ];

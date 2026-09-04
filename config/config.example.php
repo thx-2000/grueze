@@ -180,6 +180,9 @@ return [
         // Papierkorb: gelöschte Galerien/Medien nach so vielen Tagen endgültig
         // entfernen (Dateien inklusive). 0 = nie automatisch.
         'trash_days' => 30,
+        // Obergrenze für die Gesamt-Sicherung „Alle Medien sichern" (und den
+        // Import). Darüber bittet die Oberfläche, einzelne Galerien zu sichern.
+        'backup_max_bytes' => 2147483648, // 2 GiB
         // Pfad zum ImageMagick-Binary – nur nötig, wenn die PHP-Erweiterung
         // imagick fehlt UND HEIC-Bilder umgewandelt werden sollen (all-inkl).
         'convert_bin' => '/usr/bin/convert',

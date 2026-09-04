@@ -36,6 +36,17 @@ final class MediaService
         return $this->baseDir;
     }
 
+    /** Schreib-Ordner für temporäre ZIPs (nicht /tmp – auf Shared Hosting oft knapp). */
+    public function tmpDir(): string
+    {
+        $dir = dirname(__DIR__, 2) . '/storage/tmp';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+
+        return is_writable($dir) ? $dir : sys_get_temp_dir();
+    }
+
     /** Absoluter Pfad zu einem gespeicherten Medienpfad (nie aus Nutzereingabe). */
     public function absolutePath(string $relative): ?string
     {
@@ -77,7 +88,7 @@ final class MediaService
      *
      * @return array<string,mixed> Spalten für gallery_media (ohne gallery_id/position)
      */
-    public function ingest(string $tmpPath, string $originalName, int $size, ?string $posterTmp = null): array
+    public function ingest(string $tmpPath, string $originalName, int $size, ?string $posterTmp = null, bool $uploaded = true): array
     {
         $mime = $this->detectMime($tmpPath, $originalName);
         $kind = $this->classify($mime);
@@ -102,10 +113,25 @@ final class MediaService
         }
 
         if ($kind === 'video') {
-            return $this->ingestVideo($tmpPath, $originalName, $size, $mime, $id, $shard, $dir, $posterTmp);
+            return $this->ingestVideo($tmpPath, $originalName, $size, $mime, $id, $shard, $dir, $posterTmp, $uploaded);
         }
 
-        return $this->ingestImage($tmpPath, $originalName, $size, $mime, $id, $shard, $dir);
+        return $this->ingestImage($tmpPath, $originalName, $size, $mime, $id, $shard, $dir, $uploaded);
+    }
+
+    /**
+     * Wie ingest(), aber für eine Datei, die schon auf der Platte liegt (nicht
+     * frisch hochgeladen) – z. B. beim Wiederherstellen einer Medien-Sicherung.
+     * Die Quelldatei bleibt liegen (Kopie), der Aufrufer räumt sie weg.
+     */
+    public function adopt(string $path, string $originalName): array
+    {
+        return $this->ingest($path, $originalName, (int) @filesize($path) ?: 0, null, false);
+    }
+
+    private function place(string $src, string $dst, bool $uploaded): bool
+    {
+        return $uploaded ? move_uploaded_file($src, $dst) : copy($src, $dst);
     }
 
     /** Alle Dateien einer Medienzeile löschen (stored/thumb/web). */
@@ -132,9 +158,11 @@ final class MediaService
         string $mime,
         string $id,
         string $shard,
-        string $dir
+        string $dir,
+        bool $uploaded = true
     ): array {
         $workPath = $tmpPath;
+        $workIsUploaded = $uploaded;
         $cleanupWork = null;
 
         // HEIC/HEIF kann GD nicht – vor dem Ablegen zu JPEG wandeln.
@@ -144,6 +172,7 @@ final class MediaService
                 throw new RuntimeException('HEIC-Bilder brauchen ImageMagick auf dem Server. Bitte als JPG hochladen.');
             }
             $workPath = $converted;
+            $workIsUploaded = false;
             $cleanupWork = $converted;
             $mime = 'image/jpeg';
         }
@@ -152,15 +181,8 @@ final class MediaService
         $storedRel = $shard . '/' . $id . '.' . $ext;
         $storedAbs = $dir . '/' . $id . '.' . $ext;
 
-        if ($workPath === $tmpPath) {
-            if (!move_uploaded_file($tmpPath, $storedAbs)) {
-                throw new RuntimeException('Die Datei konnte nicht gespeichert werden.');
-            }
-        } else {
-            if (!rename($workPath, $storedAbs)) {
-                throw new RuntimeException('Die Datei konnte nicht gespeichert werden.');
-            }
-            $cleanupWork = null;
+        if (!$this->place($workPath, $storedAbs, $workIsUploaded)) {
+            throw new RuntimeException('Die Datei konnte nicht gespeichert werden.');
         }
         if ($cleanupWork !== null && is_file($cleanupWork)) {
             @unlink($cleanupWork);
@@ -195,7 +217,7 @@ final class MediaService
             'thumb_path' => $thumbRel,
             'web_path' => $webRel,
             'mime' => $mime,
-            'byte_size' => filesize($storedAbs) ?: $size,
+            'byte_size' => @filesize($storedAbs) ?: $size,
             'width' => (int) $dimensions[0] ?: null,
             'height' => (int) $dimensions[1] ?: null,
             'duration_seconds' => null,
@@ -213,13 +235,14 @@ final class MediaService
         string $id,
         string $shard,
         string $dir,
-        ?string $posterTmp
+        ?string $posterTmp,
+        bool $uploaded = true
     ): array {
         $ext = self::extensionFor($mime);
         $storedRel = $shard . '/' . $id . '.' . $ext;
         $storedAbs = $dir . '/' . $id . '.' . $ext;
 
-        if (!move_uploaded_file($tmpPath, $storedAbs)) {
+        if (!$this->place($tmpPath, $storedAbs, $uploaded)) {
             throw new RuntimeException('Das Video konnte nicht gespeichert werden.');
         }
 
@@ -241,7 +264,7 @@ final class MediaService
             'thumb_path' => $thumbRel,
             'web_path' => null,
             'mime' => $mime,
-            'byte_size' => filesize($storedAbs) ?: $size,
+            'byte_size' => @filesize($storedAbs) ?: $size,
             'width' => null,
             'height' => null,
             'duration_seconds' => null,
@@ -255,11 +278,16 @@ final class MediaService
     {
         $mime = '';
         if (function_exists('finfo_open')) {
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            // @: manche Shared-Hoster haben eine unvollständige magic-DB und
+            // lassen finfo warnen – das darf die JSON-Antwort nicht stören.
+            $finfo = @finfo_open(FILEINFO_MIME_TYPE);
             if ($finfo !== false) {
-                $mime = (string) finfo_file($finfo, $path);
+                $mime = (string) @finfo_file($finfo, $path);
                 finfo_close($finfo);
             }
+        }
+        if ($mime === '' && function_exists('mime_content_type')) {
+            $mime = (string) @mime_content_type($path);
         }
         $mime = strtolower(trim($mime));
         if ($mime === 'image/jpg') {
@@ -324,11 +352,11 @@ final class MediaService
         if ($bin === null) {
             return null;
         }
-        $out = tempnam(sys_get_temp_dir(), 'gmedia_') . '.jpg';
+        $out = tempnam($this->tmpDir(), 'gmedia_') . '.jpg';
         $cmd = escapeshellarg($bin) . ' ' . escapeshellarg($src . '[0]')
             . ' -auto-orient -quality 88 ' . escapeshellarg($out) . ' 2>&1';
         @exec($cmd, $lines, $code);
-        if ($code === 0 && is_file($out) && filesize($out) > 0) {
+        if ($code === 0 && is_file($out) && @filesize($out) > 0) {
             return $out;
         }
         if (is_file($out)) {
@@ -376,8 +404,8 @@ final class MediaService
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
 
         $ok = $srcMime === 'image/png'
-            ? imagepng($dst, $destPath, 6)
-            : imagejpeg($dst, $destPath, 82);
+            ? @imagepng($dst, $destPath, 6)
+            : @imagejpeg($dst, $destPath, 82);
 
         imagedestroy($src);
         imagedestroy($dst);
@@ -394,9 +422,9 @@ final class MediaService
         $orientation = (int) ($exif['Orientation'] ?? 0);
 
         $rotated = match ($orientation) {
-            3 => imagerotate($image, 180, 0),
-            6 => imagerotate($image, -90, 0),
-            8 => imagerotate($image, 90, 0),
+            3 => @imagerotate($image, 180, 0),
+            6 => @imagerotate($image, -90, 0),
+            8 => @imagerotate($image, 90, 0),
             default => null,
         };
         if ($rotated instanceof \GdImage) {

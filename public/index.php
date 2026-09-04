@@ -415,7 +415,8 @@ try {
         Container::get(\App\Repositories\GalleryMediaRepository::class),
         Container::get(\App\Services\MediaService::class),
         Container::get(EventRepository::class),
-        Container::get(LogRepository::class)
+        Container::get(LogRepository::class),
+        Container::get(SettingRepository::class)
     ));
 
     // Angemeldete Sitzung mitschreiben (Verwaltung → Anmeldungen). Wurde die
@@ -629,6 +630,9 @@ try {
     $router->get('/galerien', [\App\Controllers\GalleryController::class, 'index']);
     $router->get('/galerien/neu', [\App\Controllers\GalleryController::class, 'createForm']);
     $router->post('/galerien', [\App\Controllers\GalleryController::class, 'store']);
+    $router->post('/galerien/hinweis', [\App\Controllers\GalleryController::class, 'updateNotice']);
+    $router->get('/galerien/sicherung', [\App\Controllers\GalleryController::class, 'backupExport']);
+    $router->post('/galerien/sicherung', [\App\Controllers\GalleryController::class, 'backupImport']);
     $router->get('/galerien/papierkorb', [\App\Controllers\GalleryController::class, 'trash']);
     $router->get('/galerien/ansehen', [\App\Controllers\GalleryController::class, 'show']);
     $router->post('/galerien/speichern', [\App\Controllers\GalleryController::class, 'update']);

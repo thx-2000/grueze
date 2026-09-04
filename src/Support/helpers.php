@@ -69,6 +69,18 @@ function can(string $permission): bool
     return auth()->can($permission);
 }
 
+/** True, wenn die aktuelle Person mindestens eine der Berechtigungen hat. */
+function can_any(string ...$permissions): bool
+{
+    foreach ($permissions as $permission) {
+        if (auth()->can($permission)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function can_view_contact_field(string $field, ?array $contact = null): bool
 {
     return auth()->canViewContactField($field, $contact);
@@ -263,7 +275,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.47.0';
+    return '1.48.0';
 }
 
 /**

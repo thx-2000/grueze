@@ -92,15 +92,23 @@ Papierkorb (nur Admin sichtbar), Bilder nicht in die DB, Videos erlaubt.
   PHP-Auslieferung mit `galleries.manage` + Range-Requests. Recht
   `galleries.manage` (Standard nur Admin). Migration `2026-09-29-galerien`.
   Nicht im ZIP-Backup (Hinweis auf der Backup-Seite).
+- **Stufe 3 – Rollen & Nutzungshinweis + Sicherung – v1.48.0 erledigt.**
+  Rechte `galleries.view` / `galleries.upload` / `galleries.manage` (Standard:
+  Team verwaltet, Team+Mitglieder sehen+laden hoch). Uploader dürfen eigene
+  Medien (via `uploaded_by`) beschriften/löschen. Nutzungshinweis (editierbar,
+  `app_settings.gallery_usage_notice`) bei Ansehen/Lightbox/in jeder ZIP als
+  `HINWEIS.txt`. Medien-Sicherung im System: Export „Alle Medien sichern"
+  (ZIP + manifest.json) und Import (neue Galerien, kein Merge), Limit
+  `media.backup_max_bytes`. „Fehler 200"-Fix (ob_start + JSON-Puffer-Discard).
 - **Stufe 2 – handy-optimierter Upload + Weitergabe (offen):**
   schlanke Upload-Seite fürs Handy; **Auffangraum** (`gallery_media.gallery_id`
   ist bereits NULL-fähig) für nicht zugeordnete Uploads → später einer Galerie
   zuweisen / neue Galerie daraus; **Weitergabe-Link** (Token wie Daten-Check)
   + **QR-Code** zum Aushängen, Upload ohne Login. QR-Erzeugung muss in den
   Stack (kleine PHP-Lib oder SVG selbst zeichnen).
-- **Stufe 3 – Rollen & Rechte (offen):** wer sieht / lädt hoch / verschiebt /
-  löscht welche Galerie. Ggf. Rechte `galleries.view`, `galleries.upload`,
-  pro Galerie sichtbar für bestimmte Gruppen. Bis dahin: nur `galleries.manage`.
+- **Feiner (offen):** Sichtbarkeit einzelner Galerien auf bestimmte Gruppen
+  begrenzen (jetzt gilt jedes Recht global); Sicherungs-Export als Stream statt
+  Temp-ZIP (Speicherplatz bei sehr großen Beständen).
 - **Chat für Online-Nutzer:innen** – TH hält es selbst für unwahrscheinlich,
   nur mitführen. Größter Brocken (Polling/SSE, Moderation, Datenschutz).
 
