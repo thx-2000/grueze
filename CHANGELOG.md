@@ -3,6 +3,16 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.27.0
+
+**Aufräumen unter der Haube – kein sichtbarer Unterschied.**
+
+- Die Aufbereitung der Kontakt-Formularfelder (E-Mail-/Telefon-Zeilen säubern,
+  Stammdaten) lag dreifach kopiert vor (Verwaltung, „Mein Eintrag",
+  Daten-Check-Link). Jetzt an einer Stelle: `App\Support\ContactInput`.
+- Ein paar seit dem letzten Umbau tote CSS-Regeln entfernt (die alte
+  „Steht an"-Liste, Reste der alten Topbar).
+
 ## 1.26.0
 
 **Nur Doku – nichts an der Anwendung geändert.**

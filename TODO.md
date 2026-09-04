@@ -111,12 +111,22 @@ Stand betreffen.
    Regeln, „neue Seite"-Checkliste); `MailService` + `WebAuthnService`
    kommentiert. Offen bei Bedarf: `app.js` (Abschnittsdoku), die großen
    Controller.
-3. **Refactoring / Verschlankung**: `ContactController` (1050 Z.),
-   `ContactRepository` (1120 Z.), `MailController` (826 Z.), `app.css`
-   (6400 Z.), `app.js` (1076 Z.) sind Kandidaten. Tote CSS-Regeln aus dem
-   Redesign, wiederholte Payload-/Diff-Logik (Kontakt-Sanitize an 3 Stellen),
-   `templates/contacts/index.php` (667 Z.). Ziel: leichter wartbar, nicht
-   „Rewrite".
+3. **Refactoring / Verschlankung** – **läuft, in kleinen Schritten:**
+   - v1.27.0: Kontakt-Payload-Logik (war 3× kopiert) → `App\Support\ContactInput`;
+     ein paar tote CSS-Regeln raus.
+   - **offen: großer Dead-CSS-Durchgang.** `app.css` hat noch ganze tote
+     Cluster (`.filter-grid`/`.filter-drawer`/`.filter-advanced-grid`,
+     `.stats-grid`/`.stat-card`, `.signal-bar*`, `.rundmail-*`, `.sidebar-*`,
+     `.account-panel`/`-summary`/`-badge`, `.page-shell`, `.content-topbar`,
+     `.topbar-title`/`-meta`, `.profile-chip`, `.passkey-login-box`,
+     `.selection-tools`, `.quick-category-list`, `is-member-compact`/
+     `is-staff-compact`). Alle in Templates+JS bestätigt 0 Treffer. Braucht
+     einen dedizierten Durchgang mit laufender App / visuellem Abgleich –
+     nicht per Grep im Vorbeigehen, weil viele in kombinierten Selektoren
+     und Media-Queries stecken.
+   - offen: fette Dateien aufteilen (`ContactController` ~970 Z.,
+     `MailController` 826 Z., `templates/contacts/index.php` 667 Z.),
+     Merge-/Dubletten-Logik aus `ContactRepository` in einen Service.
 
 - **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
 

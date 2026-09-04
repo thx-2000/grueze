@@ -13,6 +13,7 @@ use App\Repositories\GroupRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
+use App\Support\ContactInput;
 use App\Services\CsvExportService;
 use App\Services\ContactImportService;
 use App\Services\UploadService;
@@ -751,60 +752,24 @@ final class ContactController extends BaseController
         Redirect::to('/verwaltung/gruppen/detail?id=' . $groupId);
     }
 
-    /**
-     * Entfernt fuehrende "mailto:"-Praefixe (Alt-Importdaten), Steuerzeichen
-     * (u. a. CR/LF – sonst E-Mail-Header-Injection beim Versand) und trimmt.
-     */
-    private function cleanEmail(string $value): string
-    {
-        $value = (string) preg_replace('/^\s*mailto:\s*/i', '', $value);
-        $value = (string) preg_replace('/[\x00-\x1F\x7F]+/', '', $value);
-
-        return trim($value);
-    }
-
+    /** Volles Kontaktformular (Verwaltung) → Datenarray für ContactRepository. */
     private function sanitizePayload(Request $request): array
     {
-        $emails = [];
-        foreach (($request->input('emails', []) ?: []) as $entry) {
-            $email = $this->cleanEmail((string) ($entry['email'] ?? ''));
-            $label = trim((string) ($entry['label'] ?? ''));
-            if ($email !== '') {
-                $emails[] = ['email' => $email, 'label' => $label];
-            }
-        }
+        $emails = ContactInput::emails($request);
 
-        $phones = [];
-        foreach (($request->input('phones', []) ?: []) as $entry) {
-            $phone = trim((string) preg_replace(['/^\s*tel:\s*/i', '/[\x00-\x1F\x7F]+/'], '', (string) ($entry['phone'] ?? '')));
-            $label = trim((string) ($entry['label'] ?? 'Sonstige'));
-            if ($phone !== '') {
-                $phones[] = ['phone' => $phone, 'label' => $label];
-            }
-        }
-
-        $loginEnabled = can('users.manage') && $request->input('login_enabled') !== null;
-        $loginEmail = $this->cleanEmail((string) $request->input('login_email'));
+        // Login-Adresse: leer = die erste Kontakt-Mail übernehmen.
+        $loginEmail = ContactInput::cleanEmail((string) $request->input('login_email'));
         if ($loginEmail === '' && isset($emails[0]['email'])) {
             $loginEmail = $emails[0]['email'];
         }
 
-        return [
-            'vorname' => trim((string) $request->input('vorname')),
-            'nachname' => trim((string) $request->input('nachname')),
-            'geburtsname' => trim((string) $request->input('geburtsname')),
-            'geschlecht' => $this->normalizeGeschlecht((string) $request->input('geschlecht')),
+        return ContactInput::baseFields($request) + [
             'category_id' => (string) $request->input('category_id'),
-            'geburtstag' => (string) $request->input('geburtstag'),
-            'strasse' => trim((string) $request->input('strasse')),
-            'plz' => trim((string) $request->input('plz')),
-            'ort' => trim((string) $request->input('ort')),
-            'land' => trim((string) $request->input('land', (string) config('defaults.country', 'Deutschland'))),
             'notizen' => trim((string) $request->input('notizen')),
             'tag_ids' => array_values(array_filter(array_map('intval', (array) $request->input('tag_ids', [])))),
             'emails' => $emails,
-            'phones' => $phones,
-            'login_enabled' => $loginEnabled,
+            'phones' => ContactInput::phones($request),
+            'login_enabled' => can('users.manage') && $request->input('login_enabled') !== null,
             'login_email' => $loginEmail,
             'role_id' => (int) $request->input('role_id'),
         ];
@@ -813,58 +778,12 @@ final class ContactController extends BaseController
     /**
      * Beschnittene Variante von sanitizePayload() für den Selbst-Service: nur die
      * Felder, die eine Person am eigenen Eintrag ändern darf. Kategorie, Tags,
-     * Notizen und Bild werden aus dem Bestand übernommen, damit contacts.update()
-     * sie nicht leert.
+     * Notizen und Bild kommen aus dem Bestand, damit contacts.update() sie nicht
+     * leert. Identisch mit dem Daten-Check-Link → siehe ContactInput.
      */
     private function sanitizeOwnProfilePayload(Request $request, array $existing): array
     {
-        $emails = [];
-        foreach (($request->input('emails', []) ?: []) as $entry) {
-            $email = $this->cleanEmail((string) ($entry['email'] ?? ''));
-            $label = trim((string) ($entry['label'] ?? ''));
-            if ($email !== '') {
-                $emails[] = ['email' => $email, 'label' => $label];
-            }
-        }
-
-        $phones = [];
-        foreach (($request->input('phones', []) ?: []) as $entry) {
-            $phone = trim((string) preg_replace(['/^\s*tel:\s*/i', '/[\x00-\x1F\x7F]+/'], '', (string) ($entry['phone'] ?? '')));
-            $label = trim((string) ($entry['label'] ?? 'Sonstige'));
-            if ($phone !== '') {
-                $phones[] = ['phone' => $phone, 'label' => $label];
-            }
-        }
-
-        return [
-            'vorname' => trim((string) $request->input('vorname')),
-            'nachname' => trim((string) $request->input('nachname')),
-            'geburtsname' => trim((string) $request->input('geburtsname')),
-            'geschlecht' => $this->normalizeGeschlecht((string) $request->input('geschlecht')),
-            'geburtstag' => (string) $request->input('geburtstag'),
-            'strasse' => trim((string) $request->input('strasse')),
-            'plz' => trim((string) $request->input('plz')),
-            'ort' => trim((string) $request->input('ort')),
-            'land' => trim((string) $request->input('land', (string) config('defaults.country', 'Deutschland'))),
-            'category_id' => (string) ($existing['category_id'] ?? ''),
-            'notizen' => (string) ($existing['notizen'] ?? ''),
-            'photo_path' => (string) ($existing['photo_path'] ?? ''),
-            'tag_ids' => array_map(static fn (array $tag): int => (int) $tag['id'], $existing['tags'] ?? []),
-            'emails' => $emails,
-            'phones' => $phones,
-        ];
-    }
-
-    /**
-     * Anrede-Code des Kontakts. `m`/`w` steuern die Anrede „Lieber"/„Liebe",
-     * leer bedeutet die neutrale Anrede „Hallo". Historische Spalte
-     * `contacts.geschlecht` – im UI heißt das Feld nur noch „Anrede".
-     */
-    private function normalizeGeschlecht(string $geschlecht): string
-    {
-        $normalized = strtolower(trim($geschlecht));
-
-        return in_array($normalized, ['m', 'w'], true) ? $normalized : '';
+        return ContactInput::selfServiceFields($request, $existing);
     }
 
     /**

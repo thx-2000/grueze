@@ -2773,10 +2773,6 @@ code {
         grid-template-columns: 1fr;
     }
 
-    .start-todo-count {
-        font-size: 1.5rem;
-    }
-
     .start-search input[type="search"] {
         font-size: 1.05rem;
         padding: 0.85rem 0.8rem;
@@ -2784,12 +2780,6 @@ code {
 
     .start-search button {
         padding: 0 1.1rem;
-    }
-}
-
-@media (min-width: 901px) {
-    .signal-bar {
-        min-height: 4rem;
     }
 }
 
@@ -2962,54 +2952,6 @@ code {
 .start-board-head p {
     margin: 0;
     font-size: 0.9rem;
-}
-
-.start-todo {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-}
-
-.start-todo li + li {
-    border-top: 1px solid var(--color-border);
-}
-
-.start-todo-link {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    padding: 0.85rem 0.25rem;
-    color: var(--color-text);
-    text-decoration: none;
-}
-
-.start-todo-link:hover .start-todo-label,
-.start-todo-link:focus-visible .start-todo-label {
-    color: var(--color-primary);
-}
-
-.start-todo-count {
-    flex: 0 0 auto;
-    min-width: 2.4ch;
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 1.7rem;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: var(--color-danger);
-}
-
-.start-todo-label {
-    flex: 1;
-    font-size: 0.95rem;
-}
-
-.start-todo-link .icon {
-    flex: 0 0 auto;
-    width: 1.1rem;
-    height: 1.1rem;
-    color: var(--color-muted);
 }
 
 .start-board-clear {
