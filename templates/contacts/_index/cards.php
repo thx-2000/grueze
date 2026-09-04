@@ -13,7 +13,7 @@
 ?>
 <div class="contacts-grid contacts-mobile">
     <?php foreach ($contacts as $contact): ?>
-        <article class="contact-card" data-contact-selectable data-view="mobile" data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
+        <article class="contact-card" data-contact-selectable data-view="mobile"<?php if ($canManage): ?> data-row-link="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"<?php endif; ?> data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
             <label class="contact-select">
                 <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox aria-label="<?= e(trim($contact['vorname'] . ' ' . $contact['nachname']) . ' auswählen') ?>">
                 <span aria-hidden="true">Auswählen</span>

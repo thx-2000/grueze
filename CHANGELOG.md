@@ -3,6 +3,20 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.46.0
+
+**Adressbuch: ganze Zeile klickbar + Archiv leichter zu finden.**
+
+- In der Adressliste (Tabelle **und** Karten) öffnet jetzt ein Klick auf
+  die ganze Zeile bzw. Karte die Kontakt-Detailseite – nicht mehr nur der
+  Pfeil rechts. Klicks auf Links, Buttons, Checkboxen usw. bleiben davon
+  unberührt; Text lässt sich weiter markieren; im Auswahl-Modus schaltet ein
+  Klick die Auswahl um. Der Pfeil/„Bearbeiten"-Link bleibt für die
+  Tastaturbedienung.
+- **„Archiv & Papierkorb"** hat jetzt eine eigene Kachel unter
+  **Verwaltung → Inhalt & Struktur** (bisher nur im „Datenpflege"-Menü des
+  Adressbuchs versteckt).
+
 ## 1.45.1
 
 **Hotfix zur Migration `2026-09-27`.** `RANDOM_BYTES()` gibt es erst ab

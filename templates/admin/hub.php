@@ -14,6 +14,7 @@ $groups = [
         ['groups.manage', '/verwaltung/gruppen', 'contacts', 'Gruppen', 'Personengruppen anlegen und Mitglieder pflegen – für Gruppen-Mail und -Abstimmung.'],
         ['settings.manage', '/verwaltung/gruesse', 'sparkles', 'Grüße-Pool', 'Standard-Wünsche für Geburtstag und Weihnachten pflegen; Weihnachtsgrüße gemischt verschicken.'],
         ['contacts.manage', '/vollstaendigkeit', 'check', 'Vollständigkeit', 'Datenlücken sehen, pro Person nachtragen, Namensliste zum Abgleich weitergeben.'],
+        ['contacts.delete', '/kontakte/archiv', 'archive', 'Archiv & Papierkorb', 'Archivierte Kontakte zurückholen, Papierkorb leeren oder endgültig löschen.'],
     ],
     'Aussehen & Texte' => [
         ['users.manage', '/settings/branding', 'sliders', 'Branding', 'Name, Kurzname, öffentliche Links, Login-Texte und Logo.'],

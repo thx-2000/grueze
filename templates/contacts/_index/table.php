@@ -32,7 +32,7 @@
         </thead>
         <tbody>
             <?php foreach ($contacts as $contact): ?>
-                <tr class="contact-row" data-contact-selectable data-view="desktop" data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
+                <tr class="contact-row" data-contact-selectable data-view="desktop"<?php if ($canManage): ?> data-row-link="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"<?php endif; ?> data-category-id="<?= e((string) ($contact['category_id'] ?? '')) ?>" data-tag-ids="<?= e(implode(',', array_map(static fn (array $tag): string => (string) $tag['id'], $contact['tags'] ?? []))) ?>">
                     <td class="col-select">
                         <label class="table-check">
                             <input type="checkbox" name="selected_contacts[]" value="<?= e((string) $contact['id']) ?>" data-contact-checkbox aria-label="<?= e(trim($contact['vorname'] . ' ' . $contact['nachname']) . ' auswählen') ?>">

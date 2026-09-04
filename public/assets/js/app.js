@@ -286,6 +286,48 @@ if (selectionForm) {
     });
 }
 
+// Ganze Zeile / Karte im Adressbuch klickbar: öffnet die Kontakt-Detailseite.
+// Klicks auf echte Bedienelemente (Links, Buttons, Checkboxen, Menüs) und
+// Textmarkierungen bleiben unberührt. Im Auswahl-Modus schaltet ein Klick auf
+// die Zeile stattdessen die Auswahl um. Die Detailseite bleibt zusätzlich über
+// den Pfeil/„Bearbeiten"-Link per Tastatur erreichbar.
+const interactiveInRow = 'a, button, input, select, textarea, label, summary, [contenteditable]';
+document.querySelectorAll('[data-row-link]').forEach((row) => {
+    const openDetail = (newTab) => {
+        const href = row.dataset.rowLink;
+        if (!href) return;
+        if (newTab) {
+            window.open(href, '_blank', 'noopener');
+        } else {
+            window.location.href = href;
+        }
+    };
+
+    row.addEventListener('click', (event) => {
+        if (event.target.closest(interactiveInRow)) return;
+        const selection = window.getSelection ? String(window.getSelection()) : '';
+        if (selection.trim() !== '') return;
+
+        if (contactsViewRoot && contactsViewRoot.classList.contains('is-selecting')) {
+            const checkbox = row.querySelector('[data-contact-checkbox]');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                updateSelectionUI();
+            }
+            return;
+        }
+
+        openDetail(event.metaKey || event.ctrlKey || event.shiftKey);
+    });
+
+    // Mittelklick → neuer Tab, wie bei einem echten Link.
+    row.addEventListener('auxclick', (event) => {
+        if (event.button !== 1 || event.target.closest(interactiveInRow)) return;
+        event.preventDefault();
+        openDetail(true);
+    });
+});
+
 // Kontakt-Detail: „Speichern"-Leiste erscheint, sobald etwas geändert wurde;
 // eine leichte Rückfrage schützt vor versehentlichem Verlassen.
 const detailForm = document.querySelector('[data-detail-form]');

@@ -638,6 +638,17 @@ h1, h2, h3, h4 {
     background: var(--accent-veil);
 }
 
+/* Ganze Zeile/Karte öffnet die Detailseite (JS); Bedienelemente darin bleiben
+   eigenständig anklickbar. */
+.contact-row[data-row-link],
+.contact-card[data-row-link] {
+    cursor: pointer;
+}
+
+.contact-card[data-row-link]:hover {
+    border-color: var(--color-primary);
+}
+
 .contacts-table .col-select {
     width: 3.5rem;
 }
