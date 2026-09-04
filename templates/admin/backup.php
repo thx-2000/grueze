@@ -50,7 +50,7 @@ $tableLabels = [
     <div class="panel-head">
         <div>
             <h3>Backup herunterladen</h3>
-            <p class="muted">Enthält alle Tabellen und hochgeladene Dateien (Kontaktfotos, Logo) als ZIP.</p>
+            <p class="muted">Enthält alle Tabellen und hochgeladene Dateien (Kontaktfotos, Logo) als ZIP. <strong>Galerie-Medien (Fotos/Videos) sind <em>nicht</em> enthalten</strong> – die liegen unter <code>storage/media/</code> und werden separat gesichert (Serverbackup des Hosters).</p>
         </div>
     </div>
     <div class="subsection-card">

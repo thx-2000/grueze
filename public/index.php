@@ -406,6 +406,17 @@ try {
         Container::get(ContactRepository::class),
         Container::get(UserRepository::class)
     ));
+    Container::factory(\App\Services\MediaService::class, static fn () => new \App\Services\MediaService());
+    Container::factory(\App\Repositories\GalleryRepository::class, static fn () => new \App\Repositories\GalleryRepository(Container::get(PDO::class)));
+    Container::factory(\App\Repositories\GalleryMediaRepository::class, static fn () => new \App\Repositories\GalleryMediaRepository(Container::get(PDO::class)));
+    Container::factory(\App\Controllers\GalleryController::class, static fn () => new \App\Controllers\GalleryController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\GalleryRepository::class),
+        Container::get(\App\Repositories\GalleryMediaRepository::class),
+        Container::get(\App\Services\MediaService::class),
+        Container::get(EventRepository::class),
+        Container::get(LogRepository::class)
+    ));
 
     // Angemeldete Sitzung mitschreiben (Verwaltung → Anmeldungen). Wurde die
     // Sitzung aus der Ferne beendet, hier abmelden und zur Anmeldung schicken.
@@ -457,6 +468,25 @@ try {
                 $sessionRepo->forgetIps();
             }
             Container::get(\App\Repositories\SentMailRepository::class)->pruneOld((int) config('mail.sent_retention_days', 365));
+
+            // Galerie-Papierkorb: abgelaufene Galerien und Einzelmedien mitsamt
+            // Dateien endgültig entfernen.
+            $mediaTrashDays = (int) config('media.trash_days', 30);
+            if ($mediaTrashDays > 0) {
+                $galleryRepo = Container::get(\App\Repositories\GalleryRepository::class);
+                $galleryMediaRepo = Container::get(\App\Repositories\GalleryMediaRepository::class);
+                $mediaStore = Container::get(\App\Services\MediaService::class);
+                foreach ($galleryRepo->expiredTrashIds($mediaTrashDays) as $gid) {
+                    foreach ($galleryMediaRepo->allForGallery($gid) as $row) {
+                        $mediaStore->deleteFiles($row);
+                    }
+                    $galleryRepo->hardDelete($gid);
+                }
+                foreach ($galleryMediaRepo->expiredTrashed($mediaTrashDays) as $row) {
+                    $mediaStore->deleteFiles($row);
+                    $galleryMediaRepo->hardDelete((int) $row['id']);
+                }
+            }
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
         }
@@ -595,6 +625,23 @@ try {
     $router->get('/termine/termin.ics', [EventController::class, 'ical']);
     $router->get('/abstimmen', [EventController::class, 'vote']);
     $router->post('/abstimmen', [EventController::class, 'submitVote']);
+
+    $router->get('/galerien', [\App\Controllers\GalleryController::class, 'index']);
+    $router->get('/galerien/neu', [\App\Controllers\GalleryController::class, 'createForm']);
+    $router->post('/galerien', [\App\Controllers\GalleryController::class, 'store']);
+    $router->get('/galerien/papierkorb', [\App\Controllers\GalleryController::class, 'trash']);
+    $router->get('/galerien/ansehen', [\App\Controllers\GalleryController::class, 'show']);
+    $router->post('/galerien/speichern', [\App\Controllers\GalleryController::class, 'update']);
+    $router->post('/galerien/hochladen', [\App\Controllers\GalleryController::class, 'upload']);
+    $router->post('/galerien/medien/beschriftung', [\App\Controllers\GalleryController::class, 'mediaCaption']);
+    $router->post('/galerien/medien/sortieren', [\App\Controllers\GalleryController::class, 'mediaReorder']);
+    $router->post('/galerien/medien/loeschen', [\App\Controllers\GalleryController::class, 'mediaDelete']);
+    $router->post('/galerien/cover', [\App\Controllers\GalleryController::class, 'setCover']);
+    $router->post('/galerien/loeschen', [\App\Controllers\GalleryController::class, 'deleteGallery']);
+    $router->post('/galerien/wiederherstellen', [\App\Controllers\GalleryController::class, 'restoreGallery']);
+    $router->post('/galerien/endgueltig-loeschen', [\App\Controllers\GalleryController::class, 'purgeGallery']);
+    $router->get('/galerien/datei', [\App\Controllers\GalleryController::class, 'file']);
+    $router->get('/galerien/zip', [\App\Controllers\GalleryController::class, 'downloadZip']);
     $router->get('/meine-daten', [\App\Controllers\DataCheckController::class, 'show']);
     $router->get('/meine-daten/{token}', [\App\Controllers\DataCheckController::class, 'show']);
     $router->post('/meine-daten', [\App\Controllers\DataCheckController::class, 'save']);

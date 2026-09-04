@@ -12,6 +12,7 @@ $groups = [
     'Inhalt & Struktur' => [
         ['categories.manage', '/verwaltung/kategorien-tags', 'sliders', 'Kategorien & Tags', 'Kategorien und Tags anlegen, umbenennen und löschen.'],
         ['groups.manage', '/verwaltung/gruppen', 'contacts', 'Gruppen', 'Personengruppen anlegen und Mitglieder pflegen – für Gruppen-Mail und -Abstimmung.'],
+        ['galleries.manage', '/galerien', 'image', 'Galerien', 'Foto- und Video-Sammlungen anlegen, Medien hochladen und ordnen.'],
         ['settings.manage', '/verwaltung/gruesse', 'sparkles', 'Grüße-Pool', 'Standard-Wünsche für Geburtstag und Weihnachten pflegen; Weihnachtsgrüße gemischt verschicken.'],
         ['contacts.manage', '/vollstaendigkeit', 'check', 'Vollständigkeit', 'Datenlücken sehen, pro Person nachtragen, Namensliste zum Abgleich weitergeben.'],
         ['contacts.delete', '/kontakte/archiv', 'archive', 'Archiv & Papierkorb', 'Archivierte Kontakte zurückholen, Papierkorb leeren oder endgültig löschen.'],

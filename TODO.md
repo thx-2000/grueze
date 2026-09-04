@@ -78,34 +78,37 @@ Ideen, falls es weitergeht (kein Muss):
   (mit aufgelöster Anrede + Fuß) + „An mich senden". Keine Migration – nutzt
   `sent_mails.recipients` (JSON-`LIKE`-Suche auf `contact_id`).
 
-## Bilder & Galerie (Ideen, TH 2026-09-04 – noch nicht beauftragt)
+## Galerien (Fotos & Videos)
 
-Zusammenhängendes Thema, in Stufen denkbar. „Out of Scope" bisher war nur
-Kontaktformular/Newsletter – Foto-Themen sind neu.
+Entscheidungen TH 2026-09-04: Server-Bildverarbeitung (GD/ImageMagick),
+EXIF/GPS bewusst DRIN lassen (Aufnahmezeit für Sortierung), HEIC→JPG wandeln,
+Papierkorb (nur Admin sichtbar), Bilder nicht in die DB, Videos erlaubt.
 
+- **Stufe 1 – v1.47.0 erledigt.** Galerien-CRUD, Drag-and-drop-Upload
+  (Bilder + Videos, mehrere gleichzeitig, Fortschritt), GD-Thumbnails +
+  Web-Größe, HEIC→JPG via `convert`, EXIF-Aufnahmezeit, Sortierung
+  captured/uploaded/manual, Bildunterschrift, Titelbild, ZIP-Download,
+  Lightbox, Papierkorb + GC. `storage/media/` außerhalb Webroot,
+  PHP-Auslieferung mit `galleries.manage` + Range-Requests. Recht
+  `galleries.manage` (Standard nur Admin). Migration `2026-09-29-galerien`.
+  Nicht im ZIP-Backup (Hinweis auf der Backup-Seite).
+- **Stufe 2 – handy-optimierter Upload + Weitergabe (offen):**
+  schlanke Upload-Seite fürs Handy; **Auffangraum** (`gallery_media.gallery_id`
+  ist bereits NULL-fähig) für nicht zugeordnete Uploads → später einer Galerie
+  zuweisen / neue Galerie daraus; **Weitergabe-Link** (Token wie Daten-Check)
+  + **QR-Code** zum Aushängen, Upload ohne Login. QR-Erzeugung muss in den
+  Stack (kleine PHP-Lib oder SVG selbst zeichnen).
+- **Stufe 3 – Rollen & Rechte (offen):** wer sieht / lädt hoch / verschiebt /
+  löscht welche Galerie. Ggf. Rechte `galleries.view`, `galleries.upload`,
+  pro Galerie sichtbar für bestimmte Gruppen. Bis dahin: nur `galleries.manage`.
 - **Chat für Online-Nutzer:innen** – TH hält es selbst für unwahrscheinlich,
-  nur mitführen. (Wäre technisch der größte Brocken: Polling/SSE, Moderation,
-  Aufbewahrung/Datenschutz. Niedrige Prio.)
-- **Bilder-Upload, handy-zuerst** – eine Upload-Möglichkeit, die vor allem
-  vom Handy aus **sehr** leicht ist (Kamera/Fotos direkt, mehrere auf einmal,
-  kein Konto-Gefummel). Baut auf `UploadService` auf (MIME serverseitig, SVG
-  verboten, Zufallsnamen), braucht aber Mehrfach-Upload + größere Limits +
-  ggf. clientseitiges Verkleinern.
-- **Galerie / „Räume"** – z. B. pro Stufentreffen ein Raum, in den alle
-  Bilder hochladen und die dann alle ansehen/herunterladen können.
-  - **Auffangraum** für Uploads ohne Zuordnung → später einem Raum zuweisen
-    oder einen neuen Raum daraus erstellen.
-  - Direkt-Upload in einen bestehenden Raum ebenso möglich.
-- **Upload-Link zum Weitergeben** – Token-Link (wie Daten-Check /
-  Abstimmung), per Messenger/Mail/**QR-Code** teilbar oder aushängbar, über
-  den man ohne Login Bilder in einen (bestehenden oder Auffang-)Raum lädt.
-  QR-Code-Erzeugung müsste dazukommen (bislang nicht im Stack).
+  nur mitführen. Größter Brocken (Polling/SSE, Moderation, Datenschutz).
 
-Zu klären, falls es kommt: Speicherort/-budget (Fotos sind groß – Platte
-vs. externes Objekt-Storage), Rechte (wer sieht/lädt welchen Raum), EXIF/
-Geodaten strippen, Missbrauch/Moderation bei offenen Upload-Links,
-Aufbewahrung, Einbindung ins Backup (aktuell sichert `BackupService` nur
-`public/assets/uploads`).
+Offene Feinheiten für später: chunked upload für sehr große Videos (jetzt ein
+POST pro Datei, begrenzt durch `post_max_size`); Video-Dauer/Maße serverseitig
+(bräuchte getID3 o. ä., ffmpeg fehlt auf Shared Hosting); Bild-Rotation aus
+EXIF fürs Original (jetzt nur in den Vorschau-Varianten); Galerie-Medien in
+eine separate Sicherung einbinden.
 
 ## UX-Review – Umsetzung (Entscheidungen TH 2026-09-04)
 

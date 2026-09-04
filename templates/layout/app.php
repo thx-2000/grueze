@@ -121,6 +121,9 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                 <?php if (nav_show_groups()): ?>
                     <a class="<?= $onGroups ? 'is-active' : '' ?>" href="<?= e(url('/gruppen')) ?>"><span class="rail-ic"><?= icon('users') ?></span>Gruppen</a>
                 <?php endif; ?>
+                <?php if (can('galleries.manage')): ?>
+                    <a class="<?= str_starts_with($currentPath, '/galerien') ? 'is-active' : '' ?>" href="<?= e(url('/galerien')) ?>"><span class="rail-ic"><?= icon('image') ?></span>Galerien</a>
+                <?php endif; ?>
                 <?php if ($showAdminHub): ?>
                     <span class="rail-group">Verwaltung</span>
                     <a class="<?= $onAdminHub ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung')) ?>"><span class="rail-ic"><?= icon('sliders') ?></span>Einstellungen</a>

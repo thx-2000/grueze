@@ -303,6 +303,9 @@ final class SettingsController extends BaseController
                 'Gruppen' => [
                     'groups.manage' => 'Gruppen anlegen und Mitglieder verwalten',
                 ],
+                'Galerien' => [
+                    'galleries.manage' => 'Galerien und Medien (Fotos/Videos) verwalten',
+                ],
                 'Orga-Team' => [
                     'orga.contact_target' => 'Bekommt Nachrichten über den „Orga-Team schreiben"-Knopf',
                 ],

@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.46.0';
+    return '1.47.0';
 }
 
 /**
@@ -548,6 +548,10 @@ function page_title(string $path): string
         '/kontakte'                  => 'Adressbuch',
         '/kontakte/archiv'           => 'Archiv & Papierkorb',
         '/kontakte/dubletten'        => 'Mögliche Doppel-Einträge',
+        '/galerien'                  => 'Galerien',
+        '/galerien/neu'              => 'Neue Galerie',
+        '/galerien/ansehen'          => 'Galerie',
+        '/galerien/papierkorb'       => 'Galerie-Papierkorb',
         '/meine-daten'               => 'Daten-Check',
         '/search'                    => 'Suche',
         '/contacts/create'           => 'Neuer Kontakt',
@@ -922,6 +926,12 @@ function icon(string $name): string
         'menu' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg>',
         'close' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5L5 6.4L10.6 12L5 17.6L6.4 19L12 13.4L17.6 19L19 17.6L13.4 12L19 6.4L17.6 5L12 10.6L6.4 5Z"/></svg>',
         'eye-off' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.28 2.22L2.22 3.28l3.2 3.2C3.5 7.9 1.98 9.98 1 12.5C2.73 16.89 7 20 12 20c2 0 3.88-.5 5.54-1.38l3.18 3.18l1.06-1.06L3.28 2.22ZM12 18c-3.76 0-7.17-2.2-8.82-5.5c.83-1.66 2.06-3.05 3.54-4.02l2.02 2.02A4 4 0 0 0 14.5 15.9l1.66 1.66A9.6 9.6 0 0 1 12 18Zm0-11c3.76 0 7.17 2.2 8.82 5.5a11.4 11.4 0 0 1-2.2 2.94l1.42 1.42A13.3 13.3 0 0 0 23 12.5C21.27 8.11 17 5 12 5c-1.2 0-2.36.18-3.45.5l1.6 1.6C10.79 7.04 11.38 7 12 7Z"/></svg>',
+        'image' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v9.6l4.3-4.3a1 1 0 0 1 1.4 0l2.8 2.8l3.3-3.3a1 1 0 0 1 1.4 0L20 15V6H4Zm4.5 1a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Z"/></svg>',
+        'video' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11a2 2 0 0 1 2 2v2.2l4-2.4a1 1 0 0 1 1.5.86v8.68a1 1 0 0 1-1.5.86L17 14.8V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 2v10h11V7H4Zm5 1.8l4 3.2l-4 3.2V8.8Z"/></svg>',
+        'play' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.29-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"/></svg>',
+        'download' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3h2v8h3l-4 4l-4-4h3V3Zm-6 13h2v3h10v-3h2v3.5A1.5 1.5 0 0 1 17.5 21h-11A1.5 1.5 0 0 1 5 19.5V16Z"/></svg>',
+        'drag' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Zm6 0a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3ZM9 10.5a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Zm6 0a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3ZM9 16a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Zm6 0a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3Z"/></svg>',
+        'star' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3l2.8 5.7l6.2.9l-4.5 4.4l1.1 6.2L12 17.3L6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>',
     ];
 
     $svg = $icons[$name] ?? '';

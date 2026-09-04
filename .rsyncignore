@@ -25,6 +25,11 @@ storage/app.key
 storage/tmp/*
 !storage/tmp/.gitkeep
 !storage/tmp/.htaccess
+# Galerie-Medien bleiben auf dem Server – nie vom lokalen Stand überschreiben
+# oder mit --delete entfernen. Eigene Sicherung nötig (nicht im ZIP-Backup).
+storage/media/*
+!storage/media/.gitkeep
+!storage/media/.htaccess
 storage/backups/*
 !storage/backups/.gitkeep
 !storage/backups/.htaccess

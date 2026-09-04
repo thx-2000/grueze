@@ -162,9 +162,40 @@ return [
     ],
 
     'contacts' => [
-        // Wie lange ein „Daten-Check"-Link (ohne Login, /meine-daten?token=…)
+        // Wie lange ein „Daten-Check"-Link (ohne Login, /meine-daten/<token>)
         // gültig ist. Danach muss die Verwaltung einen neuen erzeugen.
         'data_check_days' => 30,
+    ],
+
+    // Galerien: Foto-/Video-Sammlungen. Die Dateien liegen unter storage/media/
+    // (außerhalb des Webroots) und sind NICHT im ZIP-Backup – separat sichern.
+    'media' => [
+        // Obergrenzen je Datei. Videos brauchen auf Shared Hosting oft eine
+        // eigene php.ini mit passendem upload_max_filesize / post_max_size.
+        'max_image_bytes' => 25165824,   // 24 MiB
+        'max_video_bytes' => 524288000,  // 500 MiB
+        // Kantenlänge (längste Seite) der erzeugten Varianten.
+        'thumb_max_edge' => 400,
+        'web_max_edge' => 1600,
+        // Papierkorb: gelöschte Galerien/Medien nach so vielen Tagen endgültig
+        // entfernen (Dateien inklusive). 0 = nie automatisch.
+        'trash_days' => 30,
+        // Pfad zum ImageMagick-Binary – nur nötig, wenn die PHP-Erweiterung
+        // imagick fehlt UND HEIC-Bilder umgewandelt werden sollen (all-inkl).
+        'convert_bin' => '/usr/bin/convert',
+        'allowed_image_types' => [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+            'image/heic',
+            'image/heif',
+        ],
+        'allowed_video_types' => [
+            'video/mp4',
+            'video/webm',
+            'video/quicktime',
+        ],
     ],
 
     'defaults' => [

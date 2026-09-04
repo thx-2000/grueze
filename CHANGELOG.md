@@ -3,6 +3,32 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.47.0
+
+**Neu: Galerien (Fotos & Videos).** Stufe 1 – vorerst nur für die Verwaltung.
+
+- **Galerien anlegen** mit Titel, Beschreibung, optionalem Datum und
+  optionaler Verknüpfung zu einem Termin.
+- **Bilder und Videos hochladen** per Drag-and-drop (mehrere gleichzeitig,
+  mit Fortschrittsanzeige). Serverseitig entstehen Vorschau- und Web-Größen
+  (GD); das Original bleibt unangetastet, inklusive EXIF/Aufnahmezeit.
+- **HEIC** (iPhone-Standard) wird beim Upload zu JPG umgewandelt, wenn der
+  Server ImageMagick hat. Videos: das Vorschaubild zieht der Browser aus dem
+  ersten Frame.
+- **Sortierung** wahlweise nach Aufnahmezeit, Upload-Reihenfolge oder manuell
+  (Ziehen). Bildunterschriften, Titelbild wählen, **ganze Galerie als ZIP**.
+- **Lightbox** zum Durchblättern (Tasten ←/→/Esc), Einzel-Download.
+- **Papierkorb** (nur Admin) mit automatischer Endlöschung inkl. Dateien.
+- Neue **Medien liegen unter `storage/media/`** (außerhalb des Webroots,
+  Auslieferung nur mit Rechteprüfung, Video-Seeking via Range-Requests) und
+  sind **nicht im ZIP-Backup** – separat sichern (Serverbackup).
+- Neues Recht **`galleries.manage`** (Standard: nur Admin) – die feinere
+  Rollenverteilung folgt in einer späteren Stufe.
+
+**Migration `2026-09-29-galerien`.** Optional in `config/config.example.php`:
+Größenlimits, Papierkorb-Frist, `convert`-Pfad. Für Video-Uploads über ~30 MB
+braucht der Webspace eine eigene `php.ini` mit größerem `upload_max_filesize`.
+
 ## 1.46.0
 
 **Adressbuch: ganze Zeile klickbar + Archiv leichter zu finden.**

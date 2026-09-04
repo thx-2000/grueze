@@ -13,6 +13,9 @@
 /storage/tmp/*
 !/storage/tmp/.htaccess
 !/storage/tmp/.gitkeep
+/storage/media/*
+!/storage/media/.htaccess
+!/storage/media/.gitkeep
 /storage/backups/*
 !/storage/backups/.gitkeep
 !/storage/backups/.htaccess

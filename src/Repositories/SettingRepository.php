@@ -196,6 +196,7 @@ final class SettingRepository
             'mail.view_log'        => ['orga'],
             'events.manage'        => ['orga'],
             'groups.manage'        => ['orga'],
+            'galleries.manage'     => [],
             'orga.contact_target'  => ['orga'],
             'settings.manage'      => ['orga'],
         ];
