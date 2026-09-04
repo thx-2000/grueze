@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.42.0
+
+**Feinschliff: Icons und Auswahlfelder.**
+
+- Icons in Link-Buttons (z. B. die Werkzeugleiste im Adressbuch) saßen zu
+  tief – sie sind jetzt sauber mittig zum Text ausgerichtet und einen Tick
+  größer. Gilt in allen Ansichten und Rollen.
+- Auswahlfelder (`<select>`) zeigen nicht mehr die klobige System-Darstellung
+  (auffällig in Safari), sondern haben dieselbe Höhe und Optik wie ein
+  Textfeld, mit einem dezenten eigenen Pfeil.
+
 ## 1.41.0
 
 **„Kreide" ist der neue Standard.**
