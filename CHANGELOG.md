@@ -3,6 +3,16 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.23.0
+
+**Gruppenleitung: alles Wichtige auf einen Blick (UX Teil 3)**
+
+- Wer eine Gruppe leitet, findet auf „Gruppen" jetzt ganz oben den Abschnitt
+  **„Gruppen, die du leitest"** – mit den zwei Kernaktionen als großen Knöpfen:
+  **Nachricht schreiben** und **Abstimmung starten**. Kein Umweg über
+  „Verwalten" mehr.
+- Offene Beitrittsanfragen werden direkt auf der Karte angezeigt und verlinkt.
+
 ## 1.22.0
 
 **Einstellungen neu sortiert (UX Teil 2)**

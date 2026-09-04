@@ -70,10 +70,12 @@ Vollständige Analyse: `docs/UX-REVIEW.md`. Entscheidungen:
   erledigt**.
 - **Verwaltungs-Hub 4 Gruppen (B3)** – **v1.22.0 erledigt** (+ Cron-Kachel →
   bedingter Hinweisstreifen via `scheduler_stale()`).
-- **Gruppenleitungs-Einstieg (C1)** – offen, als Nächstes: `/gruppen` für Leads
-  mit direkten Knöpfen „Nachricht an die Gruppe" + „Abstimmung starten".
-- **Startseiten rollenspezifisch (C4 + C2)** – offen, nach der Rollen-Abfrage
-  mit TH.
+- **Gruppenleitungs-Einstieg (C1)** – **v1.23.0 erledigt**: Abschnitt „Gruppen,
+  die du leitest" auf `/gruppen` mit Groß-Knöpfen „Nachricht schreiben" +
+  „Abstimmung starten", Beitrittsanfragen direkt auf der Karte.
+- **Startseiten rollenspezifisch (C4 + C2)** – offen, **als Nächstes nach der
+  Rollen-Abfrage mit TH** (die 3–5 wichtigsten Aufgaben je Rolle, einzeln
+  abgefragt).
 
 ## Zur Entscheidung – „lets discuss" (2026-09-04, noch NICHT beauftragt)
 
