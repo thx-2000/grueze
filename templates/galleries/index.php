@@ -6,8 +6,6 @@
  * @var bool $canManage
  * @var bool $canUpload
  * @var string $usageNotice
- * @var int $mediaBytes
- * @var int $backupMax
  * @var int $unassignedCount
  * @var list<array<string,mixed>> $catchAllLinks
  * @var array<string,mixed>|null $freshLink
@@ -118,31 +116,9 @@ $uploadMax = (int) ($capabilities['upload_max_bytes'] ?? 0);
         'csrfToken' => $csrfToken, 'linkDays' => $linkDays,
     ]); ?>
 
-    <section class="panel gallery-backup">
-        <div class="panel-head"><div><h3>Sicherung der Medien</h3>
-            <p class="muted">Alle Galerien und Dateien als ZIP – zusätzlich zur Sicherung beim Hoster. Die Galerie-Medien sind <strong>nicht</strong> im normalen Datensicherungs-Backup enthalten.</p>
-        </div></div>
-        <div class="toolbar-actions">
-            <?php $over = $backupMax > 0 && $mediaBytes > $backupMax; ?>
-            <a class="ghost-button<?= $over ? ' is-disabled' : '' ?>" href="<?= e(url('/galerien/sicherung')) ?>"<?= $over ? ' aria-disabled="true" tabindex="-1"' : '' ?>>
-                <?= icon('download') ?><span>Alle Medien sichern<?= $mediaBytes > 0 ? ' (' . e(\App\Services\MediaService::humanBytes($mediaBytes)) . ')' : '' ?></span>
-            </a>
-        </div>
-        <?php if ($over): ?>
-            <p class="field-hint">Zu groß für eine Gesamt-Sicherung (Limit <?= e(\App\Services\MediaService::humanBytes($backupMax)) ?>). Bitte einzelne Galerien über „Als ZIP" sichern.</p>
-        <?php endif; ?>
-        <details class="gallery-restore">
-            <summary>Sicherung einspielen</summary>
-            <form method="post" action="<?= e(url('/galerien/sicherung')) ?>" enctype="multipart/form-data" class="stack" data-confirm="Sicherung jetzt einspielen? Die enthaltenen Galerien werden als NEUE Galerien angelegt (nichts wird überschrieben).">
-                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                <label>
-                    <span>ZIP-Sicherung (aus „Alle Medien sichern")</span>
-                    <input type="file" name="backup_file" accept=".zip,application/zip" required>
-                </label>
-                <div class="form-actions"><button type="submit" class="ghost-button"><?= icon('upload') ?><span>Einspielen</span></button></div>
-            </form>
-        </details>
-    </section>
+    <p class="gallery-trash-link">
+        <a class="ghost-button compact-action" href="<?= e(url('/admin/backup')) ?>"><?= icon('download') ?><span>Medien sichern (Verwaltung → Datensicherung)</span></a>
+    </p>
 
     <?php if ($trashedCount > 0): ?>
         <p class="gallery-trash-link">

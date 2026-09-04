@@ -166,7 +166,11 @@ try {
     ));
     Container::factory(BackupController::class, static fn () => new BackupController(
         Container::get(Auth::class),
-        Container::get(BackupService::class)
+        Container::get(BackupService::class),
+        Container::get(\App\Repositories\GalleryRepository::class),
+        Container::get(\App\Repositories\GalleryMediaRepository::class),
+        Container::get(\App\Services\MediaService::class),
+        Container::get(LogRepository::class)
     ));
     Container::factory(StartController::class, static fn () => new StartController(
         Container::get(Auth::class),
@@ -640,8 +644,6 @@ try {
     $router->get('/galerien/neu', [\App\Controllers\GalleryController::class, 'createForm']);
     $router->post('/galerien', [\App\Controllers\GalleryController::class, 'store']);
     $router->post('/galerien/hinweis', [\App\Controllers\GalleryController::class, 'updateNotice']);
-    $router->get('/galerien/sicherung', [\App\Controllers\GalleryController::class, 'backupExport']);
-    $router->post('/galerien/sicherung', [\App\Controllers\GalleryController::class, 'backupImport']);
     $router->get('/galerien/papierkorb', [\App\Controllers\GalleryController::class, 'trash']);
     $router->get('/galerien/ansehen', [\App\Controllers\GalleryController::class, 'show']);
     $router->post('/galerien/speichern', [\App\Controllers\GalleryController::class, 'update']);
@@ -710,6 +712,8 @@ try {
     $router->get('/admin/backup', [BackupController::class, 'index']);
     $router->post('/admin/backup/export', [BackupController::class, 'export']);
     $router->post('/admin/backup/restore', [BackupController::class, 'restore']);
+    $router->get('/admin/backup/medien', [BackupController::class, 'mediaExport']);
+    $router->post('/admin/backup/medien', [BackupController::class, 'mediaImport']);
     $router->get('/admin/legal/impressum', [LegalController::class, 'editImpressum']);
     $router->post('/admin/legal/impressum', [LegalController::class, 'updateImpressum']);
     $router->get('/admin/legal/datenschutz', [LegalController::class, 'editDatenschutz']);

@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.49.1
+
+**Feinschliff nach TH-Feedback.**
+
+- **Medien-Sicherung umgezogen:** „Alle Galerie-Medien sichern" (Download +
+  Einspielen) steht jetzt unter **Verwaltung → Datensicherung** statt auf der
+  Galerie-Übersicht – zusammen mit dem normalen Backup, wo es hingehört.
+- **„Anmelden als" verfälscht die Anmeldungen-Liste nicht mehr.** Die
+  impersonierte Person wurde schon bisher nie als „angemeldet" erfasst (das
+  Anmelde-Protokoll schreibt immer die auslösende Admin-Sitzung, das
+  Änderungsprotokoll markiert die Aktion klar als „Admin X als Y"). Neu
+  behoben: Start/Ende von „Anmelden als" hinterließ eine verwaiste, scheinbar
+  weiter „online" stehende Sitzungszeile – die wird jetzt sauber abgeschlossen.
+- **Medien-Übersicht kompakter:** größere Vorschaubilder, weniger Zwischenraum
+  in der Galerie-Ansicht – mehr Bild pro Bildschirm, dafür etwas mehr Scrollen.
+
 ## 1.49.0
 
 **Galerien: Fotos beisteuern per Link + QR, ohne Login (Stufe 2).**

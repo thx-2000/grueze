@@ -50,7 +50,7 @@ $tableLabels = [
     <div class="panel-head">
         <div>
             <h3>Backup herunterladen</h3>
-            <p class="muted">Enthält alle Tabellen und hochgeladene Dateien (Kontaktfotos, Logo) als ZIP. <strong>Galerie-Medien (Fotos/Videos) sind <em>nicht</em> enthalten</strong> – die liegen unter <code>storage/media/</code> und werden separat gesichert (Serverbackup des Hosters).</p>
+            <p class="muted">Enthält alle Tabellen und hochgeladene Dateien (Kontaktfotos, Logo) als ZIP. <strong>Galerie-Medien (Fotos/Videos) sind <em>nicht</em> enthalten</strong> – dafür weiter unten „Galerie-Medien sichern".</p>
         </div>
     </div>
     <div class="subsection-card">
@@ -127,4 +127,38 @@ $tableLabels = [
             </button>
         </div>
     </form>
+</section>
+
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h3>Galerie-Medien sichern</h3>
+            <p class="muted">
+                Fotos und Videos aus <a href="<?= e(url('/galerien')) ?>">Galerien</a> als eigene ZIP – mit Manifest, unabhängig vom Backup oben und zusätzlich zur Sicherung beim Hoster.
+                <?php if ($galleryCount > 0): ?>
+                    Aktuell <?= e((string) $galleryCount) ?> <?= $galleryCount === 1 ? 'Galerie' : 'Galerien' ?><?= $mediaBytes > 0 ? ', ' . e(\App\Services\MediaService::humanBytes($mediaBytes)) : '' ?>.
+                <?php endif; ?>
+            </p>
+        </div>
+    </div>
+    <?php $over = $mediaBackupMax > 0 && $mediaBytes > $mediaBackupMax; ?>
+    <div class="toolbar-actions">
+        <a class="ghost-button<?= $over || $galleryCount === 0 ? ' is-disabled' : '' ?>" href="<?= e(url('/admin/backup/medien')) ?>"<?= $over || $galleryCount === 0 ? ' aria-disabled="true" tabindex="-1"' : '' ?>>
+            <?= icon('download') ?><span>Alle Galerie-Medien sichern</span>
+        </a>
+    </div>
+    <?php if ($over): ?>
+        <p class="field-hint">Zu groß für eine Gesamt-Sicherung (Limit <?= e(\App\Services\MediaService::humanBytes($mediaBackupMax)) ?>). Bitte einzelne Galerien direkt dort über „Als ZIP" sichern.</p>
+    <?php endif; ?>
+    <details class="gallery-restore">
+        <summary>Medien-Sicherung einspielen</summary>
+        <form method="post" action="<?= e(url('/admin/backup/medien')) ?>" enctype="multipart/form-data" class="stack" data-confirm="Sicherung jetzt einspielen? Die enthaltenen Galerien werden als NEUE Galerien angelegt (nichts wird überschrieben).">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <label>
+                <span>ZIP-Sicherung (aus „Alle Galerie-Medien sichern")</span>
+                <input type="file" name="backup_file" accept=".zip,application/zip" required>
+            </label>
+            <div class="form-actions"><button type="submit" class="ghost-button"><?= icon('upload') ?><span>Einspielen</span></button></div>
+        </form>
+    </details>
 </section>

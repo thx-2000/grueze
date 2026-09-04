@@ -33,7 +33,6 @@ final class GalleryController extends BaseController
     private const NOTICE_DEFAULT = 'Diese Aufnahmen sind für die Teilnehmenden des Treffens zum Ansehen gedacht. '
         . 'Eine Weitergabe oder Veröffentlichung – etwa in sozialen Netzwerken – ist nur mit Einverständnis der '
         . 'abgebildeten Personen zulässig.';
-    private const BACKUP_FORMAT = 1;
 
     public function __construct(
         \App\Core\Auth $auth,
@@ -62,8 +61,6 @@ final class GalleryController extends BaseController
             'canManage' => $canManage,
             'canUpload' => $this->canUpload(),
             'usageNotice' => gallery_usage_notice(),
-            'mediaBytes' => $canManage ? $this->media->totalActiveBytes() : 0,
-            'backupMax' => (int) config('media.backup_max_bytes', 2147483648),
             'unassignedCount' => $canManage ? $this->media->countUnassigned() : 0,
             'catchAllLinks' => $canManage ? $this->uploadLinks->active(0) : [],
             'freshLink' => $canManage ? $this->takeFreshLink(null) : null,
@@ -496,7 +493,7 @@ final class GalleryController extends BaseController
             Redirect::to('/galerien/ansehen?id=' . $gallery['id']);
         }
 
-        $zip->addFromString('HINWEIS.txt', $this->noticePlain());
+        $zip->addFromString('HINWEIS.txt', \App\Support\GalleryZip::noticeText());
         $used = [];
         $n = 1;
         foreach ($items as $item) {
@@ -504,7 +501,7 @@ final class GalleryController extends BaseController
             if ($abs === null) {
                 continue;
             }
-            $entry = $this->zipEntryName($n++, (string) ($item['original_name'] ?? ''), $used);
+            $entry = \App\Support\GalleryZip::entryName($n++, (string) ($item['original_name'] ?? ''), $used);
             $zip->addFile($abs, $entry);
         }
         $zip->close();
@@ -513,172 +510,9 @@ final class GalleryController extends BaseController
             session_write_close();
         }
 
-        $name = 'galerie-' . self::slug((string) $gallery['title']) . '.zip';
+        $name = 'galerie-' . \App\Support\GalleryZip::slug((string) $gallery['title']) . '.zip';
         register_shutdown_function(static fn () => @unlink($tmp));
         FileResponse::stream($tmp, 'application/zip', $name, 0);
-    }
-
-    // ------------------------------------------------------ Medien-Sicherung
-
-    /** Komplette Medien-Sicherung als ZIP (alle Galerien + Manifest). */
-    public function backupExport(Request $request): void
-    {
-        $this->requireManage();
-
-        $max = (int) config('media.backup_max_bytes', 2147483648);
-        $total = $this->media->totalActiveBytes();
-        if ($max > 0 && $total > $max) {
-            flash('error', 'Die Medien sind zusammen ' . MediaService::humanBytes($total)
-                . ' groß – das ist mehr als das Sicherungs-Limit (' . MediaService::humanBytes($max)
-                . '). Bitte einzelne Galerien über „Als ZIP" sichern.');
-            Redirect::to('/galerien');
-        }
-
-        $galleries = $this->galleries->all();
-        if ($galleries === []) {
-            flash('error', 'Es gibt noch keine Galerie zum Sichern.');
-            Redirect::to('/galerien');
-        }
-
-        $tmp = tempnam($this->storage->tmpDir(), 'gbak_') . '.zip';
-        $zip = new ZipArchive();
-        if ($zip->open($tmp, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-            flash('error', 'Die Sicherung konnte nicht erstellt werden.');
-            Redirect::to('/galerien');
-        }
-
-        $zip->addFromString('HINWEIS.txt', $this->noticePlain());
-        $manifest = [
-            'format' => self::BACKUP_FORMAT,
-            'exported_at' => date('c'),
-            'usage_notice' => $this->notice(),
-            'galleries' => [],
-        ];
-
-        $gi = 1;
-        foreach ($galleries as $gallery) {
-            $folder = sprintf('%03d-%s', $gi++, self::slug((string) $gallery['title']));
-            $items = $this->media->forGallery((int) $gallery['id'], (string) $gallery['sort_mode']);
-            $entryG = [
-                'title' => (string) $gallery['title'],
-                'description' => (string) ($gallery['description'] ?? ''),
-                'gallery_date' => $gallery['gallery_date'] ? substr((string) $gallery['gallery_date'], 0, 10) : null,
-                'sort_mode' => (string) $gallery['sort_mode'],
-                'event_title' => (string) ($gallery['event_title'] ?? ''),
-                'media' => [],
-            ];
-
-            $used = [];
-            $n = 1;
-            foreach ($items as $item) {
-                $abs = $this->storage->absolutePath((string) $item['stored_path']);
-                if ($abs === null) {
-                    continue;
-                }
-                $file = $folder . '/' . $this->zipEntryName($n++, (string) ($item['original_name'] ?? ''), $used);
-                $zip->addFile($abs, $file);
-                $entryG['media'][] = [
-                    'file' => $file,
-                    'kind' => (string) $item['kind'],
-                    'original_name' => (string) ($item['original_name'] ?? ''),
-                    'caption' => (string) ($item['caption'] ?? ''),
-                    'captured_at' => $item['captured_at'] ? substr((string) $item['captured_at'], 0, 19) : null,
-                ];
-            }
-            $manifest['galleries'][] = $entryG;
-        }
-
-        $zip->addFromString('manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $zip->close();
-
-        $this->logs->addAudit((int) $this->userId(), null, 'created', 'Medien-Sicherung heruntergeladen (' . count($galleries) . ' Galerien).');
-
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
-        register_shutdown_function(static fn () => @unlink($tmp));
-        FileResponse::stream($tmp, 'application/zip', 'galerien-medien-' . date('Y-m-d') . '.zip', 0);
-    }
-
-    /** Medien-Sicherung wieder einspielen – legt neue Galerien an (kein Merge). */
-    public function backupImport(Request $request): void
-    {
-        $this->requireManage();
-        Csrf::validate($request->input('_csrf'));
-
-        $file = $request->file('backup_file');
-        if (!$file || (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file((string) ($file['tmp_name'] ?? ''))) {
-            flash('error', 'Bitte eine Sicherungs-ZIP auswählen.');
-            Redirect::to('/galerien');
-        }
-        $max = (int) config('media.backup_max_bytes', 2147483648);
-        if ($max > 0 && (int) ($file['size'] ?? 0) > $max) {
-            flash('error', 'Die Datei ist größer als das Sicherungs-Limit.');
-            Redirect::to('/galerien');
-        }
-
-        $zip = new ZipArchive();
-        if ($zip->open((string) $file['tmp_name']) !== true) {
-            flash('error', 'Die Datei ließ sich nicht öffnen – ist es eine gültige ZIP?');
-            Redirect::to('/galerien');
-        }
-        $raw = $zip->getFromName('manifest.json');
-        $manifest = is_string($raw) ? json_decode($raw, true) : null;
-        if (!is_array($manifest) || (int) ($manifest['format'] ?? 0) !== self::BACKUP_FORMAT || !is_array($manifest['galleries'] ?? null)) {
-            $zip->close();
-            flash('error', 'In der ZIP fehlt ein passendes manifest.json.');
-            Redirect::to('/galerien');
-        }
-
-        $galleriesAdded = 0;
-        $mediaAdded = 0;
-        foreach ($manifest['galleries'] as $g) {
-            if (!is_array($g) || trim((string) ($g['title'] ?? '')) === '') {
-                continue;
-            }
-            $galleryId = $this->galleries->create([
-                'title' => mb_substr(trim((string) $g['title']), 0, 190),
-                'description' => mb_substr((string) ($g['description'] ?? ''), 0, 5000),
-                'gallery_date' => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($g['gallery_date'] ?? '')) ? $g['gallery_date'] : '',
-                'event_id' => null,
-                'sort_mode' => in_array($g['sort_mode'] ?? '', GalleryRepository::SORT_MODES, true) ? $g['sort_mode'] : 'captured',
-            ], $this->userId());
-            $galleriesAdded++;
-
-            foreach ((array) ($g['media'] ?? []) as $m) {
-                $inZip = (string) ($m['file'] ?? '');
-                if ($inZip === '' || str_contains($inZip, '..')) {
-                    continue;
-                }
-                $bytes = $zip->getFromName($inZip);
-                if ($bytes === false) {
-                    continue;
-                }
-                $tmpFile = tempnam($this->storage->tmpDir(), 'gimp_');
-                file_put_contents($tmpFile, $bytes);
-                try {
-                    $meta = $this->storage->adopt($tmpFile, (string) ($m['original_name'] ?? basename($inZip)));
-                    $capManifest = (string) ($m['captured_at'] ?? '');
-                    if (($meta['captured_at'] ?? null) === null && preg_match('/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/', $capManifest)) {
-                        $meta['captured_at'] = str_replace('T', ' ', $capManifest);
-                    }
-                    $mediaId = $this->media->add($galleryId, $meta, $this->userId());
-                    if (trim((string) ($m['caption'] ?? '')) !== '') {
-                        $this->media->updateCaption($mediaId, (string) $m['caption']);
-                    }
-                    $mediaAdded++;
-                } catch (RuntimeException) {
-                    // einzelne Datei überspringen
-                } finally {
-                    @unlink($tmpFile);
-                }
-            }
-        }
-        $zip->close();
-
-        $this->logs->addAudit((int) $this->userId(), null, 'created', "Medien-Sicherung eingespielt: {$galleriesAdded} Galerien, {$mediaAdded} Medien.");
-        flash('success', "Eingespielt: {$galleriesAdded} Galerien, {$mediaAdded} Medien (als neue Galerien).");
-        Redirect::to('/galerien');
     }
 
     // --------------------------------------------------------------- intern
@@ -740,17 +574,6 @@ final class GalleryController extends BaseController
         JsonResponse::send(['ok' => false, 'error' => 'Nur eigene Uploads oder mit Verwalten-Recht.'], 403);
     }
 
-    private function notice(): string
-    {
-        return gallery_usage_notice();
-    }
-
-    private function noticePlain(): string
-    {
-        return "Hinweis zur Nutzung\n===================\n\n" . $this->notice()
-            . "\n\nHeruntergeladen am " . date('d.m.Y') . ".\n";
-    }
-
     /**
      * Einmalig anzuzeigenden frischen Upload-Link aus der Session holen –
      * nur wenn er zur gerade gezeigten Seite gehört (`null` = Übersicht).
@@ -766,29 +589,6 @@ final class GalleryController extends BaseController
         unset($_SESSION['fresh_upload_link']);
 
         return $fresh;
-    }
-
-    /** @param array<string,bool> $used */
-    private function zipEntryName(int $n, string $originalName, array &$used): string
-    {
-        $base = $originalName !== ''
-            ? (preg_replace('/[^A-Za-z0-9._-]+/', '_', $originalName) ?: 'datei')
-            : 'datei';
-        $entry = sprintf('%03d_%s', $n, $base);
-        $i = $n;
-        while (isset($used[$entry])) {
-            $entry = sprintf('%03d_%s', ++$i, $base);
-        }
-        $used[$entry] = true;
-
-        return $entry;
-    }
-
-    private static function slug(string $text): string
-    {
-        $slug = preg_replace('/[^a-z0-9]+/i', '-', mb_strtolower(trim($text))) ?? '';
-
-        return trim($slug, '-') ?: 'galerie';
     }
 
     /** @return array<string,mixed> */

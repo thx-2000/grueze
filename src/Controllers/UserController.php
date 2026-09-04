@@ -116,7 +116,19 @@ final class UserController extends BaseController
         $targetUserId = (int) $request->input('user_id');
         $targetUser = $this->users->findById($targetUserId);
         $originalUser = $this->auth->originalUser();
-        if (!$targetUser || !$originalUser || !$this->auth->startImpersonation($targetUserId)) {
+        if (!$targetUser || !$originalUser) {
+            flash('error', 'Die Anmeldung als andere Person konnte nicht gestartet werden.');
+            Redirect::to('/users');
+        }
+
+        // Die bisherige Zeile in „Anmeldungen" abschließen, bevor die Sitzung
+        // gleich neu ausgestellt wird (Session::regenerate() in
+        // startImpersonation()) – sonst bliebe sie als Karteileiche „online"
+        // stehen und würde admin scheinbar doppelt zeigen. Die Ziel-Person
+        // wird dabei NIE als angemeldet erfasst: „Anmeldungen" schreibt immer
+        // die ursprüngliche Admin-Session mit, nicht die impersonierte.
+        $this->sessions->end(session_id());
+        if (!$this->auth->startImpersonation($targetUserId)) {
             flash('error', 'Die Anmeldung als andere Person konnte nicht gestartet werden.');
             Redirect::to('/users');
         }
@@ -142,6 +154,7 @@ final class UserController extends BaseController
 
         $impersonatedUser = $this->auth->user();
         $originalUser = $this->auth->originalUser();
+        $this->sessions->end(session_id());
         $this->auth->stopImpersonation();
 
         if ($originalUser) {
