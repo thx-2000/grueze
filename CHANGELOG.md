@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.31.0
+
+**Nur Umbau am Adressbuch-Template – kein sichtbarer Unterschied, keine Migration.**
+
+- `templates/contacts/index.php` war mit ~685 Zeilen die letzte fette Datei.
+  Die großen Blöcke liegen jetzt als Teil-Templates unter
+  `templates/contacts/_index/`: `own-contact` (eigener Kontakt),
+  `toolbar` (Filterleiste + Werkzeuge), `table` (Tabellenansicht),
+  `cards` (Kartenansicht), `bulk-edit` (Sammelbearbeitung).
+- Neuer Helfer `view_partial()` – bindet ein Teil-Template mit eigenem
+  Scope ein.
+- `index.php` selbst: ~235 Zeilen (Seitenkopf, Ansichts-/Auswahl-Leiste,
+  gemeinsames Auswahl-Formular).
+- HTML-Ausgabe unverändert (Struktur 1:1 geprüft), alle interaktiven Teile
+  (Auswählen-Modus, Spalten-Menü, Sammelbearbeitung, Filter) getestet.
+
 ## 1.30.0
 
 **Nur Umbau unter der Haube – kein sichtbarer Unterschied, keine Migration.**

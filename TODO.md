@@ -140,9 +140,14 @@ Stand betreffen.
      - v1.30.0: `MailController` 826 → ~500 Z.; raus in
        `MailRecipientResolver`, `MailComposer`, `RecipientListController`,
        `JsonResponse`.
-     - offen: `templates/contacts/index.php` 685 Z. (Teil-Partials:
-       Filterleiste, Tabelle, Karten, Auswahl-Modus-Leiste).
-   - offen: Merge-/Dubletten-Logik aus `ContactRepository` in einen Service.
+     - v1.31.0: `templates/contacts/index.php` 685 → ~235 Z.; Blöcke in
+       `templates/contacts/_index/` (own-contact/toolbar/table/cards/
+       bulk-edit), neuer Helfer `view_partial()`.
+     - **fette Dateien damit alle unter ~500 Z.** Nächste Kandidaten bei
+       Bedarf: `ContactRepository` 1120 Z., `EventRepository` 988 Z.,
+       `SettingRepository` 616 Z., `app.js`.
+   - offen: Merge-/Dubletten-Logik aus `ContactRepository` in einen Service
+     (`ContactMergeService`) – wäre zugleich der Anfang der Repo-Verschlankung.
 
 - **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
 

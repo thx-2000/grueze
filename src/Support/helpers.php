@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.30.0';
+    return '1.31.0';
 }
 
 /**
@@ -906,4 +906,20 @@ function icon(string $name): string
     $svg = $icons[$name] ?? '';
 
     return $svg === '' ? '' : '<span class="icon" aria-hidden="true">' . $svg . '</span>';
+}
+
+/**
+ * Bindet ein Teil-Template aus `templates/` ein und gibt es direkt aus. Die
+ * übergebenen Variablen sind im Teil-Template als lokale Variablen verfügbar;
+ * ein eigener Scope hält Teil-Templates vom Eltern-Template getrennt.
+ * Aufruf üblicherweise mit `get_defined_vars()`, um den Kontext weiterzureichen.
+ *
+ * @param array<string,mixed> $vars
+ */
+function view_partial(string $name, array $vars = []): void
+{
+    (static function () use ($name, $vars): void {
+        extract($vars, EXTR_SKIP);
+        require dirname(__DIR__, 2) . '/templates/' . $name . '.php';
+    })();
 }
