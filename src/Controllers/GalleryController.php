@@ -233,6 +233,45 @@ final class GalleryController extends BaseController
         Redirect::to($link && $link['gallery_id'] !== null ? '/galerien/ansehen?id=' . (int) $link['gallery_id'] : '/galerien');
     }
 
+    /**
+     * Für einen bestehenden Link einen QR-Code besorgen: das Klartext-Token
+     * ist nur bei der Erzeugung bekannt (danach nur noch gehasht) – also den
+     * alten Link zurückziehen und mit denselben Eckdaten (Bezeichnung, Max.
+     * Uploads) einen neuen erzeugen, der sofort mit QR-Code angezeigt wird.
+     */
+    public function renewLink(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+
+        $old = $this->uploadLinks->find((int) $request->input('id'));
+        if ($old === null) {
+            flash('error', 'Link nicht gefunden.');
+            Redirect::to('/galerien');
+        }
+
+        $galleryId = $old['gallery_id'] !== null ? (int) $old['gallery_id'] : null;
+        $gallery = $galleryId !== null ? $this->galleries->find($galleryId) : null;
+        $allowed = $gallery !== null ? $this->canManageGallery($gallery) : $this->canManage();
+        if (!$allowed) {
+            throw new RuntimeException('Zum Erneuern dieses Links fehlt die Berechtigung.');
+        }
+
+        $this->uploadLinks->revoke((int) $old['id']);
+
+        $days = max(1, min(365, (int) config('media.link_expiry_days', 21)));
+        $label = trim((string) ($old['label'] ?? ''));
+        $maxUploads = $old['max_uploads'] !== null ? (int) $old['max_uploads'] : null;
+        $token = $this->uploadLinks->create($galleryId, $label !== '' ? $label : null, $days, $maxUploads, $this->userId());
+        $url = url('/beitragen/' . rawurlencode($token));
+
+        $_SESSION['fresh_upload_link'] = ['url' => $url, 'for_gallery' => $galleryId];
+        $this->logs->addAudit((int) $this->userId(), null, 'created',
+            'Galerie-Upload-Link erneuert' . ($gallery ? ' für „' . $gallery['title'] . '"' : ' (Auffangraum)') . ', gültig ' . $days . ' Tage.');
+        flash('success', 'Neuer Link erstellt (der alte ist jetzt ungültig) – unten zum Kopieren und als QR-Code.');
+        Redirect::to($galleryId !== null ? '/galerien/ansehen?id=' . $galleryId : '/galerien');
+    }
+
     // ---------------------------------------------------- Auffangraum
 
     public function unassigned(): void
@@ -747,14 +786,19 @@ final class GalleryController extends BaseController
         $requestedVisible = (int) $request->input('visible_group_id') ?: null;
 
         if ($this->canManage()) {
-            // Globale Verwaltung: jede Gruppe als Sichtbarkeit wählbar; die
-            // Zugehörigkeit (owner_group_id) bleibt unverändert/leer – die
-            // legt nur eine Gruppenleitung beim Anlegen fest.
+            // Globale Verwaltung: jede Gruppe als Sichtbarkeit wählbar, und
+            // darf die Eigentümer-Gruppe (owner_group_id) frei setzen/ändern/
+            // aufheben – z. B. um eine Galerie an eine andere Gruppenleitung
+            // zu übergeben. Eine Gruppenleitung selbst kann das nicht (siehe
+            // unten) – die legt owner_group_id nur einmalig bei Neuanlage fest.
             $allGroupIds = array_map(static fn (array $g): int => (int) $g['id'], $this->groups->all());
+            $requestedOwner = (int) $request->input('owner_group_id') ?: null;
             $data['visible_group_id'] = $requestedVisible !== null && in_array($requestedVisible, $allGroupIds, true)
                 ? $requestedVisible
                 : null;
-            $data['owner_group_id'] = $existing['owner_group_id'] ?? null;
+            $data['owner_group_id'] = $requestedOwner !== null && in_array($requestedOwner, $allGroupIds, true)
+                ? $requestedOwner
+                : null;
 
             return $data;
         }

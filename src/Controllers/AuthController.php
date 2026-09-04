@@ -11,6 +11,7 @@ use App\Repositories\PasskeyRepository;
 use App\Repositories\UserSessionRepository;
 use App\Services\PasswordResetService;
 use App\Services\Validator;
+use App\Support\PasswordPolicy;
 use App\Support\Redirect;
 
 final class AuthController extends BaseController
@@ -113,8 +114,9 @@ final class AuthController extends BaseController
         $token = (string) $request->input('token');
         $password = (string) $request->input('password');
 
-        if (mb_strlen($password) < 12) {
-            flash('error', 'Das Passwort muss mindestens 12 Zeichen lang sein.');
+        $passwordError = PasswordPolicy::validate($password);
+        if ($passwordError !== null) {
+            flash('error', $passwordError);
             Redirect::to('/passwort-neu/' . rawurlencode($token));
         }
 

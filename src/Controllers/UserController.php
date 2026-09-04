@@ -11,6 +11,7 @@ use App\Repositories\PasskeyRepository;
 use App\Repositories\UserRepository;
 use App\Services\PasswordResetService;
 use App\Services\Validator;
+use App\Support\PasswordPolicy;
 use App\Support\Redirect;
 
 final class UserController extends BaseController
@@ -186,8 +187,9 @@ final class UserController extends BaseController
         }
 
         $password = trim((string) $request->input('new_password'));
-        if (mb_strlen($password) < 12) {
-            flash('error', 'Das neue Passwort muss mindestens 12 Zeichen lang sein.');
+        $passwordError = PasswordPolicy::validate($password);
+        if ($passwordError !== null) {
+            flash('error', $passwordError);
             Redirect::to('/users#user-' . $targetUser['id']);
         }
 
@@ -224,8 +226,9 @@ final class UserController extends BaseController
             Redirect::to('/account#password');
         }
 
-        if (mb_strlen($newPassword) < 12) {
-            flash('error', 'Das neue Passwort muss mindestens 12 Zeichen lang sein.');
+        $newPasswordError = PasswordPolicy::validate($newPassword);
+        if ($newPasswordError !== null) {
+            flash('error', $newPasswordError);
             Redirect::to('/account#password');
         }
 

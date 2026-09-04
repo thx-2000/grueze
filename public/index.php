@@ -701,6 +701,7 @@ try {
     $router->post('/galerien/medien/verschieben', [\App\Controllers\GalleryController::class, 'moveMedia']);
     $router->post('/galerien/link', [\App\Controllers\GalleryController::class, 'createLink']);
     $router->post('/galerien/link/widerrufen', [\App\Controllers\GalleryController::class, 'revokeLink']);
+    $router->post('/galerien/link/erneuern', [\App\Controllers\GalleryController::class, 'renewLink']);
     $router->get('/beitragen/{token}', [\App\Controllers\GalleryContributeController::class, 'form']);
     $router->post('/beitragen/{token}', [\App\Controllers\GalleryContributeController::class, 'upload']);
 

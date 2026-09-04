@@ -55,6 +55,7 @@ $targetField = $galleryId !== null
     </form>
 
     <?php if ($links !== []): ?>
+        <p class="field-hint">Der QR-Code eines Links lässt sich aus Sicherheitsgründen nicht nachträglich anzeigen – „Neuer QR-Code" zieht den bestehenden Link zurück und erstellt sofort einen neuen mit denselben Eckdaten.</p>
         <ul class="link-list">
             <?php foreach ($links as $l): ?>
                 <li>
@@ -68,11 +69,18 @@ $targetField = $galleryId !== null
                             <?php if ($l['expires_at'] !== null): ?> · bis <?= e(format_date(substr((string) $l['expires_at'], 0, 10))) ?><?php endif; ?>
                         </span>
                     </div>
-                    <form method="post" action="<?= e(url('/galerien/link/widerrufen')) ?>" data-confirm="Diesen Upload-Link ungültig machen?">
-                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                        <input type="hidden" name="id" value="<?= e((string) $l['id']) ?>">
-                        <button type="submit" class="ghost-button compact-action">Zurückziehen</button>
-                    </form>
+                    <div class="link-row-actions">
+                        <form method="post" action="<?= e(url('/galerien/link/erneuern')) ?>" data-confirm="Neuen QR-Code erzeugen? Der bisherige Link „<?= e(trim((string) ($l['label'] ?? '')) !== '' ? $l['label'] : 'Upload-Link') ?>“ wird dabei ungültig.">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="id" value="<?= e((string) $l['id']) ?>">
+                            <button type="submit" class="ghost-button compact-action"><?= icon('link') ?><span>Neuer QR-Code</span></button>
+                        </form>
+                        <form method="post" action="<?= e(url('/galerien/link/widerrufen')) ?>" data-confirm="Diesen Upload-Link ungültig machen?">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="id" value="<?= e((string) $l['id']) ?>">
+                            <button type="submit" class="ghost-button compact-action">Zurückziehen</button>
+                        </form>
+                    </div>
                 </li>
             <?php endforeach; ?>
         </ul>

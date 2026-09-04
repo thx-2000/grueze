@@ -1,7 +1,7 @@
 <header class="page-head">
     <p class="eyebrow">Neues Passwort</p>
     <h1>Passwort festlegen</h1>
-    <p class="muted">Mindestens 12 Zeichen. Danach kannst du dich direkt anmelden.</p>
+    <p class="muted">Mindestens 12 Zeichen, nichts leicht zu Erratendes (z. B. keine Tastaturfolge). Danach kannst du dich direkt anmelden.</p>
 </header>
 
 <section class="panel stack auth-card">

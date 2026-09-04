@@ -20,7 +20,7 @@
 
         <div data-register-password>
             <label>
-                <span>Kennwort (mindestens 12 Zeichen)</span>
+                <span>Kennwort (mindestens 12 Zeichen, nichts leicht Erratbares)</span>
                 <input type="password" name="password" minlength="12" autocomplete="new-password">
             </label>
             <label>

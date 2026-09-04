@@ -10,6 +10,7 @@ use App\Repositories\SettingRepository;
 use App\Repositories\UserRepository;
 use App\Services\ThemeService;
 use App\Services\Validator;
+use App\Support\PasswordPolicy;
 use App\Support\Redirect;
 
 final class SetupController extends BaseController
@@ -55,8 +56,9 @@ final class SetupController extends BaseController
             'password' => ['required'],
         ]);
 
-        if (mb_strlen($data['password']) < 12) {
-            $errors['password'] = 'Das Passwort muss mindestens 12 Zeichen lang sein.';
+        $passwordError = PasswordPolicy::validate($data['password']);
+        if ($passwordError !== null) {
+            $errors['password'] = $passwordError;
         }
 
         if ($errors !== []) {

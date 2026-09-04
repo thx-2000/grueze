@@ -16,6 +16,7 @@ use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
 use App\Services\MailService;
 use App\Support\JsonResponse;
+use App\Support\PasswordPolicy;
 use App\Support\Redirect;
 
 /**
@@ -154,8 +155,9 @@ final class RegistrationController extends BaseController
             flash('error', 'Bitte einen Namen angeben.');
             Redirect::to($backTo);
         }
-        if (!$usePasskey && mb_strlen($password) < 12) {
-            flash('error', 'Das Passwort muss mindestens 12 Zeichen lang sein.');
+        $passwordError = $usePasskey ? null : PasswordPolicy::validate($password);
+        if ($passwordError !== null) {
+            flash('error', $passwordError);
             Redirect::to($backTo);
         }
         if (!$usePasskey && $password !== $repeat) {

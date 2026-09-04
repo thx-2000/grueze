@@ -129,7 +129,8 @@ final class GalleryRepository
         $stmt = $this->pdo->prepare(
             'UPDATE galleries
              SET title = :title, description = :description, gallery_date = :gallery_date,
-                 event_id = :event_id, visible_group_id = :visible_group_id, sort_mode = :sort_mode
+                 event_id = :event_id, owner_group_id = :owner_group_id, visible_group_id = :visible_group_id,
+                 sort_mode = :sort_mode
              WHERE id = :id'
         );
         $stmt->execute([
@@ -138,6 +139,7 @@ final class GalleryRepository
             'description' => ($data['description'] ?? '') !== '' ? $data['description'] : null,
             'gallery_date' => ($data['gallery_date'] ?? '') !== '' ? $data['gallery_date'] : null,
             'event_id' => !empty($data['event_id']) ? (int) $data['event_id'] : null,
+            'owner_group_id' => !empty($data['owner_group_id']) ? (int) $data['owner_group_id'] : null,
             'visible_group_id' => !empty($data['visible_group_id']) ? (int) $data['visible_group_id'] : null,
             'sort_mode' => in_array($data['sort_mode'] ?? '', self::SORT_MODES, true) ? $data['sort_mode'] : 'captured',
         ]);

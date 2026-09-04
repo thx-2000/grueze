@@ -113,10 +113,16 @@ Papierkorb (nur Admin sichtbar), Bilder nicht in die DB, Videos erlaubt.
   + `visible_group_id` (Ansehen auf diese Gruppe eingeschränkt, NULL = normale
   globale Rechte). Gruppenleitung kann ohne globales Recht anlegen/verwalten;
   globale Verwaltung kann jede Galerie auf jede Gruppe einschränken.
-- **Feiner (offen):** Sicherungs-Export als Stream statt Temp-ZIP; QR-Code für
-  Alt-Links (aktuell nur direkt nach dem Erstellen, weil der Klartext-Token
-  nicht gespeichert wird); Galerie-Eigentümerschaft nachträglich auf eine
-  andere Gruppe übertragen (aktuell nur bei Neuanlage wählbar).
+- ~~**QR-Code für Alt-Links**~~ – **erledigt (v1.54.0).** Da der Klartext-
+  Token nie gespeichert wird, kein Nachträglich-Anzeigen möglich – stattdessen
+  „Neuer QR-Code": zieht den Link zurück, erstellt sofort einen neuen mit
+  denselben Eckdaten (Route `/galerien/link/erneuern`).
+- ~~**Galerie-Eigentümerschaft nachträglich übertragen**~~ – **erledigt
+  (v1.54.0).** Globale Verwaltung kann `owner_group_id` jetzt frei setzen/
+  ändern/aufheben (`_visibility-fields.php` + `GalleryRepository::update()`
+  schreibt die Spalte jetzt mit) – Gruppenleitung selbst weiterhin nicht
+  (bleibt bei Neuanlage fix, geprüft per Testfall mit manipuliertem Request).
+- **Feiner (offen):** Sicherungs-Export als Stream statt Temp-ZIP.
 
 ## Dokumente (TH-Wunsch 2026-09-04, „Teil A")
 
@@ -248,8 +254,13 @@ bestehende „Fester Termin"-Einträge **automatisch** in Ankündigungen
   jemand über einen Link tatsächlich einen Zugang einrichtet, geht eine kurze
   Mail an alle Zugänge mit `users.manage` (Name + Mailadresse + Link zu
   „Zugänge"). Fehler dabei stören die Registrierung nie.
-- Passwort-Stärke: weiterhin nur Längenprüfung (min. 12 Zeichen) – offen,
-  falls gewünscht: nicht nur eine Zeichenklasse, kleine Blocklist.
+- ~~**Passwort-Stärke**~~ – **erledigt (v1.54.0).** Zusätzlich zur Länge
+  (min. 12 Zeichen) eine kleine Blockliste (`App\Support\PasswordPolicy`,
+  neu) – häufige Wörter als Teilstring („passwort", „qwertz", …), reine
+  Zahlenfolgen, ein wiederholtes Zeichen, durchgehend auf-/absteigende
+  Zeichenfolgen. **Bewusst keine Zeichenklassen-Pflicht** (TH-Entscheidung).
+  An allen fünf Stellen, wo ein Passwort gesetzt wird (Ersteinrichtung,
+  Registrierung, Reset, eigenes ändern, Admin setzt fremdes) ersetzt.
 
 ## Berechtigungs-Matrix (TH-Frage 2026-09-04)
 

@@ -13,6 +13,16 @@ $currentOwner = (int) ($g['owner_group_id'] ?? 0) ?: null;
 ?>
 <?php if ($canPickGroup): ?>
     <label>
+        <span>Eigentümer-Gruppe</span>
+        <select name="owner_group_id">
+            <option value="">— keine (nur global verwaltet) —</option>
+            <?php foreach ($groupChoices as $group): ?>
+                <option value="<?= e((string) $group['id']) ?>" <?= $currentOwner === (int) $group['id'] ? 'selected' : '' ?>><?= e($group['name']) ?></option>
+            <?php endforeach; ?>
+        </select>
+        <small class="field-hint">Deren Leitung darf die Galerie dann selbst verwalten, auch ohne globales Recht. Lässt sich hier jederzeit ändern oder wieder aufheben – z. B. um eine Galerie an eine andere Gruppe zu übergeben.</small>
+    </label>
+    <label>
         <span>Sichtbar für</span>
         <select name="visible_group_id">
             <option value="">Alle mit Ansehen-Recht (normal)</option>

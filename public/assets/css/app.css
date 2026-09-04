@@ -6018,6 +6018,7 @@ body.lightbox-open { overflow: hidden; }
     font-size: 0.88rem;
 }
 .link-list li > div { display: grid; gap: 0.1rem; min-width: 0; }
+.link-row-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; flex: 0 0 auto; }
 
 /* Beisteuern (öffentlich) */
 .contribute-card { max-width: 44rem; margin: 0 auto; }

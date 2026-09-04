@@ -3,6 +3,32 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.54.0
+
+**Passwort-Prüfung erweitert.**
+
+- Zusätzlich zur bisherigen Längenprüfung (min. 12 Zeichen) wird jetzt gegen
+  eine kleine Blockliste häufig geratener Wörter/Muster geprüft (u. a.
+  „passwort"/„password" in jeder Groß-/Kleinschreibung, Tastaturfolgen wie
+  „qwertz…", reine Zahlenfolgen, ein einzelnes wiederholtes Zeichen,
+  durchgehend auf-/absteigende Zeichenfolgen). **Keine Pflicht zu
+  Zeichenklassen** (Groß-/Klein/Zahl/Sonderzeichen) – eine lange Passphrase
+  reicht weiterhin. Gilt überall, wo ein Passwort gesetzt wird: Ersteinrichtung,
+  Registrierung, Passwort-Reset, eigenes Passwort ändern, Admin setzt Passwort.
+
+**Galerien: zwei offene Kleinigkeiten erledigt.**
+
+- **Eigentümer-Gruppe nachträglich änderbar:** globale Verwaltung kann die
+  Gruppen-Zugehörigkeit einer Galerie jetzt jederzeit setzen, ändern oder
+  aufheben (vorher nur bei Neuanlage durch die Gruppenleitung selbst
+  möglich) – z. B. um eine Galerie an eine andere Gruppe zu übergeben.
+- **QR-Code für bestehende Upload-Links:** „Neuer QR-Code" bei einem
+  bestehenden Link zieht ihn zurück und erstellt sofort einen neuen mit
+  denselben Eckdaten (Bezeichnung, Uploadlimit) inklusive QR-Code zum
+  Anzeigen/Speichern. Der alte Link wird dabei ungültig – aus
+  Sicherheitsgründen lässt sich ein einmal erstellter QR-Code nicht
+  nachträglich erneut anzeigen.
+
 ## 1.53.1
 
 Hilfe-PDFs (`orga-team.pdf`, `mitglied.pdf`) neu erzeugt – jetzt mit dem
