@@ -3,6 +3,24 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.50.0
+
+**Sammel-Einladungen + Admin-Benachrichtigung bei Registrierung.**
+
+- **Sammel-Einladung** unter Verwaltung → Selbst-Registrierung: mehrere
+  Personen auf einmal einladen – nach **Kategorie**, **Tag(s)**,
+  **Gruppe(n)** oder „**alle ohne Zugang**". Auch direkt im Adressbuch:
+  „Auswählen" → „Einladungen für Auswahl" lädt die markierten Kontakte ein.
+  Vor dem Versand zeigt eine **Vorschau**, wer eingeladen wird und wer aus
+  welchem Grund übersprungen wird (keine Mailadresse, schon ein Zugang,
+  schon eine offene Einladung) – nichts geht ungeprüft raus. Der Versand
+  läuft in Häppchen mit Fortschrittsanzeige, wie beim Rundmail-Versand.
+- **Admin-Benachrichtigung:** Sobald sich jemand über einen Einladungslink
+  tatsächlich einen Zugang einrichtet, bekommen alle Zugänge mit dem Recht
+  „Zugänge verwalten" eine kurze Mail (Name, Adresse, Link zur Verwaltung).
+
+Keine Migration.
+
 ## 1.49.1
 
 **Feinschliff nach TH-Feedback.**

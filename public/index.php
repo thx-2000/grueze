@@ -298,7 +298,11 @@ try {
         Container::get(UserRepository::class),
         Container::get(ContactRepository::class),
         Container::get(SettingRepository::class),
-        Container::get(MailService::class)
+        Container::get(MailService::class),
+        Container::get(CategoryRepository::class),
+        Container::get(TagRepository::class),
+        Container::get(GroupRepository::class),
+        Container::get(LogRepository::class)
     ));
     Container::factory(GreetingController::class, static fn () => new GreetingController(
         Container::get(Auth::class),
@@ -546,6 +550,11 @@ try {
     $router->post('/verwaltung/einladung/zuruecknehmen', [RegistrationController::class, 'revokeInvite']);
     $router->post('/verwaltung/einladung/freigeben', [RegistrationController::class, 'approveRequest']);
     $router->post('/verwaltung/einladung/ablehnen', [RegistrationController::class, 'rejectRequest']);
+    $router->get('/verwaltung/einladungen', [RegistrationController::class, 'bulkForm']);
+    $router->post('/verwaltung/einladungen/vorschau', [RegistrationController::class, 'bulkPreview']);
+    $router->post('/verwaltung/einladungen/start', [RegistrationController::class, 'bulkStart']);
+    $router->get('/verwaltung/einladungen/status', [RegistrationController::class, 'bulkStatus']);
+    $router->post('/verwaltung/einladungen/batch', [RegistrationController::class, 'bulkBatch']);
     $router->get('/impressum', [LegalController::class, 'impressum']);
     $router->get('/datenschutz', [LegalController::class, 'datenschutz']);
     $router->get('/setup/admin', [SetupController::class, 'showAdminForm']);

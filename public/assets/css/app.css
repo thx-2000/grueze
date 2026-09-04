@@ -5946,3 +5946,6 @@ body.lightbox-open { overflow: hidden; }
 .media-pick { display: block; cursor: pointer; position: relative; }
 .media-pick input { position: absolute; top: 0.4rem; left: 0.4rem; z-index: 2; width: 1.15rem; height: 1.15rem; }
 .media-pick input:checked ~ .media-thumb { outline: 3px solid var(--color-primary); outline-offset: -3px; }
+
+/* Sammel-Einladung */
+.bulk-invite-sub { margin: -0.4rem 0 0.6rem 1.7rem; }

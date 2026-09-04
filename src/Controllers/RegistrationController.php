@@ -6,11 +6,16 @@ namespace App\Controllers;
 
 use App\Core\Csrf;
 use App\Core\Request;
+use App\Repositories\CategoryRepository;
 use App\Repositories\ContactRepository;
+use App\Repositories\GroupRepository;
+use App\Repositories\LogRepository;
 use App\Repositories\RegistrationInviteRepository;
 use App\Repositories\SettingRepository;
+use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
 use App\Services\MailService;
+use App\Support\JsonResponse;
 use App\Support\Redirect;
 
 /**
@@ -30,6 +35,10 @@ final class RegistrationController extends BaseController
         private ContactRepository $contacts,
         private SettingRepository $settings,
         private MailService $mailer,
+        private CategoryRepository $categories,
+        private TagRepository $tags,
+        private GroupRepository $groups,
+        private LogRepository $logs,
     ) {
         parent::__construct($auth);
     }
@@ -178,6 +187,7 @@ final class RegistrationController extends BaseController
         ]);
         $this->invites->markUsed((int) $invite['id']);
         $this->auth->loginUsingId($userId);
+        $this->notifyAdminsOfRegistration($name, (string) $invite['email']);
 
         if ($usePasskey) {
             flash('success', 'Dein Zugang ist da. Richte jetzt gleich deinen Passkey ein – danach meldest du dich einfach per Gerätefreigabe an.');
@@ -218,7 +228,7 @@ final class RegistrationController extends BaseController
         $this->invites->setStatus((int) $invite['id'], 'revoked');
         $mailStatus = $this->sendInviteMail((string) $invite['email'], $token, $config['link_hours']);
 
-        flash('success', 'Freigegeben. ' . $mailStatus . ' Link: ' . $this->inviteUrl($token));
+        flash('success', 'Freigegeben. ' . $mailStatus['message'] . ' Link: ' . $this->inviteUrl($token));
         Redirect::to('/verwaltung/registrierung');
     }
 
@@ -285,7 +295,7 @@ final class RegistrationController extends BaseController
         $mailStatus = $this->sendInviteMail($email, $token, $config['link_hours']);
 
         flash('success', trim(
-            'Einladungslink erstellt (gültig ' . $config['link_hours'] . ' Std.). ' . $mailStatus
+            'Einladungslink erstellt (gültig ' . $config['link_hours'] . ' Std.). ' . $mailStatus['message']
             . ' Link zum Weitergeben: ' . $link
         ));
         Redirect::to('/contacts/edit?id=' . $contactId);
@@ -304,6 +314,175 @@ final class RegistrationController extends BaseController
         Redirect::to('/verwaltung/registrierung');
     }
 
+    // ------------------------------------------------------------ Sammel-Einladung
+
+    public function bulkForm(): void
+    {
+        $this->requirePermission('users.manage');
+
+        $this->render('settings/registration-bulk', [
+            'categories' => $this->categories->all(),
+            'tags' => $this->tags->all(),
+            'groups' => $this->groups->all(),
+            'config' => $this->settings->registrationSettings(),
+        ]);
+    }
+
+    /** Kandidaten ermitteln, in eingeladbar/übersprungen sortieren, zur Bestätigung anzeigen. */
+    public function bulkPreview(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $mode = (string) $request->input('mode', 'without_account');
+        $ids = match ($mode) {
+            'selection' => array_map('intval', (array) ($request->input('selected_contacts', []) ?: $request->input('contact_ids', []))),
+            'category' => (string) $request->input('category_id', '') !== ''
+                ? $this->contacts->recipientIds(['category_id' => (string) $request->input('category_id')])
+                : [],
+            'tags' => ($tagIds = array_values(array_filter(array_map('intval', (array) $request->input('tag_ids', []))))) !== []
+                ? $this->contacts->recipientIds(['tag_ids' => $tagIds])
+                : [],
+            'groups' => ($groupIds = array_values(array_filter(array_map('intval', (array) $request->input('group_ids', []))))) !== []
+                ? $this->contacts->recipientIds(['group_ids' => $groupIds])
+                : [],
+            default => $this->contacts->recipientIds([]), // alle mit Mailadresse
+        };
+        $ids = array_values(array_unique(array_filter($ids, static fn (int $id): bool => $id > 0)));
+
+        if ($ids === []) {
+            flash('error', 'Keine passenden Kontakte gefunden.');
+            Redirect::to('/verwaltung/einladungen');
+        }
+
+        $eligible = [];
+        $skipped = [];
+        foreach ($this->contacts->findManyByIds($ids) as $contact) {
+            $name = trim($contact['vorname'] . ' ' . $contact['nachname']);
+            $email = mb_strtolower(trim((string) ($contact['emails'][0]['email'] ?? '')));
+
+            if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $skipped[] = ['name' => $name, 'reason' => 'keine Mailadresse'];
+                continue;
+            }
+            if (!empty($contact['linked_user'])) {
+                $skipped[] = ['name' => $name, 'reason' => 'hat schon einen Zugang'];
+                continue;
+            }
+            $existingUser = $this->users->findByEmail($email);
+            if ($existingUser && (int) $existingUser['is_active'] === 1) {
+                $skipped[] = ['name' => $name, 'reason' => 'hat schon einen Zugang'];
+                continue;
+            }
+            if ($this->invites->pendingForEmail($email) !== null) {
+                $skipped[] = ['name' => $name, 'reason' => 'Einladung bereits offen'];
+                continue;
+            }
+
+            $eligible[] = ['id' => (int) $contact['id'], 'name' => $name, 'email' => $email];
+        }
+
+        // Für den Start-Schritt zwischenspeichern statt der Seite zu vertrauen –
+        // die Auswahl könnte sich sonst zwischen Vorschau und Klick ändern.
+        $_SESSION['bulk_invite_candidates'] = $eligible;
+
+        $this->render('settings/registration-bulk-preview', [
+            'eligible' => $eligible,
+            'skipped' => $skipped,
+            'linkHours' => (int) $this->settings->registrationSettings()['link_hours'],
+            'defaultRoleLabel' => role_label((string) $this->settings->registrationSettings()['default_role']),
+        ]);
+    }
+
+    public function bulkStart(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $candidates = $_SESSION['bulk_invite_candidates'] ?? null;
+        unset($_SESSION['bulk_invite_candidates']);
+        if (!is_array($candidates) || $candidates === []) {
+            flash('error', 'Keine vorbereitete Auswahl gefunden. Bitte erneut starten.');
+            Redirect::to('/verwaltung/einladungen');
+        }
+
+        $_SESSION['invite_job'] = [
+            'candidates' => $candidates,
+            'offset' => 0,
+            'results' => [],
+        ];
+        Redirect::to('/verwaltung/einladungen/status');
+    }
+
+    public function bulkStatus(): void
+    {
+        $this->requirePermission('users.manage');
+
+        $job = $_SESSION['invite_job'] ?? null;
+        if (!$job) {
+            flash('error', 'Kein aktiver Einladungs-Auftrag.');
+            Redirect::to('/verwaltung/einladungen');
+        }
+
+        $this->render('settings/registration-bulk-status', ['job' => $job]);
+    }
+
+    public function bulkBatch(): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($_POST['_csrf'] ?? null);
+
+        $job = $_SESSION['invite_job'] ?? null;
+        if (!$job) {
+            JsonResponse::send(['ok' => false, 'message' => 'Kein aktiver Auftrag.']);
+        }
+
+        $config = $this->settings->registrationSettings();
+        $candidates = (array) $job['candidates'];
+        $slice = array_slice($candidates, (int) $job['offset'], (int) config('mail.batch_size', 3));
+
+        foreach ($slice as $candidate) {
+            $contactId = (int) $candidate['id'];
+            $email = (string) $candidate['email'];
+            $token = $this->invites->create($email, $contactId, (int) $this->auth->user()['id'], $config['link_hours']);
+            $mailResult = $this->sendInviteMail($email, $token, $config['link_hours']);
+
+            $job['results'][] = [
+                'name' => (string) $candidate['name'],
+                'ok' => $mailResult['ok'],
+                'error' => $mailResult['ok'] ? null : $mailResult['message'],
+            ];
+
+            if ((int) config('mail.send_delay_seconds', 1) > 0) {
+                sleep((int) config('mail.send_delay_seconds', 1));
+            }
+        }
+
+        $job['offset'] += count($slice);
+        $_SESSION['invite_job'] = $job;
+        $done = $job['offset'] >= count($candidates);
+
+        if ($done) {
+            $sent = count(array_filter($job['results'], static fn (array $r): bool => $r['ok']));
+            $failed = count($job['results']) - $sent;
+            $this->logs->addAudit(
+                (int) $this->auth->user()['id'],
+                null,
+                'created',
+                sprintf('Sammel-Einladung verschickt: %d Mails raus, %d fehlgeschlagen (von %d ausgewählt).', $sent, $failed, count($candidates))
+            );
+            unset($_SESSION['invite_job']);
+        }
+
+        JsonResponse::send([
+            'ok' => true,
+            'done' => $done,
+            'processed' => $job['offset'],
+            'total' => count($candidates),
+            'results' => $job['results'],
+        ]);
+    }
+
     // ------------------------------------------------------------------ intern
 
     private function inviteUrl(string $token): string
@@ -318,7 +497,38 @@ final class RegistrationController extends BaseController
         return source_hash('registrierung');
     }
 
-    private function sendInviteMail(string $email, string $token, int $hours): string
+    /**
+     * Kurze Mail an alle Zugänge mit `users.manage`, sobald sich jemand über
+     * einen Einladungslink tatsächlich einen Zugang eingerichtet hat.
+     * Fehler hier dürfen die Registrierung selbst nie stören.
+     */
+    private function notifyAdminsOfRegistration(string $name, string $email): void
+    {
+        try {
+            $roles = array_values(array_unique(array_merge(['admin'], $this->settings->permissionMatrix()['users.manage'] ?? [])));
+            $recipients = array_values(array_unique(array_filter(array_map(
+                static fn (array $u): string => trim((string) $u['email']),
+                $this->users->activeByRoleNames($roles)
+            ))));
+            if ($recipients === []) {
+                return;
+            }
+
+            $appName = (string) (app_branding()['branding_app_name'] ?? 'Adress-Zentrale');
+            $body = "Hallo,\n\nüber einen Einladungslink hat sich gerade ein neuer Zugang eingerichtet:\n\n"
+                . "Name: " . $name . "\nMailadresse: " . $email . "\n\n"
+                . "Verwaltung → Zugänge: " . url('/users');
+            $identity = $this->settings->mailIdentity();
+            foreach ($recipients as $to) {
+                $this->mailer->sendSystemMail($identity, $to, 'Neuer Zugang bei ' . $appName, $body);
+            }
+        } catch (\Throwable) {
+            // Benachrichtigung ist unkritisch – die Registrierung ist trotzdem gültig.
+        }
+    }
+
+    /** @return array{ok:bool,message:string} */
+    private function sendInviteMail(string $email, string $token, int $hours): array
     {
         $branding = app_branding();
         $appName = (string) ($branding['branding_app_name'] ?? 'Adress-Zentrale');
@@ -333,9 +543,9 @@ final class RegistrationController extends BaseController
         try {
             $this->mailer->sendSystemMail($this->settings->mailIdentity(), $email, 'Dein Zugang zu ' . $appName, $body);
 
-            return 'Die Mail mit dem Link ist an ' . $email . ' unterwegs.';
+            return ['ok' => true, 'message' => 'Die Mail mit dem Link ist an ' . $email . ' unterwegs.'];
         } catch (\Throwable) {
-            return 'Die Mail konnte nicht versendet werden – bitte den Link manuell weitergeben.';
+            return ['ok' => false, 'message' => 'Die Mail konnte nicht versendet werden – bitte den Link manuell weitergeben.'];
         }
     }
 

@@ -3,6 +3,7 @@
         <h1>Selbst-Registrierung</h1>
         <p class="muted">Wie Leute an einen Zugang kommen. Einladungslinks (von dir auf einem Kontakt erstellt) funktionieren immer.</p>
     </div>
+    <a class="button-link" href="<?= e(url('/verwaltung/einladungen')) ?>"><?= icon('mail') ?><span>Sammel-Einladung</span></a>
 </header>
 
 <section class="detail-card">

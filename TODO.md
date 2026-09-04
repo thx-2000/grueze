@@ -124,15 +124,18 @@ Papierkorb (nur Admin sichtbar), Bilder nicht in die DB, Videos erlaubt.
 - Selbst-Anmeldung: unter `/registrieren` kann jemand die eigene bekannte
   Mailadresse eintragen und bekommt (nach Klick auf Bestätigungslink) den
   Zugang; unbekannte Adressen landen in einer Freigabe-Warteschlange.
-
-**Gewünscht / offen:**
-1. **Sammel-Einladung** – für mehrere Kontakte auf einmal einen Link erzeugen
-   und mailen; „für alle ohne Account" als ein Knopf (Kontakte mit
-   Mailadresse ohne verknüpften Login).
-2. **Admin-Benachrichtigung** – wenn sich jemand über einen Link registriert,
-   eine Mail an den/die Admin(s).
-3. Passwort-Stärke: evtl. simple Zusatz-Checks (nicht nur Länge – z. B. nicht
-   nur eine Zeichenklasse, nicht in einer kleinen Blocklist).
+- ~~**Sammel-Einladung**~~ – **erledigt (v1.50.0).** Verwaltung →
+  Selbst-Registrierung → „Sammel-Einladung": nach Kategorie, Tag(s),
+  Gruppe(n) oder „alle ohne Zugang"; zusätzlich im Adressbuch „Auswählen" →
+  „Einladungen für Auswahl". Vorschau zeigt eingeladbar/übersprungen (kein
+  Login-fähig, schon Zugang, Einladung schon offen) vor dem Versand;
+  Häppchen-Versand mit Fortschrittsseite wie beim Rundmail-Versand.
+- ~~**Admin-Benachrichtigung**~~ – **erledigt (v1.50.0).** Sobald sich
+  jemand über einen Link tatsächlich einen Zugang einrichtet, geht eine kurze
+  Mail an alle Zugänge mit `users.manage` (Name + Mailadresse + Link zu
+  „Zugänge"). Fehler dabei stören die Registrierung nie.
+- Passwort-Stärke: weiterhin nur Längenprüfung (min. 12 Zeichen) – offen,
+  falls gewünscht: nicht nur eine Zeichenklasse, kleine Blocklist.
 
 ## Berechtigungs-Matrix (TH-Frage 2026-09-04)
 

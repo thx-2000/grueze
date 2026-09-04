@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.49.1';
+    return '1.50.0';
 }
 
 /**
@@ -575,6 +575,8 @@ function page_title(string $path): string
         '/reset-password'            => 'Neues Passwort',
         '/registrieren'              => 'Zugang einrichten',
         '/verwaltung/registrierung'  => 'Selbst-Registrierung',
+        '/verwaltung/einladungen'    => 'Sammel-Einladung',
+        '/verwaltung/einladungen/status' => 'Einladungen werden verschickt',
         '/setup/admin'               => 'Ersteinrichtung',
         '/kontakte'                  => 'Adressbuch',
         '/kontakte/archiv'           => 'Archiv & Papierkorb',

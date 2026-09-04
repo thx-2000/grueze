@@ -186,6 +186,9 @@ $renderChips = static function (array $chips): string {
                     <?php if (can('contacts.export')): ?>
                         <button type="submit" class="ghost-button" formaction="<?= e(url('/contacts/vcard')) ?>" formmethod="post"><?= icon('contacts') ?><span>vCard</span></button>
                     <?php endif; ?>
+                    <?php if (can('users.manage')): ?>
+                        <button type="submit" class="ghost-button" formaction="<?= e(url('/verwaltung/einladungen/vorschau')) ?>" formmethod="post" name="mode" value="selection"><?= icon('mail') ?><span>Einladungen für Auswahl</span></button>
+                    <?php endif; ?>
                     <button type="button" class="ghost-button" data-select-mode-exit><?= icon('close') ?><span>Fertig</span></button>
                 </div>
             </div>
