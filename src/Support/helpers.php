@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.21.0';
+    return '1.22.0';
 }
 
 /**
@@ -494,6 +494,22 @@ function system_update_pending(): bool
     } catch (Throwable) {
         return false;
     }
+}
+
+/**
+ * True, wenn seit über 48 h keine zeitgesteuerte Aufgabe mehr gelaufen ist –
+ * dann fehlt vermutlich der Cronjob (Fristen, Erinnerungen, Ergebnis-Mails,
+ * Geburtstagsgrüße, Papierkorb laufen dann nicht zuverlässig).
+ */
+function scheduler_stale(): bool
+{
+    try {
+        $last = (int) App\Core\Container::get(App\Repositories\SettingRepository::class)->get('scheduler_last_run', '0');
+    } catch (Throwable) {
+        return false;
+    }
+
+    return $last === 0 || (time() - $last) > 172800;
 }
 
 /** Ob der „Gruppen"-Menüpunkt für die aktuelle Person angezeigt werden soll. */

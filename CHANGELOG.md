@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.22.0
+
+**Einstellungen neu sortiert (UX Teil 2)**
+
+- Der Verwaltungs-Bereich ist von drei auf **vier klarere Gruppen** umgestellt:
+  *Zugänge & Rollen*, *Inhalt & Struktur*, *Aussehen & Texte*, *System*.
+  „Vollständigkeit" liegt jetzt bei den inhaltlichen Werkzeugen, nicht mehr
+  unter „System".
+- Die Kachel „Cronjob einrichten" ist weg. Stattdessen erscheint oben ein
+  Hinweisstreifen – aber nur, wenn seit über zwei Tagen keine zeitgesteuerte
+  Aufgabe mehr gelaufen ist. Läuft die Automatik, ist nichts im Weg.
+
 ## 1.21.0
 
 **UX aufgeräumt (Teil 1 von mehreren)**

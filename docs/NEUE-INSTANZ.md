@@ -102,9 +102,11 @@ wird die Automatik höchstens einmal pro Stunde nebenbei angestoßen. Ein echter
 Cron bleibt aber die empfohlene Lösung – sonst hängen fällige Erinnerungen und
 Ergebnis-Mails, bis jemand die Seite öffnet.
 
-Schritt-für-Schritt für All-Inkl (KAS): in der laufenden Instanz unter
-**Verwaltung → System → „Cronjob einrichten"** (`/hilfe/cron`, nur für Admins;
-PDF unter `/hilfe/cron.pdf`). Quelle: `resources/help/cron-allinkl.html`.
+Schritt-für-Schritt für All-Inkl (KAS): Anleitung unter `/hilfe/cron`
+(nur für Admins; PDF unter `/hilfe/cron.pdf`, Quelle
+`resources/help/cron-allinkl.html`). Solange kein Cron läuft, weist die
+Einstellungen-Seite oben mit einem Hinweisstreifen darauf hin und verlinkt
+die Anleitung; sobald die Automatik regelmäßig läuft, verschwindet er.
 
 ## Bestehende Instanz aktualisieren
 

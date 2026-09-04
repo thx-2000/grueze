@@ -68,9 +68,10 @@ Vollständige Analyse: `docs/UX-REVIEW.md`. Entscheidungen:
 
 - **Sofort-Paket (A1, A2, B1, B2, B4-Teil) + Betrachter raus** – **v1.21.0
   erledigt**.
-- **Verwaltungs-Hub 4 Gruppen (B3)** – offen, als Nächstes.
-- **Gruppenleitungs-Einstieg (C1)** – offen: `/gruppen` für Leads mit direkten
-  Knöpfen „Nachricht an die Gruppe" + „Abstimmung starten".
+- **Verwaltungs-Hub 4 Gruppen (B3)** – **v1.22.0 erledigt** (+ Cron-Kachel →
+  bedingter Hinweisstreifen via `scheduler_stale()`).
+- **Gruppenleitungs-Einstieg (C1)** – offen, als Nächstes: `/gruppen` für Leads
+  mit direkten Knöpfen „Nachricht an die Gruppe" + „Abstimmung starten".
 - **Startseiten rollenspezifisch (C4 + C2)** – offen, nach der Rollen-Abfrage
   mit TH.
 
