@@ -190,33 +190,71 @@ final class ContactRepository
         return $contacts;
     }
 
-    public function globalSearch(string $query, int $limit = 12): array
+    /**
+     * Globale Suche über alle Felder, die die aktuelle Rolle sehen darf.
+     * `$visible` schaltet die geschützten Feldgruppen frei (Ergebnis aus
+     * `can_view_contact_field()` – der Repository trifft die Rechte-Entscheidung
+     * bewusst nicht selbst).
+     *
+     * @param array{address?:bool,emails?:bool,phones?:bool,notes?:bool} $visible
+     * @return list<array<string,mixed>> hydrierte Kontakte (Treffer)
+     */
+    public function globalSearch(string $query, array $visible = [], int $limit = 60): array
     {
-        $term = '%' . trim($query) . '%';
-        $stmt = $this->pdo->prepare(
-            'SELECT contacts.id, contacts.vorname, contacts.nachname, contacts.geburtsname, contacts.ort,
-                    categories.name AS category_name,
-                    EXISTS(
-                        SELECT 1 FROM contact_emails WHERE contact_emails.contact_id = contacts.id
-                    ) AS has_email
-             FROM contacts
-             LEFT JOIN categories ON categories.id = contacts.category_id
-             WHERE (contacts.vorname LIKE :term_vorname
-                OR contacts.nachname LIKE :term_nachname
-                OR contacts.geburtsname LIKE :term_geburtsname
-                OR contacts.ort LIKE :term_ort)
-                AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL
-             ORDER BY contacts.vorname ASC, contacts.nachname ASC
-             LIMIT ' . (int) $limit
-        );
-        $stmt->execute([
-            'term_vorname' => $term,
-            'term_nachname' => $term,
-            'term_geburtsname' => $term,
-            'term_ort' => $term,
-        ]);
+        $query = trim($query);
+        if ($query === '') {
+            return [];
+        }
+        $term = '%' . $query . '%';
 
-        return $stmt->fetchAll();
+        // Immer durchsuchbar: Name/Geburtsname, Beruf, Webseite, Kategorie,
+        // Tags, Gruppen.
+        $conds = [
+            'contacts.vorname LIKE ?',
+            'contacts.nachname LIKE ?',
+            'contacts.geburtsname LIKE ?',
+            'contacts.beruf LIKE ?',
+            'contacts.webseite LIKE ?',
+            'categories.name LIKE ?',
+            'EXISTS (SELECT 1 FROM contact_tags ct JOIN tags tg ON tg.id = ct.tag_id
+                     WHERE ct.contact_id = contacts.id AND tg.name LIKE ?)',
+            'EXISTS (SELECT 1 FROM contact_group_members cgm JOIN contact_groups cg ON cg.id = cgm.group_id
+                     WHERE cgm.contact_id = contacts.id AND cg.name LIKE ?)',
+        ];
+        if (!empty($visible['address'])) {
+            $conds[] = 'contacts.strasse LIKE ?';
+            $conds[] = 'contacts.plz LIKE ?';
+            $conds[] = 'contacts.ort LIKE ?';
+            $conds[] = 'contacts.land LIKE ?';
+        }
+        if (!empty($visible['emails'])) {
+            $conds[] = 'EXISTS (SELECT 1 FROM contact_emails ce WHERE ce.contact_id = contacts.id AND ce.email LIKE ?)';
+        }
+        if (!empty($visible['phones'])) {
+            $conds[] = 'EXISTS (SELECT 1 FROM contact_phones cp WHERE cp.contact_id = contacts.id AND cp.phone LIKE ?)';
+        }
+        if (!empty($visible['notes'])) {
+            $conds[] = 'contacts.notizen LIKE ?';
+        }
+
+        try {
+            $stmt = $this->pdo->prepare(
+                'SELECT contacts.id
+                 FROM contacts
+                 LEFT JOIN categories ON categories.id = contacts.category_id
+                 WHERE (' . implode(' OR ', $conds) . ")
+                   AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL
+                 ORDER BY contacts.nachname ASC, contacts.vorname ASC
+                 LIMIT " . (int) $limit
+            );
+            $stmt->execute(array_fill(0, count($conds), $term));
+            $ids = array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN));
+        } catch (\Throwable) {
+            // z. B. Gruppen-Tabellen auf einer noch nicht migrierten Instanz.
+            return [];
+        }
+
+        return $ids === [] ? [] : $this->findManyByIds($ids);
     }
 
     /**

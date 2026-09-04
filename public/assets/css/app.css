@@ -2271,6 +2271,101 @@ code {
     flex: 0 0 0.95rem;
 }
 
+/* Fundstelle je Treffer: „E-Mail: …", „Webseite: …" */
+.search-match {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.search-match-chip {
+    font-size: 0.78rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+    background: var(--accent-veil);
+    border: 1px solid var(--accent-edge);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-match-chip b {
+    font-weight: 700;
+    color: var(--color-primary-strong);
+}
+
+/* Ergebnisse eingrenzen */
+.search-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface-veil);
+    border: 1px solid var(--edge-hairline);
+}
+
+.search-filter > span,
+.search-filter-kinds > span,
+.search-filter-cat > span {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-muted);
+}
+
+.search-filter-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.search-filter-cat select {
+    width: auto;
+    min-width: 8rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+}
+
+.search-filter-kinds {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.search-kind-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.28rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    background: var(--color-surface);
+    font-size: 0.8rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.search-kind-toggle input {
+    width: 0.85rem;
+    height: 0.85rem;
+    margin: 0;
+    accent-color: var(--color-primary);
+}
+
+.search-kind-toggle:has(input:checked) {
+    background: var(--accent-veil);
+    border-color: var(--color-primary);
+    color: var(--color-primary-strong);
+    font-weight: 600;
+}
+
+.search-no-match {
+    margin: 0;
+}
+
 /* ---------------------------------------------- Kontaktliste, entschlackt */
 
 .contacts-header {

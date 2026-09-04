@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.43.0
+
+**Suche durchsucht jetzt alle sichtbaren Felder.**
+
+- Die globale Suche (Startseite und Kopfleiste) findet Treffer nicht mehr nur
+  in Name, Geburtsname und Ort, sondern in **allem, was die eigene Rolle
+  sehen darf**: Kategorie, Tags, Gruppen, Beruf, Webseite – und, falls für
+  die Rolle sichtbar, Adresse, E-Mail, Telefon und Notizen.
+- Jeder Treffer zeigt, **wo** der Begriff gefunden wurde („Webseite: …",
+  „E-Mail: …").
+- Die Ergebnisliste lässt sich direkt **eingrenzen** – nach Kategorie und
+  nach Fundstelle (Name / Adresse / E-Mail / …).
+
 ## 1.42.0
 
 **Feinschliff: Icons und Auswahlfelder.**
