@@ -29,6 +29,24 @@ final class ContactInput
         return trim($value);
     }
 
+    /**
+     * Webseite normalisieren: Steuerzeichen weg, trimmen, und eine bloße
+     * Domain (ohne Schema) mit `https://` versehen, damit der gespeicherte
+     * Wert immer ein benutzbarer Link ist.
+     */
+    public static function cleanWebsite(string $value): string
+    {
+        $value = trim((string) preg_replace('/[\x00-\x1F\x7F\s]+/', '', $value));
+        if ($value === '') {
+            return '';
+        }
+        if (!preg_match('#^https?://#i', $value)) {
+            $value = 'https://' . ltrim($value, '/');
+        }
+
+        return mb_substr($value, 0, 255);
+    }
+
     /** Anrede-Code: `m`/`w` steuern „Lieber"/„Liebe", sonst leer (= „Hallo"). */
     public static function salutationCode(string $value): string
     {
@@ -74,7 +92,7 @@ final class ContactInput
     }
 
     /**
-     * Die neun Stammdaten-Skalare, die in allen drei Formularen identisch sind.
+     * Die Stammdaten-Skalare, die in allen drei Formularen identisch sind.
      *
      * @return array<string,string>
      */
@@ -86,6 +104,8 @@ final class ContactInput
             'geburtsname' => trim((string) $request->input('geburtsname')),
             'geschlecht' => self::salutationCode((string) $request->input('geschlecht')),
             'geburtstag' => (string) $request->input('geburtstag'),
+            'beruf' => trim((string) $request->input('beruf')),
+            'webseite' => self::cleanWebsite((string) $request->input('webseite')),
             'strasse' => trim((string) $request->input('strasse')),
             'plz' => trim((string) $request->input('plz')),
             'ort' => trim((string) $request->input('ort')),

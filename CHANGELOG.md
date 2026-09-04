@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.34.0
+
+**Neu: zwei Kontaktfelder – „Beruf/Tätigkeit" und „Webseite".**
+
+- Beide erscheinen in den Stammdaten – in der Verwaltung, in „Mein Eintrag"
+  und im Daten-Check-Link. Eine bloße Domain in „Webseite" wird automatisch
+  zu `https://…` ergänzt.
+- Anzeige auf der Kontaktkarte und unter „Deine Kontaktdaten"; im
+  Änderungsverlauf, im CSV-Export und in der vCard (`TITLE` / `URL`).
+- Migration `2026-09-23-beruf-webseite` – nach dem Upload
+  **Verwaltung → Aktualisieren**.
+
 ## 1.33.0
 
 **Neu: Anmelde-Übersicht für die Verwaltung.**

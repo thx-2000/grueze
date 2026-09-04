@@ -35,6 +35,12 @@ if ($ownContact === null || !in_array(true, $ownFields, true)) {
     </div>
     <dl class="own-contact-list is-guarded">
         <div><dt>Name</dt><dd><?= e(trim(($ownContact['vorname'] ?? '') . ' ' . ($ownContact['nachname'] ?? ''))) ?></dd></div>
+        <?php if (trim((string) ($ownContact['beruf'] ?? '')) !== ''): ?>
+            <div><dt>Beruf/Tätigkeit</dt><dd><?= e((string) $ownContact['beruf']) ?></dd></div>
+        <?php endif; ?>
+        <?php if (trim((string) ($ownContact['webseite'] ?? '')) !== ''): ?>
+            <div><dt>Webseite</dt><dd><a href="<?= e((string) $ownContact['webseite']) ?>" target="_blank" rel="noopener noreferrer"><?= e(preg_replace('#^https?://#i', '', (string) $ownContact['webseite'])) ?></a></dd></div>
+        <?php endif; ?>
         <?php if ($ownFields['address']): ?>
             <div><dt>Adresse</dt><dd>
                 <?= e(trim((string) ($ownContact['strasse'] ?? ''))) ?>

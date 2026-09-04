@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.33.0';
+    return '1.34.0';
 }
 
 /**
@@ -898,6 +898,7 @@ function icon(string $name): string
         'clock' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20a10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16Zm-1 3h2v5.4l3.7 2.14l-1 1.72L11 13V7Z"/></svg>',
         'help' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20a10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16Zm.1 3.2c1.9 0 3.4 1.2 3.4 3c0 1.2-.6 1.9-1.6 2.6c-.9.6-1.1.9-1.1 1.6v.4h-1.9v-.6c0-1.2.5-1.9 1.5-2.6c.9-.6 1.2-1 1.2-1.6c0-.8-.6-1.3-1.5-1.3c-.8 0-1.4.4-1.7 1.3l-1.8-.7c.5-1.5 1.8-2.4 3.8-2.4ZM11 15.8h2v2h-2Z"/></svg>',
         'link' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a1 1 0 0 0 1.4 0l4-4a3 3 0 0 0-4.2-4.2l-1.5 1.5l1.4 1.4l1.5-1.5a1 1 0 0 1 1.4 1.4l-4 4a1 1 0 0 0 0 1.4Zm2.8-2.8a1 1 0 0 0-1.4 0l-4 4a3 3 0 0 0 4.2 4.2l1.5-1.5l-1.4-1.4l-1.5 1.5a1 1 0 0 1-1.4-1.4l4-4a1 1 0 0 0 0-1.4Z"/></svg>',
+        'briefcase' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4a2 2 0 0 0-2 2v1H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3V6a2 2 0 0 0-2-2H9Zm0 3V6h6v1H9ZM4 9h16v3h-6v-1h-4v1H4V9Zm0 5h6v1h4v-1h6v4H4v-4Z"/></svg>',
         'x' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5L5 6.4L10.6 12L5 17.6L6.4 19L12 13.4L17.6 19L19 17.6L13.4 12L19 6.4L17.6 5L12 10.6L6.4 5Z"/></svg>',
         'menu' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg>',
         'close' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5L5 6.4L10.6 12L5 17.6L6.4 19L12 13.4L17.6 19L19 17.6L13.4 12L19 6.4L17.6 5L12 10.6L6.4 5Z"/></svg>',

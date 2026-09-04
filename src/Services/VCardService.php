@@ -52,6 +52,16 @@ final class VCardService
             $lines[] = 'BDAY:' . $bday;
         }
 
+        $beruf = trim((string) ($contact['beruf'] ?? ''));
+        if ($beruf !== '') {
+            $lines[] = 'TITLE:' . $this->esc($beruf);
+        }
+
+        $webseite = trim((string) ($contact['webseite'] ?? ''));
+        if ($webseite !== '') {
+            $lines[] = 'URL:' . $this->esc($webseite);
+        }
+
         foreach (($contact['emails'] ?? []) as $email) {
             $value = trim((string) ($email['email'] ?? ''));
             if ($value !== '') {

@@ -31,6 +31,7 @@ final class CsvExportService
 
         fputcsv($out, [
             'Vorname', 'Nachname', 'Geburtsname', 'Kategorie', 'Tags', 'Geburtstag',
+            'Beruf/Tätigkeit', 'Webseite',
             'Straße', 'PLZ', 'Ort', 'Land', 'E-Mails', 'Telefonnummern', 'Notizen'
         ], ';');
 
@@ -55,6 +56,8 @@ final class CsvExportService
                 $contact['category_name'],
                 $tags,
                 $contact['geburtstag'],
+                $contact['beruf'] ?? '',
+                $contact['webseite'] ?? '',
                 $contact['strasse'],
                 $contact['plz'],
                 $contact['ort'],

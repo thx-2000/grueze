@@ -48,10 +48,10 @@ Ideen, falls es weitergeht (kein Muss):
 - Echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows – nur am
   Gerät machbar.
 - Termine: Ranking-Variante.
-- **Kontaktfeld „Beruf/Tätigkeit"** (TH-Wunsch 2026-09-04): neue Spalte
-  `contacts.beruf`/`taetigkeit`, Formularfeld (Detail + „Mein Eintrag" +
-  Daten-Check), Anzeige in Detail/Karte, CSV- und vCard-Export (`TITLE`/`ROLE`),
-  `BackupService::fillEmptyContactFields`. Migration nötig.
+- ~~**Kontaktfeld „Beruf/Tätigkeit" + „Webseite"**~~ – **v1.34.0 erledigt.**
+  Spalten `contacts.beruf` / `contacts.webseite` (Migration
+  `2026-09-23-beruf-webseite`), Formular überall, Karte + „Deine
+  Kontaktdaten", Änderungsverlauf, CSV, vCard (`TITLE` / `URL`).
 - **`contacts.geschlecht` → sauberes Feld `anrede`** (Folge der inklusiven
   Ansprache): Spalte umbenennen, Werte migrieren (`m`→`lieber`, `w`→`liebe`,
   NULL→`''`), alle ~8 Fundstellen anpassen. Aktuell nur umbenannt im UI, die

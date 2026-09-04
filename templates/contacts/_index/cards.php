@@ -41,6 +41,17 @@
                 </div>
             <?php endif; ?>
 
+            <?php if (trim((string) ($contact['beruf'] ?? '')) !== '' || trim((string) ($contact['webseite'] ?? '')) !== ''): ?>
+                <div class="contact-body">
+                    <?php if (trim((string) ($contact['beruf'] ?? '')) !== ''): ?>
+                        <p><?= icon('briefcase') ?><span><?= e((string) $contact['beruf']) ?></span></p>
+                    <?php endif; ?>
+                    <?php if (trim((string) ($contact['webseite'] ?? '')) !== ''): ?>
+                        <p><?= icon('globe') ?><span><a href="<?= e((string) $contact['webseite']) ?>" target="_blank" rel="noopener noreferrer"><?= e(preg_replace('#^https?://#i', '', (string) $contact['webseite'])) ?></a></span></p>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
             <?php if ($canViewPrivateDetails): ?>
                 <div class="contact-body">
                     <?php if ($visibleContactFields['address']): ?>

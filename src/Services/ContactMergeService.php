@@ -179,8 +179,8 @@ final class ContactMergeService
             // 1) Skalarfelder auffüllen.
             $fillable = [
                 'geburtsname' => 'Geburtsname', 'geschlecht' => 'Anrede', 'category_id' => 'Kategorie',
-                'geburtstag' => 'Geburtstag', 'strasse' => 'Straße', 'plz' => 'PLZ',
-                'ort' => 'Ort', 'land' => 'Land', 'photo_path' => 'Foto',
+                'geburtstag' => 'Geburtstag', 'beruf' => 'Beruf/Tätigkeit', 'webseite' => 'Webseite',
+                'strasse' => 'Straße', 'plz' => 'PLZ', 'ort' => 'Ort', 'land' => 'Land', 'photo_path' => 'Foto',
             ];
             $set = [];
             $params = ['id' => $primaryId];

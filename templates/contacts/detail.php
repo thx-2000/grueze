@@ -11,6 +11,8 @@ $defaults = [
     'geschlecht' => old('geschlecht'),
     'category_id' => old('category_id'),
     'geburtstag' => old('geburtstag'),
+    'beruf' => old('beruf'),
+    'webseite' => old('webseite'),
     'strasse' => old('strasse'),
     'plz' => old('plz'),
     'ort' => old('ort'),
@@ -23,7 +25,7 @@ $defaults = [
 $values = $editing ? $contact : $defaults;
 if ($editing) {
     if ($hasOld) {
-        foreach (['vorname', 'nachname', 'geburtsname', 'geschlecht', 'category_id', 'geburtstag', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
+        foreach (['vorname', 'nachname', 'geburtsname', 'geschlecht', 'category_id', 'geburtstag', 'beruf', 'webseite', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
             $values[$field] = $defaults[$field];
         }
     }
@@ -108,6 +110,8 @@ $actionLabel = static fn (string $a): string => match ($a) {
                 </select>
             </label>
             <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($values['geburtstag'] ?? '') ?>"></label>
+            <label><span>Beruf/Tätigkeit</span><input type="text" name="beruf" value="<?= e($values['beruf'] ?? '') ?>" maxlength="160"></label>
+            <label><span>Webseite</span><input type="text" name="webseite" value="<?= e($values['webseite'] ?? '') ?>" inputmode="url" placeholder="https://…"></label>
             <label>
                 <span>Kategorie</span>
                 <select name="category_id">

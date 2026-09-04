@@ -77,6 +77,8 @@ $vorname = trim((string) ($contact['vorname'] ?? ''));
                     </select>
                 </label>
                 <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($field('geburtstag')) ?>"></label>
+                <label><span>Beruf/Tätigkeit</span><input type="text" name="beruf" value="<?= e($field('beruf')) ?>" maxlength="160"></label>
+                <label><span>Webseite</span><input type="text" name="webseite" value="<?= e($field('webseite')) ?>" inputmode="url" placeholder="https://…"></label>
             </div>
         </section>
 

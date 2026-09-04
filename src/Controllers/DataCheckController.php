@@ -174,6 +174,8 @@ final class DataCheckController extends BaseController
             'Geburtsname' => [(string) ($before['geburtsname'] ?? ''), (string) $after['geburtsname']],
             'Anrede' => [(string) ($before['geschlecht'] ?? ''), (string) $after['geschlecht']],
             'Geburtstag' => [(string) ($before['geburtstag'] ?? ''), (string) $after['geburtstag']],
+            'Beruf/Tätigkeit' => [(string) ($before['beruf'] ?? ''), (string) ($after['beruf'] ?? '')],
+            'Webseite' => [(string) ($before['webseite'] ?? ''), (string) ($after['webseite'] ?? '')],
             'Straße' => [(string) ($before['strasse'] ?? ''), (string) $after['strasse']],
             'PLZ' => [(string) ($before['plz'] ?? ''), (string) $after['plz']],
             'Ort' => [(string) ($before['ort'] ?? ''), (string) $after['ort']],
