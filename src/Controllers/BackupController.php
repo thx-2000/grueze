@@ -27,6 +27,7 @@ final class BackupController extends BaseController
         $this->render('admin/backup', [
             'rowCounts' => $this->backups->tableRowCounts(true),
             'restoreKeyword' => self::RESTORE_KEYWORD,
+            'zipEncryption' => $this->backups->zipEncryptionAvailable(),
         ]);
     }
 
@@ -36,9 +37,14 @@ final class BackupController extends BaseController
         Csrf::validate($request->input('_csrf'));
 
         $includeLogs = (string) $request->input('include_logs', '0') === '1';
+        $password = trim((string) $request->input('backup_password', ''));
+        if ($password !== '' && mb_strlen($password) < 8) {
+            flash('error', 'Das Backup-Passwort sollte mindestens 8 Zeichen haben – oder leer bleiben.');
+            Redirect::to('/admin/backup');
+        }
 
         try {
-            $path = $this->backups->createArchive($includeLogs);
+            $path = $this->backups->createArchive($includeLogs, $password !== '' ? $password : null);
         } catch (Throwable $e) {
             flash('error', 'Das Backup konnte nicht erstellt werden: ' . $e->getMessage());
             Redirect::to('/admin/backup');
@@ -80,8 +86,10 @@ final class BackupController extends BaseController
             Redirect::to('/admin/backup');
         }
 
+        $password = trim((string) $request->input('backup_password', ''));
+
         try {
-            $result = $this->backups->restoreArchive($tmp, $mode);
+            $result = $this->backups->restoreArchive($tmp, $mode, $password !== '' ? $password : null);
         } catch (Throwable $e) {
             flash('error', ($mode === 'merge' ? 'Zusammenführen' : 'Wiederherstellung') . ' fehlgeschlagen: ' . $e->getMessage());
             Redirect::to('/admin/backup');

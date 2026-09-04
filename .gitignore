@@ -9,6 +9,7 @@
 /public/assets/uploads/*
 !/public/assets/uploads/.htaccess
 !/public/assets/uploads/.gitkeep
+/storage/app.key
 /storage/tmp/*
 !/storage/tmp/.htaccess
 !/storage/tmp/.gitkeep

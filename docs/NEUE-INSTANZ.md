@@ -18,7 +18,10 @@ GRUEZE"). Nur wer das Produkt selbst umlabeln will, setzt
    (mindestens die erste `identities`-Identität und eine `reply_to_options`).
 3. `database/schema.sql` in die MySQL-/MariaDB-Datenbank importieren.
 4. Optional `phpmailer/phpmailer` per Composer installieren (sonst `mail()`).
-5. `public/assets/uploads/` und `storage/tmp/` beschreibbar machen.
+5. `public/assets/uploads/`, `storage/tmp/` und `storage/` beschreibbar machen
+   (`storage/` selbst, damit die App `storage/app.key` für die „at rest"-
+   Verschlüsselung anlegen kann – alternativ `security.secret_key` in der
+   `config.php` setzen).
 6. Seite `/setup/admin` aufrufen und das erste Admin-Konto anlegen. Dabei
    wird das Theme `hell` als aktiv gesetzt.
 7. Unter `/admin/migrations` alle Migrationen anwenden.

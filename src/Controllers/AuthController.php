@@ -88,27 +88,34 @@ final class AuthController extends BaseController
         Redirect::to('/login');
     }
 
-    public function showResetPassword(Request $request): void
+    public function showResetPassword(Request $request, string $token = ''): void
     {
-        $this->render('auth/reset-password', [
-            'email' => (string) $request->input('email', ''),
-            'token' => (string) $request->input('token', ''),
-        ]);
+        // Alt-Links (/reset-password?token=…&email=…) auf die neue Pfad-Form
+        // umleiten – der Query verschwindet damit aus dem Browser-Verlauf.
+        if ($token === '') {
+            $queryToken = trim((string) $request->input('token', ''));
+            if ($queryToken !== '') {
+                Redirect::to('/passwort-neu/' . rawurlencode($queryToken));
+            }
+            flash('error', 'Der Reset-Link ist unvollständig. Bitte fordere einen neuen an.');
+            Redirect::to('/forgot-password');
+        }
+
+        $this->render('auth/reset-password', ['token' => $token, 'pageTitle' => 'Neues Passwort']);
     }
 
     public function resetPassword(Request $request): void
     {
         Csrf::validate($request->input('_csrf'));
-        $email = (string) $request->input('email');
         $token = (string) $request->input('token');
         $password = (string) $request->input('password');
 
         if (mb_strlen($password) < 12) {
             flash('error', 'Das Passwort muss mindestens 12 Zeichen lang sein.');
-            Redirect::to('/reset-password?email=' . urlencode($email) . '&token=' . urlencode($token));
+            Redirect::to('/passwort-neu/' . rawurlencode($token));
         }
 
-        if (!$this->passwordResets->reset($email, $token, $password)) {
+        if (!$this->passwordResets->reset($token, $password)) {
             flash('error', 'Der Reset-Link ist ungültig oder abgelaufen.');
             Redirect::to('/forgot-password');
         }

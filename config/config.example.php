@@ -130,6 +130,12 @@ return [
         // (Rate-Limits, „mehrere Geräte"-Erkennung) unumkehrbar. Leer lassen
         // heißt: schwächere, aber funktionierende Hashes.
         'hash_pepper' => '',
+        // Schlüssel für die „at rest"-Verschlüsselung sensibler Einstellungen
+        // (Mailserver-Passwörter). Leer lassen ist ok: dann erzeugt die App
+        // beim ersten Start automatisch `storage/app.key` (0600, nicht im
+        // Deployment/Backup). Ein hier gesetzter Wert hat Vorrang – praktisch,
+        // wenn mehrere App-Server dieselbe DB teilen.
+        'secret_key' => '',
         'allowed_photo_types' => [
             'image/jpeg',
             'image/png',

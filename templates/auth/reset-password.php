@@ -5,9 +5,8 @@
 </header>
 
 <section class="panel stack auth-card">
-    <form method="post" action="<?= e(url('/reset-password')) ?>" class="stack">
+    <form method="post" action="<?= e(url('/passwort-neu')) ?>" class="stack">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <input type="hidden" name="email" value="<?= e($email ?? '') ?>">
         <input type="hidden" name="token" value="<?= e($token ?? '') ?>">
         <label>
             <span>Neues Passwort</span>

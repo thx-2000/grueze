@@ -63,6 +63,13 @@ $tableLabels = [
             <input type="checkbox" name="include_logs" value="1" checked>
             <span>Protokolle einschließen (Änderungs- und Versandprotokoll, Login-Versuche)</span>
         </label>
+        <?php if (!empty($zipEncryption)): ?>
+            <label>
+                <span>Passwort für die ZIP-Datei (empfohlen, optional)</span>
+                <input type="password" name="backup_password" autocomplete="new-password" minlength="8" placeholder="leer = unverschlüsselt">
+                <small class="field-hint">Mit Passwort wird das ZIP <strong>AES-256-verschlüsselt</strong>. Ohne Passwort kann jeder mit Zugriff auf die Datei alle Kontaktdaten lesen. Das Passwort wird nirgends gespeichert – gut merken, es wird zum Wiederherstellen gebraucht.</small>
+            </label>
+        <?php endif; ?>
         <div class="toolbar-actions">
             <button type="submit"><?= icon('archive') ?><span>Backup herunterladen</span></button>
         </div>
@@ -106,6 +113,10 @@ $tableLabels = [
                 <span><strong>Alles ersetzen</strong> – aktuellen Datenbestand vollständig überschreiben</span>
             </label>
         </fieldset>
+        <label>
+            <span>Passwort des Backups (nur bei verschlüsseltem ZIP)</span>
+            <input type="password" name="backup_password" autocomplete="off" placeholder="leer lassen, wenn ohne Passwort erstellt">
+        </label>
         <label>
             <span>Nur für „Alles ersetzen": zur Bestätigung <code><?= e($restoreKeyword) ?></code> eintippen</span>
             <input type="text" name="confirm" autocomplete="off" placeholder="<?= e($restoreKeyword) ?>">

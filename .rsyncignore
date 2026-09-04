@@ -19,6 +19,9 @@ SECURITY.md
 OPEN_TERMINAL_API_KEY
 WEBUI_SECRET_KEY
 config/config.php
+# Der „at rest"-Schlüssel gehört auf den Zielserver, nicht ins Deployment –
+# jede Instanz erzeugt beim ersten Start ihren eigenen.
+storage/app.key
 storage/tmp/*
 !storage/tmp/.gitkeep
 !storage/tmp/.htaccess

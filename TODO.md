@@ -39,8 +39,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
        erledigt**.
      - PWA (Manifest + Icon + schlanker Service Worker, „Zum Home-Bildschirm")
        – **v1.19.0 erledigt**. Damit ist Batch 3 komplett.
-  4. **Sicherheit nachziehen** – offen: Verschlüsselung von Backup-ZIPs /
-     Mail-Zugangsdaten „at rest" · Reset-Token ins Pfad-Segment statt Query (L8).
+  4. **Sicherheit nachziehen** – **v1.20.0 erledigt**: Mailserver-Passwörter
+     „at rest" verschlüsselt (`App\Support\Crypto`, `storage/app.key`),
+     Backup-ZIP optional AES-256, Reset-Token im Pfad-Segment (`/passwort-neu/…`,
+     L8). **Alle vier „Praktisch nützlich"-Batches abgeschlossen.**
 
 Ideen, falls es weitergeht (kein Muss):
 - Echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows – nur am

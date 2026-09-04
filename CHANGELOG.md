@@ -3,6 +3,23 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.20.0
+
+**Sicherheit nachgezogen**
+
+- **Mailserver-Passwörter verschlüsselt gespeichert** („at rest"): ein
+  DB-Auszug enthält jetzt nur noch Chiffretext. Der Schlüssel liegt in einer
+  eigenen Datei (`storage/app.key`), die nicht mit deployt und nicht ins
+  Backup aufgenommen wird – oder frei über `security.secret_key` gesetzt.
+  Bestehende Passwörter werden automatisch nachverschlüsselt.
+- **Backup-ZIP optional mit Passwort** (AES-256): beim Herunterladen ein
+  Passwort vergeben, beim Wiederherstellen wieder eingeben. Ohne Passwort
+  bleibt alles wie bisher.
+- **Passwort-vergessen-Link ohne Query-String**: der Link heißt jetzt
+  `…/passwort-neu/<Token>` statt `…/reset-password?token=…&email=…`. Der Token
+  landet damit nicht mehr in Server-Logs oder im Browser-Verlauf. Ältere Links
+  aus schon verschickten Mails funktionieren weiter (Weiterleitung).
+
 ## 1.19.0
 
 **Web-App fürs Handy („Zum Home-Bildschirm")**

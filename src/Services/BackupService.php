@@ -77,10 +77,14 @@ final class BackupService
      * Erzeugt das Backup-ZIP und gibt den Pfad zur temporären Datei zurück.
      * Der Aufrufer ist für den Versand und das Aufräumen zuständig.
      */
-    public function createArchive(bool $includeLogs): string
+    public function createArchive(bool $includeLogs, ?string $password = null): string
     {
         if (!class_exists(ZipArchive::class)) {
             throw new RuntimeException('Die PHP-Erweiterung "zip" ist nicht verfügbar.');
+        }
+        $password = $password !== null && trim($password) !== '' ? $password : null;
+        if ($password !== null && !$this->zipEncryptionAvailable()) {
+            throw new RuntimeException('Verschlüsselte Backups werden von dieser PHP-Version nicht unterstützt. Bitte ohne Passwort exportieren.');
         }
 
         $database = [];
@@ -120,14 +124,46 @@ final class BackupService
             throw new RuntimeException('Die Backup-Datei konnte nicht angelegt werden.');
         }
 
+        if ($password !== null) {
+            $zip->setPassword($password);
+        }
+
+        $entries = ['manifest.json', 'database.json'];
         $zip->addFromString('manifest.json', (string) json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $zip->addFromString('database.json', $databaseJson);
         foreach ($uploads as $absolute => $name) {
             $zip->addFile($absolute, 'uploads/' . $name);
+            $entries[] = 'uploads/' . $name;
         }
+
+        if ($password !== null) {
+            foreach ($entries as $entry) {
+                $zip->setEncryptionName($entry, ZipArchive::EM_AES_256);
+            }
+        }
+
         $zip->close();
 
         return $path;
+    }
+
+    public function zipEncryptionAvailable(): bool
+    {
+        return class_exists(ZipArchive::class)
+            && defined('ZipArchive::EM_AES_256')
+            && method_exists(ZipArchive::class, 'setEncryptionName');
+    }
+
+    private function firstEntryIsEncrypted(ZipArchive $zip): bool
+    {
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $stat = $zip->statIndex($i);
+            if (is_array($stat) && (int) ($stat['encryption_method'] ?? 0) > 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function suggestedFileName(): string
@@ -145,7 +181,7 @@ final class BackupService
      *                      'merge' = Kontakte ins bestehende System einspielen
      * @return array{tables: array<string,int>, uploads: int, merge?: array<string,int>}
      */
-    public function restoreArchive(string $zipPath, string $mode): array
+    public function restoreArchive(string $zipPath, string $mode, ?string $password = null): array
     {
         if (!in_array($mode, ['replace', 'fill', 'merge'], true)) {
             throw new RuntimeException('Unbekannter Wiederherstellungs-Modus.');
@@ -158,11 +194,20 @@ final class BackupService
         if ($zip->open($zipPath) !== true) {
             throw new RuntimeException('Das Backup konnte nicht geöffnet werden. Ist es eine gültige ZIP-Datei?');
         }
+        if ($password !== null && trim($password) !== '') {
+            $zip->setPassword($password);
+        }
 
         $manifestRaw = $zip->getFromName('manifest.json');
         $databaseRaw = $zip->getFromName('database.json');
         if ($manifestRaw === false || $databaseRaw === false) {
+            $encrypted = $this->firstEntryIsEncrypted($zip);
             $zip->close();
+            if ($encrypted) {
+                throw new RuntimeException($password !== null && trim($password) !== ''
+                    ? 'Das Backup ist verschlüsselt und das Passwort passt nicht.'
+                    : 'Das Backup ist verschlüsselt. Bitte das beim Export vergebene Passwort eingeben.');
+            }
             throw new RuntimeException('Im Backup fehlen manifest.json oder database.json.');
         }
 

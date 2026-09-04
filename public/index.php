@@ -366,6 +366,7 @@ try {
             );
             Container::get(ContactRepository::class)->pruneTrashedContacts();
             Container::get(\App\Repositories\DataCheckRepository::class)->purgeExpired();
+            Container::get(SettingRepository::class)->reencryptSecrets();
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
         }
@@ -398,8 +399,9 @@ try {
     $router->post('/logout', [AuthController::class, 'logout']);
     $router->get('/forgot-password', [AuthController::class, 'showForgotPassword']);
     $router->post('/forgot-password', [AuthController::class, 'sendReset']);
-    $router->get('/reset-password', [AuthController::class, 'showResetPassword']);
-    $router->post('/reset-password', [AuthController::class, 'resetPassword']);
+    $router->get('/passwort-neu/{token}', [AuthController::class, 'showResetPassword']);
+    $router->post('/passwort-neu', [AuthController::class, 'resetPassword']);
+    $router->get('/reset-password', [AuthController::class, 'showResetPassword']); // Alt-Links umleiten
     $router->get('/registrieren', [RegistrationController::class, 'form']);
     $router->post('/registrieren', [RegistrationController::class, 'submit']);
     $router->get('/verwaltung/registrierung', [RegistrationController::class, 'settingsForm']);

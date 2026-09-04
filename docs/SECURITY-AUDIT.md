@@ -45,7 +45,7 @@ Berechtigung `users.manage` bzw. `settings.manage` ausnutzbar.
 | L5 | Aktionen während „Als Benutzer anmelden" werden dem Ziel zugeschrieben | niedrig | Admin |
 | L6 | `applyOne()` akzeptiert jede vorhandene Migration, nicht nur offene | niedrig | Admin |
 | L7 | IP-Adressen/-Hashes ohne Aufbewahrungsgrenze; Datenschutz-Doku nötig | niedrig | – |
-| L8 | Reset-Token + Mailadresse im URL-Query (landet in Logs/History) | niedrig | – |
+| L8 | Reset-Token + Mailadresse im URL-Query (landet in Logs/History) | niedrig | erledigt 1.20.0 (Pfad-Segment) |
 | L9 | `Auth::user()` nicht gecacht → viele DB-Abfragen pro Seite | niedrig | – |
 | L10 | Login-Timing verrät, ob eine Mailadresse existiert | niedrig | – |
 | L11 | Deploy spielt weiterhin `docker-compose.yml` u. a. Dev-Dateien auf den Webspace | niedrig | – |
@@ -465,7 +465,7 @@ Ergebnis: nach jedem Speichern von Impressum/Datenschutz ein 500 – der Wert
 | L5 | `LogRepository::addAudit()` hängt bei aktiver Impersonation `[… durch Konto #N]` an die Details. |
 | L6 | `MigrationService::applyOne()` nur für Migrationen aus `pending()`. |
 | L7 | Probabilistische GC in `index.php`: `pruneLoginAttempts` (30 T.), `pruneExpiredPasswordResets`, `pruneTokenHits` (120 T.), konfigurierbar. `source_hash()` mit optionalem `security.hash_pepper`. |
-| L8 | `Referrer-Policy: same-origin` (Teil von M7). Token bleibt im Query – bewusst, da mit Referrer-Policy entschärft. |
+| L8 | **Erledigt in 1.20.0:** Reset-Link ist jetzt `/passwort-neu/<token>` (Pfad-Segment, keine E-Mail mehr im Link). Lookup über `password_resets.token_sha` (SHA-256-Index), Gültigkeit weiter per bcrypt-`token_hash`. Alt-Links (`/reset-password?token=…`) leiten per 302 auf die Pfad-Form um. `Referrer-Policy: same-origin` bleibt als zweite Schicht. |
 | L9 | `Auth::user()` pro Request gecacht, Invalidierung bei Login/Logout/Impersonation. |
 | L10 | `Auth::attempt()` rechnet auch für unbekannte Konten einen `password_verify()`. |
 | L11 | `.rsyncignore` um `docker-compose.yml`, `.dockerignore`, `scripts/docker-*.sh` erweitert. |
@@ -480,8 +480,20 @@ Ergebnis: nach jedem Speichern von Impressum/Datenschutz ein 500 – der Wert
 `security.login_attempts_retention_days`, `security.token_hit_retention_days`,
 `security.hash_pepper`.
 
+**Nachgezogen in 1.20.0 („Batch 4"):**
+- **Verschlüsselung „at rest"** für die Mailserver-Passwörter: `App\Support\Crypto`
+  (libsodium `secretbox`), Schlüssel aus `config('security.secret_key')` oder
+  automatisch erzeugter `storage/app.key` (0600, nicht im Deploy/Backup).
+  `SettingRepository` ver-/entschlüsselt `mail_smtp_password`/`mail_imap_password`
+  transparent; `reencryptSecrets()` zieht Altbestände beim ersten Lauf nach. Hebt
+  die Latte gegen reine DB-Kompromisse deutlich.
+- **Backup-ZIP optional AES-256-verschlüsselt**: Passwortfeld beim Export
+  (`ZipArchive::setEncryptionName`/`EM_AES_256`), Passwortfeld beim
+  Wiederherstellen mit klaren Fehlermeldungen.
+- **L8** erledigt (siehe Tabelle oben).
+
 **Bewusst nicht geändert:** Backup „Alles ersetzen" überschreibt weiterhin die
-`users`-Tabelle (Kernfunktion, mit Bestätigungswort). Passwort-Verschlüsselung
-„at rest" nur als Option skizziert (Schlüssel läge auf Shared Hosting neben den
-Daten). Reset-Token bleibt im Query-String (durch `Referrer-Policy` entschärft).
-Echter Screenreader-Test steht weiterhin aus (nur am Gerät möglich).
+`users`-Tabelle (Kernfunktion, mit Bestätigungswort). Der `at-rest`-Schlüssel
+liegt auf Shared Hosting weiterhin auf demselben Server wie die Daten – schützt
+also gegen DB-Dumps/SQL-Injection und weitergegebene Backups, nicht gegen eine
+vollständige Server-Übernahme. Echter Screenreader-Test steht weiterhin aus.

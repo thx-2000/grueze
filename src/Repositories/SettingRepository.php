@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Support\Crypto;
 use PDO;
 use RuntimeException;
 
 final class SettingRepository
 {
+    /** Werte, die verschlüsselt „at rest" in app_settings liegen. */
+    private const ENCRYPTED_KEYS = ['mail_smtp_password', 'mail_imap_password'];
+
     private ?bool $tableReady = null;
     private ?array $brandingCache = null;
     private ?array $mailSettingsCache = null;
@@ -29,7 +33,13 @@ final class SettingRepository
         $stmt->execute(['setting_key' => $key]);
         $value = $stmt->fetchColumn();
 
-        return $value !== false ? (string) $value : $default;
+        if ($value === false) {
+            return $default;
+        }
+
+        return in_array($key, self::ENCRYPTED_KEYS, true)
+            ? Crypto::decrypt((string) $value)
+            : (string) $value;
     }
 
     public function set(string $key, string $value): void
@@ -38,6 +48,10 @@ final class SettingRepository
             throw new RuntimeException('Die Einstellungs-Tabelle konnte nicht angelegt werden.');
         }
 
+        $stored = in_array($key, self::ENCRYPTED_KEYS, true) && $value !== '' && !Crypto::looksEncrypted($value)
+            ? Crypto::encrypt($value)
+            : $value;
+
         $stmt = $this->pdo->prepare(
             'INSERT INTO app_settings (setting_key, setting_value)
              VALUES (:setting_key, :setting_value)
@@ -45,12 +59,35 @@ final class SettingRepository
         );
         $stmt->execute([
             'setting_key' => $key,
-            'setting_value' => $value,
+            'setting_value' => $stored,
         ]);
         $this->brandingCache = null;
         $this->mailSettingsCache = null;
         $this->fieldVisibilityCache = null;
         $this->permissionMatrixCache = null;
+    }
+
+    /**
+     * Noch im Klartext liegende Secret-Werte nachträglich verschlüsseln –
+     * damit ein DB-Dump direkt nach dem Update schon geschützt ist. Nach dem
+     * ersten Durchlauf ein No-Op. Braucht einen nutzbaren Schlüssel.
+     */
+    public function reencryptSecrets(): void
+    {
+        if (!$this->ensureTable() || !Crypto::isActive()) {
+            return;
+        }
+
+        $stmt = $this->pdo->prepare('SELECT setting_key, setting_value FROM app_settings WHERE setting_key IN (?, ?)');
+        $stmt->execute(self::ENCRYPTED_KEYS);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $value = (string) ($row['setting_value'] ?? '');
+            if ($value !== '' && !Crypto::looksEncrypted($value)) {
+                $enc = Crypto::encrypt($value);
+                $this->pdo->prepare('UPDATE app_settings SET setting_value = :v WHERE setting_key = :k')
+                    ->execute(['v' => $enc, 'k' => $row['setting_key']]);
+            }
+        }
     }
 
     public function branding(): array
