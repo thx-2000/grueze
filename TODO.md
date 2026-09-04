@@ -49,11 +49,31 @@ Ideen, falls es weitergeht (kein Muss):
   Gerät machbar.
 - Termine: Ranking-Variante.
 
+## UX-Review – Umsetzung (Entscheidungen TH 2026-09-04)
+
+Vollständige Analyse: `docs/UX-REVIEW.md`. Entscheidungen:
+1. Verwaltungs-Hub neu gruppieren → **ja** (4 Gruppen).
+2. Startseiten rollenspezifisch → **ja**, aber Aufgabenliste je Rolle wird
+   danach einzeln mit TH abgestimmt.
+3. Gruppenleitung → **haben wollen**, Ziel: „so einfach wie möglich, eine
+   Gruppe anschreiben und abstimmen".
+4. Betrachter-Rolle → **streichen**.
+
+- **Sofort-Paket (A1, A2, B1, B2, B4-Teil) + Betrachter raus** – **v1.21.0
+  erledigt**.
+- **Verwaltungs-Hub 4 Gruppen (B3)** – offen, als Nächstes.
+- **Gruppenleitungs-Einstieg (C1)** – offen: `/gruppen` für Leads mit direkten
+  Knöpfen „Nachricht an die Gruppe" + „Abstimmung starten".
+- **Startseiten rollenspezifisch (C4 + C2)** – offen, nach der Rollen-Abfrage
+  mit TH.
+
 ## Zur Entscheidung – „lets discuss" (2026-09-04, noch NICHT beauftragt)
 
-Vier Themen, die TH zur Diskussion gestellt hat. Erst besprechen, dann
-entscheiden, ob/wie umgesetzt wird. Ausführliche Einschätzung je Thema im
-Chat vom 2026-09-04.
+Themen, die TH zur Diskussion gestellt hat. Thema 4 (UX/IA-Review) ist
+entschieden und in Umsetzung (siehe Abschnitt oben). Die übrigen drei erst
+besprechen, dann entscheiden. Ausführliche Einschätzung im Chat vom 2026-09-04.
+Reihenfolge, falls alle kommen: nach dem UX-Umbau, damit sie den aufgeräumten
+Stand betreffen.
 
 1. **Genderneutrale/inklusive Ansprache**, wo keine Anrede (m/w) hinterlegt
    ist. Ist-Stand: Mail-`{Anrede}` fällt bei fehlendem `geschlecht` schon auf
@@ -71,12 +91,6 @@ Chat vom 2026-09-04.
    Redesign, wiederholte Payload-/Diff-Logik (Kontakt-Sanitize an 3 Stellen),
    `templates/contacts/index.php` (667 Z.). Ziel: leichter wartbar, nicht
    „Rewrite".
-4. **UX/IA-Review pro Rolle** mit aktuellem Feature-Stand: Seit dem letzten
-   Redesign (v0.23–0.30) kamen Gruppen, Hilfe, Archiv/Papierkorb, Dubletten,
-   Daten-Check, Start-Widgets, PWA dazu. Frage: sieht jede Rolle (Admin, Orga,
-   Gruppenleitung, Mitglied) das Wichtigste sofort und nichts Überflüssiges?
-   V. a. Adressbuch-Seite (viele Werkzeugleisten-Knöpfe), Verwaltungs-Hub,
-   Start je Rolle.
 
 - **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
 

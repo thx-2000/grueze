@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.20.0';
+    return '1.21.0';
 }
 
 /**
@@ -542,7 +542,6 @@ function page_title(string $path): string
         '/mail/compose'              => 'Nachricht schreiben',
         '/mail/status'               => 'Versand',
         '/vollstaendigkeit'          => 'Vollständigkeit',
-        '/namensliste'               => 'Vollständigkeit',
         '/termine'                   => 'Termine',
         '/termine/neu'               => 'Neuer Termin',
         '/termine/detail'            => 'Termin',

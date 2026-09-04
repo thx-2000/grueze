@@ -10,16 +10,17 @@ $months = [1 => 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'A
 $now = new DateTimeImmutable('now');
 $todayLong = $weekdays[(int) $now->format('w')] . ', ' . (int) $now->format('j') . '. ' . $months[(int) $now->format('n')];
 
-// „Steht an": dieselben Kennzahlen wie früher, aber als verlinkte Aufgabe.
+// „Steht an": Datenlücken als verlinkte Aufgabe. Nur für Rollen, die die
+// Vollständigkeits-Seite auch öffnen dürfen – sonst führen die Links ins Leere.
 $todos = [];
-if (($stats['without_email'] ?? 0) > 0) {
+if ($canManage && ($stats['without_email'] ?? 0) > 0) {
     $todos[] = [
         'count' => (int) $stats['without_email'],
         'label' => 'Personen ohne Mailadresse – Lücken schließen',
         'href' => url('/vollstaendigkeit?which=email'),
     ];
 }
-if (($stats['without_phone'] ?? 0) > 0) {
+if ($canManage && ($stats['without_phone'] ?? 0) > 0) {
     $todos[] = [
         'count' => (int) $stats['without_phone'],
         'label' => 'Personen ohne Handynummer',
@@ -39,17 +40,21 @@ if (($stats['without_phone'] ?? 0) > 0) {
     <button type="submit">Suchen</button>
 </form>
 
-<?php if ($canManage || $canMail): ?>
-    <div class="start-actions">
-        <?php if ($canManage): ?>
-            <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Person hinzufügen</span></a>
-        <?php endif; ?>
-        <?php if ($canMail): ?>
-            <a class="ghost-button" href="<?= e(url('/rundmail')) ?>"><?= icon('mail') ?><span>Nachricht schreiben</span></a>
-        <?php endif; ?>
-    </div>
-<?php endif; ?>
+<?php $isMemberView = !$canManage && !$canMail; ?>
+<div class="start-actions">
+    <?php if ($canManage): ?>
+        <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Person hinzufügen</span></a>
+    <?php endif; ?>
+    <?php if ($canMail): ?>
+        <a class="ghost-button" href="<?= e(url('/rundmail')) ?>"><?= icon('mail') ?><span>Nachricht schreiben</span></a>
+    <?php endif; ?>
+    <?php if ($isMemberView): ?>
+        <a class="button-link" href="<?= e(url('/account')) ?>"><?= icon('user') ?><span>Meine Daten</span></a>
+        <a class="ghost-button" href="<?= e(url('/orga-team')) ?>"><?= icon('mail') ?><span>Orga-Team schreiben</span></a>
+    <?php endif; ?>
+</div>
 
+<?php if ($canManage): ?>
 <section class="panel start-board" aria-labelledby="startBoardTitle">
     <div class="start-board-head">
         <h2 id="startBoardTitle">Steht an</h2>
@@ -86,6 +91,7 @@ if (($stats['without_phone'] ?? 0) > 0) {
         · <?= e((string) ($stats['total'] ?? 0)) ?> Kontakte
     </p>
 </section>
+<?php endif; ?>
 
 <?php $birthdays = $birthdays ?? []; $pendingEvents = $pendingEvents ?? []; ?>
 

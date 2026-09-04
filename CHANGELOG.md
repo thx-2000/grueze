@@ -3,6 +3,24 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.21.0
+
+**UX aufgeräumt (Teil 1 von mehreren)**
+
+- **Startseite für Mitglieder** zeigt jetzt „Meine Daten" und „Orga-Team
+  schreiben" statt einer Aufgabenliste, die auf eine gesperrte Seite verlinkte.
+  Der „Steht an"-Block erscheint nur noch für Rollen, die die
+  Vollständigkeits-Seite auch öffnen dürfen.
+- **„Orga-Team schreiben"** steht für Mitglieder jetzt in der Hauptnavigation
+  statt versteckt im Fuß der Seitenleiste.
+- **Adressbuch-Werkzeugleiste** von sechs Knöpfen auf drei: „Rundmail an diese
+  Liste", „Exportieren ▾" (CSV / vCard) und „Datenpflege ▾" (Vollständigkeit,
+  Doppel-Einträge, Archiv & Papierkorb).
+- Der erweiterte Filterbereich heißt jetzt „Mehr Filter".
+- Die nicht mehr genutzte Adresse `/namensliste` und die Standard-Rolle „Gast"
+  für neue Instanzen wurden entfernt. Eine vorhandene „Gast"-Rolle lässt sich
+  bei Bedarf unter Verwaltung → Rollen löschen.
+
 ## 1.20.0
 
 **Sicherheit nachgezogen**

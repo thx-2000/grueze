@@ -1074,3 +1074,14 @@ if ('serviceWorker' in navigator && window.isSecureContext) {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
     });
 }
+
+// Aufklappmenüs in der Werkzeugleiste: bei Klick nach außen oder Esc schließen.
+document.addEventListener('click', (event) => {
+    document.querySelectorAll('details.tool-menu[open]').forEach((menu) => {
+        if (!menu.contains(event.target)) menu.removeAttribute('open');
+    });
+});
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    document.querySelectorAll('details.tool-menu[open]').forEach((menu) => menu.removeAttribute('open'));
+});

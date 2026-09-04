@@ -218,12 +218,6 @@ final class ContactController extends BaseController
         Redirect::to('/rundmail');
     }
 
-    /** Alte „Namensliste"-Adresse zeigt auf die neue Seite. */
-    public function namenslisteMoved(): void
-    {
-        Redirect::to('/vollstaendigkeit');
-    }
-
     public function create(): void
     {
         $this->requirePermission('contacts.manage');

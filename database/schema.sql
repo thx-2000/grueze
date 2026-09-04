@@ -384,5 +384,4 @@ CREATE TABLE registration_invites (
 INSERT INTO roles (name, label, description) VALUES
 ('admin', 'Admin', 'Vollzugriff inklusive Benutzerverwaltung'),
 ('orga', 'Team', 'Verwaltet Kontakte, Mailings und Einstellungen'),
-('stufenmitglied', 'Mitglied', 'Kann Namen und Gruppen sehen und einzelne Kontaktanfragen senden'),
-('betrachter', 'Gast', 'Kann Kontakte in reduzierter Ansicht sehen');
+('stufenmitglied', 'Mitglied', 'Kann Namen und Gruppen sehen und einzelne Kontaktanfragen senden');

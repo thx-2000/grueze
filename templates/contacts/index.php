@@ -204,7 +204,7 @@ $ownFields = $ownContact !== null ? [
         <button type="submit" class="filter-apply">Filtern</button>
 
         <details class="filter-more"<?= $advancedFilterActive ? ' open' : '' ?>>
-            <summary><?= icon('sliders') ?><span>Filter</span></summary>
+            <summary><?= icon('sliders') ?><span>Mehr Filter</span></summary>
             <div class="filter-more-body">
                 <div class="filter-more-grid">
                     <label>
@@ -286,23 +286,41 @@ $ownFields = $ownContact !== null ? [
         </p>
     <?php endif; ?>
 
-    <?php if ($canSendRegularMail || can('contacts.export') || $canManage): ?>
+    <?php
+    $careCount = (int) ($duplicateCount ?? 0) + (int) ($retiredCount ?? 0);
+    $showCare = $canManage || can('contacts.delete');
+    ?>
+    <?php if ($canSendRegularMail || can('contacts.export') || $showCare): ?>
         <div class="addressbook-tools">
             <?php if ($canSendRegularMail): ?>
                 <a class="ghost-button" href="<?= e(url('/rundmail?' . http_build_query(array_merge($filters, ['from' => 'filter'])))) ?>"><?= icon('mail') ?><span>Rundmail an diese Liste</span></a>
             <?php endif; ?>
-            <?php if ($canManage): ?>
-                <a class="ghost-button" href="<?= e(url('/vollstaendigkeit' . (($filters['category_id'] ?? '') !== '' ? '?category_id=' . rawurlencode((string) $filters['category_id']) : ''))) ?>"><?= icon('check') ?><span>Vollständigkeit</span></a>
-            <?php endif; ?>
+
             <?php if (can('contacts.export')): ?>
-                <a class="ghost-button" href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>"><?= icon('upload') ?><span>CSV exportieren</span></a>
-                <a class="ghost-button" href="<?= e(url('/contacts/vcard?' . http_build_query($filters))) ?>"><?= icon('contacts') ?><span>vCard exportieren</span></a>
+                <details class="tool-menu">
+                    <summary class="ghost-button"><?= icon('upload') ?><span>Exportieren</span></summary>
+                    <div class="tool-menu-body">
+                        <a href="<?= e(url('/contacts/export?' . http_build_query($filters))) ?>">Als CSV-Tabelle</a>
+                        <a href="<?= e(url('/contacts/vcard?' . http_build_query($filters))) ?>">Als vCard (Adressbuch)</a>
+                    </div>
+                </details>
             <?php endif; ?>
-            <?php if ($canManage && ($duplicateCount ?? 0) > 0): ?>
-                <a class="ghost-button" href="<?= e(url('/kontakte/dubletten')) ?>"><?= icon('contacts') ?><span>Doppelt? (<?= (int) $duplicateCount ?>)</span></a>
-            <?php endif; ?>
-            <?php if (can('contacts.delete')): ?>
-                <a class="ghost-button" href="<?= e(url('/kontakte/archiv')) ?>"><?= icon('archive') ?><span>Archiv &amp; Papierkorb<?= $retiredCount > 0 ? ' (' . (int) $retiredCount . ')' : '' ?></span></a>
+
+            <?php if ($showCare): ?>
+                <details class="tool-menu">
+                    <summary class="ghost-button"><?= icon('check') ?><span>Datenpflege<?= $careCount > 0 ? ' (' . $careCount . ')' : '' ?></span></summary>
+                    <div class="tool-menu-body">
+                        <?php if ($canManage): ?>
+                            <a href="<?= e(url('/vollstaendigkeit' . (($filters['category_id'] ?? '') !== '' ? '?category_id=' . rawurlencode((string) $filters['category_id']) : ''))) ?>">Vollständigkeit prüfen</a>
+                        <?php endif; ?>
+                        <?php if ($canManage && ($duplicateCount ?? 0) > 0): ?>
+                            <a href="<?= e(url('/kontakte/dubletten')) ?>">Mögliche Doppel-Einträge (<?= (int) $duplicateCount ?>)</a>
+                        <?php endif; ?>
+                        <?php if (can('contacts.delete')): ?>
+                            <a href="<?= e(url('/kontakte/archiv')) ?>">Archiv &amp; Papierkorb<?= $retiredCount > 0 ? ' (' . (int) $retiredCount . ')' : '' ?></a>
+                        <?php endif; ?>
+                    </div>
+                </details>
             <?php endif; ?>
         </div>
     <?php endif; ?>

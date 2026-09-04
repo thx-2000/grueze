@@ -109,6 +109,8 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                 <a class="<?= $onContacts ? 'is-active' : '' ?>" href="<?= e(url('/kontakte')) ?>"><span class="rail-ic"><?= icon('contacts') ?></span>Adressbuch</a>
                 <?php if (can('mail.send')): ?>
                     <a class="<?= $onRundmail ? 'is-active' : '' ?>" href="<?= e(url('/rundmail')) ?>"><span class="rail-ic"><?= icon('mail') ?></span>Nachrichten</a>
+                <?php else: ?>
+                    <a class="<?= $currentPath === '/orga-team' ? 'is-active' : '' ?>" href="<?= e(url('/orga-team')) ?>"><span class="rail-ic"><?= icon('mail') ?></span>Orga-Team schreiben</a>
                 <?php endif; ?>
                 <?php if (can('events.manage')): ?>
                     <a class="<?= $onEvents ? 'is-active' : '' ?>" href="<?= e(url('/termine')) ?>"><span class="rail-ic"><?= icon('calendar') ?></span>Termine</a>
@@ -124,7 +126,9 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
             </nav>
 
             <div class="rail-foot">
-                <a class="rail-orga" href="<?= e(url('/orga-team')) ?>"><?= icon('mail') ?><span>Orga-Team schreiben</span></a>
+                <?php if (can('mail.send')): ?>
+                    <a class="rail-orga" href="<?= e(url('/orga-team')) ?>"><?= icon('mail') ?><span>Orga-Team schreiben</span></a>
+                <?php endif; ?>
                 <?php if (!empty($isImpersonating) && !empty($originalUser)): ?>
                     <form method="post" action="<?= e(url('/users/impersonate/stop')) ?>" class="rail-impersonate">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

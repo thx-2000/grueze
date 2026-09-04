@@ -471,7 +471,6 @@ try {
     $router->post('/rundmail/liste-loeschen', [MailController::class, 'deleteRecipientList']);
     $router->get('/vollstaendigkeit', [ContactController::class, 'completeness']);
     $router->post('/vollstaendigkeit/teilen', [ContactController::class, 'shareCompleteness']);
-    $router->get('/namensliste', [ContactController::class, 'namenslisteMoved']);
 
     $router->get('/verwaltung/gruesse', [GreetingController::class, 'manage']);
     $router->post('/verwaltung/gruesse', [GreetingController::class, 'store']);
