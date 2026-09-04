@@ -6,8 +6,28 @@ namespace App\Services;
 
 use RuntimeException;
 
+/**
+ * WebAuthn / FIDO2 – Passkey-Registrierung und -Anmeldung, ganz ohne Library.
+ * Unterstützt bewusst nur **ES256** (COSE-Algorithmus `-7`, EC P-256) – das
+ * deckt Apple/Google/Windows-Passkeys und die üblichen Sicherheitsschlüssel ab.
+ *
+ * Ablauf (JS im Browser dazwischen):
+ *   1. `beginRegistration` / `beginAuthentication` erzeugen eine Zufalls-
+ *      Challenge, legen sie in der Session ab und geben die Optionen für
+ *      `navigator.credentials.create()` bzw. `.get()` zurück.
+ *   2. `finishRegistration` / `finishAuthentication` prüfen die Antwort des
+ *      Authenticators gegen die Session-Challenge, die RP-ID und die Origin
+ *      und geben die zu speichernden bzw. bestätigten Felder zurück.
+ *
+ * RP-ID = Host aus `app.base_url`, Origin = `app.base_url` ohne Slash. Läuft
+ * die App nicht unter genau dieser URL, schlagen die Prüfungen fehl.
+ *
+ * Enthält am Ende einen kleinen CBOR-Decoder (für `attestationObject` und den
+ * COSE-Key) und einen DER-Encoder (COSE-Key → PEM für `openssl_verify`).
+ */
 final class WebAuthnService
 {
+    /** Registrierung starten – Optionen für `navigator.credentials.create()`. */
     public function beginRegistration(array $user, array $existingCredentials): array
     {
         $challenge = random_bytes(32);
@@ -47,6 +67,11 @@ final class WebAuthnService
         ];
     }
 
+    /**
+     * Registrierungs-Antwort prüfen. Verlangt User-Present, User-Verified und
+     * mitgelieferte Credential-Daten (Flags 0x01 | 0x04 | 0x40); gibt das
+     * fertige Zeilen-Array für `user_passkeys` zurück (inkl. Public Key als PEM).
+     */
     public function finishRegistration(array $payload): array
     {
         $session = $_SESSION['webauthn_register'] ?? null;
@@ -92,6 +117,7 @@ final class WebAuthnService
         ];
     }
 
+    /** Anmeldung starten – Optionen für `navigator.credentials.get()`. */
     public function beginAuthentication(): array
     {
         $challenge = random_bytes(32);
@@ -107,6 +133,12 @@ final class WebAuthnService
         ];
     }
 
+    /**
+     * Anmelde-Antwort prüfen. Verifiziert die Signatur über
+     * `authenticatorData ‖ SHA-256(clientDataJSON)` mit dem gespeicherten
+     * Public Key und prüft den Signaturzähler gegen Klonen (muss steigen,
+     * sofern der Authenticator überhaupt einen führt).
+     */
     public function finishAuthentication(array $storedCredential, array $payload): array
     {
         $session = $_SESSION['webauthn_auth'] ?? null;
@@ -184,6 +216,11 @@ final class WebAuthnService
         }
     }
 
+    /**
+     * Flag-Byte der Authenticator-Daten prüfen:
+     * 0x01 = User Present (Touch), 0x04 = User Verified (PIN/Biometrie),
+     * 0x40 = Attested Credential Data enthalten (nur bei der Registrierung).
+     */
     private function assertFlags(int $flags, bool $requireUserPresent, bool $requireUserVerified, bool $requireAttestedData): void
     {
         if ($requireUserPresent && ($flags & 0x01) === 0) {
@@ -199,6 +236,14 @@ final class WebAuthnService
         }
     }
 
+    /**
+     * Authenticator-Daten zerlegen (Binärformat, feste Offsets):
+     *   [0..31]  rpIdHash (SHA-256 der RP-ID)
+     *   [32]     Flags
+     *   [33..36] signCount (uint32, big endian)
+     *   danach (nur wenn Flag 0x40): AAGUID(16) + credIdLen(2) + credId +
+     *           COSE-Public-Key (CBOR).
+     */
     private function parseAuthData(string $authData): array
     {
         if (strlen($authData) < 37) {
@@ -239,6 +284,12 @@ final class WebAuthnService
         return $parsed;
     }
 
+    /**
+     * COSE-Key (CBOR-Map) → PEM. Nur EC2 / P-256 / ES256
+     * (kty=2, alg=-7, crv=1). Baut die DER-`SubjectPublicKeyInfo` von Hand:
+     * fester ecPublicKey-/prime256v1-AlgorithmIdentifier + BitString mit dem
+     * unkomprimierten Punkt `04 ‖ X ‖ Y`. `openssl_verify` frisst das PEM dann.
+     */
     private function coseKeyToPem(mixed $credentialPublicKey): string
     {
         if (!is_array($credentialPublicKey)) {
@@ -315,6 +366,10 @@ final class WebAuthnService
 
         return $decoded;
     }
+
+    // --- Minimaler CBOR-Decoder (RFC 8949) ---------------------------------
+    // Nur so viel, wie `attestationObject` und der COSE-Key brauchen:
+    // unsigned/negative ints, Byte-/Text-Strings, Arrays, Maps, true/false/null.
 
     private static function decodeCbor(string $bytes): mixed
     {
@@ -395,6 +450,8 @@ final class WebAuthnService
 
         return $segment;
     }
+
+    // --- Minimaler DER-Encoder (nur für coseKeyToPem) --------------------
 
     private static function derSequence(string $payload): string
     {

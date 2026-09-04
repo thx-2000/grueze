@@ -106,9 +106,11 @@ Stand betreffen.
    Feld → „Anrede" (Neutral/Liebe/Lieber), „Teilnehmer" → „Teilnehmende",
    „Benutzer" → „Zugänge/Konto" usw. Stil in `docs/SPRACHE.md`. Offen als
    Aufräumaufgabe: Spalte `geschlecht` → `anrede` (siehe „Ideen").
-2. **Code-Kommentierung** für Mitentwickler:innen prüfen und ergänzen –
-   Schwerpunkt `MailService` (fast unkommentiert), die großen Repos/Controller,
-   `app.js`. Plus: ist ein `ARCHITECTURE.md`-Refresh fällig?
+2. ~~**Code-Kommentierung** + `ARCHITECTURE.md`~~ – **v1.26.0 erledigt.**
+   `ARCHITECTURE.md` neu (Lebenszyklus, Datenmodell, Migrations-/ensureSchema-
+   Regeln, „neue Seite"-Checkliste); `MailService` + `WebAuthnService`
+   kommentiert. Offen bei Bedarf: `app.js` (Abschnittsdoku), die großen
+   Controller.
 3. **Refactoring / Verschlankung**: `ContactController` (1050 Z.),
    `ContactRepository` (1120 Z.), `MailController` (826 Z.), `app.css`
    (6400 Z.), `app.js` (1076 Z.) sind Kandidaten. Tote CSS-Regeln aus dem

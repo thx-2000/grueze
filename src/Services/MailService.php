@@ -7,19 +7,48 @@ namespace App\Services;
 use App\Repositories\LogRepository;
 use RuntimeException;
 
+/**
+ * Zentraler Mailversand. Zwei Wege nach außen:
+ *
+ *  - **PHPMailer über SMTP**, sobald `phpmailer/phpmailer` per Composer da ist
+ *    (empfohlen; nur so gehen Anhänge).
+ *  - **`mail()`-Fallback** sonst – reiner Text, keine Anhänge.
+ *
+ * Nach jedem erfolgreichen Versand wird eine Kopie in den „Gesendet"-Ordner
+ * des Postfachs gelegt (`archiveSentCopy`), damit versendete Mails auch im
+ * Webmail auftauchen. Weil die PHP-`imap`-Erweiterung auf Shared Hosting oft
+ * fehlt, gibt es dafür eine zweistufige Strategie: erst die Erweiterung,
+ * sonst ein minimaler, handgeschriebener IMAP-Client über einen TLS-Socket.
+ *
+ * `$identity` ist das Array aus `SettingRepository::mailIdentity()`
+ * (Absender, SMTP- und IMAP-Zugang, Sent-Ordner-Kandidaten).
+ */
 final class MailService
 {
     public function __construct(private LogRepository $logs)
     {
     }
 
+    /**
+     * System-Mail (Reset-Link, Erinnerung, Ergebnis …): kein Eintrag im
+     * `mail_log`, Fehler werden als Exception nach oben gereicht.
+     */
     public function sendSystemMail(array $identity, string $to, string $subject, string $body, ?string $replyTo = null): void
     {
         $this->sendRaw($identity, $to, $subject, $body, $replyTo ?: $identity['email'], []);
     }
 
+    /**
+     * Eine personalisierte Mailing-Mail an genau einen Kontakt. Wird vom
+     * Batch-Versand (`MailController`) je Empfänger aufgerufen; protokolliert
+     * jeden Versuch im `mail_log` und gibt `['ok' => bool, 'error' => ?string]`
+     * zurück, statt zu werfen – der Batch soll bei einem Fehler weiterlaufen.
+     *
+     * @return array{ok: bool, error?: string}
+     */
     public function sendMergedMail(array $identity, array $replyTo, array $contact, string $subject, string $message, string $salutationMode, array $attachments, int $userId): array
     {
+        // Erste hinterlegte Adresse ist die Zieladresse.
         $to = $contact['emails'][0]['email'] ?? null;
         if (!$to) {
             return ['ok' => false, 'error' => 'Kein Empfänger vorhanden.'];
@@ -53,6 +82,11 @@ final class MailService
         }
     }
 
+    /**
+     * Ersetzt die Platzhalter `{Anrede}` / `{Vorname}` / `{Nachname}` im
+     * Nachrichtentext. `{Abstimmungslink}` wird nicht hier, sondern vorher im
+     * `MailController` je Empfänger gesetzt (braucht den Token).
+     */
     public function renderMessageTemplate(array $contact, string $message, string $salutationMode = 'auto'): string
     {
         return str_replace(
@@ -107,6 +141,11 @@ final class MailService
         return $out;
     }
 
+    /**
+     * Der eigentliche Versand. Zwei Pfade (PHPMailer/SMTP oder `mail()`), danach
+     * jeweils die Sent-Ordner-Kopie. Alle Adress- und Namensbestandteile werden
+     * vorher von Zeilenumbrüchen befreit (Header-Injection).
+     */
     private function sendRaw(array $identity, string $to, string $subject, string $body, string $replyTo, array $attachments): void
     {
         $to = $this->safeAddress($to);
@@ -114,6 +153,7 @@ final class MailService
         $identity['email'] = $this->safeAddress((string) ($identity['email'] ?? ''));
         $identity['name'] = trim((string) preg_replace('/[\r\n]+/', ' ', (string) ($identity['name'] ?? '')));
 
+        // --- Pfad 1: PHPMailer über SMTP (bevorzugt, kann Anhänge) ---
         if (class_exists(\PHPMailer\PHPMailer\PHPMailer::class)) {
             $mailer = new \PHPMailer\PHPMailer\PHPMailer(true);
             $mailer->isSMTP();
@@ -141,10 +181,13 @@ final class MailService
             }
 
             $mailer->send();
+            // PHPMailer liefert die fertige MIME-Nachricht – die legen wir 1:1
+            // in „Gesendet" ab.
             $this->archiveSentCopy($identity, $mailer->getSentMIMEMessage());
             return;
         }
 
+        // --- Pfad 2: `mail()`-Fallback (nur Text, keine Anhänge) ---
         $headers = [
             'MIME-Version: 1.0',
             'Content-Type: text/plain; charset=UTF-8',
@@ -164,14 +207,24 @@ final class MailService
             throw new RuntimeException('Mailversand fehlgeschlagen. Bitte SMTP prüfen.');
         }
 
+        // `mail()` gibt uns die gesendete Nachricht nicht zurück – für die
+        // Archiv-Kopie bauen wir sie aus denselben Teilen nach.
         $this->archiveSentCopy($identity, $this->buildPlainTextMime($identity, $to, implode(', ', $replyToAddrs), $subject, $body, $headers));
     }
 
+    /**
+     * Kopie der gesendeten Mail in den „Gesendet"-Ordner des Postfachs legen.
+     * Reihenfolge: (1) PHP-`imap`-Erweiterung, falls vorhanden; (2) sonst ein
+     * eigener IMAP-Client über einen TLS-Socket. Beide probieren die
+     * konfigurierten Ordnernamen der Reihe nach durch (Provider benennen den
+     * Sent-Ordner unterschiedlich). Scheitert alles, nur `error_log` – der
+     * Versand selbst gilt trotzdem als erfolgreich.
+     */
     private function archiveSentCopy(array $identity, string $rawMessage): void
     {
         $config = $this->imapConfig($identity);
         if (!(bool) ($config['enabled'] ?? true)) {
-            return;
+            return; // In den Mail-Einstellungen abgeschaltet.
         }
 
         $message = $this->normalizeMime($rawMessage);
@@ -223,8 +276,17 @@ final class MailService
         return false;
     }
 
+    /**
+     * Minimaler IMAP-Client für genau einen Zweck: die gesendete Mail per
+     * `APPEND` in den Sent-Ordner schreiben. Ablauf nach RFC 3501:
+     * Server-Greeting lesen → bei `tls` STARTTLS + Crypto anschalten →
+     * `LOGIN` → `APPEND` mit Literal-Syntax (`{Länge}` + `+`-Continuation,
+     * dann die Nachricht) → `LOGOUT`. Der Socket prüft das Zertifikat
+     * (`verify_peer` + SNI).
+     */
     private function appendWithImapSocket($streamConfig, string $message): bool
     {
+        // `ssl` = implizites TLS (Port 993); `tls` = STARTTLS auf Klartext-Port.
         $scheme = ($streamConfig['encryption'] ?? 'ssl') === 'ssl' ? 'ssl' : 'tcp';
         $address = sprintf('%s://%s:%d', $scheme, $streamConfig['host'], (int) $streamConfig['port']);
         $context = stream_context_create([
@@ -306,6 +368,12 @@ final class MailService
         return false;
     }
 
+    /**
+     * `APPEND <ordner> (\Seen) {<n>}` – der Server antwortet mit `+` (bereit
+     * für ein Literal von n Bytes), dann schicken wir die Nachricht und lesen
+     * die abschließende getaggte Antwort. `strlen` (Bytes, nicht Zeichen) ist
+     * hier korrekt – das IMAP-Literal zählt Oktette.
+     */
     private function imapAppendCommand($stream, string $tag, string $mailbox, string $message): bool
     {
         fwrite($stream, sprintf('%s APPEND %s (\\Seen) {%d}', $tag, $this->imapQuote($mailbox), strlen($message)) . "\r\n");
@@ -359,11 +427,18 @@ final class MailService
         return implode("\r\n", array_merge($baseHeaders, $headers)) . "\r\n\r\n" . $this->normalizeMime($body);
     }
 
+    /** Zeilenenden auf CRLF vereinheitlichen (RFC 5322 / IMAP APPEND). */
     private function normalizeMime(string $value): string
     {
         return str_replace("\n", "\r\n", str_replace(["\r\n", "\r"], "\n", $value));
     }
 
+    /**
+     * Wert für den `{Anrede}`-Platzhalter. `$salutationMode` kommt aus dem
+     * Mailformular: `liebe` / `lieber` / `hallo` erzwingen die Anrede für alle;
+     * `auto` (Standard) richtet sich nach dem Kontakt-Anrede-Feld
+     * (`contacts.geschlecht`: `m` → „Lieber", `w` → „Liebe", leer → „Hallo").
+     */
     private function resolveSalutation(array $contact, string $salutationMode): string
     {
         return match ($salutationMode) {

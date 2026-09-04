@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.26.0
+
+**Nur Doku – nichts an der Anwendung geändert.**
+
+- `ARCHITECTURE.md` komplett überarbeitet: Request-Lebenszyklus, Container/
+  Router, Datenmodell (alle aktuellen Tabellen), Migrations- und
+  `ensureSchema`-Regeln, at-rest-Verschlüsselung, PWA, plus eine Checkliste
+  „Eine neue Seite hinzufügen".
+- `MailService` und `WebAuthnService` (die beiden kniffligsten Dateien –
+  handgeschriebener IMAP-Client bzw. WebAuthn ohne Library) sind jetzt
+  ausführlich kommentiert.
+
 ## 1.25.0
 
 **Inklusive, geschlechtsneutrale Sprache**
