@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.40.0
+
+**Zwei neue Farbwelten zur Auswahl.**
+
+- **Terrakotta** – warme Erdtöne (Sand, Ton, Espresso) mit gebranntem Orange
+  als einziger Signalfarbe.
+- **Kreide** – fast weiße, kühle Flächen und kräftige, matte Farben für
+  wichtige Elemente (Petrol / Ziegelrot / Amber), etwas schärfere Ecken.
+
+Beide erscheinen unter **Verwaltung → Themes**. Zum Ausprobieren „Aktivieren",
+zum Anpassen „Kopieren & bearbeiten". Alle Farbkontraste erfüllen WCAG AA.
+Der bisherige Standard („Grün") bleibt unverändert aktiv.
+
 ## 1.39.0
 
 **Navigation aufgeräumt – nichts entfernt, nur klarer sortiert.**
