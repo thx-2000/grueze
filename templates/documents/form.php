@@ -1,22 +1,29 @@
 <?php
 /**
  * @var array<string,mixed>|null $folder
+ * @var array<string,mixed>|null $parent  gesetzt = Unterordner wird angelegt
  * @var list<array<string,mixed>> $groupChoices
  * @var bool $canPickGroup
  */
 $f = $folder ?? [];
 $isEdit = $folder !== null;
 $action = $isEdit ? url('/dokumente/speichern') : url('/dokumente');
+$parent = $parent ?? null;
 ?>
 <header class="contact-detail-head">
-    <p class="eyebrow"><a href="<?= e(url('/dokumente')) ?>">Dokumente</a></p>
-    <h1><?= $isEdit ? 'Ordner bearbeiten' : 'Neuer Ordner' ?></h1>
+    <p class="eyebrow">
+        <a href="<?= e(url('/dokumente')) ?>">Dokumente</a>
+        <?php if ($parent !== null): ?> · <a href="<?= e(url('/dokumente/ansehen?id=' . (int) $parent['id'])) ?>"><?= e((string) $parent['title']) ?></a><?php endif; ?>
+    </p>
+    <h1><?= $isEdit ? 'Ordner bearbeiten' : ($parent !== null ? 'Neuer Unterordner' : 'Neuer Ordner') ?></h1>
+    <?php if ($parent !== null): ?><p class="muted">In „<?= e((string) $parent['title']) ?>"</p><?php endif; ?>
 </header>
 
 <section class="panel">
     <form method="post" action="<?= e($action) ?>" class="stack">
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <?php if ($isEdit): ?><input type="hidden" name="id" value="<?= e((string) $f['id']) ?>"><?php endif; ?>
+        <?php if ($parent !== null): ?><input type="hidden" name="parent_id" value="<?= e((string) $parent['id']) ?>"><?php endif; ?>
 
         <label>
             <span>Titel <span aria-hidden="true">*</span></span>
@@ -32,7 +39,7 @@ $action = $isEdit ? url('/dokumente/speichern') : url('/dokumente');
 
         <div class="form-actions">
             <button type="submit" class="button-link"><?= icon('check') ?><span><?= $isEdit ? 'Speichern' : 'Anlegen' ?></span></button>
-            <a class="ghost-button" href="<?= e(url($isEdit ? '/dokumente/ansehen?id=' . $f['id'] : '/dokumente')) ?>">Abbrechen</a>
+            <a class="ghost-button" href="<?= e(url($isEdit ? '/dokumente/ansehen?id=' . $f['id'] : ($parent !== null ? '/dokumente/ansehen?id=' . $parent['id'] : '/dokumente'))) ?>">Abbrechen</a>
         </div>
     </form>
 </section>

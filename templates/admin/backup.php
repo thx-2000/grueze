@@ -162,3 +162,37 @@ $tableLabels = [
         </form>
     </details>
 </section>
+
+<section class="panel">
+    <div class="panel-head">
+        <div>
+            <h3>Dokumente sichern</h3>
+            <p class="muted">
+                Dateien aus <a href="<?= e(url('/dokumente')) ?>">Dokumente</a> (inkl. Unterordner) als eigene ZIP – mit Manifest, unabhängig vom Backup oben und zusätzlich zur Sicherung beim Hoster.
+                <?php if ($documentFolderCount > 0): ?>
+                    Aktuell <?= e((string) $documentFolderCount) ?> Ordner auf oberster Ebene<?= $documentBytes > 0 ? ', ' . e(\App\Services\MediaService::humanBytes($documentBytes)) : '' ?>.
+                <?php endif; ?>
+            </p>
+        </div>
+    </div>
+    <?php $docOver = $documentBackupMax > 0 && $documentBytes > $documentBackupMax; ?>
+    <div class="toolbar-actions">
+        <a class="ghost-button<?= $docOver || $documentFolderCount === 0 ? ' is-disabled' : '' ?>" href="<?= e(url('/admin/backup/dokumente')) ?>"<?= $docOver || $documentFolderCount === 0 ? ' aria-disabled="true" tabindex="-1"' : '' ?>>
+            <?= icon('download') ?><span>Alle Dokumente sichern</span>
+        </a>
+    </div>
+    <?php if ($docOver): ?>
+        <p class="field-hint">Zu groß für eine Gesamt-Sicherung (Limit <?= e(\App\Services\MediaService::humanBytes($documentBackupMax)) ?>).</p>
+    <?php endif; ?>
+    <details class="gallery-restore">
+        <summary>Dokumente-Sicherung einspielen</summary>
+        <form method="post" action="<?= e(url('/admin/backup/dokumente')) ?>" enctype="multipart/form-data" class="stack" data-confirm="Sicherung jetzt einspielen? Die enthaltenen Ordner werden als NEUE Ordner angelegt (nichts wird überschrieben).">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <label>
+                <span>ZIP-Sicherung (aus „Alle Dokumente sichern")</span>
+                <input type="file" name="backup_file" accept=".zip,application/zip" required>
+            </label>
+            <div class="form-actions"><button type="submit" class="ghost-button"><?= icon('upload') ?><span>Einspielen</span></button></div>
+        </form>
+    </details>
+</section>

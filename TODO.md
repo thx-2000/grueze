@@ -152,10 +152,20 @@ Login). Rechte/Gruppen-Modell auf TH-Wunsch identisch zu den Galerien.
   `config('documents.allowed_extensions')`. `storage/documents/` außerhalb
   Webroot, getrennt von Galerie-Medien, nicht im ZIP-Backup und nicht
   mitrsynct. Migration `2026-10-02-dokumente`.
-- **Feiner (offen):** Unterordner/Verschachtelung; Sortierung/Suche bei vielen
-  Dateien; Datei-Vorschau (aktuell öffnet der Browser die Datei direkt, PDF
-  meist inline, Office-Formate meist als Download); Medien-Sicherungsknopf
-  (wie bei Galerien) auch für Dokumente in der Verwaltung → Datensicherung.
+- ~~**Feiner**~~ – **erledigt (v1.57.0).** Unterordner (`parent_id` auf
+  `document_folders`, ein Level tief wie viel Level, keine Rechte-Vererbung –
+  jeder Unterordner hat eigenes `owner_group_id`/`visible_group_id`; Löschen
+  blockiert solange Unterordner existieren, App- und DB-Ebene). Sortierung
+  (Name/Neueste/Älteste/Größte) + Volltextsuche (Titel/Dateiname/Beschreibung)
+  je Ordner. Datei-Vorschau für Office-Formate: `DocumentStorageService`
+  wandelt beim Upload optional mit `soffice --headless --convert-to pdf` in
+  eine PDF-Vorschau um (`preview_path`) – Feature-Detection wie beim
+  ffmpeg/ImageMagick-Muster, ohne installiertes LibreOffice bleibt alles beim
+  bisherigen Direkt-Download (auf dem Produktivserver mangels LibreOffice
+  aktuell inaktiv, bricht aber nichts). Medien-Sicherungsknopf analog
+  Galerien: `/admin/backup/dokumente`, `App\Support\StreamZip` (Stream statt
+  Temp-Datei, siehe oben), Export mit rekursivem Manifest (`subfolders`
+  verschachtelt), Import legt IMMER neue Ordner an (kein Merge/Überschreiben).
 
 ## Termine & Abstimmungen getrennt (TH-Wunsch 2026-09-04, „Teil B")
 

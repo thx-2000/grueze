@@ -1,7 +1,12 @@
 <?php
 /**
  * @var array<string,mixed> $folder
+ * @var list<array<string,mixed>> $breadcrumb
+ * @var list<array<string,mixed>> $subfolders
+ * @var bool $canCreateSubfolder
  * @var list<array<string,mixed>> $documents
+ * @var string $sort
+ * @var string $search
  * @var bool $canManage
  * @var bool $canUpload
  * @var int $currentUserId
@@ -11,10 +16,14 @@
  * @var list<string> $allowedExtensions
  */
 $f = $folder;
+$sortLabels = ['title' => 'Name', 'newest' => 'Neueste zuerst', 'oldest' => 'Älteste zuerst', 'largest' => 'Größte zuerst'];
 ?>
 <header class="contact-detail-head gallery-head">
     <div>
-        <p class="eyebrow"><a href="<?= e(url('/dokumente')) ?>">Dokumente</a></p>
+        <p class="eyebrow">
+            <a href="<?= e(url('/dokumente')) ?>">Dokumente</a>
+            <?php foreach ($breadcrumb as $crumb): ?> · <a href="<?= e(url('/dokumente/ansehen?id=' . (int) $crumb['id'])) ?>"><?= e((string) $crumb['title']) ?></a><?php endforeach; ?>
+        </p>
         <h1><?= e($f['title']) ?></h1>
         <p class="muted">
             <?= count($documents) ?> <?= count($documents) === 1 ? 'Datei' : 'Dateien' ?>
@@ -89,9 +98,48 @@ $f = $folder;
 <?php endif; ?>
 
 <section class="panel">
-    <?php if ($documents === []): ?>
+    <div class="panel-head">
+        <h3>Unterordner<?= $subfolders !== [] ? ' (' . count($subfolders) . ')' : '' ?></h3>
+        <?php if ($canCreateSubfolder): ?>
+            <a class="ghost-button compact-action" href="<?= e(url('/dokumente/neu?parent_id=' . (int) $f['id'])) ?>"><?= icon('plus') ?><span>Neuer Unterordner</span></a>
+        <?php endif; ?>
+    </div>
+    <?php if ($subfolders === []): ?>
+        <p class="muted">Keine Unterordner.</p>
+    <?php else: ?>
+        <div class="gallery-grid document-folder-grid">
+            <?php foreach ($subfolders as $sub): ?>
+                <a class="gallery-card document-folder-card" href="<?= e(url('/dokumente/ansehen?id=' . (int) $sub['id'])) ?>">
+                    <span class="gallery-card-cover document-folder-cover"><?= icon('folder') ?></span>
+                    <span class="gallery-card-body">
+                        <strong><?= e((string) $sub['title']) ?></strong>
+                        <span class="muted"><?= (int) $sub['document_count'] === 1 ? '1 Datei' : (int) $sub['document_count'] . ' Dateien' ?><?= (int) $sub['subfolder_count'] > 0 ? ' · ' . (int) $sub['subfolder_count'] . ' Unterordner' : '' ?></span>
+                    </span>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</section>
+
+<section class="panel">
+    <?php if ($documents === [] && $search === ''): ?>
         <p class="muted">Noch keine Dateien in diesem Ordner.</p>
     <?php else: ?>
+        <form method="get" action="<?= e(url('/dokumente/ansehen')) ?>" class="document-toolbar">
+            <input type="hidden" name="id" value="<?= e((string) $f['id']) ?>">
+            <label class="visually-hidden" for="docSearch">Dateien durchsuchen</label>
+            <input type="search" id="docSearch" name="q" value="<?= e($search) ?>" placeholder="Dateien durchsuchen …">
+            <label class="visually-hidden" for="docSort">Sortierung</label>
+            <select id="docSort" name="sort">
+                <?php foreach ($sortLabels as $value => $label): ?>
+                    <option value="<?= e($value) ?>" <?= $sort === $value ? 'selected' : '' ?>><?= e($label) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <button type="submit" class="ghost-button compact-action"><?= icon('search') ?><span>Anwenden</span></button>
+        </form>
+        <?php if ($documents === []): ?>
+            <p class="muted">Keine Datei passt zu „<?= e($search) ?>".</p>
+        <?php else: ?>
         <ul class="document-list">
             <?php foreach ($documents as $doc): ?>
                 <?php
@@ -114,7 +162,7 @@ $f = $folder;
                         </span>
                     </div>
                     <div class="document-row-actions">
-                        <a class="ghost-button compact-action" href="<?= e($viewUrl) ?>" target="_blank" rel="noopener"><?= icon('eye') ?><span>Ansehen</span></a>
+                        <a class="ghost-button compact-action" href="<?= e($viewUrl) ?>" target="_blank" rel="noopener"><?= icon('eye') ?><span>Ansehen<?= trim((string) ($doc['preview_path'] ?? '')) !== '' ? ' (Vorschau)' : '' ?></span></a>
                         <a class="ghost-button compact-action" href="<?= e($downloadUrl) ?>"><?= icon('download') ?><span>Herunterladen</span></a>
                         <?php if ($mayEdit): ?>
                             <details class="document-edit">
@@ -153,5 +201,6 @@ $f = $folder;
                 </li>
             <?php endforeach; ?>
         </ul>
+    <?php endif; ?>
     <?php endif; ?>
 </section>

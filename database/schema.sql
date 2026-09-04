@@ -499,6 +499,7 @@ CREATE TABLE IF NOT EXISTS gallery_upload_links (
 -- aber ohne Papierkorb (wie bei Gruppen: Löschen ist hier endgültig).
 CREATE TABLE IF NOT EXISTS document_folders (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    parent_id INT UNSIGNED NULL,
     title VARCHAR(190) NOT NULL,
     description TEXT NULL,
     owner_group_id INT UNSIGNED NULL,
@@ -506,8 +507,10 @@ CREATE TABLE IF NOT EXISTS document_folders (
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_document_folders_parent (parent_id),
     KEY idx_document_folders_owner_group (owner_group_id),
     KEY idx_document_folders_visible_group (visible_group_id),
+    CONSTRAINT fk_document_folders_parent FOREIGN KEY (parent_id) REFERENCES document_folders(id),
     CONSTRAINT fk_document_folders_owner_group FOREIGN KEY (owner_group_id) REFERENCES contact_groups(id) ON DELETE SET NULL,
     CONSTRAINT fk_document_folders_visible_group FOREIGN KEY (visible_group_id) REFERENCES contact_groups(id) ON DELETE SET NULL,
     CONSTRAINT fk_document_folders_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
@@ -520,6 +523,7 @@ CREATE TABLE IF NOT EXISTS documents (
     description TEXT NULL,
     original_name VARCHAR(255) NULL,
     stored_path VARCHAR(255) NOT NULL,
+    preview_path VARCHAR(255) NULL,
     mime VARCHAR(150) NOT NULL,
     byte_size BIGINT UNSIGNED NOT NULL DEFAULT 0,
     uploaded_by INT UNSIGNED NULL,

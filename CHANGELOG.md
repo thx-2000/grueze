@@ -3,6 +3,28 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.57.0
+
+**Dokumente: Unterordner, Sortierung/Suche, Datei-Vorschau, Datensicherung.**
+
+- **Unterordner:** Ordner können jetzt Unterordner enthalten (z. B.
+  „Vereinsunterlagen" → „Kassenbelege"). Jeder Unterordner hat eigene
+  Sichtbarkeits-/Verwaltungs-Einstellungen, unabhängig vom übergeordneten
+  Ordner. Ein Ordner mit Unterordnern lässt sich erst löschen, wenn die
+  Unterordner weg sind.
+- **Sortierung und Suche:** Innerhalb eines Ordners lässt sich nach Name,
+  Neueste zuerst, Älteste zuerst oder Größte zuerst sortieren, dazu eine
+  Volltextsuche über Titel, Dateiname und Beschreibung.
+- **Vorschau für Office-Dateien:** Word-/Excel-/PowerPoint-Dateien werden
+  beim Hochladen – sofern der Server das unterstützt – automatisch als
+  PDF-Vorschau bereitgestellt, statt nur zum Download angeboten zu werden.
+  (Steht erst zur Verfügung, sobald LibreOffice auf dem Server installiert
+  ist – bis dahin ändert sich nichts am bisherigen Verhalten.)
+- **Datensicherung für Dokumente:** in Verwaltung → Datensicherung gibt es
+  jetzt auch für Dokumente einen „Alle Dokumente sichern"-Knopf (ZIP-Export
+  mit allen Ordnern, Unterordnern und Dateien) und eine Einspielen-Funktion
+  für den Ernstfall.
+
 ## 1.56.0
 
 **Letzte drei Galerien-Kleinigkeiten aus dem Backlog.**

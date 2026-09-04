@@ -57,7 +57,7 @@ final class DocumentController extends BaseController
         $this->requireFolderAccess();
 
         $visible = array_values(array_filter(
-            $this->folders->all(),
+            $this->folders->topLevel(),
             fn (array $f): bool => $this->canViewFolder($f)
         ));
 
@@ -68,12 +68,22 @@ final class DocumentController extends BaseController
         ]);
     }
 
-    public function createForm(): void
+    public function createForm(Request $request): void
     {
-        $this->requireCreate();
+        $parentId = (int) $request->input('parent_id') ?: null;
+        $parent = null;
+        if ($parentId !== null) {
+            $parent = $this->folders->find($parentId);
+            if ($parent === null || !$this->canManageFolder($parent)) {
+                throw new RuntimeException('Zum Anlegen eines Unterordners fehlt die Berechtigung.');
+            }
+        } else {
+            $this->requireCreate();
+        }
 
         $this->render('documents/form', [
             'folder' => null,
+            'parent' => $parent,
             'groupChoices' => $this->groupChoicesForCreate(),
             'canPickGroup' => $this->canManage(),
         ]);
@@ -81,17 +91,28 @@ final class DocumentController extends BaseController
 
     public function store(Request $request): void
     {
-        $this->requireCreate();
+        $parentId = (int) $request->input('parent_id') ?: null;
+        $parent = null;
+        if ($parentId !== null) {
+            $parent = $this->folders->find($parentId);
+            if ($parent === null || !$this->canManageFolder($parent)) {
+                throw new RuntimeException('Zum Anlegen eines Unterordners fehlt die Berechtigung.');
+            }
+        } else {
+            $this->requireCreate();
+        }
         Csrf::validate($request->input('_csrf'));
 
         $data = $this->sanitizeGroups($this->sanitize($request), $request, null);
+        $data['parent_id'] = $parentId;
         if ($data['title'] === '') {
             flash('error', 'Bitte einen Titel angeben.');
-            Redirect::to('/dokumente/neu');
+            Redirect::to('/dokumente/neu' . ($parentId !== null ? '?parent_id=' . $parentId : ''));
         }
 
         $id = $this->folders->create($data, $this->userId());
-        $this->logs->addAudit((int) $this->userId(), null, 'created', 'Dokumente-Ordner angelegt: „' . $data['title'] . '".');
+        $this->logs->addAudit((int) $this->userId(), null, 'created', 'Dokumente-Ordner angelegt: „' . $data['title'] . '".'
+            . ($parent !== null ? ' (Unterordner von „' . $parent['title'] . '")' : ''));
         flash('success', 'Ordner angelegt. Jetzt Dateien hochladen.');
         Redirect::to('/dokumente/ansehen?id=' . $id);
     }
@@ -107,10 +128,24 @@ final class DocumentController extends BaseController
             Redirect::to('/dokumente');
         }
 
+        $canManageThis = $this->canManageFolder($folder);
+        $subfolders = array_values(array_filter(
+            $this->folders->childrenOf((int) $folder['id']),
+            fn (array $f): bool => $this->canViewFolder($f)
+        ));
+
+        $sort = (string) $request->input('sort', 'title');
+        $search = trim((string) $request->input('q', ''));
+
         $this->render('documents/show', [
             'folder' => $folder,
-            'documents' => $this->documents->forFolder((int) $folder['id']),
-            'canManage' => $this->canManageFolder($folder),
+            'breadcrumb' => $this->folders->ancestors((int) $folder['id']),
+            'subfolders' => $subfolders,
+            'canCreateSubfolder' => $canManageThis,
+            'documents' => $this->documents->forFolder((int) $folder['id'], $sort, $search),
+            'sort' => $sort,
+            'search' => $search,
+            'canManage' => $canManageThis,
             'canUpload' => $this->canUploadToFolder($folder),
             'currentUserId' => (int) $this->userId(),
             'groupChoices' => $this->groupChoicesForCreate(),
@@ -150,14 +185,20 @@ final class DocumentController extends BaseController
         if ($folder !== null && !$this->canManageFolder($folder)) {
             throw new RuntimeException('Zum Löschen dieses Ordners fehlt die Berechtigung.');
         }
+        if ($folder !== null && $this->folders->hasChildren((int) $folder['id'])) {
+            flash('error', 'Dieser Ordner hat noch Unterordner – erst die entfernen.');
+            Redirect::to('/dokumente/ansehen?id=' . $folder['id']);
+        }
         if ($folder !== null) {
             foreach ($this->documents->forFolder((int) $folder['id']) as $doc) {
                 $this->storage->deleteFile($doc);
             }
             $this->documents->deleteAllInFolder((int) $folder['id']);
+            $parentId = $folder['parent_id'] !== null ? (int) $folder['parent_id'] : null;
             $this->folders->delete((int) $folder['id']);
             $this->logs->addAudit((int) $this->userId(), null, 'deleted', 'Dokumente-Ordner endgültig gelöscht: „' . $folder['title'] . '" (inkl. aller Dateien).');
             flash('success', '„' . $folder['title'] . '" wurde endgültig gelöscht.');
+            Redirect::to($parentId !== null ? '/dokumente/ansehen?id=' . $parentId : '/dokumente');
         }
         Redirect::to('/dokumente');
     }
@@ -209,6 +250,7 @@ final class DocumentController extends BaseController
             'description' => mb_substr(trim((string) $request->input('description')), 0, 5000),
             'original_name' => $meta['original_name'],
             'stored_path' => $meta['stored_path'],
+            'preview_path' => $meta['preview_path'] ?? null,
             'mime' => $meta['mime'],
             'byte_size' => $meta['byte_size'],
         ], $this->userId());
@@ -280,14 +322,21 @@ final class DocumentController extends BaseController
             session_write_close();
         }
 
-        $abs = $this->storage->absolutePath((string) $doc['stored_path']);
+        $wantDownload = $request->input('dl') === '1';
+        $previewRel = trim((string) ($doc['preview_path'] ?? ''));
+        // Vorschau (PDF, aus Office-Formaten erzeugt) nur beim Ansehen nutzen –
+        // heruntergeladen wird immer das Original.
+        $usePreview = !$wantDownload && $previewRel !== '' && $request->input('v') !== 'original';
+
+        $abs = $this->storage->absolutePath($usePreview ? $previewRel : (string) $doc['stored_path']);
         if ($abs === null) {
             http_response_code(404);
             exit;
         }
 
-        $downloadName = $request->input('dl') === '1' ? (string) ($doc['original_name'] ?? 'datei') : null;
-        FileResponse::stream($abs, (string) $doc['mime'], $downloadName, $downloadName === null ? 3600 : 0);
+        $mime = $usePreview ? 'application/pdf' : (string) $doc['mime'];
+        $downloadName = $wantDownload ? (string) ($doc['original_name'] ?? 'datei') : null;
+        FileResponse::stream($abs, $mime, $downloadName, $downloadName === null ? 3600 : 0);
     }
 
     // --------------------------------------------------------------- intern

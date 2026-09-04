@@ -170,7 +170,10 @@ try {
         Container::get(\App\Repositories\GalleryRepository::class),
         Container::get(\App\Repositories\GalleryMediaRepository::class),
         Container::get(\App\Services\MediaService::class),
-        Container::get(LogRepository::class)
+        Container::get(LogRepository::class),
+        Container::get(\App\Repositories\DocumentFolderRepository::class),
+        Container::get(\App\Repositories\DocumentRepository::class),
+        Container::get(\App\Services\DocumentStorageService::class)
     ));
     Container::factory(StartController::class, static fn () => new StartController(
         Container::get(Auth::class),
@@ -774,6 +777,8 @@ try {
     $router->post('/admin/backup/restore', [BackupController::class, 'restore']);
     $router->get('/admin/backup/medien', [BackupController::class, 'mediaExport']);
     $router->post('/admin/backup/medien', [BackupController::class, 'mediaImport']);
+    $router->get('/admin/backup/dokumente', [BackupController::class, 'documentsExport']);
+    $router->post('/admin/backup/dokumente', [BackupController::class, 'documentsImport']);
     $router->get('/admin/legal/impressum', [LegalController::class, 'editImpressum']);
     $router->post('/admin/legal/impressum', [LegalController::class, 'updateImpressum']);
     $router->get('/admin/legal/datenschutz', [LegalController::class, 'editDatenschutz']);

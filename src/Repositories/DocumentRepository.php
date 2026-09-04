@@ -35,6 +35,7 @@ final class DocumentRepository
                     description TEXT NULL,
                     original_name VARCHAR(255) NULL,
                     stored_path VARCHAR(255) NOT NULL,
+                    preview_path VARCHAR(255) NULL,
                     mime VARCHAR(150) NOT NULL,
                     byte_size BIGINT UNSIGNED NOT NULL DEFAULT 0,
                     uploaded_by INT UNSIGNED NULL,
@@ -42,6 +43,9 @@ final class DocumentRepository
                     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     KEY idx_documents_folder (folder_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+            );
+            $this->pdo->exec(
+                'ALTER TABLE documents ADD COLUMN IF NOT EXISTS preview_path VARCHAR(255) NULL AFTER stored_path'
             );
         } catch (\Throwable) {
             // Migration holt es nach.
@@ -74,10 +78,37 @@ final class DocumentRepository
     }
 
     /** @return list<array<string,mixed>> */
-    public function forFolder(int $folderId): array
+    public const SORT_MODES = ['title', 'newest', 'oldest', 'largest'];
+
+    /**
+     * @param string $sort   title (Standard) / newest / oldest / largest
+     * @param string $search Filtert auf Titel, Dateiname und Beschreibung (Teilstring, klein/groß egal)
+     */
+    public function forFolder(int $folderId, string $sort = 'title', string $search = ''): array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM documents WHERE folder_id = :f ORDER BY title ASC');
-        $stmt->execute(['f' => $folderId]);
+        $order = match ($sort) {
+            'newest' => 'created_at DESC, title ASC',
+            'oldest' => 'created_at ASC, title ASC',
+            'largest' => 'byte_size DESC, title ASC',
+            default => 'title ASC',
+        };
+
+        $sql = 'SELECT * FROM documents WHERE folder_id = :f';
+        $params = ['f' => $folderId];
+        if (trim($search) !== '') {
+            // Named Platzhalter dürfen bei nativen Prepared Statements
+            // (PDO::ATTR_EMULATE_PREPARES = false) nicht mehrfach vorkommen –
+            // daher drei eigene Platzhalter statt dreimal :q.
+            $sql .= ' AND (title LIKE :q1 OR original_name LIKE :q2 OR description LIKE :q3)';
+            $needle = '%' . $search . '%';
+            $params['q1'] = $needle;
+            $params['q2'] = $needle;
+            $params['q3'] = $needle;
+        }
+        $sql .= ' ORDER BY ' . $order;
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
 
         return $stmt->fetchAll();
     }
@@ -85,8 +116,8 @@ final class DocumentRepository
     public function add(int $folderId, array $data, ?int $userId): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO documents (folder_id, title, description, original_name, stored_path, mime, byte_size, uploaded_by)
-             VALUES (:folder_id, :title, :description, :original_name, :stored_path, :mime, :byte_size, :uploaded_by)'
+            'INSERT INTO documents (folder_id, title, description, original_name, stored_path, preview_path, mime, byte_size, uploaded_by)
+             VALUES (:folder_id, :title, :description, :original_name, :stored_path, :preview_path, :mime, :byte_size, :uploaded_by)'
         );
         $stmt->execute([
             'folder_id' => $folderId,
@@ -94,6 +125,7 @@ final class DocumentRepository
             'description' => ($data['description'] ?? '') !== '' ? $data['description'] : null,
             'original_name' => $data['original_name'] ?? null,
             'stored_path' => $data['stored_path'],
+            'preview_path' => $data['preview_path'] ?? null,
             'mime' => $data['mime'],
             'byte_size' => (int) ($data['byte_size'] ?? 0),
             'uploaded_by' => $userId,
@@ -129,5 +161,11 @@ final class DocumentRepository
         $stmt->execute(['f' => $folderId]);
 
         return (int) $stmt->fetchColumn();
+    }
+
+    /** Gesamtgröße aller Dateien in Bytes – für die Sicherungs-Vorschau. */
+    public function totalBytes(): int
+    {
+        return (int) $this->pdo->query('SELECT COALESCE(SUM(byte_size), 0) FROM documents')->fetchColumn();
     }
 }

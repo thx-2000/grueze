@@ -5910,6 +5910,15 @@ body.lightbox-open { overflow: hidden; }
 .document-upload { display: grid; gap: 0.7rem; }
 .document-upload h3 { margin: 0; }
 
+.document-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.document-toolbar input[type="search"] { flex: 1 1 14rem; }
+.document-toolbar select { flex: 0 0 auto; }
+
 .document-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
 .document-row {
     display: flex;

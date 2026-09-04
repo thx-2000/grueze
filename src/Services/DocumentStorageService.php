@@ -39,6 +39,9 @@ final class DocumentStorageService
         'png' => 'image/png',
     ];
 
+    /** Formate, für die bei Verfügbarkeit von LibreOffice eine PDF-Vorschau erzeugt wird. */
+    private const OFFICE_PREVIEW_EXTENSIONS = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf'];
+
     private string $baseDir;
 
     public function __construct()
@@ -73,11 +76,80 @@ final class DocumentStorageService
     }
 
     /**
+     * Ob eine PDF-Vorschau für Office-Formate erzeugt werden kann – braucht
+     * LibreOffice (`soffice`) auf dem Server, was auf Shared Hosting meist
+     * fehlt. Ohne das bleibt alles wie bisher (Browser entscheidet selbst,
+     * meist Direkt-Download).
+     */
+    public function officePreviewAvailable(): bool
+    {
+        return $this->officeConvertBin() !== null;
+    }
+
+    private function officeConvertBin(): ?string
+    {
+        $configured = trim((string) config('documents.office_convert_bin', ''));
+        if ($configured !== '' && @is_executable($configured)) {
+            return $configured;
+        }
+        foreach (['/usr/bin/soffice', '/usr/bin/libreoffice'] as $candidate) {
+            if (@is_executable($candidate)) {
+                return $candidate;
+            }
+        }
+        $which = trim((string) @shell_exec('command -v soffice 2>/dev/null'));
+
+        return $which !== '' ? $which : null;
+    }
+
+    /**
+     * Office-Datei per LibreOffice (headless) zu PDF wandeln – nur wenn
+     * verfügbar. Liefert den relativen Vorschau-Pfad oder null, wenn es
+     * nicht klappt (Datei bleibt trotzdem normal herunterladbar).
+     */
+    private function makeOfficePreview(string $sourceAbs, string $ext, string $dir, string $shard, string $id): ?string
+    {
+        if (!in_array($ext, self::OFFICE_PREVIEW_EXTENSIONS, true)) {
+            return null;
+        }
+        $bin = $this->officeConvertBin();
+        if ($bin === null) {
+            return null;
+        }
+
+        $cmd = escapeshellarg($bin) . ' --headless --convert-to pdf --outdir ' . escapeshellarg($dir) . ' '
+            . escapeshellarg($sourceAbs) . ' 2>&1';
+        @exec($cmd, $lines, $code);
+
+        // LibreOffice benennt die Ausgabe nach dem Quelldateinamen (ohne Endung) + .pdf.
+        $producedAbs = $dir . '/' . pathinfo($sourceAbs, PATHINFO_FILENAME) . '.pdf';
+        if ($code !== 0 || !is_file($producedAbs) || @filesize($producedAbs) <= 0) {
+            if (is_file($producedAbs)) {
+                @unlink($producedAbs);
+            }
+
+            return null;
+        }
+
+        $previewAbs = $dir . '/' . $id . '_preview.pdf';
+        if (!@rename($producedAbs, $previewAbs)) {
+            @unlink($producedAbs);
+
+            return null;
+        }
+
+        return $shard . '/' . $id . '_preview.pdf';
+    }
+
+    /**
      * Eine hochgeladene Datei aufnehmen.
      *
+     * @param bool $uploaded true = echter PHP-Upload (move_uploaded_file),
+     *                       false = Datei liegt schon auf der Platte, z. B.
+     *                       beim Wiederherstellen einer Sicherung (copy())
      * @return array<string,mixed> Spalten für documents (original_name, stored_path, mime, byte_size)
      */
-    public function ingest(string $tmpPath, string $originalName, int $size): array
+    public function ingest(string $tmpPath, string $originalName, int $size, bool $uploaded = true): array
     {
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         $allowed = $this->allowedExtensions();
@@ -99,13 +171,17 @@ final class DocumentStorageService
 
         $storedRel = $shard . '/' . $id . '.' . $ext;
         $storedAbs = $dir . '/' . $id . '.' . $ext;
-        if (!move_uploaded_file($tmpPath, $storedAbs)) {
+        $placed = $uploaded ? move_uploaded_file($tmpPath, $storedAbs) : copy($tmpPath, $storedAbs);
+        if (!$placed) {
             throw new RuntimeException('Die Datei konnte nicht gespeichert werden.');
         }
+
+        $previewRel = $this->makeOfficePreview($storedAbs, $ext, $dir, $shard, $id);
 
         return [
             'original_name' => self::cleanName($originalName),
             'stored_path' => $storedRel,
+            'preview_path' => $previewRel,
             'mime' => $allowed[$ext],
             'byte_size' => @filesize($storedAbs) ?: $size,
         ];
@@ -113,13 +189,15 @@ final class DocumentStorageService
 
     public function deleteFile(array $documentRow): void
     {
-        $rel = (string) ($documentRow['stored_path'] ?? '');
-        if ($rel === '') {
-            return;
-        }
-        $abs = $this->baseDir . '/' . ltrim($rel, '/');
-        if (is_file($abs)) {
-            @unlink($abs);
+        foreach (['stored_path', 'preview_path'] as $col) {
+            $rel = (string) ($documentRow[$col] ?? '');
+            if ($rel === '') {
+                continue;
+            }
+            $abs = $this->baseDir . '/' . ltrim($rel, '/');
+            if (is_file($abs)) {
+                @unlink($abs);
+            }
         }
     }
 
