@@ -283,8 +283,14 @@ bestehende „Fester Termin"-Einträge **automatisch** in Ankündigungen
 
 **Gibt es schon:** Verwaltung → Berechtigungen ist eine Matrix (Rechte-Zeilen
 × Rollen-Spalten mit Häkchen); Rollen anlegen/umbenennen/löschen unter
-Verwaltung → Rollen. Möglicher Ausbau: beides auf einer Seite, „neue Rolle"
-inline in der Matrix, Rechte nach Bereich gruppiert sichtbar.
+Verwaltung → Rollen.
+- ~~**„Neue Rolle" inline in der Matrix; Rechte nach Bereich gruppiert
+  sichtbar**~~ – **erledigt (v1.59.0).** Kompaktes Anlage-Formular direkt
+  unter der Matrix (`POST /settings/roles/store` mit `redirect_to`, dorthin
+  zurück statt zur separaten Rollen-Seite – die neue Spalte ist sofort da
+  und lässt sich ohne Umweg abhaken). Gruppen-Kopfzeilen zusätzlich mit
+  passendem Icon je Bereich und deutlicherer Trennlinie zwischen den
+  Bereichen in der langen Tabelle.
 - **Chat für Online-Nutzer:innen** – TH hält es selbst für unwahrscheinlich,
   nur mitführen. Größter Brocken (Polling/SSE, Moderation, Datenschutz).
 

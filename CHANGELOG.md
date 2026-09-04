@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.59.0
+
+**Berechtigungs-Matrix: neue Rolle direkt dort anlegen, klarere Bereiche.**
+
+- **Neue Rolle ohne Umweg:** unter Verwaltung → Berechtigungen lässt sich
+  jetzt direkt unter der Matrix eine neue Rolle anlegen – man landet danach
+  sofort wieder dort, die neue Spalte ist schon da und lässt sich gleich
+  abhaken. Bisher musste man dafür erst zur separaten Rollen-Seite wechseln.
+- **Bereiche klarer erkennbar:** jede Gruppe in der Matrix (Kontakte,
+  Mailing, Galerien, …) hat jetzt ein passendes Symbol und eine deutlichere
+  Trennlinie zum vorigen Bereich – leichter zu überblicken bei vielen Rollen.
+
 ## 1.58.0
 
 **Termine: Live-Vorschau bei der Sichtbarkeit, Galerien/Dokumente an Ankündigungen verlinkbar.**

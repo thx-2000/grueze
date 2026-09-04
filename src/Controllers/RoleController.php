@@ -19,6 +19,9 @@ final class RoleController extends BaseController
 {
     private const RETURN_PATH = '/settings/roles';
 
+    /** Erlaubte Rücksprungziele für `redirect_to` (z. B. Inline-Anlage aus der Berechtigungs-Matrix). */
+    private const ALLOWED_REDIRECTS = ['/settings/roles', '/settings/permissions'];
+
     public function __construct(
         Auth $auth,
         private RoleRepository $roles,
@@ -46,21 +49,28 @@ final class RoleController extends BaseController
         $this->requirePermission('users.manage');
         Csrf::validate($request->input('_csrf'));
 
+        // Inline-Anlage direkt aus der Berechtigungs-Matrix heraus: nach dem
+        // Anlegen dorthin zurück statt zur Rollen-Seite, damit die neue Spalte
+        // sofort da ist und sich ohne Umweg abhaken lässt.
+        $returnTo = in_array((string) $request->input('redirect_to'), self::ALLOWED_REDIRECTS, true)
+            ? (string) $request->input('redirect_to')
+            : self::RETURN_PATH;
+
         $label = trim((string) $request->input('label'));
         $description = trim((string) $request->input('description'));
 
         if ($label === '') {
             flash('error', 'Bitte einen Anzeigenamen angeben.');
-            Redirect::to(self::RETURN_PATH);
+            Redirect::to($returnTo);
         }
         if ($this->roles->labelExists($label)) {
             flash('error', 'Eine Rolle mit diesem Namen gibt es schon.');
-            Redirect::to(self::RETURN_PATH);
+            Redirect::to($returnTo);
         }
 
         $this->roles->create($label, $description);
         flash('success', 'Rolle „' . $label . '" angelegt. Rechte und Sichtbarkeit lassen sich jetzt für sie festlegen.');
-        Redirect::to(self::RETURN_PATH);
+        Redirect::to($returnTo);
     }
 
     public function update(Request $request): void

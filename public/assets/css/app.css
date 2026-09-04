@@ -6112,6 +6112,9 @@ body.lightbox-open { overflow: hidden; }
     max-width: 26rem;
 }
 .permission-table-group th {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     text-align: left;
     background: var(--surface-sunken);
     color: var(--color-muted);
@@ -6120,6 +6123,11 @@ body.lightbox-open { overflow: hidden; }
     letter-spacing: 0.05em;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
+}
+.permission-table-group th .icon { width: 0.95rem; height: 0.95rem; flex: 0 0 0.95rem; }
+/* Deutlichere Trennung zum vorigen Bereich, jede Gruppe steckt in eigenem tbody. */
+tbody + tbody .permission-table-group th {
+    border-top: 2px solid var(--edge-hairline);
 }
 .permission-table tbody tr:not(.permission-table-group):hover td {
     background: var(--accent-veil);

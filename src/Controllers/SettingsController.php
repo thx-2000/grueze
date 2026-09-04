@@ -284,6 +284,17 @@ final class SettingsController extends BaseController
             'defaults' => $this->settings->permissionDefaults(),
             'configurableRoles' => $roles['configurable'],
             'roleLabels' => $roles['labels'],
+            'permissionGroupIcons' => [
+                'Kontakte' => 'contacts',
+                'Mailing' => 'mail',
+                'Abstimmungen' => 'poll',
+                'Termine' => 'calendar',
+                'Gruppen' => 'users',
+                'Galerien' => 'image',
+                'Dokumente' => 'file',
+                'Orga-Team' => 'message-send',
+                'Administration' => 'lock',
+            ],
             'permissionGroups' => [
                 'Kontakte' => [
                     'contacts.manage'      => 'Kontakte anlegen und bearbeiten',
