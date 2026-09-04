@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.28.0
+
+**Nur Stylesheet – nichts an der Anwendung geändert.**
+
+- Großer Dead-CSS-Durchgang in `app.css`: alle Regeln der abgelösten Hülle
+  (`.signal-bar*`, `.page-shell`, `.sidebar*`, `.content-topbar`) und weiterer
+  nicht mehr genutzter Bausteine (`.rundmail-*`-Empfängerauswahl,
+  `.account-panel/-badge/-summary`, `.contact-meta-list`, `.tag-account`,
+  `.branding-color-grid`, `.status-icon`, Kompakt-Varianten der Kontaktliste,
+  `.group-member-list` u. a.) entfernt – inklusive der zugehörigen
+  Media-Query-Blöcke.
+- Datei von rund 6.500 auf 5.455 Zeilen geschrumpft, geladenes CSS von
+  ~145 KB auf ~110 KB. Optik und Verhalten unverändert (Start, Adressbuch,
+  „Mein Eintrag", Nachrichten, Verwaltung, Termine, Gruppen geprüft –
+  Desktop und mobil).
+
 ## 1.27.0
 
 **Aufräumen unter der Haube – kein sichtbarer Unterschied.**

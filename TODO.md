@@ -63,6 +63,16 @@ Ideen, falls es weitergeht (kein Muss):
   `successful=1`; für sauberen Verlauf ggf. eigene `login_log`-Tabelle mit
   Logout-Zeit). Anzeige unter Verwaltung, ggf. neben „Änderungs-/
   Versandprotokoll".
+- **Gesendete Mails einsehen (für Sende-Berechtigte)** (TH-Wunsch 2026-09-04):
+  jede sende-berechtigte Person sieht die von ihr (bzw. alle) versendeten
+  Rundmails wieder – Inhalt, Empfängerkreis, Zeitpunkt. Option, dieselbe Mail
+  erneut zu verschicken (an alle oder einzelne Personen). Datenbasis teils da:
+  `mail_jobs`/`mail_job_recipients`; ggf. den gerenderten Text je Job sichern.
+- **Empfangene Mails einsehen (für Empfangs-Berechtigte)** (TH-Wunsch
+  2026-09-04): jede Person mit Login sieht die an sie gegangenen Rundmails im
+  Archiv, kann sie erneut lesen und sich auf Wunsch nochmal ans eigene
+  Postfach schicken lassen. Braucht pro Empfänger:in eine Zuordnung Job→Kontakt
+  plus Zugriff über „Mein Eintrag"/eigene Seite.
 
 ## UX-Review – Umsetzung (Entscheidungen TH 2026-09-04)
 
@@ -114,16 +124,14 @@ Stand betreffen.
 3. **Refactoring / Verschlankung** – **läuft, in kleinen Schritten:**
    - v1.27.0: Kontakt-Payload-Logik (war 3× kopiert) → `App\Support\ContactInput`;
      ein paar tote CSS-Regeln raus.
-   - **offen: großer Dead-CSS-Durchgang.** `app.css` hat noch ganze tote
-     Cluster (`.filter-grid`/`.filter-drawer`/`.filter-advanced-grid`,
-     `.stats-grid`/`.stat-card`, `.signal-bar*`, `.rundmail-*`, `.sidebar-*`,
-     `.account-panel`/`-summary`/`-badge`, `.page-shell`, `.content-topbar`,
-     `.topbar-title`/`-meta`, `.profile-chip`, `.passkey-login-box`,
-     `.selection-tools`, `.quick-category-list`, `is-member-compact`/
-     `is-staff-compact`). Alle in Templates+JS bestätigt 0 Treffer. Braucht
-     einen dedizierten Durchgang mit laufender App / visuellem Abgleich –
-     nicht per Grep im Vorbeigehen, weil viele in kombinierten Selektoren
-     und Media-Queries stecken.
+   - ~~**großer Dead-CSS-Durchgang**~~ – **v1.28.0 erledigt.** Alle toten
+     Cluster aus `app.css` raus (`.signal-bar*`, `.page-shell`, `.sidebar*`,
+     `.content-topbar`, `.rundmail-*`, `.account-panel/-summary/-badge`,
+     `.filter-grid`/`.stats-grid`, `.contact-meta-list`, `.tag-account`,
+     `.branding-color-grid`, `is-*-compact`, `.group-member-list` u. a.),
+     inkl. der zugehörigen Media-Query-Blöcke. Datei ~6.500 → 5.455 Zeilen,
+     CSS ~145 KB → ~110 KB. Sieben Seiten Desktop+mobil geprüft, Optik
+     unverändert.
    - offen: fette Dateien aufteilen (`ContactController` ~970 Z.,
      `MailController` 826 Z., `templates/contacts/index.php` 667 Z.),
      Merge-/Dubletten-Logik aus `ContactRepository` in einen Service.
