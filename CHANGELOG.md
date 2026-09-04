@@ -3,6 +3,33 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.45.0
+
+**Sicherheits-Härtung aus dem zweiten Audit.**
+
+- **Token im Pfad statt im Query.** Der Daten-Check-Link (`/meine-daten/…`)
+  und der Einladungslink (`/registrieren/…`) tragen ihren Token jetzt im
+  Pfad – so landet er nicht mehr in Server-Logs, Browser-Verlauf oder
+  Referrer-Headern (wie schon beim „Passwort vergessen"-Link). Alte Links im
+  `?token=`-Format funktionieren weiter.
+- **Passwortwechsel beendet fremde Sitzungen.** Wer sein Passwort ändert
+  (oder es per „Passwort vergessen" bzw. durch eine:n Admin neu gesetzt
+  bekommt), meldet damit alle anderen Geräte/Browser ab. Die eigene aktuelle
+  Sitzung bleibt.
+- **Einladungslinks: schnellerer, DoS-fester Abgleich.** Statt für jeden
+  Aufruf bis zu 50 bcrypt-Vergleiche zu rechnen, findet ein Index die
+  passende Einladung direkt (neue Spalte `registration_invites.token_sha`).
+- **Orga-Team-Knopf mit sanftem Limit** gegen versehentliches Doppel-Senden
+  und Spam (Mindestabstand + Stundenobergrenze).
+- **Kalender-Schlüssel neu gewürfelt.** `events.ical_uid` wird für laufende
+  Termine auf einen echten Zufallswert gesetzt (frühe Bestände kamen aus
+  `UUID()` und waren in Grenzen erratbar). Wer den Kalender-Link eines
+  laufenden Termins gespeichert hat, muss ihn einmalig neu kopieren.
+- **Kleinkram:** Backup-Wiederherstellung mit Größengrenze gegen
+  „ZIP-Bomben"; XLSX-Import prüft `is_uploaded_file`; protokollrelative
+  Links (`//fremde-domain`) in Rechtstexten werden entfernt; Passwort-Hash
+  wird nicht mehr in den View-/Listen-Kontext gereicht.
+
 ## 1.44.0
 
 **Nur Doku: zweiter Sicherheits-Audit.**

@@ -56,9 +56,11 @@ final class DataCheckController extends BaseController
             'Daten-Check-Link erzeugt (gültig ' . $days . ' Tage).'
         );
 
+        // Token im Pfad, nicht im Query – landet so nicht in Server-Logs,
+        // Browser-Verlauf oder Referrer-Headern (wie beim Passwort-Reset).
         $_SESSION['data_check_link'] = [
             'contact_id' => $contactId,
-            'url' => url('/meine-daten') . '?token=' . $token,
+            'url' => url('/meine-daten/' . rawurlencode($token)),
         ];
         flash('success', 'Der Daten-Check-Link ist erzeugt – zum Kopieren und Weitergeben unten.');
         Redirect::to('/contacts/edit?id=' . $contactId);
@@ -77,9 +79,10 @@ final class DataCheckController extends BaseController
 
     // -------------------------------------------------------------- Public
 
-    public function show(Request $request): void
+    public function show(Request $request, string $token = ''): void
     {
-        $check = $this->checks->findValidByToken((string) $request->input('token', ''));
+        $token = $this->resolveToken($request, $token);
+        $check = $this->checks->findValidByToken($token);
         if ($check === null) {
             $this->render('contacts/data-check', ['invalid' => true]);
 
@@ -95,7 +98,7 @@ final class DataCheckController extends BaseController
 
         $this->render('contacts/data-check', [
             'invalid' => false,
-            'token' => (string) $request->input('token', ''),
+            'token' => $token,
             'contact' => $contact,
             'phoneLabels' => config('defaults.phone_labels', []),
             'expiresAt' => (string) $check['expires_at'],
@@ -103,10 +106,20 @@ final class DataCheckController extends BaseController
         ]);
     }
 
-    public function save(Request $request): void
+    public function save(Request $request, string $token = ''): void
     {
         Csrf::validate($request->input('_csrf'));
-        $check = $this->checks->findValidByToken((string) $request->input('token', ''));
+
+        // Schutz vor versehentlichem/skript-getriebenem Mehrfach-Absenden.
+        $now = time();
+        if (($now - (int) ($_SESSION['data_check_save_at'] ?? 0)) < 10) {
+            flash('error', 'Kurz warten – die letzte Änderung wird noch gespeichert.');
+            Redirect::to('/meine-daten/' . rawurlencode($this->resolveToken($request, $token)));
+        }
+        $_SESSION['data_check_save_at'] = $now;
+
+        $token = $this->resolveToken($request, $token);
+        $check = $this->checks->findValidByToken($token);
         if ($check === null) {
             $this->render('contacts/data-check', ['invalid' => true]);
 
@@ -129,7 +142,7 @@ final class DataCheckController extends BaseController
         if ($errors !== []) {
             $_SESSION['_errors'] = $errors;
             $_SESSION['_old'] = $request->all();
-            Redirect::to('/meine-daten?token=' . rawurlencode((string) $request->input('token', '')));
+            Redirect::to('/meine-daten/' . rawurlencode($token));
         }
 
         // Handelnde Person ist nicht eingeloggt – die Aktion wird der Person
@@ -145,10 +158,21 @@ final class DataCheckController extends BaseController
             : 'Über den Daten-Check-Link selbst korrigiert: ' . implode(', ', array_keys($changes)) . '.';
         $this->logs->addAudit($actorId, $contactId, 'updated', $summary, $changes);
 
-        Redirect::to('/meine-daten?token=' . rawurlencode((string) $request->input('token', '')) . '&gespeichert=1');
+        Redirect::to('/meine-daten/' . rawurlencode($token) . '?gespeichert=1');
     }
 
     // -------------------------------------------------------------- intern
+
+    /**
+     * Token bevorzugt aus dem Pfad; `?token=`/POST-Feld nur als Rückfall für
+     * Links, die vor der Umstellung verschickt wurden.
+     */
+    private function resolveToken(Request $request, string $fromPath): string
+    {
+        $fromPath = trim($fromPath);
+
+        return $fromPath !== '' ? $fromPath : trim((string) $request->input('token', ''));
+    }
 
     /**
      * @param array<string,mixed> $before

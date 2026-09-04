@@ -50,6 +50,24 @@ final class OrgaController extends BaseController
             Redirect::to('/orga-team');
         }
 
+        // Sanftes Limit gegen versehentliches Doppel-Absenden und Spam:
+        // mindestens 30 s Abstand, höchstens 6 Nachrichten pro Stunde.
+        $now = time();
+        $recent = array_values(array_filter(
+            (array) ($_SESSION['orga_send_ts'] ?? []),
+            static fn ($ts): bool => is_int($ts) && $ts > $now - 3600
+        ));
+        if ($recent !== [] && $now - max($recent) < 30) {
+            flash('error', 'Einen Moment noch – die letzte Nachricht ist gerade erst raus.');
+            Redirect::to('/orga-team');
+        }
+        if (count($recent) >= 6) {
+            flash('error', 'Du hast in der letzten Stunde schon einige Nachrichten geschickt. Bitte später weitermachen.');
+            Redirect::to('/orga-team');
+        }
+        $recent[] = $now;
+        $_SESSION['orga_send_ts'] = $recent;
+
         $recipients = $this->recipients();
         if ($recipients === []) {
             flash('error', 'Es ist kein Orga-Team hinterlegt. Bitte an eine:n Admin wenden.');

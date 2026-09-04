@@ -15,7 +15,9 @@ ALTER TABLE events
 ALTER TABLE events
     ADD KEY IF NOT EXISTS idx_events_ical_uid (ical_uid);
 
-UPDATE events SET ical_uid = REPLACE(UUID(), '-', '') WHERE ical_uid IS NULL;
+-- Zufälliger Schlüssel (nicht UUID(): das ist zeit-/MAC-basiert und damit in
+-- Grenzen erratbar). RANDOM_BYTES wird pro Zeile neu ausgewertet.
+UPDATE events SET ical_uid = LOWER(HEX(RANDOM_BYTES(16))) WHERE ical_uid IS NULL;
 
 ALTER TABLE event_participants
     ADD COLUMN IF NOT EXISTS note VARCHAR(500) NULL AFTER token;

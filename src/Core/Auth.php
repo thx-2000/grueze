@@ -31,7 +31,7 @@ final class Auth
 
         $user = $this->users->findById($userId);
         if ($user && (bool) $user['is_active']) {
-            return $this->userCache[$userId] = $user;
+            return $this->userCache[$userId] = self::withoutSecrets($user);
         }
 
         if ($this->isImpersonating()) {
@@ -51,7 +51,30 @@ final class Auth
 
         $user = $this->users->findById((int) $userId);
 
-        return $user && (bool) $user['is_active'] ? $user : null;
+        return $user && (bool) $user['is_active'] ? self::withoutSecrets($user) : null;
+    }
+
+    /**
+     * Passwort der aktuell angemeldeten Person prüfen. Der Hash wird frisch aus
+     * der Datenbank geholt und nie über `user()` in den View-Scope gereicht.
+     */
+    public function verifyPassword(string $password): bool
+    {
+        $userId = $this->activeUserId();
+        if ($userId === null) {
+            return false;
+        }
+        $row = $this->users->findById($userId);
+
+        return $row !== null && password_verify($password, (string) ($row['password_hash'] ?? ''));
+    }
+
+    /** Sensible Felder entfernen, bevor ein User-Array in Views/Logik fließt. */
+    private static function withoutSecrets(array $user): array
+    {
+        unset($user['password_hash']);
+
+        return $user;
     }
 
     public function isImpersonating(): bool

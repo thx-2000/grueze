@@ -12,8 +12,33 @@ use PDO;
  */
 final class RegistrationInviteRepository
 {
+    private static bool $schemaChecked = false;
+
     public function __construct(private PDO $pdo)
     {
+        $this->ensureSchema();
+    }
+
+    /**
+     * token_sha notfalls selbst nachrüsten – falls neuer Code läuft, bevor
+     * „Verwaltung → Aktualisieren" die Migration eingespielt hat.
+     */
+    private function ensureSchema(): void
+    {
+        if (self::$schemaChecked) {
+            return;
+        }
+        self::$schemaChecked = true;
+
+        try {
+            $this->pdo->exec(
+                'ALTER TABLE registration_invites
+                    ADD COLUMN IF NOT EXISTS token_sha CHAR(64) NULL AFTER token_hash,
+                    ADD KEY IF NOT EXISTS idx_registration_invites_token_sha (token_sha)'
+            );
+        } catch (\Throwable) {
+            // Migration holt es nach.
+        }
     }
 
     /**
@@ -26,14 +51,15 @@ final class RegistrationInviteRepository
 
         $token = bin2hex(random_bytes(24));
         $stmt = $this->pdo->prepare(
-            'INSERT INTO registration_invites (email, contact_id, note, token_hash, created_by, ip_hash, status, expires_at)
-             VALUES (:email, :contact_id, :note, :token_hash, :created_by, :ip_hash, \'pending\', :expires_at)'
+            'INSERT INTO registration_invites (email, contact_id, note, token_hash, token_sha, created_by, ip_hash, status, expires_at)
+             VALUES (:email, :contact_id, :note, :token_hash, :token_sha, :created_by, :ip_hash, \'pending\', :expires_at)'
         );
         $stmt->execute([
             'email' => $email,
             'contact_id' => $contactId,
             'note' => $note !== null && $note !== '' ? mb_substr($note, 0, 500) : null,
             'token_hash' => password_hash($token, PASSWORD_DEFAULT),
+            'token_sha' => hash('sha256', $token),
             'created_by' => $createdBy,
             'ip_hash' => $ipHash,
             'expires_at' => date('Y-m-d H:i:s', time() + max(1, $hours) * 3600),
@@ -99,18 +125,40 @@ final class RegistrationInviteRepository
     /** @return array<string,mixed>|null Einladung samt Kontaktname, wenn Token gültig */
     public function findValidByToken(string $token): ?array
     {
-        $rows = $this->pdo->query(
+        $token = trim($token);
+        // Formatprüfung zuerst: unpassende Eingaben rühren die Datenbank nicht an.
+        if (!preg_match('/^[a-f0-9]{48}$/i', $token)) {
+            return null;
+        }
+
+        // Schneller Weg: die eine Zeile über den SHA-Index holen, danach genau
+        // ein bcrypt-Vergleich (konstantzeitig).
+        $stmt = $this->pdo->prepare(
             "SELECT ri.*, c.vorname, c.nachname
              FROM registration_invites ri
              LEFT JOIN contacts c ON c.id = ri.contact_id
-             WHERE ri.status = 'pending' AND ri.expires_at >= NOW()
-             ORDER BY ri.id DESC
-             LIMIT 50"
-        )->fetchAll();
+             WHERE ri.token_sha = :sha AND ri.status = 'pending' AND ri.expires_at >= NOW()
+             LIMIT 1"
+        );
+        $stmt->execute(['sha' => hash('sha256', $token)]);
+        $row = $stmt->fetch();
+        if ($row) {
+            return password_verify($token, (string) $row['token_hash']) ? $row : null;
+        }
 
-        foreach ($rows as $row) {
-            if (password_verify($token, (string) $row['token_hash'])) {
-                return $row;
+        // Rückfall nur für Einladungen von vor der token_sha-Migration – eng
+        // begrenzt und verschwindet, sobald diese Alt-Einladungen abgelaufen sind.
+        $legacy = $this->pdo->query(
+            "SELECT ri.*, c.vorname, c.nachname
+             FROM registration_invites ri
+             LEFT JOIN contacts c ON c.id = ri.contact_id
+             WHERE ri.token_sha IS NULL AND ri.status = 'pending' AND ri.expires_at >= NOW()
+             ORDER BY ri.id DESC
+             LIMIT 20"
+        )->fetchAll();
+        foreach ($legacy as $candidate) {
+            if (password_verify($token, (string) $candidate['token_hash'])) {
+                return $candidate;
             }
         }
 

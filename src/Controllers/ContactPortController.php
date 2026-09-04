@@ -56,6 +56,13 @@ final class ContactPortController extends BaseController
             Redirect::to('/contacts/import');
         }
 
+        // Nur eine echt hochgeladene Datei verarbeiten – nie einen Pfad, den ein
+        // manipulierter Request untergeschoben hat.
+        if (!is_uploaded_file((string) ($file['tmp_name'] ?? ''))) {
+            flash('error', 'Die Datei konnte nicht gelesen werden. Bitte erneut hochladen.');
+            Redirect::to('/contacts/import');
+        }
+
         try {
             $summary = $this->imports->importRamaWorkbook((string) $file['tmp_name'], (int) $this->auth->user()['id']);
             flash(

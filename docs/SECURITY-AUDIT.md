@@ -539,6 +539,45 @@ Bewertung: **mittel** = zeitnah · **niedrig** = bei Gelegenheit / Härtung.
 
 ---
 
+## Umsetzung in 1.45.0
+
+Nach Rücksprache umgesetzt:
+
+- **A1 – erledigt (Teil).** Daten-Check- und Einladungslink tragen den Token
+  jetzt im Pfad (`/meine-daten/<token>`, `/registrieren/<token>`). Alt-Links
+  im `?token=`-Format laufen über einen Rückfallpfad weiter. `page_title()`
+  kennt die Pfadform. Die Gültigkeit/Mehrfach-Nutzung des Daten-Check-Links
+  wurde bewusst **nicht** geändert (siehe A2).
+- **A2 – bewusst offen gelassen.** Der Daten-Check-Link soll nach Wunsch
+  30 Tage lang mehrfach nutzbar bleiben („jederzeit noch etwas ändern").
+  Abgemildert durch die kurze `save`-Sperre (B8) und den Pfad-Token (A1).
+- **A3 – erledigt.** `registration_invites.token_sha` (Index) + Formatprüfung;
+  genau ein bcrypt-Vergleich pro Aufruf. Rückfallpfad für Alt-Einladungen ist
+  auf 20 Zeilen begrenzt und drainiert mit deren Ablauf.
+- **A4 – erledigt.** `updateOwnPassword`, Admin-`setPassword` und
+  `PasswordResetService::reset` rufen `UserSessionRepository::revokeAllForUser`.
+  Die eigene aktive Sitzung bleibt.
+- **A5 – bewusst so gelassen.** `users.manage` bleibt eine bewusste
+  Admin-Entscheidung; Hinweis in Doku/UI genügt.
+- **B2 – erledigt.** Sitzungsbasiertes Limit (30 s Abstand, 6/Stunde).
+- **B3 – erledigt.** Regex lässt nur einzelnes `/` zu, nicht `//`.
+- **B4 – erledigt (Größe).** `MAX_ARCHIVE_BYTES` / `MAX_DATABASE_JSON_BYTES`,
+  Prüfung via `statName` vor dem Entpacken. Der `DELETE FROM`-Tabellenname war
+  bereits mit Backticks eingefasst und auf real existierende Tabellen begrenzt.
+- **B5 – erledigt.** `Auth::user()`/`originalUser()` und
+  `UserRepository::all()/search()` entfernen `password_hash`. Neue
+  `Auth::verifyPassword()` für die Passwort-ändern-Prüfung.
+- **B6 – erledigt.** Migration `2026-09-27` würfelt `ical_uid` laufender
+  Termine neu (`RANDOM_BYTES`); die Backfill-Zeile der Ursprungsmigration
+  nutzt kein `UUID()` mehr.
+- **B7 – erledigt.** `is_uploaded_file()` im XLSX-Import.
+- **B8 – erledigt.** 10-s-Sperre pro Sitzung vor erneutem `save`.
+
+Weiterhin offen (brauchen eigene Entscheidung/Release): **B1** (Konto-weites
+Login-Lockout vs. DoS-Risiko).
+
+---
+
 ## Befunde im Detail
 
 ### A1 – Geheim-Tokens im Query-String

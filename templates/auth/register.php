@@ -5,9 +5,8 @@
 </header>
 
 <section class="panel stack auth-card">
-    <form method="post" action="<?= e(url('/registrieren')) ?>" class="stack" data-register-form>
+    <form method="post" action="<?= e(url('/registrieren/' . rawurlencode((string) $token))) ?>" class="stack" data-register-form>
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <input type="hidden" name="token" value="<?= e($token) ?>">
         <label>
             <span>Dein Name</span>
             <input type="text" name="name" value="<?= e($suggestedName) ?>" required autocomplete="name">

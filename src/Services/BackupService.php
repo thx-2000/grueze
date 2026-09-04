@@ -23,6 +23,10 @@ final class BackupService
 {
     private const FORMAT = 1;
 
+    /** Obergrenzen beim Einlesen eines Backups (Schutz vor Speicher-Erschöpfung). */
+    private const MAX_ARCHIVE_BYTES = 1073741824;      // 1 GiB ZIP-Datei
+    private const MAX_DATABASE_JSON_BYTES = 268435456; // 256 MiB entpacktes database.json
+
     /** Reihenfolge ist für die Wiederherstellung bewusst FK-freundlich gewählt. */
     private const CORE_TABLES = [
         'roles',
@@ -191,12 +195,24 @@ final class BackupService
             throw new RuntimeException('Die PHP-Erweiterung "zip" ist nicht verfügbar.');
         }
 
+        if ((int) @filesize($zipPath) > self::MAX_ARCHIVE_BYTES) {
+            throw new RuntimeException('Das Backup ist zu groß (über 1 GB). Bitte an den Support wenden.');
+        }
+
         $zip = new ZipArchive();
         if ($zip->open($zipPath) !== true) {
             throw new RuntimeException('Das Backup konnte nicht geöffnet werden. Ist es eine gültige ZIP-Datei?');
         }
         if ($password !== null && trim($password) !== '') {
             $zip->setPassword($password);
+        }
+
+        // Vor dem Entpacken prüfen: database.json darf den Speicher nicht sprengen
+        // (Schutz gegen „ZIP-Bombe" – kleine Datei, riesiger Inhalt).
+        $dbStat = $zip->statName('database.json');
+        if (is_array($dbStat) && (int) ($dbStat['size'] ?? 0) > self::MAX_DATABASE_JSON_BYTES) {
+            $zip->close();
+            throw new RuntimeException('Die Datenbank im Backup ist unplausibel groß. Abgebrochen.');
         }
 
         $manifestRaw = $zip->getFromName('manifest.json');

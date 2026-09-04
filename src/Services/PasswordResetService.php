@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Repositories\LogRepository;
 use App\Repositories\SettingRepository;
 use App\Repositories\UserRepository;
+use App\Repositories\UserSessionRepository;
 use PDO;
 
 final class PasswordResetService
@@ -16,7 +17,8 @@ final class PasswordResetService
         private UserRepository $users,
         private MailService $mailer,
         private SettingRepository $settings,
-        private LogRepository $logs
+        private LogRepository $logs,
+        private UserSessionRepository $sessions
     )
     {
     }
@@ -111,6 +113,10 @@ final class PasswordResetService
         // Diesen und alle anderen offenen Tokens des Kontos verbrauchen.
         $this->pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE user_id = :id AND used_at IS NULL')
             ->execute(['id' => $userId]);
+
+        // Laufende Sitzungen des Kontos beenden – nach „Passwort vergessen" soll
+        // keine alte (womöglich übernommene) Sitzung weiterlaufen.
+        $this->sessions->revokeAllForUser($userId);
 
         $this->logs->addAudit(
             $userId,

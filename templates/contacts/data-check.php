@@ -56,9 +56,8 @@ $vorname = trim((string) ($contact['vorname'] ?? ''));
         <p class="vote-hello"><?= icon('check') ?> <strong>Gespeichert – danke fürs Aktuell-Halten.</strong> Du kannst über denselben Link jederzeit noch etwas ändern, solange er gültig ist.</p>
     <?php endif; ?>
 
-    <form method="post" action="<?= e(url('/meine-daten')) ?>" class="contact-detail-form" data-detail-form>
+    <form method="post" action="<?= e(url('/meine-daten/' . rawurlencode((string) $token))) ?>" class="contact-detail-form" data-detail-form>
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-        <input type="hidden" name="token" value="<?= e((string) $token) ?>">
 
         <section class="detail-card">
             <h2>Zur Person</h2>

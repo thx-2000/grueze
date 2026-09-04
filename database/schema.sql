@@ -410,6 +410,7 @@ CREATE TABLE registration_invites (
     contact_id INT UNSIGNED NULL,
     note VARCHAR(500) NULL,
     token_hash VARCHAR(255) NOT NULL,
+    token_sha CHAR(64) NULL,
     created_by INT UNSIGNED NULL,
     ip_hash CHAR(64) NULL,
     status ENUM('pending', 'awaiting_approval', 'used', 'revoked') NOT NULL DEFAULT 'pending',
@@ -418,6 +419,7 @@ CREATE TABLE registration_invites (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     KEY idx_registration_invites_email (email),
     KEY idx_registration_invites_status (status),
+    KEY idx_registration_invites_token_sha (token_sha),
     CONSTRAINT fk_registration_invites_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE SET NULL,
     CONSTRAINT fk_registration_invites_creator FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

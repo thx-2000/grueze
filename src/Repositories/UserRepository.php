@@ -42,13 +42,15 @@ final class UserRepository
 
     public function all(): array
     {
-        return $this->pdo->query(
+        $rows = $this->pdo->query(
             'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname
              FROM users
              JOIN roles ON roles.id = users.role_id
              LEFT JOIN contacts ON contacts.id = users.contact_id
              ORDER BY users.created_at DESC'
         )->fetchAll();
+
+        return array_map(self::stripSecrets(...), $rows);
     }
 
     /**
@@ -98,7 +100,15 @@ final class UserRepository
             'term_nachname' => $term,
         ]);
 
-        return $stmt->fetchAll();
+        return array_map(self::stripSecrets(...), $stmt->fetchAll());
+    }
+
+    /** Passwort-Hash aus einer Zeile entfernen, die in Views/Listen geht. */
+    private static function stripSecrets(array $row): array
+    {
+        unset($row['password_hash']);
+
+        return $row;
     }
 
     public function roles(): array

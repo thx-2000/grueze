@@ -145,7 +145,8 @@ try {
         Container::get(UserRepository::class),
         Container::get(MailService::class),
         Container::get(SettingRepository::class),
-        Container::get(LogRepository::class)
+        Container::get(LogRepository::class),
+        Container::get(\App\Repositories\UserSessionRepository::class)
     ));
     Container::factory(WebAuthnService::class, static fn () => new WebAuthnService());
     Container::factory(MigrationService::class, static fn () => new MigrationService(Container::get(PDO::class)));
@@ -231,7 +232,8 @@ try {
         Container::get(PasswordResetService::class),
         Container::get(PasskeyRepository::class),
         Container::get(EventRepository::class),
-        Container::get(ContactRepository::class)
+        Container::get(ContactRepository::class),
+        Container::get(\App\Repositories\UserSessionRepository::class)
     ));
     Container::factory(PasskeyController::class, static fn () => new PasskeyController(
         Container::get(Auth::class),
@@ -491,7 +493,9 @@ try {
     $router->post('/passwort-neu', [AuthController::class, 'resetPassword']);
     $router->get('/reset-password', [AuthController::class, 'showResetPassword']); // Alt-Links umleiten
     $router->get('/registrieren', [RegistrationController::class, 'form']);
+    $router->get('/registrieren/{token}', [RegistrationController::class, 'form']);
     $router->post('/registrieren', [RegistrationController::class, 'submit']);
+    $router->post('/registrieren/{token}', [RegistrationController::class, 'submit']);
     $router->get('/verwaltung/registrierung', [RegistrationController::class, 'settingsForm']);
     $router->post('/verwaltung/registrierung', [RegistrationController::class, 'updateSettings']);
     $router->post('/verwaltung/einladung', [RegistrationController::class, 'createInvite']);
@@ -592,7 +596,9 @@ try {
     $router->get('/abstimmen', [EventController::class, 'vote']);
     $router->post('/abstimmen', [EventController::class, 'submitVote']);
     $router->get('/meine-daten', [\App\Controllers\DataCheckController::class, 'show']);
+    $router->get('/meine-daten/{token}', [\App\Controllers\DataCheckController::class, 'show']);
     $router->post('/meine-daten', [\App\Controllers\DataCheckController::class, 'save']);
+    $router->post('/meine-daten/{token}', [\App\Controllers\DataCheckController::class, 'save']);
     $router->get('/intern/cron', [CronController::class, 'run']);
     $router->post('/intern/cron', [CronController::class, 'run']);
 

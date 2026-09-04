@@ -36,9 +36,11 @@ final class RegistrationController extends BaseController
 
     // ------------------------------------------------------- öffentlicher Flow
 
-    public function form(Request $request): void
+    public function form(Request $request, string $token = ''): void
     {
-        $token = trim((string) $request->input('token', ''));
+        // Token bevorzugt aus dem Pfad; `?token=` nur als Rückfall für
+        // Einladungslinks, die vor der Umstellung verschickt wurden.
+        $token = trim($token) !== '' ? trim($token) : trim((string) $request->input('token', ''));
         if ($token !== '') {
             $invite = $this->invites->findValidByToken($token);
             if ($invite === null) {
@@ -62,10 +64,11 @@ final class RegistrationController extends BaseController
     }
 
     /** Ein POST-Endpunkt: mit Token → Konto anlegen, ohne → Link anfordern. */
-    public function submit(Request $request): void
+    public function submit(Request $request, string $token = ''): void
     {
-        if (trim((string) $request->input('token', '')) !== '') {
-            $this->complete($request);
+        $token = trim($token) !== '' ? trim($token) : trim((string) $request->input('token', ''));
+        if ($token !== '') {
+            $this->complete($request, $token);
 
             return;
         }
@@ -121,10 +124,10 @@ final class RegistrationController extends BaseController
         $neutral();
     }
 
-    public function complete(Request $request): void
+    public function complete(Request $request, string $token = ''): void
     {
         Csrf::validate($request->input('_csrf'));
-        $token = trim((string) $request->input('token', ''));
+        $token = trim($token) !== '' ? trim($token) : trim((string) $request->input('token', ''));
         $invite = $token !== '' ? $this->invites->findValidByToken($token) : null;
         if ($invite === null) {
             render_error_page(410, 'Link nicht mehr gültig', 'Der Einladungslink ist abgelaufen oder wurde schon benutzt.');
@@ -136,7 +139,7 @@ final class RegistrationController extends BaseController
         $password = trim((string) $request->input('password'));
         $repeat = trim((string) $request->input('password_repeat'));
         $usePasskey = (string) $request->input('mode') === 'passkey';
-        $backTo = '/registrieren?token=' . rawurlencode($token);
+        $backTo = '/registrieren/' . rawurlencode($token);
 
         if ($name === '') {
             flash('error', 'Bitte einen Namen angeben.');
@@ -305,7 +308,9 @@ final class RegistrationController extends BaseController
 
     private function inviteUrl(string $token): string
     {
-        return url('/registrieren?token=' . $token);
+        // Token im Pfad, nicht im Query – kein Leck über Server-Logs,
+        // Browser-Verlauf oder Referrer-Header.
+        return url('/registrieren/' . rawurlencode($token));
     }
 
     private function sourceHash(): string

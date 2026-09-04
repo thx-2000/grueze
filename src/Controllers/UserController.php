@@ -22,7 +22,8 @@ final class UserController extends BaseController
         private PasswordResetService $passwordResets,
         private PasskeyRepository $passkeys,
         private \App\Repositories\EventRepository $events,
-        private \App\Repositories\ContactRepository $contacts
+        private \App\Repositories\ContactRepository $contacts,
+        private \App\Repositories\UserSessionRepository $sessions
     ) {
         parent::__construct($auth);
     }
@@ -178,6 +179,9 @@ final class UserController extends BaseController
         }
 
         $this->users->updatePasswordHash((int) $targetUser['id'], password_hash($password, PASSWORD_DEFAULT));
+        // Alle laufenden Sitzungen des Kontos beenden – das neue Passwort soll
+        // sofort greifen, auch wenn woanders noch jemand angemeldet ist.
+        $this->sessions->revokeAllForUser((int) $targetUser['id']);
         $this->logs->addAudit(
             (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
             null,
@@ -202,7 +206,7 @@ final class UserController extends BaseController
         $newPassword = trim((string) $request->input('new_password'));
         $newPasswordRepeat = trim((string) $request->input('new_password_repeat'));
 
-        if (!password_verify($currentPassword, (string) ($user['password_hash'] ?? ''))) {
+        if (!$this->auth->verifyPassword($currentPassword)) {
             flash('error', 'Das aktuelle Passwort stimmt nicht.');
             Redirect::to('/account#password');
         }
@@ -218,6 +222,10 @@ final class UserController extends BaseController
         }
 
         $this->users->updatePasswordHash((int) $user['id'], password_hash($newPassword, PASSWORD_DEFAULT));
+        // Andere Geräte/Browser dieser Person abmelden – nach einem
+        // Passwortwechsel soll eine evtl. übernommene Sitzung nicht weiterlaufen.
+        // Die eigene Sitzung bleibt aktiv.
+        $this->sessions->revokeAllForUser((int) $user['id'], session_id());
         \App\Core\Session::regenerate();
         $this->logs->addAudit(
             (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),

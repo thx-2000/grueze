@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.44.0';
+    return '1.45.0';
 }
 
 /**
@@ -456,7 +456,9 @@ function sanitize_rich_html(string $html): string
                     }
                     if ($name === 'href') {
                         $href = trim($attr->nodeValue);
-                        if (!preg_match('#^(https?:|mailto:|tel:|/|\#)#i', $href)) {
+                        // `//host` (protokollrelativ) ist erlaubt-aussehend, führt
+                        // aber auf eine fremde Domain – daher nur einzelnes `/`.
+                        if (!preg_match('#^(https?:|mailto:|tel:|/(?!/)|\#)#i', $href)) {
                             $child->removeAttribute($attr->nodeName);
                         }
                     }
@@ -598,7 +600,18 @@ function page_title(string $path): string
         '/settings/permissions'      => 'Berechtigungen',
     ];
 
-    return $exact[$path] ?? '';
+    if (isset($exact[$path])) {
+        return $exact[$path];
+    }
+
+    // Token-Pfade: /meine-daten/<token>, /registrieren/<token>
+    foreach (['/meine-daten' => 'Daten-Check', '/registrieren' => 'Zugang einrichten'] as $prefix => $title) {
+        if (str_starts_with($path, $prefix . '/')) {
+            return $title;
+        }
+    }
+
+    return '';
 }
 
 /**

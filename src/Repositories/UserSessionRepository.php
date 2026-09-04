@@ -115,6 +115,32 @@ final class UserSessionRepository
     }
 
     /**
+     * Alle laufenden Sitzungen eines Kontos beenden – z. B. nach einem
+     * Passwortwechsel. `$keepSessionId` (Klartext-Session-ID) bleibt aktiv,
+     * damit die auslösende Person nicht sich selbst aussperrt.
+     */
+    public function revokeAllForUser(int $userId, ?string $keepSessionId = null): int
+    {
+        $sql = 'UPDATE user_sessions
+                SET revoked_at = NOW(), ended_at = COALESCE(ended_at, NOW())
+                WHERE user_id = :u AND revoked_at IS NULL';
+        $params = ['u' => $userId];
+        if ($keepSessionId !== null && $keepSessionId !== '') {
+            $sql .= ' AND session_hash <> :keep';
+            $params['keep'] = $this->hash($keepSessionId);
+        }
+
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+
+            return $stmt->rowCount();
+        } catch (\Throwable) {
+            return 0;
+        }
+    }
+
+    /**
      * Gerade aktive Sitzungen: nicht beendet, nicht widerrufen, innerhalb des
      * Zeitfensters zuletzt gesehen.
      *
