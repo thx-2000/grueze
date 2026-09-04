@@ -409,7 +409,7 @@ final class MailController extends BaseController
         $replyTo = $this->replyToByKey((string) $request->input('reply_to_key'), $memberContactMode, $user);
 
         if (!$identity || !$replyTo || !$user) {
-            flash('error', 'Absender oder Nutzer konnte nicht geladen werden.');
+            flash('error', 'Absender oder Konto konnte nicht geladen werden.');
             Redirect::to('/kontakte');
         }
 

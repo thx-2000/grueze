@@ -107,7 +107,7 @@ $memberContactMode = (bool) ($memberContactMode ?? false);
                     <option value="liebe" <?= $activeSalutationMode === 'liebe' ? 'selected' : '' ?>>Immer Liebe</option>
                     <option value="lieber" <?= $activeSalutationMode === 'lieber' ? 'selected' : '' ?>>Immer Lieber</option>
                 </select>
-                <small class="field-hint">Bei Automatik wird aus dem Kontaktfeld <code>m/w</code> automatisch <code>Lieber</code> oder <code>Liebe</code>. Ohne Angabe fällt die Anrede auf <code>Hallo</code> zurück.</small>
+                <small class="field-hint">Bei Automatik richtet sich die Anrede nach dem Feld „Anrede" im Kontakt: „Liebe" bzw. „Lieber". Ohne Angabe wird „Hallo" verwendet.</small>
             </label>
             <div class="subsection-card full-width">
                 <strong>Betreff-Vorschau</strong>

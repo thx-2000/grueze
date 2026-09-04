@@ -205,7 +205,7 @@ final class GroupPollController extends BaseController
         $contactId = (int) ($this->auth->user()['contact_id'] ?? 0);
         $mine = $this->events->participantForContact((int) $event['id'], $contactId);
         if ($mine === null) {
-            flash('error', 'Du gehörst nicht zum Teilnehmerkreis dieser Abstimmung.');
+            flash('error', 'Du gehörst nicht zum Kreis der Abstimmenden.');
             Redirect::to('/gruppen/abstimmung?id=' . (int) $event['id']);
         }
 

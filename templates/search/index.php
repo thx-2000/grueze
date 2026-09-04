@@ -20,7 +20,7 @@ $hasQuery = $query !== '';
 
 <?php if (!$hasQuery): ?>
     <section class="panel">
-        <p class="muted">Tippe oben einen Namen, Geburtsnamen oder Ort ein. Für Admin/Orga werden auch Benutzerkonten durchsucht.</p>
+        <p class="muted">Tippe oben einen Namen, Geburtsnamen oder Ort ein. Für Admin/Orga werden auch Zugänge durchsucht.</p>
     </section>
 <?php endif; ?>
 
@@ -61,7 +61,7 @@ $hasQuery = $query !== '';
     <section class="panel stack">
         <div class="panel-head">
             <div>
-                <h3>Benutzer</h3>
+                <h3>Zugänge</h3>
                 <p class="muted"><?= e((string) count($userResults)) ?> Treffer</p>
             </div>
         </div>
@@ -78,7 +78,7 @@ $hasQuery = $query !== '';
                             <?= e(trim((string) ($user['vorname'] ?? '') . ' ' . (string) ($user['nachname'] ?? '')) ?: 'Kein Kontakt verknüpft') ?>
                         </span>
                     </div>
-                    <span class="search-result-open"><?= icon('user') ?><span>Zum Benutzer</span></span>
+                    <span class="search-result-open"><?= icon('user') ?><span>Zum Zugang</span></span>
                 </a>
             <?php endforeach; ?>
         </div>

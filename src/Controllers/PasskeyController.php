@@ -84,7 +84,7 @@ final class PasskeyController extends BaseController
                 (int) $user['id'],
                 null,
                 'updated',
-                'Passkey für Benutzer "' . $user['name'] . '" hinzugefügt.'
+                'Passkey für den Zugang von „' . $user['name'] . '" hinzugefügt.'
             );
 
             $this->json([
@@ -128,7 +128,7 @@ final class PasskeyController extends BaseController
             $credentialId = WebAuthnService::base64urlDecode((string) ($payload['id'] ?? ''));
             $storedCredential = $this->passkeys->findByCredentialId($credentialId);
             if (!$storedCredential || !(bool) ($storedCredential['is_active'] ?? false)) {
-                throw new RuntimeException('Zu diesem Passkey wurde kein aktiver Benutzer gefunden.');
+                throw new RuntimeException('Zu diesem Passkey wurde kein aktiver Zugang gefunden.');
             }
 
             $verification = $this->webauthn->finishAuthentication($storedCredential, $payload);
@@ -171,7 +171,7 @@ final class PasskeyController extends BaseController
             (int) $user['id'],
             null,
             'updated',
-            'Ein Passkey für Benutzer "' . $user['name'] . '" wurde entfernt.'
+            'Ein Passkey für den Zugang von „' . $user['name'] . '" wurde entfernt.'
         );
 
         flash('success', 'Passkey entfernt.');

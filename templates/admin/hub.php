@@ -2,7 +2,7 @@
 // Gruppierung: „Wer darf was" · „Was steht drin" · „Wie sieht es aus" · „Betrieb".
 $groups = [
     'Zugänge & Rollen' => [
-        ['users.manage', '/users', 'user', 'Benutzer', 'Zugänge anlegen, sperren, Passkeys zurücksetzen.'],
+        ['users.manage', '/users', 'user', 'Zugänge', 'Zugänge anlegen, sperren, Passkeys zurücksetzen.'],
         ['users.manage', '/verwaltung/registrierung', 'key', 'Selbst-Registrierung', 'Einladungslinks, Selbst-Anmeldung freischalten, Standard-Rolle.'],
         ['users.manage', '/settings/roles', 'key', 'Rollen', 'Rollen anlegen, umbenennen und löschen.'],
         ['users.manage', '/settings/permissions', 'sliders', 'Berechtigungen', 'Festlegen, welche Rolle welche Aktionen ausführen darf.'],

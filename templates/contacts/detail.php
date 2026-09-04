@@ -100,11 +100,11 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <label><span>Nachname <span class="required-marker" aria-hidden="true">*</span></span><input type="text" name="nachname" value="<?= e($values['nachname'] ?? '') ?>" required></label>
             <label><span>Geburtsname</span><input type="text" name="geburtsname" value="<?= e($values['geburtsname'] ?? '') ?>"></label>
             <label>
-                <span>Geschlecht</span>
+                <span>Anrede</span>
                 <select name="geschlecht">
-                    <option value="">Nicht gesetzt</option>
-                    <option value="m" <?= ($values['geschlecht'] ?? '') === 'm' ? 'selected' : '' ?>>Männlich (Lieber)</option>
-                    <option value="w" <?= ($values['geschlecht'] ?? '') === 'w' ? 'selected' : '' ?>>Weiblich (Liebe)</option>
+                    <option value="">Neutral – „Hallo …"</option>
+                    <option value="w" <?= ($values['geschlecht'] ?? '') === 'w' ? 'selected' : '' ?>>„Liebe …"</option>
+                    <option value="m" <?= ($values['geschlecht'] ?? '') === 'm' ? 'selected' : '' ?>>„Lieber …"</option>
                 </select>
             </label>
             <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($values['geburtstag'] ?? '') ?>"></label>

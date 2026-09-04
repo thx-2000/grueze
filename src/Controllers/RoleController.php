@@ -143,7 +143,7 @@ final class RoleController extends BaseController
             Redirect::to(self::RETURN_PATH);
         }
         if ($this->roles->userCount($id) > 0) {
-            flash('error', 'Dieser Rolle sind noch Benutzer zugeordnet. Weise sie zuerst einer anderen Rolle zu.');
+            flash('error', 'Dieser Rolle sind noch Zugänge zugeordnet. Weise sie zuerst einer anderen Rolle zu.');
             Redirect::to(self::RETURN_PATH);
         }
 

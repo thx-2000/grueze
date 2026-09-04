@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.24.0';
+    return '1.25.0';
 }
 
 /**
@@ -571,7 +571,7 @@ function page_title(string $path): string
         '/verwaltung/gruppen/detail' => 'Gruppe',
         '/verwaltung'                => 'Einstellungen',
         '/verwaltung/kategorien-tags' => 'Kategorien & Tags',
-        '/users'                     => 'Benutzer',
+        '/users'                     => 'Zugänge',
         '/account'                   => 'Mein Eintrag',
         '/orga-team'                 => 'Orga-Team schreiben',
         '/security/passkeys'         => 'Passkeys',

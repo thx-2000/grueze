@@ -20,7 +20,7 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <thead>
                 <tr>
                     <th>Zeitpunkt</th>
-                    <th>Nutzer</th>
+                    <th>Wer</th>
                     <th>Kontakt</th>
                     <th>Aktion</th>
                     <th>Details</th>

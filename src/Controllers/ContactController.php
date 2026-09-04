@@ -855,6 +855,11 @@ final class ContactController extends BaseController
         ];
     }
 
+    /**
+     * Anrede-Code des Kontakts. `m`/`w` steuern die Anrede „Lieber"/„Liebe",
+     * leer bedeutet die neutrale Anrede „Hallo". Historische Spalte
+     * `contacts.geschlecht` – im UI heißt das Feld nur noch „Anrede".
+     */
     private function normalizeGeschlecht(string $geschlecht): string
     {
         $normalized = strtolower(trim($geschlecht));
@@ -873,7 +878,7 @@ final class ContactController extends BaseController
     private function contactChanges(array $before, array $after): array
     {
         $geschlecht = static fn (string $v): string => match ($v) {
-            'm' => 'männlich', 'w' => 'weiblich', default => '—',
+            'm' => '„Lieber …"', 'w' => '„Liebe …"', default => 'neutral („Hallo …")',
         };
         $categoryName = static function (string $id, array $categories): string {
             foreach ($categories as $category) {
@@ -922,7 +927,7 @@ final class ContactController extends BaseController
             'Vorname' => [(string) ($before['vorname'] ?? ''), (string) $after['vorname']],
             'Nachname' => [(string) ($before['nachname'] ?? ''), (string) $after['nachname']],
             'Geburtsname' => [(string) ($before['geburtsname'] ?? ''), (string) $after['geburtsname']],
-            'Geschlecht' => [$geschlecht((string) ($before['geschlecht'] ?? '')), $geschlecht((string) $after['geschlecht'])],
+            'Anrede' => [$geschlecht((string) ($before['geschlecht'] ?? '')), $geschlecht((string) $after['geschlecht'])],
             'Geburtstag' => [(string) ($before['geburtstag'] ?? ''), (string) $after['geburtstag']],
             'Kategorie' => [
                 (string) ($before['category_name'] ?? '') ?: '—',
@@ -1003,7 +1008,7 @@ final class ContactController extends BaseController
                 'contact_id' => $contactId,
             ]);
 
-            return 'Bestehendes Benutzerkonto wurde mit diesem Kontakt verknüpft.';
+            return 'Bestehender Zugang wurde mit diesem Kontakt verknüpft.';
         }
 
         $password = $this->generatePassword();
@@ -1040,7 +1045,7 @@ final class ContactController extends BaseController
         }
 
         return [
-            'login_email' => 'Diese Login-E-Mail wird bereits von einem anderen Benutzerkonto verwendet.',
+            'login_email' => 'Diese Login-E-Mail wird bereits von einem anderen Zugang verwendet.',
         ];
     }
 }

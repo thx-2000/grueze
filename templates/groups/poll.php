@@ -49,9 +49,9 @@ $optLabel = static fn (array $o): string => event_option_label($o);
 <?php endif; ?>
 
 <?php if ($myParticipantId === null && $canManage): ?>
-    <section class="detail-card"><p class="muted">Diese Abstimmung ist nicht für dich – du siehst sie als Verantwortliche:r für die Gruppe „<?= e((string) ($event['group_name'] ?? '')) ?>".</p></section>
+    <section class="detail-card"><p class="muted">Diese Abstimmung ist nicht für dich – du siehst sie, weil du die Gruppe „<?= e((string) ($event['group_name'] ?? '')) ?>" leitest oder verwaltest.</p></section>
 <?php elseif ($myParticipantId === null): ?>
-    <section class="detail-card"><p class="muted">Du gehörst nicht zum Teilnehmerkreis dieser Abstimmung.</p></section>
+    <section class="detail-card"><p class="muted">Du gehörst nicht zum Kreis der Abstimmenden.</p></section>
 <?php endif; ?>
 
 <form method="post" action="<?= e(url('/gruppen/abstimmung/stimme')) ?>">

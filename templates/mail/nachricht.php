@@ -183,7 +183,7 @@ $option = static function (string $value, string $active): string {
                     <option value="liebe" <?= $activeSalutation === 'liebe' ? 'selected' : '' ?>>Immer Liebe</option>
                     <option value="lieber" <?= $activeSalutation === 'lieber' ? 'selected' : '' ?>>Immer Lieber</option>
                 </select>
-                <small class="field-hint">Bei Automatik wird aus <code>m/w</code> automatisch <code>Lieber</code>/<code>Liebe</code>, sonst <code>Hallo</code>.</small>
+                <small class="field-hint">Bei Automatik richtet sich die Anrede nach dem Feld „Anrede" im Kontakt: „Liebe" bzw. „Lieber", sonst „Hallo".</small>
             </label>
             <div class="mail-preview-block full-width">
                 <strong>Betreff-Vorschau</strong>

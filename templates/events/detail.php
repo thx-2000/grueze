@@ -23,7 +23,7 @@ $isFixed = $kind === 'fixed_date';
 $answerShort = ['yes' => 'Ja', 'maybe' => 'Vielleicht', 'no' => 'Nein'];
 $optionTitle = static fn (array $option): string => event_option_label($option);
 
-// Kontakte für den Teilnehmer-Picker nach Kategorie gruppieren.
+// Kontakte für die Teilnehmenden-Auswahl nach Kategorie gruppieren.
 $byCategory = [];
 $pickerTags = [];
 $pickerGroups = [];
@@ -252,7 +252,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
 </form>
 
 <section class="detail-card">
-    <h2>Teilnehmerkreis</h2>
+    <h2>Teilnehmende</h2>
     <?php if ($participants === []): ?>
         <p class="field-hint">Noch niemand ausgewählt. Wähle die Personen, die abstimmen sollen – alle aus dem Adressbuch.</p>
     <?php else: ?>
@@ -264,7 +264,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
         <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
 
         <details class="admin-drawer"<?= $participants === [] ? ' open' : '' ?>>
-            <summary><span><?= icon('contacts') ?></span><span>Teilnehmer wählen</span></summary>
+            <summary><span><?= icon('contacts') ?></span><span>Teilnehmende wählen</span></summary>
             <div class="admin-drawer-body">
                 <div class="participant-picker-tools">
                     <button type="button" class="linkish" data-pick="all">Alle</button>
@@ -307,7 +307,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
                     <?php endforeach; ?>
                 </div>
                 <div class="toolbar-actions">
-                    <button type="submit">Teilnehmerkreis speichern</button>
+                    <button type="submit">Auswahl speichern</button>
                 </div>
             </div>
         </details>
@@ -391,7 +391,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
 
 <?php if ($participants !== []): ?>
     <section class="detail-card">
-        <h2>Teilnehmer erreichen</h2>
+        <h2>Teilnehmende erreichen</h2>
         <p class="field-hint">Jede Person hat einen eigenen Abstimmungs-Link. Wer über einen fremden Link abstimmt, sieht eine Warnung.</p>
 
         <?php if (can('mail.send')): ?>
@@ -404,7 +404,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
                     und der normale Mail-Fuß. Text und Empfängerkreis lassen sich dort noch anpassen.
                 </p>
                 <div class="toolbar-actions">
-                    <button type="submit" name="filter" value="all" class="button-link"><?= icon('mail') ?><span>Einladung an alle Teilnehmer</span></button>
+                    <button type="submit" name="filter" value="all" class="button-link"><?= icon('mail') ?><span>Einladung an alle Teilnehmenden</span></button>
                     <?php if ($event['status'] === 'decided'): ?>
                         <button type="submit" name="filter" value="confirmed" class="ghost-button">Nur an Zusagen</button>
                     <?php endif; ?>

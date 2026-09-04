@@ -4,7 +4,7 @@ $today = (new DateTimeImmutable('now'))->format('Y-m-d');
 $kind = $kind ?? null;
 
 $kindMeta = [
-    'date_poll' => ['Datumsabstimmung', 'Mehrere Termine zur Auswahl – die Teilnehmer stimmen ab, danach legst du das Ergebnis fest.'],
+    'date_poll' => ['Datumsabstimmung', 'Mehrere Termine zur Auswahl – die Teilnehmenden stimmen ab, danach legst du das Ergebnis fest.'],
     'fixed_date' => ['Fester Termin', 'Datum steht schon fest – du sammelst nur Zusagen (Ja / Vielleicht / Nein).'],
     'poll' => ['Abstimmung ohne Datum', 'Eine Frage mit mehreren Antwortmöglichkeiten – z. B. „Wohin fahren wir?".'],
 ];
@@ -49,7 +49,7 @@ $kindMeta = [
     <?php if ($kind === 'poll'): ?>
         <section class="detail-card">
             <h2>Antwortmöglichkeiten</h2>
-            <p class="field-hint">Mindestens zwei. Die Teilnehmer geben je Möglichkeit Ja / Vielleicht / Nein.</p>
+            <p class="field-hint">Mindestens zwei. Die Teilnehmenden geben je Möglichkeit Ja / Vielleicht / Nein.</p>
             <div class="text-options" data-text-options>
                 <?php for ($i = 0; $i < 3; $i++): ?>
                     <div class="text-option-row">
@@ -113,7 +113,7 @@ $kindMeta = [
     <?php if ($kind !== 'fixed_date'): ?>
         <section class="detail-card">
             <h2>Frist &amp; Ergebnis (optional)</h2>
-            <p class="field-hint">Mit einer Frist schließt die Abstimmung automatisch. 48&nbsp;Stunden vorher bekommt jede:r, der noch nicht abgestimmt hat, eine Erinnerung.</p>
+            <p class="field-hint">Mit einer Frist schließt die Abstimmung automatisch. 48&nbsp;Stunden vorher bekommen alle, die noch nicht abgestimmt haben, eine Erinnerung.</p>
             <div class="form-grid">
                 <label>
                     <span>Abstimmung endet am</span>

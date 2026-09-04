@@ -238,7 +238,7 @@ final class BackupService
         // So bleiben FK-Beziehungen im wiederhergestellten Stand konsistent.
         if ($mode === 'fill' && !$this->isEmptyEnoughForFill()) {
             $zip->close();
-            throw new RuntimeException('Das System enthält bereits Kontakte oder mehrere Benutzer. "Nur wenn leer" ist nur für eine frische Instanz gedacht – bitte "Alles ersetzen" verwenden.');
+            throw new RuntimeException('Das System enthält bereits Kontakte oder mehrere Zugänge. "Nur wenn leer" ist nur für eine frische Instanz gedacht – bitte "Alles ersetzen" verwenden.');
         }
 
         // Reihenfolge: erst alle Tabellen aus dem Backup in der bekannten
@@ -310,7 +310,7 @@ final class BackupService
 
         $actorId = (int) ($this->pdo->query('SELECT id FROM users ORDER BY id LIMIT 1')->fetchColumn() ?: 0);
         if ($actorId === 0) {
-            throw new RuntimeException('Zusammenführen braucht mindestens ein Benutzerkonto im System.');
+            throw new RuntimeException('Zusammenführen braucht mindestens einen Zugang im System.');
         }
 
         $this->pdo->beginTransaction();

@@ -48,6 +48,14 @@ Ideen, falls es weitergeht (kein Muss):
 - Echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows – nur am
   Gerät machbar.
 - Termine: Ranking-Variante.
+- **Kontaktfeld „Beruf/Tätigkeit"** (TH-Wunsch 2026-09-04): neue Spalte
+  `contacts.beruf`/`taetigkeit`, Formularfeld (Detail + „Mein Eintrag" +
+  Daten-Check), Anzeige in Detail/Karte, CSV- und vCard-Export (`TITLE`/`ROLE`),
+  `BackupService::fillEmptyContactFields`. Migration nötig.
+- **`contacts.geschlecht` → sauberes Feld `anrede`** (Folge der inklusiven
+  Ansprache): Spalte umbenennen, Werte migrieren (`m`→`lieber`, `w`→`liebe`,
+  NULL→`''`), alle ~8 Fundstellen anpassen. Aktuell nur umbenannt im UI, die
+  Codes `m`/`w`/`''` bleiben intern. Reines Aufräumen, keine Eile.
 - **Anmelde-Übersicht für Admin** (TH-Wunsch 2026-09-04): (a) wer ist gerade
   eingeloggt (aktive Sessions – gibt es noch keine Tabelle, `Session` müsste
   eine `active_sessions`/`user_id`+`last_seen` führen), (b) Anmelde-Verlauf
@@ -93,13 +101,11 @@ besprechen, dann entscheiden. Ausführliche Einschätzung im Chat vom 2026-09-04
 Reihenfolge, falls alle kommen: nach dem UX-Umbau, damit sie den aufgeräumten
 Stand betreffen.
 
-1. **Genderneutrale/inklusive Ansprache**, wo keine Anrede (m/w) hinterlegt
-   ist. Ist-Stand: Mail-`{Anrede}` fällt bei fehlendem `geschlecht` schon auf
-   „Hallo <Vorname>" zurück (neutral). Zu klären: House-Style für den
-   Unbekannt-Fall (Neutralformulierung vs. Doppelpunkt vs. Sternchen), Umbau
-   des Formularfelds „Geschlecht m/w" → echtes „Anrede"-Feld (Hallo / Liebe /
-   Lieber / neutral), UI-Texte auf gegenderte Reststellen prüfen. Aufwand
-   klein–mittel, kein DB-Bruch nötig.
+1. ~~**Genderneutrale/inklusive Ansprache**~~ – **v1.25.0 erledigt.** House-
+   Style (TH): Neutralformulierung > Doppelpunkt > kein Sternchen. „Geschlecht"-
+   Feld → „Anrede" (Neutral/Liebe/Lieber), „Teilnehmer" → „Teilnehmende",
+   „Benutzer" → „Zugänge/Konto" usw. Stil in `docs/SPRACHE.md`. Offen als
+   Aufräumaufgabe: Spalte `geschlecht` → `anrede` (siehe „Ideen").
 2. **Code-Kommentierung** für Mitentwickler:innen prüfen und ergänzen –
    Schwerpunkt `MailService` (fast unkommentiert), die großen Repos/Controller,
    `app.js`. Plus: ist ein `ARCHITECTURE.md`-Refresh fällig?

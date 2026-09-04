@@ -98,7 +98,7 @@ final class UserController extends BaseController
             'is_active' => 1,
         ]);
 
-        flash('success', 'Nutzer angelegt. Erstpasswort: ' . $password);
+        flash('success', 'Zugang angelegt. Erstpasswort: ' . $password);
         Redirect::to('/users');
     }
 
@@ -116,7 +116,7 @@ final class UserController extends BaseController
         $targetUser = $this->users->findById($targetUserId);
         $originalUser = $this->auth->originalUser();
         if (!$targetUser || !$originalUser || !$this->auth->startImpersonation($targetUserId)) {
-            flash('error', 'Die Anmeldung als anderer Benutzer konnte nicht gestartet werden.');
+            flash('error', 'Die Anmeldung als andere Person konnte nicht gestartet werden.');
             Redirect::to('/users');
         }
 
@@ -167,7 +167,7 @@ final class UserController extends BaseController
 
         $targetUser = $this->users->findById((int) $request->input('user_id'));
         if (!$targetUser) {
-            flash('error', 'Benutzer nicht gefunden.');
+            flash('error', 'Zugang nicht gefunden.');
             Redirect::to('/users');
         }
 
@@ -182,7 +182,7 @@ final class UserController extends BaseController
             (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
             null,
             'updated',
-            'Passwort für Benutzer "' . $targetUser['name'] . '" wurde durch Admin neu gesetzt.'
+            'Passwort für den Zugang von „' . $targetUser['name'] . '" wurde durch Admin neu gesetzt.'
         );
         flash('success', 'Passwort für ' . $targetUser['name'] . ' wurde geändert.');
         Redirect::to('/users#user-' . $targetUser['id']);
@@ -223,7 +223,7 @@ final class UserController extends BaseController
             (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
             null,
             'updated',
-            'Benutzer "' . $user['name'] . '" hat das eigene Passwort geändert.'
+            '„' . $user['name'] . '" hat das eigene Passwort geändert.'
         );
 
         flash('success', 'Dein Passwort wurde aktualisiert.');
@@ -237,12 +237,12 @@ final class UserController extends BaseController
 
         $targetUser = $this->users->findById((int) $request->input('user_id'));
         if (!$targetUser) {
-            flash('error', 'Benutzer nicht gefunden.');
+            flash('error', 'Zugang nicht gefunden.');
             Redirect::to('/users');
         }
 
         if (!$this->passwordResets->createForUserId((int) $targetUser['id'])) {
-            flash('error', 'Für diesen Benutzer konnte kein Reset ausgelöst werden.');
+            flash('error', 'Für diesen Zugang konnte kein Reset ausgelöst werden.');
             Redirect::to('/users#user-' . $targetUser['id']);
         }
 
@@ -250,7 +250,7 @@ final class UserController extends BaseController
             (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
             null,
             'updated',
-            'Reset-Mail für Benutzer "' . $targetUser['name'] . '" wurde durch Admin ausgelöst.'
+            'Reset-Mail für den Zugang von „' . $targetUser['name'] . '" wurde durch Admin ausgelöst.'
         );
         flash('success', 'Reset-Mail an ' . $targetUser['name'] . ' wurde versendet.');
         Redirect::to('/users#user-' . $targetUser['id']);
@@ -263,7 +263,7 @@ final class UserController extends BaseController
 
         $targetUser = $this->users->findById((int) $request->input('user_id'));
         if (!$targetUser) {
-            flash('error', 'Benutzer nicht gefunden.');
+            flash('error', 'Zugang nicht gefunden.');
             Redirect::to('/users');
         }
 
@@ -291,7 +291,7 @@ final class UserController extends BaseController
             null,
             'updated',
             sprintf(
-                'Benutzer "%s" wurde durch Admin %s.',
+                'Zugang von „%s" wurde durch Admin %s.',
                 $targetUser['name'],
                 $shouldActivate ? 'entsperrt' : 'gesperrt'
             )
@@ -313,7 +313,7 @@ final class UserController extends BaseController
 
         $targetUser = $this->users->findById((int) $request->input('user_id'));
         if (!$targetUser) {
-            flash('error', 'Benutzer nicht gefunden.');
+            flash('error', 'Zugang nicht gefunden.');
             Redirect::to('/users');
         }
 
@@ -322,7 +322,7 @@ final class UserController extends BaseController
             (int) ($this->auth->originalUser()['id'] ?? $this->auth->user()['id'] ?? 0),
             null,
             'updated',
-            'Alle Passkeys für Benutzer "' . $targetUser['name'] . '" wurden durch Admin entfernt.'
+            'Alle Passkeys für den Zugang von „' . $targetUser['name'] . '" wurden durch Admin entfernt.'
         );
 
         flash(

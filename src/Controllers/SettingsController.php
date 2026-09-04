@@ -307,7 +307,7 @@ final class SettingsController extends BaseController
                     'orga.contact_target' => 'Bekommt Nachrichten über den „Orga-Team schreiben"-Knopf',
                 ],
                 'Administration' => [
-                    'users.manage'    => 'Benutzer und Admin-Einstellungen verwalten',
+                    'users.manage'    => 'Zugänge und Admin-Einstellungen verwalten',
                     'audit.view'      => 'Audit-Log einsehen',
                     'settings.manage' => 'Mail-Fuß und Versanddaten bearbeiten',
                 ],

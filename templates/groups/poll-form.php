@@ -15,7 +15,7 @@ $memberCount = count($group['members']);
     <div class="kind-picker">
         <a class="kind-card" href="<?= e(url('/gruppen/abstimmung/neu?id=' . $groupId . '&typ=poll')) ?>">
             <strong>Meinungsabstimmung</strong>
-            <span>Eine Frage mit mehreren Antwortmöglichkeiten – jede:r stimmt mit Ja / Vielleicht / Nein ab.</span>
+            <span>Eine Frage mit mehreren Antwortmöglichkeiten – abgestimmt wird mit Ja, Vielleicht oder Nein.</span>
         </a>
         <a class="kind-card" href="<?= e(url('/gruppen/abstimmung/neu?id=' . $groupId . '&typ=date_poll')) ?>">
             <strong>Terminfindung</strong>
@@ -73,7 +73,7 @@ $memberCount = count($group['members']);
     <?php else: ?>
         <section class="detail-card">
             <h2>Antwortmöglichkeiten</h2>
-            <p class="field-hint">Zu jeder Möglichkeit stimmt jede:r mit Ja, Vielleicht oder Nein ab.</p>
+            <p class="field-hint">Zu jeder Möglichkeit wird mit Ja, Vielleicht oder Nein abgestimmt.</p>
             <div class="text-options" data-text-options>
                 <?php for ($i = 0; $i < 3; $i++): ?>
                     <div class="text-option-row">

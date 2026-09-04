@@ -187,11 +187,11 @@ final class WebAuthnService
     private function assertFlags(int $flags, bool $requireUserPresent, bool $requireUserVerified, bool $requireAttestedData): void
     {
         if ($requireUserPresent && ($flags & 0x01) === 0) {
-            throw new RuntimeException('Der Passkey bestätigt keine aktive Benutzerinteraktion.');
+            throw new RuntimeException('Der Passkey bestätigt keine aktive Nutzung am Gerät.');
         }
 
         if ($requireUserVerified && ($flags & 0x04) === 0) {
-            throw new RuntimeException('Der Passkey liefert keine bestätigte Benutzerprüfung.');
+            throw new RuntimeException('Der Passkey liefert keine bestätigte Identitätsprüfung.');
         }
 
         if ($requireAttestedData && ($flags & 0x40) === 0) {

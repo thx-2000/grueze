@@ -52,7 +52,7 @@
                             <label class="full-width">
                                 <span>Feste Orga-Team-Adresse</span>
                                 <input type="email" name="mail_orga_address" value="<?= e((string) ($mailSettings['mail_orga_address'] ?? '')) ?>" placeholder="orga@example.org">
-                                <small class="field-hint">Der „Orga-Team schreiben"-Knopf geht an diese Adresse. Leer lassen, dann geht er an alle aktiven Nutzer:innen mit der Rolle „Orga-Team" (siehe Berechtigungen).</small>
+                                <small class="field-hint">Der „Orga-Team schreiben"-Knopf geht an diese Adresse. Leer lassen, dann geht er an alle aktiven Zugänge mit der Rolle „Orga-Team" (siehe Berechtigungen).</small>
                             </label>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                                 </select>
                             </label>
                             <label>
-                                <span>Benutzername</span>
+                                <span>Benutzername (SMTP-Login)</span>
                                 <input type="text" name="mail_smtp_username" value="<?= e((string) ($mailSettings['mail_smtp_username'] ?? '')) ?>" required>
                             </label>
                             <label class="full-width">
@@ -114,7 +114,7 @@
                                 </select>
                             </label>
                             <label>
-                                <span>IMAP-Benutzername</span>
+                                <span>IMAP-Benutzername (Login)</span>
                                 <input type="text" name="mail_imap_username" value="<?= e((string) ($mailSettings['mail_imap_username'] ?? '')) ?>">
                             </label>
                             <label>

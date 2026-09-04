@@ -10,7 +10,7 @@
             <thead>
                 <tr>
                     <th>Zeitpunkt</th>
-                    <th>Nutzer</th>
+                    <th>Wer</th>
                     <th>Kontakt</th>
                     <th>Empfänger</th>
                     <th>Betreff</th>

@@ -4,7 +4,7 @@ $tableLabels = [
     'roles' => 'Rollen',
     'categories' => 'Kategorien',
     'tags' => 'Tags',
-    'users' => 'Benutzerkonten',
+    'users' => 'Zugänge',
     'contacts' => 'Kontakte',
     'contact_emails' => 'E-Mail-Adressen',
     'contact_phones' => 'Telefonnummern',
@@ -87,9 +87,9 @@ $tableLabels = [
     <div class="subsection-card">
         <strong>Die drei Modi</strong>
         <ul class="detail-hint" style="margin:0.4rem 0 0;padding-left:1.1rem">
-            <li><strong>Zusammenführen</strong> spielt nur die <em>Kontakte</em> aus dem Backup ins bestehende System ein – ohne etwas zu löschen. Gleiche Personen (Vor- und Nachname, ggf. Geburtsname) werden erkannt und nur um fehlende Mailadressen, Telefonnummern, Tags und leere Felder ergänzt. Benutzer, Rollen, Einstellungen und Protokolle bleiben unberührt.</li>
+            <li><strong>Zusammenführen</strong> spielt nur die <em>Kontakte</em> aus dem Backup ins bestehende System ein – ohne etwas zu löschen. Gleiche Personen (Vor- und Nachname, ggf. Geburtsname) werden erkannt und nur um fehlende Mailadressen, Telefonnummern, Tags und leere Felder ergänzt. Zugänge, Rollen, Einstellungen und Protokolle bleiben unberührt.</li>
             <li><strong>Nur wenn leer</strong> befüllt eine frische Instanz vollständig – nur auf einem System ohne Kontakte.</li>
-            <li><strong>Alles ersetzen</strong> löscht den kompletten aktuellen Datenbestand unwiderruflich und ersetzt ihn durch das Backup, inklusive Benutzerkonten. Danach ist ggf. eine neue Anmeldung nötig.</li>
+            <li><strong>Alles ersetzen</strong> löscht den kompletten aktuellen Datenbestand unwiderruflich und ersetzt ihn durch das Backup, inklusive der Zugänge. Danach ist ggf. eine neue Anmeldung nötig.</li>
         </ul>
     </div>
 

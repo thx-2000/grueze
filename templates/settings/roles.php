@@ -25,7 +25,7 @@
                         <input type="text" name="description" value="<?= e((string) $role['description']) ?>" aria-label="Beschreibung der Rolle" placeholder="Kurzbeschreibung">
                     </div>
                     <div class="role-edit-meta">
-                        <span class="taxo-count"><?= e((string) $role['user_count']) ?> Benutzer</span>
+                        <span class="taxo-count"><?= e((string) $role['user_count']) ?> Zugänge</span>
                         <button type="submit" class="ghost-button compact-action">Speichern</button>
                     </div>
                 </form>
@@ -44,7 +44,7 @@
                 <?php if ($role['protected']): ?>
                     <span class="role-lock" title="Geschützt"><?= icon('lock') ?></span>
                 <?php elseif ((int) $role['user_count'] > 0): ?>
-                    <span class="role-lock" title="Erst Benutzer umziehen"><?= icon('lock') ?></span>
+                    <span class="role-lock" title="Erst Zugänge umziehen"><?= icon('lock') ?></span>
                 <?php else: ?>
                     <form method="post" action="<?= e(url('/settings/roles/delete')) ?>" data-confirm="Rolle „<?= e((string) ($role['label'] ?: $role['name'])) ?>“ wirklich löschen?">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

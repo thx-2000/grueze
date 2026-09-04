@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.25.0
+
+**Inklusive, geschlechtsneutrale Sprache**
+
+- Sichtbare Texte verwenden jetzt durchgehend neutrale Formen:
+  „Teilnehmende" statt „Teilnehmer", „Zugänge/Konto" statt „Benutzer",
+  „abgestimmt wird" statt „jede:r stimmt ab". Kein Gendersternchen; wo keine
+  gute Neutralform existiert, ein Doppelpunkt.
+- Das Kontaktfeld **„Geschlecht (Männlich/Weiblich)"** heißt jetzt **„Anrede"**
+  mit den Auswahlmöglichkeiten *Neutral – „Hallo …"* / *„Liebe …"* /
+  *„Lieber …"*. An den Daten ändert sich nichts.
+- Der Stil ist in `docs/SPRACHE.md` festgehalten.
+
 ## 1.24.0
 
 **Startseite je nach Rolle (UX Teil 4)**

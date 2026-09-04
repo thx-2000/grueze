@@ -165,7 +165,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                     <span class="visually-hidden">Menü</span>
                 </button>
                 <form method="get" action="<?= e(url('/search')) ?>" class="topbar-search" role="search">
-                    <label class="visually-hidden" for="globalSearch">Suchen: Kontakte, Benutzer</label>
+                    <label class="visually-hidden" for="globalSearch">Suchen: Kontakte, Zugänge</label>
                     <span class="topbar-search-ic" aria-hidden="true"><?= icon('search') ?></span>
                     <input type="search" id="globalSearch" name="q" value="<?= e($globalSearchQuery) ?>" placeholder="Suchen: Name, Ort …">
                 </form>

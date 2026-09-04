@@ -1,14 +1,14 @@
 <header class="page-head">
-    <p class="eyebrow">Benutzerverwaltung</p>
-    <h1>Benutzer</h1>
-    <p class="muted">Neue Accounts erhalten ein einmalig angezeigtes Erstpasswort. Für Kontakte ist der bequemere Weg direkt im Kontaktformular („Zugang per Einladung").</p>
+    <p class="eyebrow">Zugänge verwalten</p>
+    <h1>Zugänge</h1>
+    <p class="muted">Neue Zugänge erhalten ein einmalig angezeigtes Erstpasswort. Für Kontakte ist der bequemere Weg direkt im Kontaktformular („Zugang per Einladung").</p>
 </header>
 
 <section class="panel compact-editor-shell">
     <details class="admin-drawer compact-editor-drawer">
         <summary>
             <span><?= icon('plus') ?></span>
-            <span>Benutzer anlegen</span>
+            <span>Zugang anlegen</span>
         </summary>
         <div class="admin-drawer-body">
             <form method="post" action="<?= e(url('/users/store')) ?>" class="form-grid compact-user-form">
@@ -24,7 +24,7 @@
                     </select>
                 </label>
                 <div class="form-actions">
-                    <button type="submit">Benutzer anlegen</button>
+                    <button type="submit">Zugang anlegen</button>
                 </div>
             </form>
         </div>
@@ -128,7 +128,7 @@
                                     </form>
 
                                     <?php if (!empty($passkeysAvailable)): ?>
-                                        <form method="post" action="<?= e(url('/users/passkeys/reset')) ?>" data-confirm="Alle Passkeys dieses Benutzers wirklich entfernen?">
+                                        <form method="post" action="<?= e(url('/users/passkeys/reset')) ?>" data-confirm="Alle Passkeys dieser Person wirklich entfernen?">
                                             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                                             <input type="hidden" name="user_id" value="<?= e((string) $user['id']) ?>">
                                             <button type="submit" class="danger-button compact-action"<?= $passkeyCount === 0 ? ' disabled' : '' ?>><?= icon('passkey') ?><span>Passkeys löschen</span></button>

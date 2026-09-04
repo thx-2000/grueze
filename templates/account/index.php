@@ -55,9 +55,9 @@ foreach ($phones as $i => $entry) {
                     <span>Anrede</span>
                     <select name="geschlecht">
                         <?php $g = $field('geschlecht'); ?>
-                        <option value="">Nicht gesetzt</option>
-                        <option value="m" <?= $g === 'm' ? 'selected' : '' ?>>Männlich (Lieber)</option>
-                        <option value="w" <?= $g === 'w' ? 'selected' : '' ?>>Weiblich (Liebe)</option>
+                        <option value="">Neutral – „Hallo …"</option>
+                        <option value="w" <?= $g === 'w' ? 'selected' : '' ?>>„Liebe …"</option>
+                        <option value="m" <?= $g === 'm' ? 'selected' : '' ?>>„Lieber …"</option>
                     </select>
                 </label>
                 <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($field('geburtstag')) ?>"></label>

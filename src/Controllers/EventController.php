@@ -100,7 +100,7 @@ final class EventController extends BaseController
 
         $id = $this->events->create($data, (int) $this->auth->user()['id']);
         $this->applyOptions($id, $kind, $request);
-        flash('success', 'Termin angelegt. Jetzt Teilnehmerkreis wählen.');
+        flash('success', 'Termin angelegt. Jetzt die Teilnehmenden wählen.');
         Redirect::to('/termine/detail?id=' . $id);
     }
 
@@ -157,8 +157,8 @@ final class EventController extends BaseController
         $this->events->syncParticipants($id, (array) $request->input('contact_ids', []));
         $count = count($this->events->participantContactIds($id, 'all'));
         flash('success', $count > 0 && $this->auth->can('mail.send')
-            ? 'Teilnehmerkreis gespeichert. Jetzt kannst du unter „Teilnehmer erreichen" alle per Mail einladen.'
-            : 'Teilnehmerkreis aktualisiert.');
+            ? 'Gespeichert. Jetzt kannst du unter „Teilnehmende erreichen" alle per Mail einladen.'
+            : 'Auswahl gespeichert.');
         Redirect::to('/termine/detail?id=' . $id);
     }
 

@@ -34,7 +34,7 @@ final class SearchController extends BaseController
             'userResults' => $userResults,
             'signalHint' => $query === ''
                 ? 'Globale Suche'
-                : sprintf('%d Kontakte, %d Benutzer', count($contactResults), count($userResults)),
+                : sprintf('%d Kontakte, %d Zugänge', count($contactResults), count($userResults)),
         ]);
     }
 }
