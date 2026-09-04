@@ -146,6 +146,85 @@ Login). Rechte/Gruppen-Modell auf TH-Wunsch identisch zu den Galerien.
   meist inline, Office-Formate meist als Download); Medien-Sicherungsknopf
   (wie bei Galerien) auch für Dokumente in der Verwaltung → Datensicherung.
 
+## Termine & Abstimmungen getrennt (TH-Wunsch 2026-09-04, „Teil B")
+
+TH-Frage: „Termine" war bisher Voting + Ankündigung in einem System.
+TH-Entscheidungen: **vollständige Trennung** (nicht nur Umbenennung); neue
+Termine-Sichtbarkeit **„alle angemeldeten Personen, mit der Möglichkeit, sie
+auf Personen/Gruppen/Tag-Ebene einzuschränken – Admin sieht immer alles"**;
+bestehende „Fester Termin"-Einträge **automatisch** in Ankündigungen
+übernehmen.
+
+- **v1.53.0 erledigt.**
+  - **Abstimmungen** (`/abstimmungen`, war `/termine`): `EventController`/
+    `EventRepository`/Tabelle `events` unverändert, nur URLs+Wortlaut
+    umbenannt. `fixed_date` aus `EventController::KINDS` und dem
+    Typ-Picker entfernt (nicht mehr neu anlegbar) – Lesen/Bearbeiten
+    bestehender Alt-Zeilen bleibt möglich (defensiv, falls je gebraucht).
+    Alt-URLs bewusst stabil gehalten: `/abstimmen?token=` (persönlicher
+    Link) und `/termine/termin.ics?k=` (Kalender-Download) – beide stehen
+    in bereits verschickten Mails.
+  - **Termine – neu** (`AnnouncementController`/`AnnouncementRepository`,
+    Migration `2026-10-03-termine-ankuendigungen`): drei Tabellen –
+    `announcements` (title/info/location/starts_at/ends_at/audience_mode),
+    `announcement_audience` (kind ENUM contact/group/tag + ref_id),
+    `announcement_links` (label/kind ENUM extern/dokument/abstimmung/url/
+    position – die URL wird beim Speichern fertig berechnet, nicht die
+    Referenz-ID; beim Bearbeiten wird die ID aus der gespeicherten URL per
+    Regex zurückgewonnen, um die Auswahl vorzubelegen).
+  - **Sichtbarkeit:** `audience_mode` wird serverseitig aus der Auswahl
+    abgeleitet (leer = `all`, sonst `restricted`) – **kein Radio-Feld
+    nötig**. `AnnouncementRepository::isVisibleTo()` prüft Kontakt-ID
+    direkt, Gruppen-Mitgliedschaft (`GroupRepository::forContact`) und
+    Tags (neu: `TagRepository::tagIdsForContact()`). Verwaltung
+    (`announcements.manage`, Standard nur `orga`) sieht immer alles, mit
+    Klartext-Hinweis wer/was eingeschränkt ist (`audienceLabels()`).
+    **Kein eigenes `announcements.view`** – Ansehen ist für jede
+    angemeldete Person offen, nur die Einschränkung pro Ankündigung regelt
+    die Sichtbarkeit.
+  - **Links:** „Extern" (freie URL), „Dokument" (Picker über
+    `DocumentRepository::allWithFolder()`, neu), „Abstimmung" (Picker über
+    alle offenen poll/date_poll-Events; verlinkt bei Gruppen-Abstimmungen
+    auf `/gruppen/abstimmung?id=` – für die Gruppe erreichbar –, sonst auf
+    `/abstimmungen/detail?id=` – nur mit `events.manage` erreichbar,
+    bewusst als Verwaltungs-Querverweis akzeptiert).
+  - **Kein Papierkorb** (wie bei Gruppen/Dokumenten) – Löschen ist
+    endgültig, cascadet auf `announcement_audience`/`announcement_links`.
+  - **Migration übernimmt bestehende „Fester Termin"-Einträge automatisch**
+    (Titel, Beschreibung+Uhrzeit/Kosten/Mitbringen als zusammengefasstes
+    Info-Feld, erstes Options-Datum als `starts_at`) und setzt die
+    Quell-Events auf `status='archived'` (Daten bleiben erhalten, im
+    Abstimmungs-Archiv einsehbar).
+  - **Bugfix während der Umsetzung:** `AnnouncementRepository::audienceLabels()`
+    nutzte anfangs denselben Named-Placeholder (`:id`) dreimal in einer
+    UNION-Query – bricht mit `PDO::ATTR_EMULATE_PREPARES=false` (Projekt-
+    Standard, siehe `config.example.php`) mit „SQLSTATE[HY093]: Invalid
+    parameter number". Fix: drei eigene Platzhalter. **Lehre:** named
+    Placeholder in diesem Projekt nie mehrfach in derselben Query
+    verwenden – entweder eigene Namen je Vorkommen oder positionelle `?`
+    mit `array_fill`/`array_merge` (siehe `GalleryRepository::hasGalleriesForGroups()`).
+  - Rail-Nav: „Termine" (alle, neues `calendar`-Icon-Ziel `/termine`) +
+    „Abstimmungen" (nur `events.manage`, neues `poll`-Icon) statt des einen
+    alten „Termine"-Links. Start-Schnellaktionen ebenso aufgeteilt
+    (`$canAnnouncements`/`$canEvents`).
+  - Hilfe-Seiten `orga-team.html` + `mitglied.html` an die Trennung
+    angepasst (Navigation, „fester Termin" aus der Typenliste raus,
+    Hinweis-Kasten zu Ankündigungen). **PDFs dazu noch nicht neu erzeugt.**
+  - **Getestet** (Docker, curl): Migration inkl. echter Alt-Daten
+    („Grillabend" aus früherer Session + eigens angelegter Testfall) korrekt
+    übernommen + archiviert; Abstimmungen-Bereich unverändert nutzbar;
+    Ankündigung mit allen drei Link-Typen + Gruppen+Tag-Einschränkung
+    angelegt, bearbeitet, gelöscht (Cascade geprüft); Sichtbarkeit geprüft
+    mit Gruppen-Mitglied (sieht es) vs. Außenstehende:r (sieht es nicht,
+    404 bei Direktzugriff); Gruppen-Abstimmung-Link routet korrekt auf
+    `/gruppen/abstimmung`, normale Abstimmung auf `/abstimmungen/detail`;
+    alle Testdaten danach entfernt.
+- **Feiner (offen):** PDFs der Hilfe-Seiten neu erzeugen; Audience-Picker
+  sind einfache Mehrfach-Selects ohne Live-Vorschau („X Personen sehen
+  das"); Medien-/Dateibereiche (Galerien, Dokumente) könnten künftig auch
+  an eine Termine-Ankündigung statt an eine Abstimmung verlinkbar sein
+  (aktuell zeigt `galleries.event_id` weiter auf `events`/Abstimmungen).
+
 ## Account-Einladungen (TH-Fragen 2026-09-04)
 
 **Was es schon gibt:**
@@ -338,18 +417,14 @@ Stand betreffen.
     prominenter, sobald dieser Screen kommt.
   - Datenschutz-Feinheit: aktuell nur die Fremd-Link-Warnung, keine
     Mail-Bestätigung beim Abstimmen (bewusst so entschieden 2026-09).
-  - **Geplant, noch NICHT gebaut (TH-Wunsch 2026-09-04, „Teil B"):**
-    „Termine" (heute Voting + Ankündigung in einem System) in zwei Bereiche
-    trennen. TH-Entscheidung: **vollständige Trennung** (nicht nur Umbenennung).
-    1. „Abstimmungen" als eigener Navigationspunkt/Bereich – heutiges
-       poll/date_poll-Verhalten unverändert übernehmen, keine Datenmigration
-       nötig.
-    2. „Termine" neu bauen als reine Ankündigungsseite vom Orga-Team: Titel,
-       Zeitraum, Freitext-Info, Link-Liste (intern zu Dokumenten – jetzt via
-       Direktlink aus dem Dokumente-Bereich möglich, extern, intern zu einer
-       Abstimmung). Heutige `fixed_date`-Termine wandern hier rein.
-    3. Aufräumen: Hilfe-Seiten, iCal-Export, Gruppen-Verzahnung, Rail-Navigation.
-    Größerer Umbau, in eigenen Releases – noch nicht begonnen.
+  - ~~**Teil B (TH-Wunsch 2026-09-04): Termine/Abstimmungen trennen**~~ –
+    **erledigt (v1.53.0).** Vollständige Trennung wie entschieden:
+    „Abstimmungen" (`/abstimmungen`, unverändertes poll/date_poll-Verhalten)
+    + neu „Termine" (`/termine`, reine Ankündigungsseite mit Sichtbarkeits-
+    Einschränkung + Links). Bestehende „Fester Termin"-Einträge automatisch
+    übernommen. Details siehe Abschnitt „Dokumente" unten (Teil A) und die
+    Projekt-Memory. Hilfe-Seiten (`orga-team.html`, `mitglied.html`) an die
+    neue Trennung angepasst – **PDFs dazu noch nicht neu erzeugt** (offen).
 
 - **„Mail ans Orga-Team"-Knopf**: **erledigt in v0.34.0** – `/orga-team`
   (`OrgaController`), Link in Seitenleiste + „Mein Konto". Ziel: feste

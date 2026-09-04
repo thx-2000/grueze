@@ -530,6 +530,43 @@ CREATE TABLE IF NOT EXISTS documents (
     CONSTRAINT fk_documents_user FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Termine: reine Ankündigungsseite (Titel, Zeitraum, Freitext-Info, Links),
+-- getrennt vom Abstimmungstool (`events`, jetzt unter /abstimmungen).
+CREATE TABLE IF NOT EXISTS announcements (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(190) NOT NULL,
+    info TEXT NULL,
+    location VARCHAR(190) NULL,
+    starts_at DATE NULL,
+    ends_at DATE NULL,
+    audience_mode ENUM('all', 'restricted') NOT NULL DEFAULT 'all',
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_announcements_starts (starts_at),
+    CONSTRAINT fk_announcements_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS announcement_audience (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    announcement_id INT UNSIGNED NOT NULL,
+    kind ENUM('contact', 'group', 'tag') NOT NULL,
+    ref_id INT UNSIGNED NOT NULL,
+    KEY idx_announcement_audience_announcement (announcement_id),
+    CONSTRAINT fk_announcement_audience_announcement FOREIGN KEY (announcement_id) REFERENCES announcements(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS announcement_links (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    announcement_id INT UNSIGNED NOT NULL,
+    label VARCHAR(190) NOT NULL,
+    kind ENUM('extern', 'dokument', 'abstimmung') NOT NULL DEFAULT 'extern',
+    url VARCHAR(500) NOT NULL,
+    position INT NOT NULL DEFAULT 0,
+    KEY idx_announcement_links_announcement (announcement_id),
+    CONSTRAINT fk_announcement_links_announcement FOREIGN KEY (announcement_id) REFERENCES announcements(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO roles (name, label, description) VALUES
 ('admin', 'Admin', 'Vollzugriff inklusive Benutzerverwaltung'),
 ('orga', 'Team', 'Verwaltet Kontakte, Mailings und Einstellungen'),

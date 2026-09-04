@@ -47,7 +47,7 @@ final class StartController extends BaseController
             foreach ($this->events->openWithPendingResponses() as $ev) {
                 $deadline = trim((string) ($ev['closes_at'] ?? ''));
                 $board[] = [
-                    'href' => url('/termine/detail?id=' . $ev['id']),
+                    'href' => url('/abstimmungen/detail?id=' . $ev['id']),
                     'label' => $ev['title'],
                     'meta' => $ev['answered_count'] . '/' . $ev['participant_count'] . ' geantwortet'
                         . ($deadline !== '' ? ' · Frist ' . time_until_hint($deadline) : ''),

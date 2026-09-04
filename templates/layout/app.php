@@ -74,7 +74,8 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
         || str_starts_with($currentPath, '/contacts') || str_starts_with($currentPath, '/search')
         || str_starts_with($currentPath, '/vollstaendigkeit');
     $onRundmail = str_starts_with($currentPath, '/rundmail') || str_starts_with($currentPath, '/mail');
-    $onEvents = str_starts_with($currentPath, '/termine');
+    $onPolls = str_starts_with($currentPath, '/abstimmungen');
+    $onAnnouncements = str_starts_with($currentPath, '/termine');
     $onGroups = $currentPath === '/gruppen';
     $onAdminHub = str_starts_with($currentPath, '/verwaltung')
         || str_starts_with($currentPath, '/settings') || str_starts_with($currentPath, '/admin')
@@ -115,8 +116,9 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                 <?php if (!empty($currentUser['contact_id'])): ?>
                     <a class="<?= str_starts_with($currentPath, '/meine-nachrichten') ? 'is-active' : '' ?>" href="<?= e(url('/meine-nachrichten')) ?>"><span class="rail-ic"><?= icon('inbox') ?></span>Erhaltene Mails</a>
                 <?php endif; ?>
+                <a class="<?= $onAnnouncements ? 'is-active' : '' ?>" href="<?= e(url('/termine')) ?>"><span class="rail-ic"><?= icon('calendar') ?></span>Termine</a>
                 <?php if (can('events.manage')): ?>
-                    <a class="<?= $onEvents ? 'is-active' : '' ?>" href="<?= e(url('/termine')) ?>"><span class="rail-ic"><?= icon('calendar') ?></span>Termine</a>
+                    <a class="<?= $onPolls ? 'is-active' : '' ?>" href="<?= e(url('/abstimmungen')) ?>"><span class="rail-ic"><?= icon('poll') ?></span>Abstimmungen</a>
                 <?php endif; ?>
                 <?php if (nav_show_groups()): ?>
                     <a class="<?= $onGroups ? 'is-active' : '' ?>" href="<?= e(url('/gruppen')) ?>"><span class="rail-ic"><?= icon('users') ?></span>Gruppen</a>

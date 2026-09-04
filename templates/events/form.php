@@ -1,40 +1,40 @@
 <?php
-// Nur für „Neuer Termin". Bearbeiten passiert auf der Detailseite.
+// Nur für „Neue Abstimmung". Bearbeiten passiert auf der Detailseite.
 $today = (new DateTimeImmutable('now'))->format('Y-m-d');
 $kind = $kind ?? null;
 
 $kindMeta = [
     'date_poll' => ['Datumsabstimmung', 'Mehrere Termine zur Auswahl – die Teilnehmenden stimmen ab, danach legst du das Ergebnis fest.'],
-    'fixed_date' => ['Fester Termin', 'Datum steht schon fest – du sammelst nur Zusagen (Ja / Vielleicht / Nein).'],
     'poll' => ['Abstimmung ohne Datum', 'Eine Frage mit mehreren Antwortmöglichkeiten – z. B. „Wohin fahren wir?".'],
 ];
 ?>
-<p class="detail-backlink"><a href="<?= e(url('/termine')) ?>"><?= icon('chevron-right') ?>Zurück zu den Terminen</a></p>
+<p class="detail-backlink"><a href="<?= e(url('/abstimmungen')) ?>"><?= icon('chevron-right') ?>Zurück zu den Abstimmungen</a></p>
 
 <?php if ($kind === null): ?>
     <header class="contact-detail-head">
-        <p class="eyebrow">Neuer Termin</p>
+        <p class="eyebrow">Neue Abstimmung</p>
         <h1>Was soll es sein?</h1>
     </header>
     <div class="kind-picker">
         <?php foreach ($kindMeta as $key => [$label, $desc]): ?>
-            <a class="kind-card" href="<?= e(url('/termine/neu?typ=' . $key)) ?>">
+            <a class="kind-card" href="<?= e(url('/abstimmungen/neu?typ=' . $key)) ?>">
                 <strong><?= e($label) ?></strong>
                 <span><?= e($desc) ?></span>
             </a>
         <?php endforeach; ?>
     </div>
+    <p class="field-hint">Steht das Datum schon fest und es geht nur ums Ankündigen? Das übernimmt jetzt der Bereich <a href="<?= e(url('/termine/neu')) ?>">Termine</a>.</p>
     <?php return; ?>
 <?php endif; ?>
 
 <?php [$kindLabel, $kindDesc] = $kindMeta[$kind]; ?>
 <header class="contact-detail-head">
-    <p class="eyebrow">Neuer Termin · <?= e($kindLabel) ?></p>
-    <h1>Termin anlegen</h1>
+    <p class="eyebrow">Neue Abstimmung · <?= e($kindLabel) ?></p>
+    <h1>Abstimmung anlegen</h1>
     <p class="muted"><?= e($kindDesc) ?></p>
 </header>
 
-<form method="post" action="<?= e(url('/termine')) ?>" class="contact-detail-form">
+<form method="post" action="<?= e(url('/abstimmungen')) ?>" class="contact-detail-form">
     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
     <input type="hidden" name="kind" value="<?= e($kind) ?>">
 
@@ -158,10 +158,10 @@ $kindMeta = [
     <?php endif; ?>
 
     <div class="detail-save-bar" data-save-bar>
-        <span class="detail-save-hint">Termin anlegen.</span>
+        <span class="detail-save-hint">Abstimmung anlegen.</span>
         <div class="detail-save-actions">
-            <a class="ghost-button" href="<?= e(url('/termine/neu')) ?>">Zurück</a>
-            <button type="submit">Termin anlegen</button>
+            <a class="ghost-button" href="<?= e(url('/abstimmungen/neu')) ?>">Zurück</a>
+            <button type="submit">Abstimmung anlegen</button>
         </div>
     </div>
 </form>

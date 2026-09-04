@@ -3,6 +3,7 @@ $firstName = trim((string) ($currentUser['name'] ?? ''));
 $firstName = $firstName !== '' ? explode(' ', $firstName)[0] : '';
 $canManage = can('contacts.manage');
 $canEvents = can('events.manage');
+$canAnnouncements = can('announcements.manage');
 $canMail = can('mail.send');
 $isMemberView = !$canManage && !$canMail;
 
@@ -33,8 +34,11 @@ $todayLong = $weekdays[(int) $now->format('w')] . ', ' . (int) $now->format('j')
     <?php if ($canManage): ?>
         <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Person hinzufügen</span></a>
     <?php endif; ?>
+    <?php if ($canAnnouncements): ?>
+        <a class="ghost-button" href="<?= e(url('/termine/neu')) ?>"><?= icon('calendar') ?><span>Neue Ankündigung</span></a>
+    <?php endif; ?>
     <?php if ($canEvents): ?>
-        <a class="ghost-button" href="<?= e(url('/termine/neu')) ?>"><?= icon('calendar') ?><span>Neuer Termin</span></a>
+        <a class="ghost-button" href="<?= e(url('/abstimmungen/neu')) ?>"><?= icon('poll') ?><span>Neue Abstimmung</span></a>
     <?php endif; ?>
     <?php if ($canMail): ?>
         <a class="ghost-button" href="<?= e(url('/rundmail')) ?>"><?= icon('mail') ?><span>Nachricht schreiben</span></a>

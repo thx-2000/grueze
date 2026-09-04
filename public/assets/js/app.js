@@ -416,6 +416,42 @@ document.querySelectorAll('[data-text-options]').forEach((container) => {
     });
 });
 
+// Ankündigungen: Link-Zeilen hinzufügen / entfernen, passendes Feld je nach
+// gewählter Art (extern/Dokument/Abstimmung) ein-/ausblenden.
+document.querySelectorAll('[data-link-options]').forEach((container) => {
+    const template = document.getElementById('linkRowTemplate');
+    const addButton = container.parentElement.querySelector('[data-add-link]');
+
+    const syncFields = (row) => {
+        const kind = row.querySelector('[data-link-kind]')?.value;
+        row.querySelectorAll('[data-link-field]').forEach((field) => {
+            field.hidden = field.dataset.linkField !== kind;
+        });
+    };
+
+    const bindRow = (row) => {
+        syncFields(row);
+        row.querySelector('[data-link-kind]')?.addEventListener('change', () => syncFields(row));
+        row.querySelector('[data-remove-link]')?.addEventListener('click', () => {
+            const rows = container.querySelectorAll('.link-row');
+            if (rows.length > 1) {
+                row.remove();
+            } else {
+                row.querySelectorAll('input[type="text"], input[type="url"]').forEach((input) => { input.value = ''; });
+                row.querySelectorAll('select').forEach((select) => { select.selectedIndex = 0; });
+                syncFields(row);
+            }
+        });
+    };
+
+    container.querySelectorAll('.link-row').forEach(bindRow);
+    addButton?.addEventListener('click', () => {
+        if (!template) return;
+        container.appendChild(template.content.cloneNode(true));
+        bindRow(container.lastElementChild);
+    });
+});
+
 // Termine: Teilnehmer-Schnellauswahl.
 document.querySelectorAll('[data-participant-picker]').forEach((form) => {
     const boxes = [...form.querySelectorAll('.participant-option input[type="checkbox"]')];

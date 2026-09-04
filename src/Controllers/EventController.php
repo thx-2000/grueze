@@ -73,7 +73,11 @@ final class EventController extends BaseController
         ]);
     }
 
-    private const KINDS = ['date_poll', 'fixed_date', 'poll'];
+    // 'fixed_date' ist hier bewusst raus – neu geht das über den Bereich
+    // „Termine" (AnnouncementController). Bestehende Alt-Datensätze mit
+    // kind='fixed_date' bleiben lesbar/bearbeitbar (siehe applyOptions()),
+    // nur die Neuanlage bietet den Typ nicht mehr an.
+    private const KINDS = ['date_poll', 'poll'];
 
     public function createForm(Request $request): void
     {
@@ -95,13 +99,13 @@ final class EventController extends BaseController
         $data = $this->detailData($request) + ['kind' => $kind];
         if ($data['title'] === '') {
             flash('error', 'Bitte einen Titel angeben.');
-            Redirect::to('/termine/neu?typ=' . $kind);
+            Redirect::to('/abstimmungen/neu?typ=' . $kind);
         }
 
         $id = $this->events->create($data, (int) $this->auth->user()['id']);
         $this->applyOptions($id, $kind, $request);
         flash('success', 'Termin angelegt. Jetzt die Teilnehmenden wählen.');
-        Redirect::to('/termine/detail?id=' . $id);
+        Redirect::to('/abstimmungen/detail?id=' . $id);
     }
 
     public function detail(Request $request): void
@@ -110,7 +114,7 @@ final class EventController extends BaseController
         $event = $this->events->find((int) $request->input('id'));
         if ($event === null) {
             flash('error', 'Termin nicht gefunden.');
-            Redirect::to('/termine');
+            Redirect::to('/abstimmungen');
         }
 
         $participantIds = array_map(static fn (array $p): int => (int) $p['contact_id'], $event['participants']);
@@ -130,19 +134,19 @@ final class EventController extends BaseController
         Csrf::validate($request->input('_csrf'));
         $id = (int) $request->input('id');
         if ($this->events->find($id) === null) {
-            Redirect::to('/termine');
+            Redirect::to('/abstimmungen');
         }
 
         $existing = $this->events->find($id);
         $data = $this->detailData($request);
         if ($data['title'] === '') {
             flash('error', 'Bitte einen Titel angeben.');
-            Redirect::to('/termine/detail?id=' . $id);
+            Redirect::to('/abstimmungen/detail?id=' . $id);
         }
         $this->events->updateDetails($id, $data);
         $this->applyOptions($id, (string) ($existing['kind'] ?? 'date_poll'), $request);
         flash('success', 'Termin gespeichert.');
-        Redirect::to('/termine/detail?id=' . $id);
+        Redirect::to('/abstimmungen/detail?id=' . $id);
     }
 
     public function updateParticipants(Request $request): void
@@ -151,7 +155,7 @@ final class EventController extends BaseController
         Csrf::validate($request->input('_csrf'));
         $id = (int) $request->input('id');
         if ($this->events->find($id) === null) {
-            Redirect::to('/termine');
+            Redirect::to('/abstimmungen');
         }
 
         $this->events->syncParticipants($id, (array) $request->input('contact_ids', []));
@@ -159,7 +163,7 @@ final class EventController extends BaseController
         flash('success', $count > 0 && $this->auth->can('mail.send')
             ? 'Gespeichert. Jetzt kannst du unter „Teilnehmende erreichen" alle per Mail einladen.'
             : 'Auswahl gespeichert.');
-        Redirect::to('/termine/detail?id=' . $id);
+        Redirect::to('/abstimmungen/detail?id=' . $id);
     }
 
     public function decide(Request $request): void
@@ -168,13 +172,13 @@ final class EventController extends BaseController
         Csrf::validate($request->input('_csrf'));
         $id = (int) $request->input('id');
         if ($this->events->find($id) === null) {
-            Redirect::to('/termine');
+            Redirect::to('/abstimmungen');
         }
 
         $optionId = (int) $request->input('option_id');
         $this->events->setDecidedOption($id, $optionId > 0 ? $optionId : null);
         flash('success', $optionId > 0 ? 'Termin festgelegt.' : 'Festlegung aufgehoben.');
-        Redirect::to('/termine/detail?id=' . $id);
+        Redirect::to('/abstimmungen/detail?id=' . $id);
     }
 
     public function setStatus(Request $request): void
@@ -190,7 +194,7 @@ final class EventController extends BaseController
             default => 'Termin wieder geöffnet.',
         };
         flash('success', $message);
-        Redirect::to($status === 'archived' ? '/termine' : '/termine/detail?id=' . $id);
+        Redirect::to($status === 'archived' ? '/abstimmungen' : '/abstimmungen/detail?id=' . $id);
     }
 
     /**
@@ -203,12 +207,12 @@ final class EventController extends BaseController
         Csrf::validate($request->input('_csrf'));
         $id = (int) $request->input('id');
         if ($this->events->find($id) === null) {
-            Redirect::to('/termine');
+            Redirect::to('/abstimmungen');
         }
 
         $this->events->extendDeadline($id, trim((string) $request->input('closes_at')) ?: null);
         flash('success', 'Frist aktualisiert.');
-        Redirect::to('/termine/detail?id=' . $id);
+        Redirect::to('/abstimmungen/detail?id=' . $id);
     }
 
     public function delete(Request $request): void
@@ -217,7 +221,7 @@ final class EventController extends BaseController
         Csrf::validate($request->input('_csrf'));
         $this->events->delete((int) $request->input('id'));
         flash('success', 'Termin gelöscht.');
-        Redirect::to('/termine');
+        Redirect::to('/abstimmungen');
     }
 
     /**
@@ -233,7 +237,7 @@ final class EventController extends BaseController
         $id = (int) $request->input('id');
         $event = $this->events->find($id);
         if ($event === null) {
-            Redirect::to('/termine');
+            Redirect::to('/abstimmungen');
         }
 
         $filter = (string) $request->input('filter', 'all');
@@ -242,7 +246,7 @@ final class EventController extends BaseController
 
         if ($contactIds === []) {
             flash('error', 'In diesem Kreis ist niemand.');
-            Redirect::to('/termine/detail?id=' . $id);
+            Redirect::to('/abstimmungen/detail?id=' . $id);
         }
 
         $isPoll = ($event['kind'] ?? '') === 'poll';
@@ -255,7 +259,7 @@ final class EventController extends BaseController
                 . 'die ' . $noun . ' „' . $event['title'] . "\" ist entschieden.\n"
                 . 'Hier ist das Ergebnis: {Abstimmungslink}';
             if (!$isPoll && trim((string) ($event['ical_uid'] ?? '')) !== '') {
-                $message .= "\n\nIn den Kalender: " . url('/termine/termin.ics') . '?k=' . $event['ical_uid'];
+                $message .= "\n\nIn den Kalender: " . url('/abstimmungen/termin.ics') . '?k=' . $event['ical_uid'];
             }
             $message .= "\n\nDanke euch!";
         } else {

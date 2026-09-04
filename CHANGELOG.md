@@ -3,6 +3,36 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.53.0
+
+**Termine und Abstimmungen sind jetzt getrennt.**
+
+- **Abstimmungen** (bisher „Termine", jetzt unter `/abstimmungen`): unverändertes
+  Verhalten – Datumsabstimmung oder Abstimmung ohne Datum, Teilnehmerkreis,
+  persönliche Links, Frist, Ergebnis-Mail. Nur „Fester Termin" lässt sich hier
+  nicht mehr neu anlegen – dafür jetzt:
+- **Neu: Termine** – reine Ankündigungsseite vom Orga-Team. Titel, Zeitraum,
+  Freitext-Info, Links (extern, zu einem Dokument oder zu einer Abstimmung).
+  Standardmäßig sieht jede angemeldete Person alle Ankündigungen; optional
+  auf bestimmte Personen, Gruppen oder Tags einschränkbar – die Verwaltung
+  sieht dabei immer alles, mit Hinweis auf die eigentliche Einschränkung.
+  Kein Papierkorb (wie bei Gruppen/Dokumenten) – Löschen ist endgültig.
+- Bestehende „Fester Termin"-Einträge wurden **automatisch** in Ankündigungen
+  übernommen (Titel, Datum, Ort, Infos); die Quell-Einträge liegen jetzt im
+  Abstimmungs-Archiv.
+- Alt-Links bleiben stabil: `/abstimmen?token=…` (persönlicher Abstimmungs-Link)
+  und `/termine/termin.ics?k=…` (Kalender-Download) funktionieren unverändert
+  weiter – nur die Verwaltungsseiten sind umgezogen.
+
+**Nebenbei behoben:** Die Checkbox „Mit Login freischalten" auf der
+Kontaktseite zeigte nach dem Speichern wieder den alten Zustand, auch wenn
+der Login gerade erst deaktiviert wurde (zeigte nur „gibt es einen
+verknüpften Zugang", nicht „ist er aktiv").
+
+**Migration `2026-10-03-termine-ankuendigungen`** (drei neue Tabellen:
+`announcements`, `announcement_audience`, `announcement_links`; übernimmt
+bestehende „Fester Termin"-Einträge automatisch).
+
 ## 1.52.0
 
 **Neu: Dokumente-Bereich.**

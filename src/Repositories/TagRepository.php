@@ -42,6 +42,15 @@ final class TagRepository
         return $stmt->fetch() ?: null;
     }
 
+    /** @return list<int> Tag-IDs dieses Kontakts */
+    public function tagIdsForContact(int $contactId): array
+    {
+        $stmt = $this->pdo->prepare('SELECT tag_id FROM contact_tags WHERE contact_id = :c');
+        $stmt->execute(['c' => $contactId]);
+
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
     /** @return list<int> Kontakt-IDs mit diesem Tag */
     public function contactIdsForTag(int $tagId): array
     {

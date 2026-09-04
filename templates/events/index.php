@@ -1,27 +1,27 @@
 <?php
 $statusLabel = ['open' => 'Abstimmung läuft', 'closed' => 'Abstimmung beendet', 'decided' => 'Termin steht', 'archived' => 'Archiviert'];
-$kindLabel = ['date_poll' => 'Datumsabstimmung', 'fixed_date' => 'Fester Termin', 'poll' => 'Abstimmung'];
+$kindLabel = ['date_poll' => 'Datumsabstimmung', 'fixed_date' => 'Fester Termin (alt)', 'poll' => 'Abstimmung'];
 ?>
 <header class="contacts-header">
     <div>
-        <h1>Termine</h1>
-        <p class="muted"><?= $showArchive ? 'Abgeschlossene und archivierte Termine.' : 'Terminfindung und Abstimmungen.' ?></p>
+        <h1>Abstimmungen</h1>
+        <p class="muted"><?= $showArchive ? 'Abgeschlossene und archivierte Abstimmungen.' : 'Terminfindung und Abstimmungen.' ?></p>
     </div>
     <?php if (!$showArchive): ?>
-        <a class="button-link" href="<?= e(url('/termine/neu')) ?>"><?= icon('plus') ?><span>Neuer Termin</span></a>
+        <a class="button-link" href="<?= e(url('/abstimmungen/neu')) ?>"><?= icon('plus') ?><span>Neue Abstimmung</span></a>
     <?php endif; ?>
 </header>
 
 <nav class="events-tabs" aria-label="Ansicht">
-    <a class="<?= $showArchive ? '' : 'is-active' ?>" href="<?= e(url('/termine')) ?>">Aktuell</a>
-    <a class="<?= $showArchive ? 'is-active' : '' ?>" href="<?= e(url('/termine?archiv=1')) ?>">Archiv</a>
+    <a class="<?= $showArchive ? '' : 'is-active' ?>" href="<?= e(url('/abstimmungen')) ?>">Aktuell</a>
+    <a class="<?= $showArchive ? 'is-active' : '' ?>" href="<?= e(url('/abstimmungen?archiv=1')) ?>">Archiv</a>
 </nav>
 
 <?php if ($events === []): ?>
     <section class="panel">
         <p class="muted">
-            <?= $showArchive ? 'Noch nichts im Archiv.' : 'Noch keine Termine.' ?>
-            <?php if (!$showArchive): ?><a href="<?= e(url('/termine/neu')) ?>">Ersten Termin anlegen</a>.<?php endif; ?>
+            <?= $showArchive ? 'Noch nichts im Archiv.' : 'Noch keine Abstimmungen.' ?>
+            <?php if (!$showArchive): ?><a href="<?= e(url('/abstimmungen/neu')) ?>">Erste Abstimmung anlegen</a>.<?php endif; ?>
         </p>
     </section>
 <?php else: ?>
@@ -38,11 +38,11 @@ $kindLabel = ['date_poll' => 'Datumsabstimmung', 'fixed_date' => 'Fester Termin'
                 }
                 ?>
                 <li class="events-row">
-                    <a class="events-row-main" href="<?= e(url('/termine/detail?id=' . (int) $event['id'])) ?>">
+                    <a class="events-row-main" href="<?= e(url('/abstimmungen/detail?id=' . (int) $event['id'])) ?>">
                         <span class="events-row-title"><?= e($event['title']) ?><?php if (trim((string) ($event['group_name'] ?? '')) !== ''): ?> <span class="events-group-tag"><?= icon('contacts') ?><?= e($event['group_name']) ?></span><?php endif; ?></span>
                         <span class="events-row-meta">
                             <span class="events-status is-<?= e($event['status']) ?>"><?= e($statusLabel[$event['status']] ?? $event['status']) ?></span>
-                            · <?= e($kindLabel[$event['kind']] ?? 'Termin') ?>
+                            · <?= e($kindLabel[$event['kind']] ?? 'Abstimmung') ?>
                             <?php if ($decidedOption !== null): ?>
                                 · <?= e(event_option_label($decidedOption)) ?>
                             <?php elseif ($optionCount > 0 && $event['kind'] !== 'poll'): ?>

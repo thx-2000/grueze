@@ -297,8 +297,11 @@ final class SettingsController extends BaseController
                     'mail.contact_single' => 'Einzelne Person über interne Kontaktfunktion kontaktieren',
                     'mail.view_log'       => 'Versandprotokoll einsehen',
                 ],
+                'Abstimmungen' => [
+                    'events.manage' => 'Abstimmungen anlegen und verwalten',
+                ],
                 'Termine' => [
-                    'events.manage' => 'Termine anlegen und die Abstimmung verwalten',
+                    'announcements.manage' => 'Termine ankündigen (Ansehen ist für alle offen)',
                 ],
                 'Gruppen' => [
                     'groups.manage' => 'Gruppen anlegen und Mitglieder verwalten',

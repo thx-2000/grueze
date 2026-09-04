@@ -28,7 +28,7 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
             <?php if ($g['gallery_date']): ?><?= e(format_date(substr((string) $g['gallery_date'], 0, 10))) ?> · <?php endif; ?>
             <span data-media-count><?= count($items) ?></span> Medien
             <?php if (trim((string) ($g['event_title'] ?? '')) !== ''): ?>
-                · <a href="<?= e(url('/termine/detail?id=' . (int) $g['event_id'])) ?>"><?= icon('calendar') ?><?= e($g['event_title']) ?></a>
+                · <a href="<?= e(url('/abstimmungen/detail?id=' . (int) $g['event_id'])) ?>"><?= icon('calendar') ?><?= e($g['event_title']) ?></a>
             <?php endif; ?>
             <?php if (trim((string) ($g['owner_group_name'] ?? '')) !== ''): ?>
                 · <span class="gallery-card-event"><?= icon('users') ?>Gruppe „<?= e($g['owner_group_name']) ?>"</span>
@@ -89,7 +89,7 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
             </label>
         </div>
         <label>
-            <span>Zu einem Termin (optional)</span>
+            <span>Zu einer Abstimmung (optional)</span>
             <select name="event_id">
                 <option value="">— kein Termin —</option>
                 <?php foreach ($events as $event): ?>

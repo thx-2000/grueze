@@ -112,7 +112,7 @@ final class MailController extends BaseController
         }
 
         $token = (string) ($job['event_tokens'][$contactId] ?? '');
-        $link = $token !== '' ? url('/abstimmen?token=' . $token) : url('/termine');
+        $link = $token !== '' ? url('/abstimmen?token=' . $token) : url('/abstimmungen');
 
         return [
             str_replace('{Abstimmungslink}', $link, $subject),
@@ -243,7 +243,7 @@ final class MailController extends BaseController
             $tokens = $this->events->tokensForEvent($eventId);
             $link = ($token = $tokens[(int) ($sample['id'] ?? 0)] ?? '') !== ''
                 ? url('/abstimmen?token=' . $token)
-                : url('/termine');
+                : url('/abstimmungen');
             $subject = str_replace('{Abstimmungslink}', $link, $subject);
             $rawTestMessage = str_replace('{Abstimmungslink}', $link, $rawTestMessage);
         }

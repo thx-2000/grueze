@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.52.0';
+    return '1.53.0';
 }
 
 /**
@@ -674,10 +674,13 @@ function page_title(string $path): string
         '/mail/compose'              => 'Nachricht schreiben',
         '/mail/status'               => 'Versand',
         '/vollstaendigkeit'          => 'Vollständigkeit',
-        '/termine'                   => 'Termine',
-        '/termine/neu'               => 'Neuer Termin',
-        '/termine/detail'            => 'Termin',
+        '/abstimmungen'              => 'Abstimmungen',
+        '/abstimmungen/neu'          => 'Neue Abstimmung',
+        '/abstimmungen/detail'       => 'Abstimmung',
         '/abstimmen'                 => 'Abstimmen',
+        '/termine'                   => 'Termine',
+        '/termine/neu'               => 'Neue Ankündigung',
+        '/termine/detail'            => 'Termin',
         '/gruppen'                   => 'Meine Gruppen',
         '/gruppen/nachricht'         => 'Nachricht an die Gruppe',
         '/gruppen/abstimmungen'      => 'Abstimmungen der Gruppe',
@@ -1044,6 +1047,7 @@ function icon(string $name): string
         'star' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3l2.8 5.7l6.2.9l-4.5 4.4l1.1 6.2L12 17.3L6.4 20.2l1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>',
         'folder' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h4.4a1.5 1.5 0 0 1 1.06.44L12.4 5.9H18.5A1.5 1.5 0 0 1 20 7.4v11.1a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13Z"/></svg>',
         'file' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm7 1.5V8h4.5L13 3.5ZM8 13h8v1.5H8V13Zm0 3.5h8V18H8v-1.5ZM8 9.5h4V11H8V9.5Z"/></svg>',
+        'poll' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 10h3v10H5V10Zm5.5-6h3v16h-3V4Zm5.5 9h3v7h-3v-7Z"/></svg>',
     ];
 
     $svg = $icons[$name] ?? '';

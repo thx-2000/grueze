@@ -321,6 +321,17 @@ try {
         Container::get(LogRepository::class),
         Container::get(\App\Services\IcalService::class)
     ));
+    Container::factory(\App\Repositories\AnnouncementRepository::class, static fn () => new \App\Repositories\AnnouncementRepository(Container::get(PDO::class)));
+    Container::factory(\App\Controllers\AnnouncementController::class, static fn () => new \App\Controllers\AnnouncementController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\AnnouncementRepository::class),
+        Container::get(ContactRepository::class),
+        Container::get(GroupRepository::class),
+        Container::get(TagRepository::class),
+        Container::get(\App\Repositories\DocumentRepository::class),
+        Container::get(EventRepository::class),
+        Container::get(LogRepository::class)
+    ));
     Container::factory(EventScheduler::class, static fn () => new EventScheduler(
         Container::get(EventRepository::class),
         Container::get(UserRepository::class),
@@ -646,20 +657,28 @@ try {
     $router->post('/gruesse/geburtstage/vorschau', [GreetingController::class, 'birthdayPreview']);
     $router->post('/mail/gruesse-senden', [MailController::class, 'sendGreetings']);
 
-    $router->get('/termine', [EventController::class, 'index']);
-    $router->get('/termine/neu', [EventController::class, 'createForm']);
-    $router->post('/termine', [EventController::class, 'store']);
-    $router->get('/termine/detail', [EventController::class, 'detail']);
-    $router->post('/termine/speichern', [EventController::class, 'updateDetails']);
-    $router->post('/termine/teilnehmer', [EventController::class, 'updateParticipants']);
-    $router->post('/termine/ergebnis', [EventController::class, 'decide']);
-    $router->post('/termine/status', [EventController::class, 'setStatus']);
-    $router->post('/termine/loeschen', [EventController::class, 'delete']);
-    $router->post('/termine/nachricht', [EventController::class, 'messageParticipants']);
-    $router->post('/termine/frist', [EventController::class, 'extendDeadline']);
+    $router->get('/abstimmungen', [EventController::class, 'index']);
+    $router->get('/abstimmungen/neu', [EventController::class, 'createForm']);
+    $router->post('/abstimmungen', [EventController::class, 'store']);
+    $router->get('/abstimmungen/detail', [EventController::class, 'detail']);
+    $router->post('/abstimmungen/speichern', [EventController::class, 'updateDetails']);
+    $router->post('/abstimmungen/teilnehmer', [EventController::class, 'updateParticipants']);
+    $router->post('/abstimmungen/ergebnis', [EventController::class, 'decide']);
+    $router->post('/abstimmungen/status', [EventController::class, 'setStatus']);
+    $router->post('/abstimmungen/loeschen', [EventController::class, 'delete']);
+    $router->post('/abstimmungen/nachricht', [EventController::class, 'messageParticipants']);
+    $router->post('/abstimmungen/frist', [EventController::class, 'extendDeadline']);
+    // Alt-URL bleibt erhalten (Kalender-Links in bereits verschickten Mails).
     $router->get('/termine/termin.ics', [EventController::class, 'ical']);
     $router->get('/abstimmen', [EventController::class, 'vote']);
     $router->post('/abstimmen', [EventController::class, 'submitVote']);
+
+    $router->get('/termine', [\App\Controllers\AnnouncementController::class, 'index']);
+    $router->get('/termine/neu', [\App\Controllers\AnnouncementController::class, 'createForm']);
+    $router->post('/termine', [\App\Controllers\AnnouncementController::class, 'store']);
+    $router->get('/termine/detail', [\App\Controllers\AnnouncementController::class, 'show']);
+    $router->post('/termine/speichern', [\App\Controllers\AnnouncementController::class, 'update']);
+    $router->post('/termine/loeschen', [\App\Controllers\AnnouncementController::class, 'delete']);
 
     $router->get('/galerien', [\App\Controllers\GalleryController::class, 'index']);
     $router->get('/galerien/neu', [\App\Controllers\GalleryController::class, 'createForm']);

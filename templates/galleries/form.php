@@ -49,7 +49,7 @@ $action = $isEdit ? url('/galerien/speichern') : url('/galerien');
         </div>
 
         <label>
-            <span>Zu einem Termin (optional)</span>
+            <span>Zu einer Abstimmung (optional)</span>
             <select name="event_id">
                 <option value="">— kein Termin —</option>
                 <?php foreach ($events as $event): ?>

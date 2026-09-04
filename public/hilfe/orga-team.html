@@ -233,7 +233,8 @@
       <li><b>Adressbuch</b> &ndash; Menschen anlegen und pflegen, suchen, mit Kategorien und Tags gruppieren.</li>
       <li><b>Gruppen</b> &ndash; feste Runden (Kurs, Ausschuss, Fahrgemeinschaft) mit eigener Mail und eigenen Abstimmungen.</li>
       <li><b>Nachrichten</b> &ndash; eine Rundmail an alle oder an eine ausgewählte Gruppe.</li>
-      <li><b>Termine</b> &ndash; ein Datum abstimmen lassen, optional mit Frist und automatischer Ergebnis-Mail.</li>
+      <li><b>Abstimmungen</b> &ndash; ein Datum abstimmen lassen, optional mit Frist und automatischer Ergebnis-Mail.</li>
+      <li><b>Termine</b> &ndash; ein Datum ankündigen, das schon feststeht, mit Infos und Links (kein Zu-/Absagen).</li>
       <li><b>Mein Eintrag</b> (unten links) &ndash; deine eigenen Daten und dein Passwort.</li>
     </ul>
   </div>
@@ -244,7 +245,7 @@
       <span class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg> Start</span>
       <a class="on" href="#adressbuch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6z"/><path d="M6 4v16"/><circle cx="12.5" cy="10" r="2"/><path d="M9.5 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4"/></svg> Adressbuch</a>
       <a href="#nachrichten"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg> Nachrichten</a>
-      <a href="#termine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9h17M8 3v3M16 3v3"/></svg> Termine</a>
+      <a href="#termine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9h17M8 3v3M16 3v3"/></svg> Abstimmungen &amp; Termine</a>
       <a href="#gruppen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="9" r="2.4"/><path d="M3.5 18c.6-2.4 2.3-3.6 4.5-3.6S12 15.6 12.5 18M11.5 18c.6-2.4 2.3-3.6 4.5-3.6s3.9 1.2 4.5 3.6"/></svg> Gruppen</a>
       <a href="#einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.3"/><circle cx="8" cy="17" r="2.3"/></svg> Einstellungen</a>
       <span class="item" style="margin-top:.5rem;color:var(--muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 19c1-3.2 3.7-4.6 6.5-4.6S17.5 15.8 18.5 19"/></svg> Mein Eintrag</span>
@@ -316,7 +317,7 @@
       <p class="goal">Eine Gruppe (Kurs, Ausschuss, Fahrgemeinschaft) anlegen &ndash; danach kann sie sich weitgehend selbst organisieren.</p>
       <ol class="steps">
         <li><kbd>Einstellungen</kbd> &rarr; <kbd>Gruppen</kbd> &rarr; Name eintragen &rarr; <kbd>Gruppe anlegen</kbd>. Schneller aus vorhandenen Daten: in <kbd>Kategorien &amp; Tags</kbd> bei einem Tag <kbd>Als Gruppe anlegen</kbd>, oder im Adressbuch <kbd>Aus der Auswahl eine neue Gruppe machen</kbd>.</li>
-        <li>In der Gruppe: <b>Mitglieder wählen</b> (gleicher Picker wie bei Terminen), Beschreibung eintragen.</li>
+        <li>In der Gruppe: <b>Mitglieder wählen</b> (gleicher Picker wie bei Abstimmungen), Beschreibung eintragen.</li>
         <li><b>Offene Gruppe:</b> Schalter setzen &ndash; dann darf jede angemeldete Person selbst bei- und austreten. Sonst laufen Beitritte über <b>Beitrittsanfragen</b>, die du in der Gruppe annimmst oder ablehnst.</li>
         <li><b>Gruppenleitung:</b> ein Mitglied zur Leitung machen (<kbd>Zur Leitung machen</kbd>). Die Leitung darf die Gruppe dann selbst verwalten &ndash; Mitglieder, Nachrichten, Abstimmungen &ndash; ohne Admin-Rechte. Dafür gibt es eine eigene Kurzanleitung.</li>
         <li>Jedes Mitglied kann der Gruppe eine <b>Nachricht</b> schicken und <b>Abstimmungen</b> anlegen. Bei Missbrauch: in der Gruppe <kbd>Versand sperren</kbd>.</li>
@@ -373,18 +374,18 @@
     <section class="task" id="termine">
       <div class="task-head">
         <span class="task-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9h17M8 3v3M16 3v3"/><path d="m9 14 2 2 4-4"/></svg></span>
-        <h2>Termine: Datum finden &amp; einladen</h2>
+        <h2>Abstimmungen: Datum finden &amp; einladen</h2>
       </div>
       <p class="goal">Ein gemeinsames Datum abstimmen &ndash; auch mit Leuten, die keinen Login haben.</p>
       <div class="flow">
         <span class="caption">So läuft es ab</span>
-        <span class="node">Termin anlegen</span><span class="arr">&rarr;</span>
+        <span class="node">Abstimmung anlegen</span><span class="arr">&rarr;</span>
         <span class="node">Teilnehmerkreis</span><span class="arr">&rarr;</span>
         <span class="node">Links verschicken</span><span class="arr">&rarr;</span>
         <span class="node">Ergebnis festlegen</span>
       </div>
       <ol class="steps">
-        <li><kbd>Termine</kbd> &rarr; <kbd>Neuer Termin</kbd>. Typ wählen: <b>Datumsabstimmung</b> (mehrere Vorschläge), <b>fester Termin</b> (nur Zu-/Absagen) oder <b>Abstimmung ohne Datum</b>.</li>
+        <li><kbd>Abstimmungen</kbd> &rarr; <kbd>Neue Abstimmung</kbd>. Typ wählen: <b>Datumsabstimmung</b> (mehrere Vorschläge) oder <b>Abstimmung ohne Datum</b>. Steht das Datum schon fest und es geht nur ums Ankündigen (kein Zu-/Absagen), ist das jetzt eine <b>Ankündigung</b> unter <kbd>Termine</kbd> &ndash; siehe Kasten unten.</li>
         <li>Eckdaten und Datumsvorschläge eintragen. Optional: eine <b>Frist</b> setzen &ndash; dann schließt die Abstimmung von selbst, und 48&nbsp;Stunden vorher wird an alle erinnert, die noch nicht abgestimmt haben.</li>
         <li>Optional: einstellen, wer nach dem Schließen <b>automatisch das Ergebnis per Mail</b> bekommt (alle Abstimmenden / alle Eingeladenen / nur Orga / nur Admin).</li>
         <li><b>Teilnehmerkreis</b> aus dem Adressbuch zusammenstellen &ndash; einzeln oder über <kbd>+ Kategorie</kbd>.</li>
@@ -399,6 +400,10 @@
       <div class="tip calm">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
         <span>Damit Frist-Schließen und Erinnerungen zuverlässig laufen, muss beim Hoster ein <b>Cronjob</b> eingerichtet sein (Admin-Sache, siehe Instanz-Doku). Ohne den passiert die Automatik nur, wenn jemand die Seite öffnet.</span>
+      </div>
+      <div class="tip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9h17M8 3v3M16 3v3"/></svg>
+        <span><b>Termine</b> (eigener Punkt in der Seitenleiste) sind reine Ankündigungen: Titel, Zeitraum, Info-Text, Links zu Dokumenten oder Abstimmungen &ndash; ohne Zu-/Absagen. Standardmäßig sieht sie jede angemeldete Person, du kannst eine Ankündigung aber auf bestimmte Personen, Gruppen oder Tags einschränken.</span>
       </div>
     </section>
 

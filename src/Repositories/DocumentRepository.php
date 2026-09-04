@@ -57,6 +57,22 @@ final class DocumentRepository
         return $stmt->fetch() ?: null;
     }
 
+    /**
+     * Alle Dateien über alle Ordner hinweg, mit Ordnertitel – für Picker
+     * (z. B. Termine-Ankündigungen, die auf ein Dokument verlinken).
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function allWithFolder(): array
+    {
+        return $this->pdo->query(
+            'SELECT d.id, d.title, d.folder_id, f.title AS folder_title
+             FROM documents d
+             JOIN document_folders f ON f.id = d.folder_id
+             ORDER BY f.title ASC, d.title ASC'
+        )->fetchAll();
+    }
+
     /** @return list<array<string,mixed>> */
     public function forFolder(int $folderId): array
     {

@@ -42,10 +42,10 @@ asort($pickerGroups);
 
 $idList = static fn (array $rows): string => implode(',', array_map(static fn (array $r): int => (int) $r['id'], $rows));
 ?>
-<p class="detail-backlink"><a href="<?= e(url('/termine')) ?>"><?= icon('chevron-right') ?>Zurück zu den Terminen</a></p>
+<p class="detail-backlink"><a href="<?= e(url('/abstimmungen')) ?>"><?= icon('chevron-right') ?>Zurück zu den Abstimmungen</a></p>
 
 <header class="contact-detail-head">
-    <p class="eyebrow">Termin · <?= e($kindLabel) ?></p>
+    <p class="eyebrow">Abstimmung · <?= e($kindLabel) ?></p>
     <h1><?= e($event['title']) ?></h1>
     <div class="contact-detail-meta">
         <span class="events-status is-<?= e($event['status']) ?>"><?= e($statusLabel[$event['status']] ?? $event['status']) ?></span>
@@ -74,7 +74,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
                 <p class="muted">Ergebnis-Mail nach dem Schließen: <?= e($recipientLabels[$resultRecipients]) ?><?= $event['result_mail_sent_at'] ? ' · bereits verschickt' : '' ?>.</p>
             <?php endif; ?>
         </div>
-        <form method="post" action="<?= e(url('/termine/frist')) ?>" class="event-deadline-form">
+        <form method="post" action="<?= e(url('/abstimmungen/frist')) ?>" class="event-deadline-form">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
             <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
             <label><span>Neue Frist</span><input type="datetime-local" name="closes_at" value="<?= e($closesAtLocal) ?>" min="<?= e(date('Y-m-d\TH:i')) ?>"></label>
@@ -101,7 +101,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
                     <p><a class="ghost-button" href="<?= e(url('/termine/termin.ics') . '?k=' . $event['ical_uid']) ?>"><?= icon('calendar') ?><span>In den Kalender</span></a></p>
                 <?php endif; ?>
                 <?php if (!$isFixed): ?>
-                    <form method="post" action="<?= e(url('/termine/ergebnis')) ?>" class="event-inline-form">
+                    <form method="post" action="<?= e(url('/abstimmungen/ergebnis')) ?>" class="event-inline-form">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
                         <input type="hidden" name="option_id" value="0">
@@ -113,7 +113,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
     <?php endforeach; ?>
 <?php endif; ?>
 
-<form method="post" action="<?= e(url('/termine/speichern')) ?>" class="contact-detail-form" data-detail-form>
+<form method="post" action="<?= e(url('/abstimmungen/speichern')) ?>" class="contact-detail-form" data-detail-form>
     <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
     <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
 
@@ -259,7 +259,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
         <p class="muted"><?= count($participants) ?> <?= count($participants) === 1 ? 'Person' : 'Personen' ?> · <?= (int) $event['answered_count'] ?> haben geantwortet.</p>
     <?php endif; ?>
 
-    <form method="post" action="<?= e(url('/termine/teilnehmer')) ?>" data-participant-picker>
+    <form method="post" action="<?= e(url('/abstimmungen/teilnehmer')) ?>" data-participant-picker>
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
         <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
 
@@ -319,7 +319,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
         <h2><?= $isPoll ? 'Ergebnis' : 'Abstimmungsstand' ?></h2>
         <p class="muted">Wer hat wie geantwortet.<?= $kind === 'date_poll' ? ' Wähle unten das Ergebnis.' : '' ?></p>
 
-        <form method="post" action="<?= e(url('/termine/ergebnis')) ?>">
+        <form method="post" action="<?= e(url('/abstimmungen/ergebnis')) ?>">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
             <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
 
@@ -395,7 +395,7 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
         <p class="field-hint">Jede Person hat einen eigenen Abstimmungs-Link. Wer über einen fremden Link abstimmt, sieht eine Warnung.</p>
 
         <?php if (can('mail.send')): ?>
-            <form method="post" action="<?= e(url('/termine/nachricht')) ?>" class="event-message-actions">
+            <form method="post" action="<?= e(url('/abstimmungen/nachricht')) ?>" class="event-message-actions">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
                 <p class="field-hint">
@@ -446,18 +446,18 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
 <?php endif; ?>
 
 <section class="detail-card detail-danger">
-    <h2>Termin abschließen</h2>
-    <p class="muted">Archivierte Termine verschwinden aus der Übersicht, bleiben aber im Archiv. Löschen entfernt alles unwiderruflich.</p>
+    <h2>Abstimmung abschließen</h2>
+    <p class="muted">Archivierte Abstimmungen verschwinden aus der Übersicht, bleiben aber im Archiv. Löschen entfernt alles unwiderruflich.</p>
     <div class="toolbar-actions">
         <?php if ($event['status'] === 'open' && !$isFixed): ?>
-            <form method="post" action="<?= e(url('/termine/status')) ?>">
+            <form method="post" action="<?= e(url('/abstimmungen/status')) ?>">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
                 <input type="hidden" name="status" value="closed">
                 <button type="submit" class="ghost-button"><?= icon('lock') ?><span>Abstimmung jetzt schließen</span></button>
             </form>
         <?php elseif ($event['status'] === 'closed'): ?>
-            <form method="post" action="<?= e(url('/termine/status')) ?>">
+            <form method="post" action="<?= e(url('/abstimmungen/status')) ?>">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
                 <input type="hidden" name="status" value="open">
@@ -465,21 +465,21 @@ $idList = static fn (array $rows): string => implode(',', array_map(static fn (a
             </form>
         <?php endif; ?>
         <?php if ($event['status'] !== 'archived'): ?>
-            <form method="post" action="<?= e(url('/termine/status')) ?>">
+            <form method="post" action="<?= e(url('/abstimmungen/status')) ?>">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
                 <input type="hidden" name="status" value="archived">
                 <button type="submit" class="ghost-button"><?= icon('archive') ?><span>Archivieren</span></button>
             </form>
         <?php else: ?>
-            <form method="post" action="<?= e(url('/termine/status')) ?>">
+            <form method="post" action="<?= e(url('/abstimmungen/status')) ?>">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
                 <input type="hidden" name="status" value="open">
                 <button type="submit" class="ghost-button">Wieder öffnen</button>
             </form>
         <?php endif; ?>
-        <form method="post" action="<?= e(url('/termine/loeschen')) ?>" data-confirm="Termin „<?= e($event['title']) ?>“ endgültig löschen?">
+        <form method="post" action="<?= e(url('/abstimmungen/loeschen')) ?>" data-confirm="Abstimmung „<?= e($event['title']) ?>“ endgültig löschen?">
             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
             <input type="hidden" name="id" value="<?= e((string) $event['id']) ?>">
             <button type="submit" class="danger-button"><?= icon('trash') ?><span>Löschen</span></button>
