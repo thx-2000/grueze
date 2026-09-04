@@ -12,9 +12,9 @@ use App\Repositories\GalleryRepository;
 use App\Repositories\LogRepository;
 use App\Services\BackupService;
 use App\Services\MediaService;
-use App\Support\FileResponse;
 use App\Support\GalleryZip;
 use App\Support\Redirect;
+use App\Support\StreamZip;
 use RuntimeException;
 use Throwable;
 use ZipArchive;
@@ -161,13 +161,23 @@ final class BackupController extends BaseController
             Redirect::to('/admin/backup');
         }
 
-        $tmp = tempnam($this->mediaStorage->tmpDir(), 'gbak_') . '.zip';
-        $zip = new ZipArchive();
-        if ($zip->open($tmp, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-            flash('error', 'Die Sicherung konnte nicht erstellt werden.');
-            Redirect::to('/admin/backup');
-        }
+        $this->logs->addAudit((int) ($this->auth->user()['id'] ?? 0), null, 'created', 'Medien-Sicherung heruntergeladen (' . count($galleries) . ' Galerien).');
 
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="galerien-medien-' . date('Y-m-d') . '.zip"');
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: private, no-cache');
+
+        // Direkt in den Ausgabe-Stream schreiben statt erst eine komplette
+        // ZIP-Datei auf der Platte aufzubauen – der Download beginnt sofort,
+        // und es wird nie doppelt so viel Platz wie die Originale gebraucht.
+        $zip = new StreamZip();
         $zip->addFromString('HINWEIS.txt', GalleryZip::noticeText());
         $manifest = [
             'format' => self::MEDIA_BACKUP_FORMAT,
@@ -210,15 +220,8 @@ final class BackupController extends BaseController
         }
 
         $zip->addFromString('manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $zip->close();
-
-        $this->logs->addAudit((int) ($this->auth->user()['id'] ?? 0), null, 'created', 'Medien-Sicherung heruntergeladen (' . count($galleries) . ' Galerien).');
-
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
-        register_shutdown_function(static fn () => @unlink($tmp));
-        FileResponse::stream($tmp, 'application/zip', 'galerien-medien-' . date('Y-m-d') . '.zip', 0);
+        $zip->finish();
+        exit;
     }
 
     /** Medien-Sicherung wieder einspielen – legt neue Galerien an (kein Merge). */

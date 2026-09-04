@@ -235,7 +235,7 @@
             };
 
             var startFd = new FormData();
-            startFd.append('gallery_id', galleryId);
+            if (galleryId) startFd.append('gallery_id', galleryId);
             startFd.append('filename', file.name);
             startFd.append('total_size', String(file.size));
             startFd.append('total_chunks', String(totalChunks));

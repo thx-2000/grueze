@@ -3,6 +3,21 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.56.0
+
+**Letzte drei Galerien-Kleinigkeiten aus dem Backlog.**
+
+- **Medien-Sicherung als Stream:** „Alle Medien sichern" baut die ZIP-Datei
+  jetzt direkt beim Herunterladen zusammen, statt sie erst komplett auf dem
+  Server aufzubauen – der Download startet sofort, und es wird nie doppelt
+  so viel Plattenplatz gebraucht wie die Originaldateien selbst belegen.
+- **WebM-Videos zeigen jetzt auch die Dauer** (Zeit-Abzeichen auf dem
+  Vorschaubild) – bisher nur bei MP4/MOV.
+- **Chunked Upload jetzt auch beim öffentlichen Beitrags-Link:** wer über
+  einen Weitergabe-Link (ohne Login) sehr große Videos beisteuert, profitiert
+  jetzt ebenfalls vom automatischen Aufteilen in kleinere Stücke – bisher
+  galt das nur für den Upload direkt in der Galerie.
+
 ## 1.55.0
 
 **Galerien: große Videos, Video-Infos, korrekt gedrehte Originale.**

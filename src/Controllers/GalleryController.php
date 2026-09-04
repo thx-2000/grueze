@@ -414,7 +414,12 @@ final class GalleryController extends BaseController
             JsonResponse::send(['ok' => false, 'error' => 'Die Datei ist zu groß (max. ' . MediaService::humanBytes($maxAllowed) . ').'], 422);
         }
 
-        $sessionId = $this->storage->startChunkSession((int) $this->userId(), (int) $gallery['id'], $filename, $totalSize, $totalChunks);
+        $sessionId = $this->storage->startChunkSession(
+            ['user_id' => (int) $this->userId(), 'gallery_id' => (int) $gallery['id']],
+            $filename,
+            $totalSize,
+            $totalChunks
+        );
         JsonResponse::send(['ok' => true, 'session_id' => $sessionId]);
     }
 

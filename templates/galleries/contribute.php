@@ -26,7 +26,12 @@
     <div class="gallery-upload" data-gallery-upload
          data-upload-url="<?= e(url('/beitragen/' . rawurlencode($token))) ?>"
          data-max-image="<?= e((string) $maxImage) ?>"
-         data-max-video="<?= e((string) $maxVideo) ?>">
+         data-max-video="<?= e((string) $maxVideo) ?>"
+         data-chunk-threshold="<?= e((string) config('media.chunk_threshold_bytes', 15728640)) ?>"
+         data-chunk-size="<?= e((string) config('media.chunk_size_bytes', 4194304)) ?>"
+         data-chunk-start-url="<?= e(url('/beitragen/' . rawurlencode($token) . '/chunk/start')) ?>"
+         data-chunk-part-url="<?= e(url('/beitragen/' . rawurlencode($token) . '/chunk/teil')) ?>"
+         data-chunk-finish-url="<?= e(url('/beitragen/' . rawurlencode($token) . '/chunk/abschliessen')) ?>">
         <div class="dropzone" data-dropzone tabindex="0" role="button" aria-label="Fotos oder Videos auswählen">
             <?= icon('upload') ?>
             <p><strong>Fotos &amp; Videos auswählen</strong><br>oder hier ablegen</p>

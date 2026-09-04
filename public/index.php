@@ -709,6 +709,9 @@ try {
     $router->post('/galerien/link/erneuern', [\App\Controllers\GalleryController::class, 'renewLink']);
     $router->get('/beitragen/{token}', [\App\Controllers\GalleryContributeController::class, 'form']);
     $router->post('/beitragen/{token}', [\App\Controllers\GalleryContributeController::class, 'upload']);
+    $router->post('/beitragen/{token}/chunk/start', [\App\Controllers\GalleryContributeController::class, 'chunkStart']);
+    $router->post('/beitragen/{token}/chunk/teil', [\App\Controllers\GalleryContributeController::class, 'chunkPart']);
+    $router->post('/beitragen/{token}/chunk/abschliessen', [\App\Controllers\GalleryContributeController::class, 'chunkFinish']);
 
     $router->get('/dokumente', [\App\Controllers\DocumentController::class, 'index']);
     $router->get('/dokumente/neu', [\App\Controllers\DocumentController::class, 'createForm']);

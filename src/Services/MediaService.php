@@ -68,16 +68,23 @@ final class MediaService
     }
 
     /** Neue Chunk-Upload-Sitzung anlegen. @return string Sitzungs-ID */
-    public function startChunkSession(int $userId, int $galleryId, string $originalName, int $totalSize, int $totalChunks): string
+    /**
+     * @param array<string,mixed> $context Aufrufer-eigene Zuordnung, z. B.
+     *                                     user_id/gallery_id (eingeloggter
+     *                                     Upload) oder link_id (öffentlicher
+     *                                     Beitrags-Link) – wird 1:1 mit in
+     *                                     die Sitzungs-Metadaten geschrieben
+     *                                     und von chunkSessionMeta() wieder
+     *                                     zurückgegeben.
+     */
+    public function startChunkSession(array $context, string $originalName, int $totalSize, int $totalChunks): string
     {
         $id = bin2hex(random_bytes(16));
         $dir = $this->chunkSessionDir($id);
         if (!mkdir($dir, 0775, true)) {
             throw new RuntimeException('Die Upload-Sitzung konnte nicht angelegt werden.');
         }
-        $meta = [
-            'user_id' => $userId,
-            'gallery_id' => $galleryId,
+        $meta = $context + [
             'original_name' => $originalName,
             'total_size' => $totalSize,
             'total_chunks' => $totalChunks,
@@ -387,9 +394,11 @@ final class MediaService
             throw new RuntimeException('Das Video konnte nicht gespeichert werden.');
         }
 
-        $videoMeta = in_array($mime, ['video/mp4', 'video/quicktime'], true)
-            ? $this->readMp4Meta($storedAbs)
-            : ['duration_seconds' => null, 'width' => null, 'height' => null];
+        $videoMeta = match ($mime) {
+            'video/mp4', 'video/quicktime' => $this->readMp4Meta($storedAbs),
+            'video/webm' => $this->readWebmMeta($storedAbs),
+            default => ['duration_seconds' => null, 'width' => null, 'height' => null],
+        };
 
         $thumbRel = null;
         if ($posterTmp !== null && is_file($posterTmp) && extension_loaded('gd')) {
@@ -422,9 +431,8 @@ final class MediaService
     /**
      * Dauer + Breite/Höhe aus MP4/MOV lesen (ISO-Base-Media-Container) –
      * ganz ohne ffmpeg (auf Shared Hosting meist nicht verfügbar), reines
-     * PHP-Byte-Parsing der `moov`/`mvhd`/`trak`/`tkhd`-Boxen. WebM (EBML-
-     * Format) wird nicht unterstützt und liefert nur `null`-Werte – kein
-     * Rückschritt gegenüber vorher, nur (noch) keine Verbesserung dafür.
+     * PHP-Byte-Parsing der `moov`/`mvhd`/`trak`/`tkhd`-Boxen. Für WebM siehe
+     * readWebmMeta() weiter unten (anderes Container-Format, EBML).
      *
      * @return array{duration_seconds:int|null,width:int|null,height:int|null}
      */
@@ -585,6 +593,216 @@ final class MediaService
         $heightFixed = unpack('N', substr($raw, 4, 4))[1];
 
         return [(int) round($widthFixed / 65536), (int) round($heightFixed / 65536)];
+    }
+
+    // -------------------------------------------------- WebM-Metadaten (EBML)
+
+    /**
+     * Dauer + Breite/Höhe aus WebM lesen (EBML-Container, wie bei Matroska) –
+     * ganz ohne ffmpeg, reines PHP-Byte-Parsing. Sucht im `Segment` das
+     * `Info`-Element (Dauer) und im `Tracks`-Element die erste Video-Spur
+     * (`Video`-Unterelement mit Pixelbreite/-höhe).
+     *
+     * @return array{duration_seconds:int|null,width:int|null,height:int|null}
+     */
+    private function readWebmMeta(string $path): array
+    {
+        $result = ['duration_seconds' => null, 'width' => null, 'height' => null];
+        $handle = @fopen($path, 'rb');
+        if ($handle === false) {
+            return $result;
+        }
+
+        try {
+            $size = @filesize($path) ?: 0;
+            $segment = $this->findEbmlElement($handle, 0, $size, 0x18538067); // Segment
+            if ($segment === null) {
+                return $result;
+            }
+            [$segStart, $segEnd] = $segment;
+
+            $info = $this->findEbmlElement($handle, $segStart, $segEnd, 0x1549A966); // Info
+            if ($info !== null) {
+                $result['duration_seconds'] = $this->readWebmDuration($handle, $info[0], $info[1]);
+            }
+
+            $tracks = $this->findEbmlElement($handle, $segStart, $segEnd, 0x1654AE6B); // Tracks
+            if ($tracks !== null) {
+                [$w, $h] = $this->readWebmVideoDimensions($handle, $tracks[0], $tracks[1]);
+                $result['width'] = $w > 0 ? $w : null;
+                $result['height'] = $h > 0 ? $h : null;
+            }
+        } catch (\Throwable) {
+            // Ungewöhnliche/kaputte Datei – ohne Metadaten weitermachen.
+        } finally {
+            fclose($handle);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Erstes Element mit dieser ID innerhalb [$start, $end) suchen (keine
+     * Rekursion in andere Elemente). Liefert [Inhalt-Start, Inhalt-Ende]
+     * oder null. Ein „Größe unbekannt"-Element (alle Datenbits 1, bei
+     * Live-Aufnahmen üblich) wird defensiv bis zum Ende des übergebenen
+     * Bereichs angenommen.
+     *
+     * @return array{0:int,1:int}|null
+     */
+    private function findEbmlElement($handle, int $start, int $end, int $targetId): ?array
+    {
+        $pos = $start;
+        while ($pos < $end) {
+            fseek($handle, $pos);
+            [$id, $idLen] = $this->readEbmlVint($handle, true);
+            if ($id === null) {
+                return null;
+            }
+            [$contentSize, $sizeLen] = $this->readEbmlVint($handle, false);
+            if ($contentSize === null) {
+                return null;
+            }
+
+            $contentStart = $pos + $idLen + $sizeLen;
+            $contentEnd = $contentSize < 0 ? $end : min($contentStart + $contentSize, $end);
+            if ($id === $targetId) {
+                return [$contentStart, $contentEnd];
+            }
+            if ($contentEnd <= $pos) {
+                return null; // Sicherheitsnetz gegen Endlosschleifen bei kaputten Daten
+            }
+            $pos = $contentEnd;
+        }
+
+        return null;
+    }
+
+    /**
+     * EBML-„VINT" lesen: das erste Bit-Muster im ersten Byte bestimmt die
+     * Länge (1–8 Byte). Bei Element-IDs bleibt das Längen-Markierungsbit
+     * Teil des Werts (`$keepMarker=true`, so wie die bekannten IDs auch
+     * dokumentiert sind), bei Größenangaben wird es abgezogen. Liefert -1
+     * als Größe, wenn alle Datenbits gesetzt sind („Größe unbekannt").
+     *
+     * @return array{0:int|null,1:int} [Wert, gelesene Bytes]
+     */
+    private function readEbmlVint($handle, bool $keepMarker): array
+    {
+        $firstRaw = fread($handle, 1);
+        if ($firstRaw === false || $firstRaw === '') {
+            return [null, 0];
+        }
+        $first = ord($firstRaw);
+        if ($first === 0) {
+            return [null, 0];
+        }
+
+        $length = 1;
+        $mask = 0x80;
+        while (($first & $mask) === 0 && $length <= 8) {
+            $mask >>= 1;
+            $length++;
+        }
+
+        $value = $keepMarker ? $first : ($first & ($mask - 1));
+        for ($i = 1; $i < $length; $i++) {
+            $b = fread($handle, 1);
+            if ($b === false || $b === '') {
+                return [null, 0];
+            }
+            $value = ($value << 8) | ord($b);
+        }
+
+        if (!$keepMarker && $value === (2 ** (7 * $length)) - 1) {
+            $value = -1; // „Größe unbekannt"
+        }
+
+        return [$value, $length];
+    }
+
+    private function readWebmDuration($handle, int $infoStart, int $infoEnd): ?int
+    {
+        $timecodeScale = 1000000; // Vorgabe laut Spezifikation (Nanosekunden)
+        $tsElement = $this->findEbmlElement($handle, $infoStart, $infoEnd, 0x2AD7B1); // TimecodeScale
+        if ($tsElement !== null) {
+            $value = $this->readWebmUint($handle, $tsElement[0], $tsElement[1] - $tsElement[0]);
+            if ($value !== null && $value > 0) {
+                $timecodeScale = $value;
+            }
+        }
+
+        $durElement = $this->findEbmlElement($handle, $infoStart, $infoEnd, 0x4489); // Duration
+        if ($durElement === null) {
+            return null;
+        }
+        $duration = $this->readWebmFloat($handle, $durElement[0], $durElement[1] - $durElement[0]);
+
+        return $duration !== null ? (int) round($duration * $timecodeScale / 1_000_000_000) : null;
+    }
+
+    /** @return array{0:int,1:int} [width, height] – [0, 0] wenn nicht gefunden. */
+    private function readWebmVideoDimensions($handle, int $tracksStart, int $tracksEnd): array
+    {
+        $pos = $tracksStart;
+        while (($entry = $this->findEbmlElement($handle, $pos, $tracksEnd, 0xAE)) !== null) { // TrackEntry
+            [$entryStart, $entryEnd] = $entry;
+
+            $typeElement = $this->findEbmlElement($handle, $entryStart, $entryEnd, 0x83); // TrackType
+            $isVideo = $typeElement !== null
+                && $this->readWebmUint($handle, $typeElement[0], $typeElement[1] - $typeElement[0]) === 1;
+
+            if ($isVideo) {
+                $videoElement = $this->findEbmlElement($handle, $entryStart, $entryEnd, 0xE0); // Video
+                if ($videoElement !== null) {
+                    [$videoStart, $videoEnd] = $videoElement;
+                    $wEl = $this->findEbmlElement($handle, $videoStart, $videoEnd, 0xB0); // PixelWidth
+                    $hEl = $this->findEbmlElement($handle, $videoStart, $videoEnd, 0xBA); // PixelHeight
+                    $w = $wEl !== null ? $this->readWebmUint($handle, $wEl[0], $wEl[1] - $wEl[0]) : null;
+                    $h = $hEl !== null ? $this->readWebmUint($handle, $hEl[0], $hEl[1] - $hEl[0]) : null;
+                    if ($w !== null && $h !== null) {
+                        return [$w, $h];
+                    }
+                }
+            }
+            $pos = $entryEnd;
+        }
+
+        return [0, 0];
+    }
+
+    private function readWebmUint($handle, int $start, int $size): ?int
+    {
+        if ($size <= 0 || $size > 8) {
+            return null;
+        }
+        fseek($handle, $start);
+        $bytes = fread($handle, $size);
+        if ($bytes === false || strlen($bytes) < $size) {
+            return null;
+        }
+        $value = 0;
+        for ($i = 0; $i < $size; $i++) {
+            $value = ($value << 8) | ord($bytes[$i]);
+        }
+
+        return $value;
+    }
+
+    private function readWebmFloat($handle, int $start, int $size): ?float
+    {
+        fseek($handle, $start);
+        $bytes = fread($handle, $size);
+        if ($bytes === false || strlen($bytes) < $size) {
+            return null;
+        }
+        $unpacked = match ($size) {
+            4 => unpack('G', $bytes), // big-endian float
+            8 => unpack('E', $bytes), // big-endian double
+            default => false,
+        };
+
+        return $unpacked !== false ? (float) $unpacked[1] : null;
     }
 
     // ---------------------------------------------------------------- intern

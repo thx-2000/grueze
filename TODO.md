@@ -122,7 +122,12 @@ Papierkorb (nur Admin sichtbar), Bilder nicht in die DB, Videos erlaubt.
   ändern/aufheben (`_visibility-fields.php` + `GalleryRepository::update()`
   schreibt die Spalte jetzt mit) – Gruppenleitung selbst weiterhin nicht
   (bleibt bei Neuanlage fix, geprüft per Testfall mit manipuliertem Request).
-- **Feiner (offen):** Sicherungs-Export als Stream statt Temp-ZIP.
+- ~~**Sicherungs-Export als Stream statt Temp-ZIP**~~ – **erledigt (v1.56.0).**
+  Neuer `App\Support\StreamZip` (eigener minimaler ZIP-Writer, STORE-Methode
+  ohne Kompression) schreibt die Medien-Sicherung direkt in den HTTP-Ausgabe-
+  Stream statt erst eine komplette temporäre ZIP-Datei auf der Platte
+  aufzubauen – Download startet sofort, nie doppelter Plattenplatz. Kein
+  ZIP64 nötig (Größen ohnehin durch `media.backup_max_bytes` gedeckelt).
 
 ## Dokumente (TH-Wunsch 2026-09-04, „Teil A")
 
@@ -285,15 +290,18 @@ v1.49.1, „Medien-Sicherung" in Verwaltung → Datensicherung).
   `GalleryController`), Sitzungsverwaltung dateibasiert unter
   `storage/tmp/chunks/<id>/` (`MediaService`, kein neues DB-Schema nötig).
   Abgebrochene Sitzungen räumt `pruneStaleChunkSessions()` im bestehenden
-  GC-Block auf (24 h). **Nur der eingeloggte Galerie-Upload** – der
-  öffentliche Beitrags-Link (`/beitragen/<token>`) lädt weiterhin in einem
-  Stück hoch (eigener, tokenbasierter Endpunkt in
-  `GalleryContributeController`, noch nicht angepasst).
+  GC-Block auf (24 h). Zunächst nur der eingeloggte Galerie-Upload –
+  ~~öffentlicher Beitrags-Link noch nicht angepasst~~ **erledigt (v1.56.0):**
+  eigene, tokenbasierte Chunk-Route in `GalleryContributeController`
+  (`/beitragen/<token>/chunk/start|teil|abschliessen`), Sitzungsbindung
+  über `link_id` statt `user_id`, geprüft per echtem anonymem Roundtrip
+  (kein Login, Cross-Token-Hijack-Versuch korrekt mit 404 abgewiesen).
 - **Video-Dauer/-Maße serverseitig:** reines PHP, kein ffmpeg/getID3 nötig –
   Hand-Parser für MP4/MOV-Boxen (`moov`/`mvhd`/`trak`/`tkhd`) in
-  `MediaService::readMp4Meta()`. WebM bleibt (noch) ohne Metadaten (EBML-
-  Format, aufwendiger). Dauer zeigt sich als Badge auf dem Video-Vorschaubild
-  (`format_duration()`-Helfer, neu).
+  `MediaService::readMp4Meta()`. ~~WebM bleibt ohne Metadaten~~ **erledigt
+  (v1.56.0):** eigener EBML-Parser (`readWebmMeta()`) für `Segment`/`Info`/
+  `Tracks`/`TrackEntry`/`Video`. Dauer zeigt sich als Badge auf dem
+  Video-Vorschaubild (`format_duration()`-Helfer, neu).
 - **Bild-Rotation aus EXIF fürs Original:** bisher nur die Vorschau-Varianten
   gedreht, jetzt auch das Original selbst (`MediaService::rotateOriginalIfNeeded()`,
   nur JPEG). GD verwirft beim Neu-Speichern alle Metadaten inkl. des
