@@ -186,6 +186,13 @@ return [
         // Voreingestellte Gültigkeit (Tage) für Weitergabe-Links zum Beisteuern
         // von Fotos ohne Login. Pro Link beim Erstellen überschreibbar.
         'link_expiry_days' => 21,
+        // Chunked Upload für sehr große Videos: der Browser teilt die Datei in
+        // Stücke, die jeweils unter dem PHP-Limit bleiben – so reicht die
+        // Standard-php.ini vieler Shared-Hoster auch für Videos über
+        // upload_max_filesize/post_max_size. Ab welcher Dateigröße gechunkt
+        // wird, und wie groß ein Stück ist (beides in Bytes).
+        'chunk_threshold_bytes' => 15728640, // 15 MiB
+        'chunk_size_bytes' => 4194304,       // 4 MiB je Stück
         // Pfad zum ImageMagick-Binary – nur nötig, wenn die PHP-Erweiterung
         // imagick fehlt UND HEIC-Bilder umgewandelt werden sollen (all-inkl).
         'convert_bin' => '/usr/bin/convert',

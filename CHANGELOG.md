@@ -3,6 +3,24 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.55.0
+
+**Galerien: große Videos, Video-Infos, korrekt gedrehte Originale.**
+
+- **Chunked Upload für sehr große Videos:** Videos über 15 MiB werden vom
+  Browser automatisch in kleine Stücke aufgeteilt und einzeln hochgeladen –
+  so klappt der Upload auch, wenn der Server (Shared Hosting) nur ein
+  kleines `upload_max_filesize`/`post_max_size` erlaubt. Für Bilder und
+  kleinere Videos ändert sich nichts.
+- **Video-Dauer wird jetzt angezeigt:** ein kleines Zeit-Abzeichen auf dem
+  Vorschaubild (z. B. „3:07"), aus MP4/MOV-Dateien direkt ausgelesen – ganz
+  ohne ffmpeg. (WebM-Videos zeigen die Dauer noch nicht an.)
+- **Fotos werden jetzt auch als Original richtig herum gespeichert:** bisher
+  wurde nur die Vorschau anhand der EXIF-Ausrichtung gedreht, das
+  Original blieb wie vom Handy geliefert (meist quergelagert mit
+  Dreh-Hinweis). Jetzt wird auch das Original selbst gedreht – wichtig z. B.
+  beim Herunterladen und Öffnen außerhalb des Browsers.
+
 ## 1.54.0
 
 **Passwort-Prüfung erweitert.**

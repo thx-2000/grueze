@@ -47,6 +47,141 @@ final class MediaService
         return is_writable($dir) ? $dir : sys_get_temp_dir();
     }
 
+    // ------------------------------------------------------- Chunked Upload
+
+    private function chunkBaseDir(): string
+    {
+        $dir = $this->tmpDir() . '/chunks';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+
+        return $dir;
+    }
+
+    /** sessionId kommt immer aus bin2hex() – trotzdem defensiv gegen Pfad-Traversal. */
+    private function chunkSessionDir(string $sessionId): string
+    {
+        $safe = preg_replace('/[^a-f0-9]/', '', $sessionId) ?? '';
+
+        return $this->chunkBaseDir() . '/' . $safe;
+    }
+
+    /** Neue Chunk-Upload-Sitzung anlegen. @return string Sitzungs-ID */
+    public function startChunkSession(int $userId, int $galleryId, string $originalName, int $totalSize, int $totalChunks): string
+    {
+        $id = bin2hex(random_bytes(16));
+        $dir = $this->chunkSessionDir($id);
+        if (!mkdir($dir, 0775, true)) {
+            throw new RuntimeException('Die Upload-Sitzung konnte nicht angelegt werden.');
+        }
+        $meta = [
+            'user_id' => $userId,
+            'gallery_id' => $galleryId,
+            'original_name' => $originalName,
+            'total_size' => $totalSize,
+            'total_chunks' => $totalChunks,
+            'created_at' => time(),
+        ];
+        file_put_contents($dir . '/meta.json', json_encode($meta));
+
+        return $id;
+    }
+
+    /** @return array<string,mixed>|null */
+    public function chunkSessionMeta(string $sessionId): ?array
+    {
+        $path = $this->chunkSessionDir($sessionId) . '/meta.json';
+        if (!is_file($path)) {
+            return null;
+        }
+        $data = json_decode((string) file_get_contents($path), true);
+
+        return is_array($data) ? $data : null;
+    }
+
+    public function writeChunkPart(string $sessionId, int $index, string $tmpUploadPath): void
+    {
+        $dir = $this->chunkSessionDir($sessionId);
+        if (!is_dir($dir) || $index < 0) {
+            throw new RuntimeException('Unbekannte Upload-Sitzung.');
+        }
+        if (!move_uploaded_file($tmpUploadPath, $dir . '/' . $index . '.part')) {
+            throw new RuntimeException('Das Stück konnte nicht gespeichert werden.');
+        }
+    }
+
+    public function chunkSessionComplete(string $sessionId, int $totalChunks): bool
+    {
+        $dir = $this->chunkSessionDir($sessionId);
+        for ($i = 0; $i < $totalChunks; $i++) {
+            if (!is_file($dir . '/' . $i . '.part')) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Alle Stücke einer Sitzung zu einer Datei zusammenfügen (streamend,
+     * damit auch sehr große Videos nicht komplett in den Speicher müssen).
+     * Die zusammengesetzte Datei liegt danach noch im Sitzungsordner –
+     * discardChunkSession() räumt sie mit weg.
+     */
+    public function assembleChunkSession(string $sessionId, int $totalChunks): string
+    {
+        $dir = $this->chunkSessionDir($sessionId);
+        $out = $dir . '/assembled.bin';
+        $outHandle = fopen($out, 'wb');
+        if ($outHandle === false) {
+            throw new RuntimeException('Die Datei konnte nicht zusammengesetzt werden.');
+        }
+        for ($i = 0; $i < $totalChunks; $i++) {
+            $partHandle = fopen($dir . '/' . $i . '.part', 'rb');
+            if ($partHandle === false) {
+                fclose($outHandle);
+                throw new RuntimeException('Es fehlt ein Teil der Datei.');
+            }
+            stream_copy_to_stream($partHandle, $outHandle);
+            fclose($partHandle);
+        }
+        fclose($outHandle);
+
+        return $out;
+    }
+
+    public function discardChunkSession(string $sessionId): void
+    {
+        $dir = $this->chunkSessionDir($sessionId);
+        if (!is_dir($dir)) {
+            return;
+        }
+        foreach (glob($dir . '/*') ?: [] as $file) {
+            @unlink($file);
+        }
+        @rmdir($dir);
+    }
+
+    /** Abgebrochene/nie fertiggestellte Upload-Sitzungen aufräumen (GC, kein Cron nötig). */
+    public function pruneStaleChunkSessions(int $maxAgeHours = 24): void
+    {
+        foreach (glob($this->chunkBaseDir() . '/*', GLOB_ONLYDIR) ?: [] as $dir) {
+            $metaPath = $dir . '/meta.json';
+            $createdAt = 0;
+            if (is_file($metaPath)) {
+                $data = json_decode((string) file_get_contents($metaPath), true);
+                $createdAt = is_array($data) ? (int) ($data['created_at'] ?? 0) : 0;
+            }
+            if ($createdAt === 0 || (time() - $createdAt) > $maxAgeHours * 3600) {
+                foreach (glob($dir . '/*') ?: [] as $file) {
+                    @unlink($file);
+                }
+                @rmdir($dir);
+            }
+        }
+    }
+
     /** Absoluter Pfad zu einem gespeicherten Medienpfad (nie aus Nutzereingabe). */
     public function absolutePath(string $relative): ?string
     {
@@ -188,8 +323,14 @@ final class MediaService
             @unlink($cleanupWork);
         }
 
-        $dimensions = @getimagesize($storedAbs) ?: [0, 0];
+        // Aufnahmezeit erst lesen, dann drehen – GD verwirft beim Neu-
+        // Speichern alle Metadaten (auch den Orientation-Tag selbst, das
+        // Original braucht danach keine EXIF-Drehung mehr durch den Browser).
         $capturedAt = $this->readCapturedAt($storedAbs, $mime);
+        if ($mime === 'image/jpeg') {
+            $this->rotateOriginalIfNeeded($storedAbs);
+        }
+        $dimensions = @getimagesize($storedAbs) ?: [0, 0];
 
         $thumbMax = (int) config('media.thumb_max_edge', 400);
         $webMax = (int) config('media.web_max_edge', 1600);
@@ -246,6 +387,10 @@ final class MediaService
             throw new RuntimeException('Das Video konnte nicht gespeichert werden.');
         }
 
+        $videoMeta = in_array($mime, ['video/mp4', 'video/quicktime'], true)
+            ? $this->readMp4Meta($storedAbs)
+            : ['duration_seconds' => null, 'width' => null, 'height' => null];
+
         $thumbRel = null;
         if ($posterTmp !== null && is_file($posterTmp) && extension_loaded('gd')) {
             $thumbAbs = $dir . '/' . $id . '_t.jpg';
@@ -265,11 +410,181 @@ final class MediaService
             'web_path' => null,
             'mime' => $mime,
             'byte_size' => @filesize($storedAbs) ?: $size,
-            'width' => null,
-            'height' => null,
-            'duration_seconds' => null,
+            'width' => $videoMeta['width'],
+            'height' => $videoMeta['height'],
+            'duration_seconds' => $videoMeta['duration_seconds'],
             'captured_at' => null,
         ];
+    }
+
+    // ------------------------------------------------------- Video-Metadaten
+
+    /**
+     * Dauer + Breite/Höhe aus MP4/MOV lesen (ISO-Base-Media-Container) –
+     * ganz ohne ffmpeg (auf Shared Hosting meist nicht verfügbar), reines
+     * PHP-Byte-Parsing der `moov`/`mvhd`/`trak`/`tkhd`-Boxen. WebM (EBML-
+     * Format) wird nicht unterstützt und liefert nur `null`-Werte – kein
+     * Rückschritt gegenüber vorher, nur (noch) keine Verbesserung dafür.
+     *
+     * @return array{duration_seconds:int|null,width:int|null,height:int|null}
+     */
+    private function readMp4Meta(string $path): array
+    {
+        $result = ['duration_seconds' => null, 'width' => null, 'height' => null];
+        $handle = @fopen($path, 'rb');
+        if ($handle === false) {
+            return $result;
+        }
+
+        try {
+            $size = @filesize($path) ?: 0;
+            $moov = $this->findChildBox($handle, 0, $size, 'moov');
+            if ($moov === null) {
+                return $result;
+            }
+            [$moovStart, $moovEnd] = $moov;
+
+            $mvhd = $this->findChildBox($handle, $moovStart, $moovEnd, 'mvhd');
+            if ($mvhd !== null) {
+                $result['duration_seconds'] = $this->readMvhdDuration($handle, $mvhd[0]);
+            }
+
+            // Mehrere Spuren möglich (Video + Audio) – tkhd verrät den Typ
+            // nicht direkt, daher die mit der größten Fläche nehmen (eine
+            // Audiospur hat width=height=0).
+            $bestArea = 0;
+            $pos = $moovStart;
+            while (($trak = $this->findChildBox($handle, $pos, $moovEnd, 'trak')) !== null) {
+                [$trakStart, $trakEnd] = $trak;
+                $tkhd = $this->findChildBox($handle, $trakStart, $trakEnd, 'tkhd');
+                if ($tkhd !== null) {
+                    [$w, $h] = $this->readTkhdDimensions($handle, $tkhd[0]);
+                    if ($w * $h > $bestArea) {
+                        $bestArea = $w * $h;
+                        $result['width'] = $w > 0 ? $w : null;
+                        $result['height'] = $h > 0 ? $h : null;
+                    }
+                }
+                $pos = $trakEnd;
+            }
+        } catch (\Throwable) {
+            // Ungewöhnliche/kaputte Datei – ohne Metadaten weitermachen,
+            // der Upload selbst darf daran nicht scheitern.
+        } finally {
+            fclose($handle);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Erste Box mit diesem Typ innerhalb [$start, $end) suchen (keine
+     * Rekursion in andere Boxen – wird gezielt mit dem Container-Bereich
+     * aufgerufen). Liefert [Inhalt-Start, Inhalt-Ende] (nach dem 8/16-Byte
+     * Box-Header) oder null.
+     *
+     * @return array{0:int,1:int}|null
+     */
+    private function findChildBox($handle, int $start, int $end, string $type): ?array
+    {
+        $pos = $start;
+        while ($pos + 8 <= $end) {
+            fseek($handle, $pos);
+            $header = fread($handle, 8);
+            if ($header === false || strlen($header) < 8) {
+                return null;
+            }
+            $boxSize = unpack('N', substr($header, 0, 4))[1];
+            $boxType = substr($header, 4, 4);
+            $headerSize = 8;
+
+            if ($boxSize === 1) {
+                $ext = fread($handle, 8);
+                if ($ext === false || strlen($ext) < 8) {
+                    return null;
+                }
+                $hi = unpack('N', substr($ext, 0, 4))[1];
+                $lo = unpack('N', substr($ext, 4, 4))[1];
+                $boxSize = ($hi << 32) | $lo;
+                $headerSize = 16;
+            } elseif ($boxSize === 0) {
+                $boxSize = $end - $pos;
+            }
+            if ($boxSize < $headerSize) {
+                return null; // korrupt – Größe kleiner als der eigene Header
+            }
+
+            $contentStart = $pos + $headerSize;
+            $contentEnd = min($pos + $boxSize, $end);
+            if ($boxType === $type) {
+                return [$contentStart, $contentEnd];
+            }
+            $pos += $boxSize;
+        }
+
+        return null;
+    }
+
+    private function readMvhdDuration($handle, int $contentStart): ?int
+    {
+        fseek($handle, $contentStart);
+        $versionByte = fread($handle, 1);
+        if ($versionByte === false || $versionByte === '') {
+            return null;
+        }
+        $version = ord($versionByte);
+        $skip = $version === 1 ? 16 : 8; // creation_time + modification_time
+
+        fseek($handle, $contentStart + 4 + $skip);
+        $timescaleRaw = fread($handle, 4);
+        if ($timescaleRaw === false || strlen($timescaleRaw) < 4) {
+            return null;
+        }
+        $timescale = unpack('N', $timescaleRaw)[1];
+
+        if ($version === 1) {
+            $durationRaw = fread($handle, 8);
+            if ($durationRaw === false || strlen($durationRaw) < 8) {
+                return null;
+            }
+            $hi = unpack('N', substr($durationRaw, 0, 4))[1];
+            $lo = unpack('N', substr($durationRaw, 4, 4))[1];
+            $duration = ($hi << 32) | $lo;
+        } else {
+            $durationRaw = fread($handle, 4);
+            if ($durationRaw === false || strlen($durationRaw) < 4) {
+                return null;
+            }
+            $duration = unpack('N', $durationRaw)[1];
+        }
+
+        return $timescale > 0 ? (int) round($duration / $timescale) : null;
+    }
+
+    /** @return array{0:int,1:int} [width, height] – [0, 0] wenn nicht lesbar. */
+    private function readTkhdDimensions($handle, int $contentStart): array
+    {
+        fseek($handle, $contentStart);
+        $versionByte = fread($handle, 1);
+        if ($versionByte === false || $versionByte === '') {
+            return [0, 0];
+        }
+        $version = ord($versionByte);
+        // v0: creation(4)+modification(4)+track_ID(4)+reserved(4)+duration(4) = 20
+        // v1: creation(8)+modification(8)+track_ID(4)+reserved(4)+duration(8) = 32
+        $afterVersionFlags = $version === 1 ? 32 : 20;
+        // + reserved[2]*4(8) + layer(2) + alternate_group(2) + volume(2) + reserved(2) + matrix(36) = 52
+        $offset = $contentStart + 4 + $afterVersionFlags + 52;
+
+        fseek($handle, $offset);
+        $raw = fread($handle, 8);
+        if ($raw === false || strlen($raw) < 8) {
+            return [0, 0];
+        }
+        $widthFixed = unpack('N', substr($raw, 0, 4))[1];
+        $heightFixed = unpack('N', substr($raw, 4, 4))[1];
+
+        return [(int) round($widthFixed / 65536), (int) round($heightFixed / 65536)];
     }
 
     // ---------------------------------------------------------------- intern
@@ -419,14 +734,8 @@ final class MediaService
             return $image;
         }
         $exif = @exif_read_data($path);
-        $orientation = (int) ($exif['Orientation'] ?? 0);
-
-        $rotated = match ($orientation) {
-            3 => @imagerotate($image, 180, 0),
-            6 => @imagerotate($image, -90, 0),
-            8 => @imagerotate($image, 90, 0),
-            default => null,
-        };
+        $angle = self::rotationAngleFor((int) ($exif['Orientation'] ?? 0));
+        $rotated = $angle !== null ? @imagerotate($image, $angle, 0) : null;
         if ($rotated instanceof \GdImage) {
             imagedestroy($image);
 
@@ -434,6 +743,47 @@ final class MediaService
         }
 
         return $image;
+    }
+
+    /**
+     * Original-JPEG physisch entsprechend seinem EXIF-Orientation-Tag drehen
+     * und neu speichern (Original bekam bisher nur bei den Vorschau-Varianten
+     * eine Drehung, nicht selbst). GD verwirft dabei alle Metadaten inkl.
+     * Orientation-Tag – danach ist die Datei „normal" orientiert, ein
+     * Browser dreht sie beim direkten Anzeigen also nicht noch einmal.
+     */
+    private function rotateOriginalIfNeeded(string $path): void
+    {
+        if (!extension_loaded('exif') || !extension_loaded('gd')) {
+            return;
+        }
+        $exif = @exif_read_data($path);
+        $angle = self::rotationAngleFor((int) ($exif['Orientation'] ?? 0));
+        if ($angle === null) {
+            return;
+        }
+
+        $image = @imagecreatefromjpeg($path);
+        if (!$image instanceof \GdImage) {
+            return;
+        }
+        $rotated = @imagerotate($image, $angle, 0);
+        imagedestroy($image);
+        if ($rotated instanceof \GdImage) {
+            @imagejpeg($rotated, $path, 95);
+            imagedestroy($rotated);
+        }
+    }
+
+    /** EXIF-Orientation → Grad für imagerotate() (das dreht mathematisch gegen den Uhrzeigersinn). */
+    private static function rotationAngleFor(int $orientation): ?int
+    {
+        return match ($orientation) {
+            3 => 180,
+            6 => -90,
+            8 => 90,
+            default => null,
+        };
     }
 
     private function readCapturedAt(string $path, string $mime): ?string

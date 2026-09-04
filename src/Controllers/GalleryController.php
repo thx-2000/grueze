@@ -375,19 +375,147 @@ final class GalleryController extends BaseController
 
         $mediaId = $this->media->add((int) $gallery['id'], $meta, $this->userId());
 
-        JsonResponse::send([
-            'ok' => true,
-            'media' => [
-                'id' => $mediaId,
-                'kind' => $meta['kind'],
-                'name' => $meta['original_name'],
-                'has_thumb' => !empty($meta['thumb_path']),
-                'own' => true,
-                'thumb_url' => url('/galerien/datei?id=' . $mediaId . '&v=thumb'),
-                'full_url' => url('/galerien/datei?id=' . $mediaId . '&v=' . ($meta['kind'] === 'video' ? 'original' : 'web')),
-                'download_url' => url('/galerien/datei?id=' . $mediaId . '&v=original&dl=1'),
-            ],
-        ]);
+        JsonResponse::send(['ok' => true, 'media' => $this->mediaJsonPayload($mediaId, $meta)]);
+    }
+
+    // ------------------------------------------------- Chunked Upload (Video)
+
+    /**
+     * Sehr große Videos in Stücken hochladen, damit der Server-Zwang
+     * upload_max_filesize/post_max_size (auf Shared Hosting oft klein) nicht
+     * greift – jedes Stück bleibt darunter. Ablauf: chunkStart() legt eine
+     * Sitzung an, chunkPart() nimmt die Stücke entgegen, chunkFinish() setzt
+     * sie zusammen und läuft danach durch dieselbe ingest()-Pipeline wie ein
+     * normaler Upload.
+     */
+    public function chunkStart(Request $request): void
+    {
+        ob_start();
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+
+        $gallery = $this->galleries->find((int) $request->input('gallery_id'));
+        if ($gallery === null) {
+            JsonResponse::send(['ok' => false, 'error' => 'Galerie nicht gefunden.'], 404);
+        }
+        if (!$this->canUploadToGallery($gallery)) {
+            JsonResponse::send(['ok' => false, 'error' => 'Zum Hochladen fehlt die Berechtigung.'], 403);
+        }
+
+        $filename = trim((string) $request->input('filename'));
+        $totalSize = (int) $request->input('total_size');
+        $totalChunks = (int) $request->input('total_chunks');
+        if ($filename === '' || $totalSize <= 0 || $totalChunks <= 0 || $totalChunks > 100000) {
+            JsonResponse::send(['ok' => false, 'error' => 'Ungültige Angaben.'], 400);
+        }
+
+        $maxAllowed = max((int) config('media.max_image_bytes', 25165824), (int) config('media.max_video_bytes', 524288000));
+        if ($totalSize > $maxAllowed) {
+            JsonResponse::send(['ok' => false, 'error' => 'Die Datei ist zu groß (max. ' . MediaService::humanBytes($maxAllowed) . ').'], 422);
+        }
+
+        $sessionId = $this->storage->startChunkSession((int) $this->userId(), (int) $gallery['id'], $filename, $totalSize, $totalChunks);
+        JsonResponse::send(['ok' => true, 'session_id' => $sessionId]);
+    }
+
+    public function chunkPart(Request $request): void
+    {
+        ob_start();
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+
+        [$meta, $gallery, $error] = $this->chunkSessionGuard($request);
+        if ($error !== null) {
+            JsonResponse::send(['ok' => false, 'error' => $error[0]], $error[1]);
+        }
+
+        $chunk = $request->file('chunk');
+        if (!$chunk || (int) ($chunk['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file((string) ($chunk['tmp_name'] ?? ''))) {
+            JsonResponse::send(['ok' => false, 'error' => 'Ungültiges Datei-Stück.'], 400);
+        }
+
+        try {
+            $this->storage->writeChunkPart((string) $request->input('session_id'), (int) $request->input('index'), (string) $chunk['tmp_name']);
+        } catch (RuntimeException $e) {
+            JsonResponse::send(['ok' => false, 'error' => $e->getMessage()], 422);
+        }
+
+        JsonResponse::send(['ok' => true]);
+    }
+
+    public function chunkFinish(Request $request): void
+    {
+        ob_start();
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+
+        $sessionId = (string) $request->input('session_id');
+        [$meta, $gallery, $error] = $this->chunkSessionGuard($request);
+        if ($error !== null) {
+            JsonResponse::send(['ok' => false, 'error' => $error[0]], $error[1]);
+        }
+
+        $totalChunks = (int) $meta['total_chunks'];
+        if (!$this->storage->chunkSessionComplete($sessionId, $totalChunks)) {
+            JsonResponse::send(['ok' => false, 'error' => 'Es fehlen noch Teile der Datei.'], 422);
+        }
+
+        $posterTmp = null;
+        $poster = $request->file('poster');
+        if ($poster && (int) ($poster['error'] ?? 1) === UPLOAD_ERR_OK && is_uploaded_file((string) $poster['tmp_name'])) {
+            $posterTmp = (string) $poster['tmp_name'];
+        }
+
+        try {
+            $assembled = $this->storage->assembleChunkSession($sessionId, $totalChunks);
+            $ingested = $this->storage->ingest($assembled, (string) $meta['original_name'], (int) (@filesize($assembled) ?: $meta['total_size']), $posterTmp, false);
+        } catch (RuntimeException $e) {
+            $this->storage->discardChunkSession($sessionId);
+            JsonResponse::send(['ok' => false, 'error' => $e->getMessage()], 422);
+        }
+        $this->storage->discardChunkSession($sessionId);
+
+        $mediaId = $this->media->add((int) $gallery['id'], $ingested, $this->userId());
+
+        JsonResponse::send(['ok' => true, 'media' => $this->mediaJsonPayload($mediaId, $ingested)]);
+    }
+
+    /**
+     * Sitzung laden + Besitz/Berechtigung prüfen – gemeinsame Vorprüfung für
+     * chunkPart()/chunkFinish().
+     *
+     * @return array{0: array<string,mixed>, 1: array<string,mixed>, 2: array{0:string,1:int}|null}
+     *         [meta, gallery, error] – error ist null, wenn alles ok ist
+     *         (dann sind meta/gallery gültig befüllt).
+     */
+    private function chunkSessionGuard(Request $request): array
+    {
+        $sessionId = (string) $request->input('session_id');
+        $meta = $this->storage->chunkSessionMeta($sessionId);
+        if ($meta === null || (int) ($meta['user_id'] ?? 0) !== (int) $this->userId()) {
+            return [[], [], ['Unbekannte Upload-Sitzung.', 404]];
+        }
+        $gallery = $this->galleries->find((int) $meta['gallery_id']);
+        if ($gallery === null || !$this->canUploadToGallery($gallery)) {
+            return [[], [], ['Zum Hochladen fehlt die Berechtigung.', 403]];
+        }
+
+        return [$meta, $gallery, null];
+    }
+
+    /** @return array<string,mixed> */
+    private function mediaJsonPayload(int $mediaId, array $meta): array
+    {
+        return [
+            'id' => $mediaId,
+            'kind' => $meta['kind'],
+            'name' => $meta['original_name'],
+            'has_thumb' => !empty($meta['thumb_path']),
+            'own' => true,
+            'thumb_url' => url('/galerien/datei?id=' . $mediaId . '&v=thumb'),
+            'full_url' => url('/galerien/datei?id=' . $mediaId . '&v=' . ($meta['kind'] === 'video' ? 'original' : 'web')),
+            'download_url' => url('/galerien/datei?id=' . $mediaId . '&v=original&dl=1'),
+        ];
     }
 
     // -------------------------------------------------------- Medien-Aktionen

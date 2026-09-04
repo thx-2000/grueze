@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.54.0';
+    return '1.55.0';
 }
 
 /**
@@ -884,6 +884,21 @@ function format_datetime(?string $value): string
     } catch (Throwable) {
         return (string) $value;
     }
+}
+
+/** Sekunden als „1:23:45" bzw. „3:07" – für Video-Badges in den Galerien. */
+function format_duration(?int $seconds): string
+{
+    if ($seconds === null || $seconds < 0) {
+        return '';
+    }
+    $h = intdiv($seconds, 3600);
+    $m = intdiv($seconds % 3600, 60);
+    $s = $seconds % 60;
+
+    return $h > 0
+        ? sprintf('%d:%02d:%02d', $h, $m, $s)
+        : sprintf('%d:%02d', $m, $s);
 }
 
 /** „Fr, 12. Sep 2026 um 18:00 Uhr" – für Abstimmungs-Fristen. */

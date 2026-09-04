@@ -27,7 +27,11 @@ $captured = trim((string) ($item['captured_at'] ?? ''));
         <?php else: ?>
             <span class="media-thumb-fallback"><?= icon($isVideo ? 'video' : 'image') ?></span>
         <?php endif; ?>
-        <?php if ($isVideo): ?><span class="media-play" aria-hidden="true"><?= icon('play') ?></span><?php endif; ?>
+        <?php if ($isVideo): ?>
+            <span class="media-play" aria-hidden="true"><?= icon('play') ?></span>
+            <?php $duration = format_duration($item['duration_seconds'] !== null ? (int) $item['duration_seconds'] : null); ?>
+            <?php if ($duration !== ''): ?><span class="media-duration"><?= e($duration) ?></span><?php endif; ?>
+        <?php endif; ?>
     </button>
 
     <div class="media-meta">

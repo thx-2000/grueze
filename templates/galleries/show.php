@@ -115,11 +115,16 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
          data-gallery-id="<?= e((string) $g['id']) ?>"
          data-upload-url="<?= e(url('/galerien/hochladen')) ?>"
          data-max-image="<?= e((string) $maxImage) ?>"
-         data-max-video="<?= e((string) $maxVideo) ?>">
+         data-max-video="<?= e((string) $maxVideo) ?>"
+         data-chunk-threshold="<?= e((string) config('media.chunk_threshold_bytes', 15728640)) ?>"
+         data-chunk-size="<?= e((string) config('media.chunk_size_bytes', 4194304)) ?>"
+         data-chunk-start-url="<?= e(url('/galerien/chunk/start')) ?>"
+         data-chunk-part-url="<?= e(url('/galerien/chunk/teil')) ?>"
+         data-chunk-finish-url="<?= e(url('/galerien/chunk/abschliessen')) ?>">
     <div class="dropzone" data-dropzone tabindex="0" role="button" aria-label="Dateien zum Hochladen auswählen">
         <?= icon('upload') ?>
         <p><strong>Fotos &amp; Videos hier ablegen</strong><br>oder <button type="button" class="linkish" data-pick>Dateien auswählen</button></p>
-        <p class="muted">Mehrere gleichzeitig möglich. Bilder bis <?= e(\App\Services\MediaService::humanBytes($maxImage)) ?>, Videos bis <?= e(\App\Services\MediaService::humanBytes($maxVideo)) ?>.</p>
+        <p class="muted">Mehrere gleichzeitig möglich. Bilder bis <?= e(\App\Services\MediaService::humanBytes($maxImage)) ?>, Videos bis <?= e(\App\Services\MediaService::humanBytes($maxVideo)) ?> (größere Videos werden automatisch in Stücken hochgeladen).</p>
         <input type="file" hidden multiple accept="image/*,video/*" data-file-input>
     </div>
     <ul class="upload-queue" data-upload-queue hidden></ul>

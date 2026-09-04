@@ -70,6 +70,12 @@
     var maxImage = uploadPanel ? parseInt(uploadPanel.getAttribute('data-max-image'), 10) || 0 : 0;
     var maxVideo = uploadPanel ? parseInt(uploadPanel.getAttribute('data-max-video'), 10) || 0 : 0;
     var uploadUrl = uploadPanel ? uploadPanel.getAttribute('data-upload-url') : '';
+    var chunkThreshold = uploadPanel ? parseInt(uploadPanel.getAttribute('data-chunk-threshold'), 10) || 0 : 0;
+    var chunkSize = uploadPanel ? parseInt(uploadPanel.getAttribute('data-chunk-size'), 10) || 0 : 0;
+    var chunkStartUrl = uploadPanel ? uploadPanel.getAttribute('data-chunk-start-url') : '';
+    var chunkPartUrl = uploadPanel ? uploadPanel.getAttribute('data-chunk-part-url') : '';
+    var chunkFinishUrl = uploadPanel ? uploadPanel.getAttribute('data-chunk-finish-url') : '';
+    var canChunk = !!(chunkThreshold && chunkSize && chunkStartUrl && chunkPartUrl && chunkFinishUrl);
     var pending = [];
     var running = false;
     var needsReload = false;
@@ -204,8 +210,72 @@
             xhr.send(fd);
         };
 
+        // Große Videos in Stücken hochladen (bleibt unter dem PHP-Limit des
+        // Servers) – kleinere Dateien und der öffentliche Beitrags-Link ohne
+        // Chunk-Unterstützung laufen weiter über den normalen Einzel-POST.
+        var sendChunked = function (poster) {
+            var file = job.file;
+            var totalChunks = Math.ceil(file.size / chunkSize);
+            var sessionId = null;
+
+            var sendPart = function (index) {
+                var start = index * chunkSize;
+                var fd = new FormData();
+                fd.append('session_id', sessionId);
+                fd.append('index', String(index));
+                fd.append('chunk', file.slice(start, Math.min(start + chunkSize, file.size)), file.name);
+                return post(chunkPartUrl, fd).then(function (res) {
+                    if (!res || !res.ok) { throw new Error((res && res.error) || 'Ein Stück ist fehlgeschlagen.'); }
+                    fill.style.width = Math.round(((index + 1) / totalChunks) * 100) + '%';
+                });
+            };
+            var sendPartsFrom = function (index) {
+                if (index >= totalChunks) { return Promise.resolve(); }
+                return sendPart(index).then(function () { return sendPartsFrom(index + 1); });
+            };
+
+            var startFd = new FormData();
+            startFd.append('gallery_id', galleryId);
+            startFd.append('filename', file.name);
+            startFd.append('total_size', String(file.size));
+            startFd.append('total_chunks', String(totalChunks));
+
+            post(chunkStartUrl, startFd)
+                .then(function (res) {
+                    if (!res || !res.ok) { throw new Error((res && res.error) || 'Konnte Upload nicht starten.'); }
+                    sessionId = res.session_id;
+                    return sendPartsFrom(0);
+                })
+                .then(function () {
+                    var finishFd = new FormData();
+                    finishFd.append('session_id', sessionId);
+                    if (poster) finishFd.append('poster', poster, 'poster.jpg');
+                    return post(chunkFinishUrl, finishFd);
+                })
+                .then(function (res) {
+                    if (!res || !res.ok) { throw new Error((res && res.error) || 'Fehler beim Zusammenfügen.'); }
+                    job.row.classList.add('is-done');
+                    state.textContent = 'fertig';
+                    fill.style.width = '100%';
+                    addTile(res.media);
+                    updateCount(1);
+                    setTimeout(function () { job.row.remove(); if (!queueEl.children.length) queueEl.hidden = true; }, 1500);
+                })
+                .catch(function (err) {
+                    job.row.classList.add('is-error');
+                    state.textContent = (err && err.message) || 'Fehler beim Hochladen.';
+                })
+                .then(function () { running = false; pump(); });
+        };
+
         if (job.isVideo) {
-            videoPoster(job.file).then(send);
+            videoPoster(job.file).then(function (poster) {
+                if (canChunk && job.file.size > chunkThreshold) {
+                    sendChunked(poster);
+                } else {
+                    send(poster);
+                }
+            });
         } else {
             send(null);
         }

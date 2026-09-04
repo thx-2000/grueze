@@ -271,11 +271,34 @@ inline in der Matrix, Rechte nach Bereich gruppiert sichtbar.
 - **Chat für Online-Nutzer:innen** – TH hält es selbst für unwahrscheinlich,
   nur mitführen. Größter Brocken (Polling/SSE, Moderation, Datenschutz).
 
-Offene Feinheiten für später: chunked upload für sehr große Videos (jetzt ein
-POST pro Datei, begrenzt durch `post_max_size`); Video-Dauer/Maße serverseitig
-(bräuchte getID3 o. ä., ffmpeg fehlt auf Shared Hosting); Bild-Rotation aus
-EXIF fürs Original (jetzt nur in den Vorschau-Varianten); Galerie-Medien in
-eine separate Sicherung einbinden.
+~~Galerie-Medien in eine separate Sicherung einbinden~~ – erledigt (v1.48.0/
+v1.49.1, „Medien-Sicherung" in Verwaltung → Datensicherung).
+
+~~**Chunked Upload, Video-Metadaten, EXIF-Original-Drehung**~~ – **erledigt
+(v1.55.0).**
+- **Chunked Upload für sehr große Videos:** Client teilt Dateien über
+  `media.chunk_threshold_bytes` (Standard 15 MiB) in Stücke von
+  `media.chunk_size_bytes` (Standard 4 MiB) und lädt sie einzeln hoch – so
+  reicht die Standard-`php.ini` vieler Shared-Hoster auch für sehr große
+  Videos, ohne `upload_max_filesize`/`post_max_size` anheben zu müssen.
+  Drei neue Endpunkte (`/galerien/chunk/start|teil|abschliessen`,
+  `GalleryController`), Sitzungsverwaltung dateibasiert unter
+  `storage/tmp/chunks/<id>/` (`MediaService`, kein neues DB-Schema nötig).
+  Abgebrochene Sitzungen räumt `pruneStaleChunkSessions()` im bestehenden
+  GC-Block auf (24 h). **Nur der eingeloggte Galerie-Upload** – der
+  öffentliche Beitrags-Link (`/beitragen/<token>`) lädt weiterhin in einem
+  Stück hoch (eigener, tokenbasierter Endpunkt in
+  `GalleryContributeController`, noch nicht angepasst).
+- **Video-Dauer/-Maße serverseitig:** reines PHP, kein ffmpeg/getID3 nötig –
+  Hand-Parser für MP4/MOV-Boxen (`moov`/`mvhd`/`trak`/`tkhd`) in
+  `MediaService::readMp4Meta()`. WebM bleibt (noch) ohne Metadaten (EBML-
+  Format, aufwendiger). Dauer zeigt sich als Badge auf dem Video-Vorschaubild
+  (`format_duration()`-Helfer, neu).
+- **Bild-Rotation aus EXIF fürs Original:** bisher nur die Vorschau-Varianten
+  gedreht, jetzt auch das Original selbst (`MediaService::rotateOriginalIfNeeded()`,
+  nur JPEG). GD verwirft beim Neu-Speichern alle Metadaten inkl. des
+  Orientation-Tags – das Original braucht danach keine Dreh-Korrektur mehr
+  durch den Browser, Breite/Höhe werden nach der Drehung neu gelesen.
 
 ## UX-Review – Umsetzung (Entscheidungen TH 2026-09-04)
 

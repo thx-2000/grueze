@@ -528,6 +528,8 @@ try {
                 }
             }
             Container::get(\App\Repositories\GalleryUploadLinkRepository::class)->pruneOld(30);
+            // Abgebrochene Chunk-Uploads (Tab geschlossen o. ä.) aufräumen.
+            Container::get(\App\Services\MediaService::class)->pruneStaleChunkSessions();
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
         }
@@ -688,6 +690,9 @@ try {
     $router->get('/galerien/ansehen', [\App\Controllers\GalleryController::class, 'show']);
     $router->post('/galerien/speichern', [\App\Controllers\GalleryController::class, 'update']);
     $router->post('/galerien/hochladen', [\App\Controllers\GalleryController::class, 'upload']);
+    $router->post('/galerien/chunk/start', [\App\Controllers\GalleryController::class, 'chunkStart']);
+    $router->post('/galerien/chunk/teil', [\App\Controllers\GalleryController::class, 'chunkPart']);
+    $router->post('/galerien/chunk/abschliessen', [\App\Controllers\GalleryController::class, 'chunkFinish']);
     $router->post('/galerien/medien/beschriftung', [\App\Controllers\GalleryController::class, 'mediaCaption']);
     $router->post('/galerien/medien/sortieren', [\App\Controllers\GalleryController::class, 'mediaReorder']);
     $router->post('/galerien/medien/loeschen', [\App\Controllers\GalleryController::class, 'mediaDelete']);

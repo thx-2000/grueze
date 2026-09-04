@@ -5758,6 +5758,18 @@ body { display: block; }
 }
 .media-play .icon,
 .media-play svg { width: 2.4rem; height: 2.4rem; color: #fff; fill: currentColor; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5)); }
+.media-duration {
+    position: absolute;
+    right: 0.35rem;
+    bottom: 0.35rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 0.3rem;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+}
 
 .media-meta { display: flex; align-items: center; gap: 0.3rem; }
 .media-caption {
