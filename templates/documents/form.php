@@ -2,6 +2,7 @@
 /**
  * @var array<string,mixed>|null $folder
  * @var array<string,mixed>|null $parent  gesetzt = Unterordner wird angelegt
+ * @var list<array<string,mixed>> $announcements
  * @var list<array<string,mixed>> $groupChoices
  * @var bool $canPickGroup
  */
@@ -33,6 +34,16 @@ $parent = $parent ?? null;
         <label>
             <span>Beschreibung</span>
             <textarea name="description" rows="3" maxlength="5000"><?= e((string) ($f['description'] ?? old('description'))) ?></textarea>
+        </label>
+
+        <label>
+            <span>Zu einer Ankündigung (optional)</span>
+            <select name="announcement_id">
+                <option value="">— keine Ankündigung —</option>
+                <?php foreach ($announcements as $announcement): ?>
+                    <option value="<?= e((string) $announcement['id']) ?>" <?= (int) ($f['announcement_id'] ?? 0) === (int) $announcement['id'] ? 'selected' : '' ?>><?= e($announcement['title']) ?></option>
+                <?php endforeach; ?>
+            </select>
         </label>
 
         <?php view_partial('documents/_visibility-fields', ['folder' => $folder, 'groupChoices' => $groupChoices, 'canPickGroup' => $canPickGroup]); ?>

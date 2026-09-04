@@ -39,9 +39,10 @@ $links = $isEdit ? ($a['links'] ?? []) : [];
     </div>
 </section>
 
-<section class="detail-card">
+<section class="detail-card" data-audience-picker data-count-url="<?= e(url('/termine/sichtbarkeit-vorschau')) ?>">
     <h2>Sichtbar für</h2>
     <p class="field-hint">Ohne Auswahl sehen alle angemeldeten Personen die Ankündigung. Mit Auswahl nur die gewählten Personen, Mitglieder der gewählten Gruppen oder Personen mit den gewählten Tags. Verwaltung sieht immer alles.</p>
+    <p class="audience-preview"><?= icon('eye') ?> <strong data-audience-count>…</strong> <span data-audience-count-label>Personen sehen das</span></p>
     <div class="form-grid">
         <label>
             <span>Bestimmte Personen</span>

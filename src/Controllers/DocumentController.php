@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Csrf;
 use App\Core\Request;
+use App\Repositories\AnnouncementRepository;
 use App\Repositories\DocumentFolderRepository;
 use App\Repositories\DocumentRepository;
 use App\Repositories\GroupRepository;
@@ -46,6 +47,7 @@ final class DocumentController extends BaseController
         private DocumentStorageService $storage,
         private LogRepository $logs,
         private GroupRepository $groups,
+        private AnnouncementRepository $announcements,
     ) {
         parent::__construct($auth);
     }
@@ -84,6 +86,7 @@ final class DocumentController extends BaseController
         $this->render('documents/form', [
             'folder' => null,
             'parent' => $parent,
+            'announcements' => $this->announcements->all(),
             'groupChoices' => $this->groupChoicesForCreate(),
             'canPickGroup' => $this->canManage(),
         ]);
@@ -148,6 +151,7 @@ final class DocumentController extends BaseController
             'canManage' => $canManageThis,
             'canUpload' => $this->canUploadToFolder($folder),
             'currentUserId' => (int) $this->userId(),
+            'announcements' => $this->announcements->all(),
             'groupChoices' => $this->groupChoicesForCreate(),
             'canPickGroup' => $this->canManage(),
             'maxBytes' => $this->storage->maxBytes(),
@@ -529,6 +533,7 @@ final class DocumentController extends BaseController
         return [
             'title' => mb_substr(trim((string) $request->input('title')), 0, 190),
             'description' => mb_substr(trim((string) $request->input('description')), 0, 5000),
+            'announcement_id' => (int) $request->input('announcement_id') ?: null,
         ];
     }
 

@@ -56,6 +56,9 @@ final class GalleryRepository
                     ADD COLUMN IF NOT EXISTS owner_group_id INT UNSIGNED NULL AFTER event_id,
                     ADD COLUMN IF NOT EXISTS visible_group_id INT UNSIGNED NULL AFTER owner_group_id'
             );
+            $this->pdo->exec(
+                'ALTER TABLE galleries ADD COLUMN IF NOT EXISTS announcement_id INT UNSIGNED NULL AFTER event_id'
+            );
         } catch (\Throwable) {
             // Migration holt es nach.
         }
@@ -70,6 +73,7 @@ final class GalleryRepository
     {
         $sql = 'SELECT g.*,
                        e.title AS event_title,
+                       a.title AS announcement_title,
                        og.name AS owner_group_name,
                        vg.name AS visible_group_name,
                        COUNT(m.id) AS media_count,
@@ -78,6 +82,7 @@ final class GalleryRepository
                        cover.kind AS cover_kind
                 FROM galleries g
                 LEFT JOIN events e ON e.id = g.event_id
+                LEFT JOIN announcements a ON a.id = g.announcement_id
                 LEFT JOIN contact_groups og ON og.id = g.owner_group_id
                 LEFT JOIN contact_groups vg ON vg.id = g.visible_group_id
                 LEFT JOIN gallery_media m ON m.gallery_id = g.id AND m.deleted_at IS NULL
@@ -92,9 +97,10 @@ final class GalleryRepository
     /** @return array<string,mixed>|null */
     public function find(int $id, bool $withTrashed = false): ?array
     {
-        $sql = 'SELECT g.*, e.title AS event_title, og.name AS owner_group_name, vg.name AS visible_group_name
+        $sql = 'SELECT g.*, e.title AS event_title, a.title AS announcement_title, og.name AS owner_group_name, vg.name AS visible_group_name
                 FROM galleries g
                 LEFT JOIN events e ON e.id = g.event_id
+                LEFT JOIN announcements a ON a.id = g.announcement_id
                 LEFT JOIN contact_groups og ON og.id = g.owner_group_id
                 LEFT JOIN contact_groups vg ON vg.id = g.visible_group_id
                 WHERE g.id = :id' . ($withTrashed ? '' : ' AND g.deleted_at IS NULL');
@@ -107,14 +113,15 @@ final class GalleryRepository
     public function create(array $data, ?int $userId): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO galleries (title, description, gallery_date, event_id, owner_group_id, visible_group_id, sort_mode, created_by)
-             VALUES (:title, :description, :gallery_date, :event_id, :owner_group_id, :visible_group_id, :sort_mode, :created_by)'
+            'INSERT INTO galleries (title, description, gallery_date, event_id, announcement_id, owner_group_id, visible_group_id, sort_mode, created_by)
+             VALUES (:title, :description, :gallery_date, :event_id, :announcement_id, :owner_group_id, :visible_group_id, :sort_mode, :created_by)'
         );
         $stmt->execute([
             'title' => $data['title'],
             'description' => ($data['description'] ?? '') !== '' ? $data['description'] : null,
             'gallery_date' => ($data['gallery_date'] ?? '') !== '' ? $data['gallery_date'] : null,
             'event_id' => !empty($data['event_id']) ? (int) $data['event_id'] : null,
+            'announcement_id' => !empty($data['announcement_id']) ? (int) $data['announcement_id'] : null,
             'owner_group_id' => !empty($data['owner_group_id']) ? (int) $data['owner_group_id'] : null,
             'visible_group_id' => !empty($data['visible_group_id']) ? (int) $data['visible_group_id'] : null,
             'sort_mode' => in_array($data['sort_mode'] ?? '', self::SORT_MODES, true) ? $data['sort_mode'] : 'captured',
@@ -129,7 +136,8 @@ final class GalleryRepository
         $stmt = $this->pdo->prepare(
             'UPDATE galleries
              SET title = :title, description = :description, gallery_date = :gallery_date,
-                 event_id = :event_id, owner_group_id = :owner_group_id, visible_group_id = :visible_group_id,
+                 event_id = :event_id, announcement_id = :announcement_id,
+                 owner_group_id = :owner_group_id, visible_group_id = :visible_group_id,
                  sort_mode = :sort_mode
              WHERE id = :id'
         );
@@ -139,6 +147,7 @@ final class GalleryRepository
             'description' => ($data['description'] ?? '') !== '' ? $data['description'] : null,
             'gallery_date' => ($data['gallery_date'] ?? '') !== '' ? $data['gallery_date'] : null,
             'event_id' => !empty($data['event_id']) ? (int) $data['event_id'] : null,
+            'announcement_id' => !empty($data['announcement_id']) ? (int) $data['announcement_id'] : null,
             'owner_group_id' => !empty($data['owner_group_id']) ? (int) $data['owner_group_id'] : null,
             'visible_group_id' => !empty($data['visible_group_id']) ? (int) $data['visible_group_id'] : null,
             'sort_mode' => in_array($data['sort_mode'] ?? '', self::SORT_MODES, true) ? $data['sort_mode'] : 'captured',

@@ -13,6 +13,7 @@ use App\Repositories\EventRepository;
 use App\Repositories\GroupRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\TagRepository;
+use App\Support\JsonResponse;
 use App\Support\Redirect;
 
 /**
@@ -135,6 +136,20 @@ final class AnnouncementController extends BaseController
         $this->announcements->replaceLinks($id, $this->linkRows($request));
         flash('success', 'Ankündigung gespeichert.');
         Redirect::to('/termine/detail?id=' . $id);
+    }
+
+    /** Live-Vorschau „X Personen sehen das" für den Sichtbarkeits-Picker (JSON). */
+    public function audienceCount(Request $request): never
+    {
+        $this->requireManage();
+
+        $count = $this->announcements->matchingContactCount(
+            array_map('intval', (array) $request->input('audience_contacts', [])),
+            array_map('intval', (array) $request->input('audience_groups', [])),
+            array_map('intval', (array) $request->input('audience_tags', []))
+        );
+
+        JsonResponse::send(['count' => $count]);
     }
 
     public function delete(Request $request): void

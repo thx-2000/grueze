@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Csrf;
 use App\Core\Request;
+use App\Repositories\AnnouncementRepository;
 use App\Repositories\EventRepository;
 use App\Repositories\GalleryMediaRepository;
 use App\Repositories\GalleryRepository;
@@ -51,6 +52,7 @@ final class GalleryController extends BaseController
         private GalleryMediaRepository $media,
         private MediaService $storage,
         private EventRepository $events,
+        private AnnouncementRepository $announcements,
         private LogRepository $logs,
         private SettingRepository $settings,
         private \App\Repositories\GalleryUploadLinkRepository $uploadLinks,
@@ -93,6 +95,7 @@ final class GalleryController extends BaseController
         $this->render('galleries/form', [
             'gallery' => null,
             'events' => $this->events->all(),
+            'announcements' => $this->announcements->all(),
             'groupChoices' => $this->groupChoicesForCreate(),
             'canPickGroup' => $this->canManage(),
         ]);
@@ -134,6 +137,7 @@ final class GalleryController extends BaseController
             'gallery' => $gallery,
             'items' => $items,
             'events' => $this->events->all(),
+            'announcements' => $this->announcements->all(),
             'capabilities' => $this->storage->capabilities(),
             'canManage' => $canManageThis,
             'canUpload' => $canUploadThis,
@@ -990,6 +994,7 @@ final class GalleryController extends BaseController
                 ? (string) $request->input('gallery_date')
                 : '',
             'event_id' => (int) $request->input('event_id') ?: null,
+            'announcement_id' => (int) $request->input('announcement_id') ?: null,
             'sort_mode' => in_array((string) $request->input('sort_mode'), GalleryRepository::SORT_MODES, true)
                 ? (string) $request->input('sort_mode')
                 : 'captured',

@@ -50,16 +50,21 @@ final class DocumentFolderRepository
             $this->pdo->exec(
                 'ALTER TABLE document_folders ADD COLUMN IF NOT EXISTS parent_id INT UNSIGNED NULL AFTER id'
             );
+            $this->pdo->exec(
+                'ALTER TABLE document_folders ADD COLUMN IF NOT EXISTS announcement_id INT UNSIGNED NULL AFTER visible_group_id'
+            );
         } catch (\Throwable) {
             // Migration holt es nach.
         }
     }
 
     private const SELECT_BASE = 'SELECT f.*, og.name AS owner_group_name, vg.name AS visible_group_name,
+                       a.title AS announcement_title,
                        COUNT(DISTINCT d.id) AS document_count, COUNT(DISTINCT sub.id) AS subfolder_count
                 FROM document_folders f
                 LEFT JOIN contact_groups og ON og.id = f.owner_group_id
                 LEFT JOIN contact_groups vg ON vg.id = f.visible_group_id
+                LEFT JOIN announcements a ON a.id = f.announcement_id
                 LEFT JOIN documents d ON d.folder_id = f.id
                 LEFT JOIN document_folders sub ON sub.parent_id = f.id';
 
@@ -115,10 +120,11 @@ final class DocumentFolderRepository
     /** @return array<string,mixed>|null */
     public function find(int $id): ?array
     {
-        $sql = 'SELECT f.*, og.name AS owner_group_name, vg.name AS visible_group_name
+        $sql = 'SELECT f.*, og.name AS owner_group_name, vg.name AS visible_group_name, a.title AS announcement_title
                 FROM document_folders f
                 LEFT JOIN contact_groups og ON og.id = f.owner_group_id
                 LEFT JOIN contact_groups vg ON vg.id = f.visible_group_id
+                LEFT JOIN announcements a ON a.id = f.announcement_id
                 WHERE f.id = :id';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id]);
@@ -129,8 +135,8 @@ final class DocumentFolderRepository
     public function create(array $data, ?int $userId): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO document_folders (parent_id, title, description, owner_group_id, visible_group_id, created_by)
-             VALUES (:parent_id, :title, :description, :owner_group_id, :visible_group_id, :created_by)'
+            'INSERT INTO document_folders (parent_id, title, description, owner_group_id, visible_group_id, announcement_id, created_by)
+             VALUES (:parent_id, :title, :description, :owner_group_id, :visible_group_id, :announcement_id, :created_by)'
         );
         $stmt->execute([
             'parent_id' => !empty($data['parent_id']) ? (int) $data['parent_id'] : null,
@@ -138,6 +144,7 @@ final class DocumentFolderRepository
             'description' => ($data['description'] ?? '') !== '' ? $data['description'] : null,
             'owner_group_id' => !empty($data['owner_group_id']) ? (int) $data['owner_group_id'] : null,
             'visible_group_id' => !empty($data['visible_group_id']) ? (int) $data['visible_group_id'] : null,
+            'announcement_id' => !empty($data['announcement_id']) ? (int) $data['announcement_id'] : null,
             'created_by' => $userId,
         ]);
 
@@ -147,7 +154,8 @@ final class DocumentFolderRepository
     public function update(int $id, array $data): void
     {
         $stmt = $this->pdo->prepare(
-            'UPDATE document_folders SET title = :title, description = :description, visible_group_id = :visible_group_id
+            'UPDATE document_folders
+             SET title = :title, description = :description, visible_group_id = :visible_group_id, announcement_id = :announcement_id
              WHERE id = :id'
         );
         $stmt->execute([
@@ -155,6 +163,7 @@ final class DocumentFolderRepository
             'title' => $data['title'],
             'description' => ($data['description'] ?? '') !== '' ? $data['description'] : null,
             'visible_group_id' => !empty($data['visible_group_id']) ? (int) $data['visible_group_id'] : null,
+            'announcement_id' => !empty($data['announcement_id']) ? (int) $data['announcement_id'] : null,
         ]);
     }
 

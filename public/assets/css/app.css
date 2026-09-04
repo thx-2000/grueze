@@ -4448,6 +4448,20 @@ body { display: block; }
     font-variant-numeric: tabular-nums;
 }
 
+.audience-preview {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: var(--color-primary-strong);
+    margin: 0 0 1rem;
+}
+
+.audience-preview strong {
+    font-size: 1.15rem;
+    font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 640px) {
     .message-send-bar {
         bottom: 0;

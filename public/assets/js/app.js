@@ -597,6 +597,40 @@ if (messageForm) {
     refreshCount();
 }
 
+// Termine-Ankündigung: Live-Vorschau „X Personen sehen das" beim
+// Sichtbarkeits-Picker (Personen/Gruppen/Tags).
+document.querySelectorAll('[data-audience-picker]').forEach((card) => {
+    const countUrl = card.dataset.countUrl;
+    const countEl = card.querySelector('[data-audience-count]');
+    const labelEl = card.querySelector('[data-audience-count-label]');
+    if (!countUrl || !countEl) return;
+    const selects = [...card.querySelectorAll('select[multiple]')];
+
+    let timer = null;
+    const refresh = () => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(async () => {
+            const params = new URLSearchParams();
+            selects.forEach((select) => {
+                const field = select.name.replace('[]', '');
+                [...select.selectedOptions].forEach((option) => { params.append(`${field}[]`, option.value); });
+            });
+            try {
+                const res = await fetch(`${countUrl}?${params.toString()}`, { headers: { 'X-Requested-With': 'fetch' } });
+                const json = await res.json();
+                const n = Number(json.count) || 0;
+                countEl.textContent = String(n);
+                if (labelEl) labelEl.textContent = n === 1 ? 'Person sieht das' : 'Personen sehen das';
+            } catch (error) {
+                countEl.textContent = '?';
+            }
+        }, 200);
+    };
+
+    selects.forEach((select) => select.addEventListener('change', refresh));
+    refresh();
+});
+
 const contactsTable = document.querySelector('.contacts-table');
 if (contactsTable) {
     const storageKey = 'grueze_visible_contact_columns';

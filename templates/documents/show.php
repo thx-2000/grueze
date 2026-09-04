@@ -10,6 +10,7 @@
  * @var bool $canManage
  * @var bool $canUpload
  * @var int $currentUserId
+ * @var list<array<string,mixed>> $announcements
  * @var list<array<string,mixed>> $groupChoices
  * @var bool $canPickGroup
  * @var int $maxBytes
@@ -32,6 +33,9 @@ $sortLabels = ['title' => 'Name', 'newest' => 'Neueste zuerst', 'oldest' => 'Äl
             <?php endif; ?>
             <?php if (trim((string) ($f['visible_group_name'] ?? '')) !== ''): ?>
                 · <span class="gallery-card-event"><?= icon('eye') ?>nur für „<?= e($f['visible_group_name']) ?>" sichtbar</span>
+            <?php endif; ?>
+            <?php if (trim((string) ($f['announcement_title'] ?? '')) !== ''): ?>
+                · <a href="<?= e(url('/termine/detail?id=' . (int) $f['announcement_id'])) ?>"><?= icon('calendar') ?><?= e($f['announcement_title']) ?></a>
             <?php endif; ?>
         </p>
         <?php if (trim((string) ($f['description'] ?? '')) !== ''): ?>
@@ -62,6 +66,15 @@ $sortLabels = ['title' => 'Name', 'newest' => 'Neueste zuerst', 'oldest' => 'Äl
         <label>
             <span>Beschreibung</span>
             <textarea name="description" rows="3" maxlength="5000"><?= e((string) ($f['description'] ?? '')) ?></textarea>
+        </label>
+        <label>
+            <span>Zu einer Ankündigung (optional)</span>
+            <select name="announcement_id">
+                <option value="">— keine Ankündigung —</option>
+                <?php foreach ($announcements as $announcement): ?>
+                    <option value="<?= e((string) $announcement['id']) ?>" <?= (int) ($f['announcement_id'] ?? 0) === (int) $announcement['id'] ? 'selected' : '' ?>><?= e($announcement['title']) ?></option>
+                <?php endforeach; ?>
+            </select>
         </label>
         <?php view_partial('documents/_visibility-fields', ['folder' => $f, 'groupChoices' => $groupChoices, 'canPickGroup' => $canPickGroup]); ?>
         <div class="form-actions">

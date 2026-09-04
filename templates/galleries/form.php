@@ -2,6 +2,7 @@
 /**
  * @var array<string,mixed>|null $gallery
  * @var list<array<string,mixed>> $events
+ * @var list<array<string,mixed>> $announcements
  * @var list<array<string,mixed>> $groupChoices
  * @var bool $canPickGroup
  */
@@ -48,17 +49,30 @@ $action = $isEdit ? url('/galerien/speichern') : url('/galerien');
             </label>
         </div>
 
-        <label>
-            <span>Zu einer Abstimmung (optional)</span>
-            <select name="event_id">
-                <option value="">— kein Termin —</option>
-                <?php foreach ($events as $event): ?>
-                    <option value="<?= e((string) $event['id']) ?>" <?= (int) ($g['event_id'] ?? 0) === (int) $event['id'] ? 'selected' : '' ?>>
-                        <?= e($event['title']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </label>
+        <div class="form-grid">
+            <label>
+                <span>Zu einer Abstimmung (optional)</span>
+                <select name="event_id">
+                    <option value="">— keine Abstimmung —</option>
+                    <?php foreach ($events as $event): ?>
+                        <option value="<?= e((string) $event['id']) ?>" <?= (int) ($g['event_id'] ?? 0) === (int) $event['id'] ? 'selected' : '' ?>>
+                            <?= e($event['title']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>
+                <span>Zu einer Ankündigung (optional)</span>
+                <select name="announcement_id">
+                    <option value="">— keine Ankündigung —</option>
+                    <?php foreach ($announcements as $announcement): ?>
+                        <option value="<?= e((string) $announcement['id']) ?>" <?= (int) ($g['announcement_id'] ?? 0) === (int) $announcement['id'] ? 'selected' : '' ?>>
+                            <?= e($announcement['title']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+        </div>
 
         <?php view_partial('galleries/_visibility-fields', ['gallery' => $gallery, 'groupChoices' => $groupChoices, 'canPickGroup' => $canPickGroup]); ?>
 

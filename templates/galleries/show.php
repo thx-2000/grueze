@@ -3,6 +3,7 @@
  * @var array<string,mixed> $gallery
  * @var list<array<string,mixed>> $items
  * @var list<array<string,mixed>> $events
+ * @var list<array<string,mixed>> $announcements
  * @var array<string,mixed> $capabilities
  * @var bool $canManage
  * @var bool $canUpload
@@ -29,6 +30,9 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
             <span data-media-count><?= count($items) ?></span> Medien
             <?php if (trim((string) ($g['event_title'] ?? '')) !== ''): ?>
                 · <a href="<?= e(url('/abstimmungen/detail?id=' . (int) $g['event_id'])) ?>"><?= icon('calendar') ?><?= e($g['event_title']) ?></a>
+            <?php endif; ?>
+            <?php if (trim((string) ($g['announcement_title'] ?? '')) !== ''): ?>
+                · <a href="<?= e(url('/termine/detail?id=' . (int) $g['announcement_id'])) ?>"><?= icon('calendar') ?><?= e($g['announcement_title']) ?></a>
             <?php endif; ?>
             <?php if (trim((string) ($g['owner_group_name'] ?? '')) !== ''): ?>
                 · <span class="gallery-card-event"><?= icon('users') ?>Gruppe „<?= e($g['owner_group_name']) ?>"</span>
@@ -88,15 +92,26 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
                 </select>
             </label>
         </div>
-        <label>
-            <span>Zu einer Abstimmung (optional)</span>
-            <select name="event_id">
-                <option value="">— kein Termin —</option>
-                <?php foreach ($events as $event): ?>
-                    <option value="<?= e((string) $event['id']) ?>" <?= (int) ($g['event_id'] ?? 0) === (int) $event['id'] ? 'selected' : '' ?>><?= e($event['title']) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
+        <div class="form-grid">
+            <label>
+                <span>Zu einer Abstimmung (optional)</span>
+                <select name="event_id">
+                    <option value="">— keine Abstimmung —</option>
+                    <?php foreach ($events as $event): ?>
+                        <option value="<?= e((string) $event['id']) ?>" <?= (int) ($g['event_id'] ?? 0) === (int) $event['id'] ? 'selected' : '' ?>><?= e($event['title']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>
+                <span>Zu einer Ankündigung (optional)</span>
+                <select name="announcement_id">
+                    <option value="">— keine Ankündigung —</option>
+                    <?php foreach ($announcements as $announcement): ?>
+                        <option value="<?= e((string) $announcement['id']) ?>" <?= (int) ($g['announcement_id'] ?? 0) === (int) $announcement['id'] ? 'selected' : '' ?>><?= e($announcement['title']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+        </div>
         <?php view_partial('galleries/_visibility-fields', ['gallery' => $g, 'groupChoices' => $groupChoices, 'canPickGroup' => $canPickGroup]); ?>
         <div class="form-actions">
             <button type="submit" class="button-link"><?= icon('check') ?><span>Speichern</span></button>

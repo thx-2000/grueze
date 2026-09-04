@@ -138,6 +138,11 @@ final class AnnouncementRepository
     /** Endgültiges Löschen – kein Papierkorb (wie bei Gruppen/Dokumenten). */
     public function delete(int $id): void
     {
+        // Kein DB-FK von galleries/document_folders auf announcements
+        // (Tabellenreihenfolge in schema.sql, wie bei events.group_id) –
+        // die Verlinkung hier von Hand lösen, sonst bliebe eine tote ID stehen.
+        $this->pdo->prepare('UPDATE galleries SET announcement_id = NULL WHERE announcement_id = :id')->execute(['id' => $id]);
+        $this->pdo->prepare('UPDATE document_folders SET announcement_id = NULL WHERE announcement_id = :id')->execute(['id' => $id]);
         $this->pdo->prepare('DELETE FROM announcement_audience WHERE announcement_id = :id')->execute(['id' => $id]);
         $this->pdo->prepare('DELETE FROM announcement_links WHERE announcement_id = :id')->execute(['id' => $id]);
         $this->pdo->prepare('DELETE FROM announcements WHERE id = :id')->execute(['id' => $id]);
@@ -234,6 +239,53 @@ final class AnnouncementRepository
         }
 
         return false;
+    }
+
+    /**
+     * Live-Vorschau für den Sichtbarkeits-Picker: wie viele (lebende) Personen
+     * träfe die aktuelle Auswahl? Leere Auswahl = „alle" (siehe sanitize()).
+     *
+     * @param list<int> $contactIds
+     * @param list<int> $groupIds
+     * @param list<int> $tagIds
+     */
+    public function matchingContactCount(array $contactIds, array $groupIds, array $tagIds): int
+    {
+        $contactIds = array_values(array_unique(array_filter(array_map('intval', $contactIds), static fn (int $id): bool => $id > 0)));
+        $groupIds = array_values(array_unique(array_filter(array_map('intval', $groupIds), static fn (int $id): bool => $id > 0)));
+        $tagIds = array_values(array_unique(array_filter(array_map('intval', $tagIds), static fn (int $id): bool => $id > 0)));
+
+        if ($contactIds === [] && $groupIds === [] && $tagIds === []) {
+            return (int) $this->pdo->query(
+                'SELECT COUNT(*) FROM contacts WHERE archived_at IS NULL AND deleted_at IS NULL'
+            )->fetchColumn();
+        }
+
+        $conditions = [];
+        $params = [];
+
+        if ($contactIds !== []) {
+            $conditions[] = 'c.id IN (' . implode(',', array_fill(0, count($contactIds), '?')) . ')';
+            $params = array_merge($params, $contactIds);
+        }
+        if ($groupIds !== []) {
+            $conditions[] = 'EXISTS (SELECT 1 FROM contact_group_members cgm WHERE cgm.contact_id = c.id AND cgm.group_id IN ('
+                . implode(',', array_fill(0, count($groupIds), '?')) . '))';
+            $params = array_merge($params, $groupIds);
+        }
+        if ($tagIds !== []) {
+            $conditions[] = 'EXISTS (SELECT 1 FROM contact_tags ct WHERE ct.contact_id = c.id AND ct.tag_id IN ('
+                . implode(',', array_fill(0, count($tagIds), '?')) . '))';
+            $params = array_merge($params, $tagIds);
+        }
+
+        $stmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM contacts c
+             WHERE c.archived_at IS NULL AND c.deleted_at IS NULL AND (' . implode(' OR ', $conditions) . ')'
+        );
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn();
     }
 
     // ------------------------------------------------------------------ Links

@@ -3,6 +3,20 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.58.0
+
+**Termine: Live-Vorschau bei der Sichtbarkeit, Galerien/Dokumente an Ankündigungen verlinkbar.**
+
+- **Live-Vorschau „X Personen sehen das":** beim Einschränken einer Ankündigung
+  auf bestimmte Personen, Gruppen oder Tags zeigt das Formular jetzt sofort,
+  wie viele Personen die Auswahl tatsächlich trifft – statt es erst nach dem
+  Speichern zu erfahren.
+- **Galerien und Dokumente-Ordner an eine Ankündigung verlinken:** bisher
+  ließ sich eine Galerie nur mit einer Abstimmung verknüpfen. Jetzt geht das
+  zusätzlich (oder stattdessen) auch mit einer Termine-Ankündigung – bei
+  Dokumente-Ordnern ist das komplett neu. Der Link erscheint als kleines
+  Kalender-Abzeichen auf der Übersicht und der Detailseite.
+
 ## 1.57.0
 
 **Dokumente: Unterordner, Sortierung/Suche, Datei-Vorschau, Datensicherung.**

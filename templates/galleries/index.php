@@ -99,6 +99,9 @@ $uploadMax = (int) ($capabilities['upload_max_bytes'] ?? 0);
                     <?php if (trim((string) ($g['event_title'] ?? '')) !== ''): ?>
                         <span class="gallery-card-event"><?= icon('calendar') ?><?= e($g['event_title']) ?></span>
                     <?php endif; ?>
+                    <?php if (trim((string) ($g['announcement_title'] ?? '')) !== ''): ?>
+                        <span class="gallery-card-event"><?= icon('calendar') ?><?= e($g['announcement_title']) ?></span>
+                    <?php endif; ?>
                     <?php if (trim((string) ($g['visible_group_name'] ?? '')) !== ''): ?>
                         <span class="gallery-card-event"><?= icon('eye') ?>nur „<?= e($g['visible_group_name']) ?>"</span>
                     <?php elseif (trim((string) ($g['owner_group_name'] ?? '')) !== ''): ?>

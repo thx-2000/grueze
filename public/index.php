@@ -438,6 +438,7 @@ try {
         Container::get(\App\Repositories\GalleryMediaRepository::class),
         Container::get(\App\Services\MediaService::class),
         Container::get(EventRepository::class),
+        Container::get(\App\Repositories\AnnouncementRepository::class),
         Container::get(LogRepository::class),
         Container::get(SettingRepository::class),
         Container::get(\App\Repositories\GalleryUploadLinkRepository::class),
@@ -458,7 +459,8 @@ try {
         Container::get(\App\Repositories\DocumentRepository::class),
         Container::get(\App\Services\DocumentStorageService::class),
         Container::get(LogRepository::class),
-        Container::get(GroupRepository::class)
+        Container::get(GroupRepository::class),
+        Container::get(\App\Repositories\AnnouncementRepository::class)
     ));
 
     // Angemeldete Sitzung mitschreiben (Verwaltung → Anmeldungen). Wurde die
@@ -684,6 +686,7 @@ try {
     $router->get('/termine/detail', [\App\Controllers\AnnouncementController::class, 'show']);
     $router->post('/termine/speichern', [\App\Controllers\AnnouncementController::class, 'update']);
     $router->post('/termine/loeschen', [\App\Controllers\AnnouncementController::class, 'delete']);
+    $router->get('/termine/sichtbarkeit-vorschau', [\App\Controllers\AnnouncementController::class, 'audienceCount']);
 
     $router->get('/galerien', [\App\Controllers\GalleryController::class, 'index']);
     $router->get('/galerien/neu', [\App\Controllers\GalleryController::class, 'createForm']);

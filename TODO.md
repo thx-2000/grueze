@@ -241,11 +241,13 @@ bestehende „Fester Termin"-Einträge **automatisch** in Ankündigungen
     404 bei Direktzugriff); Gruppen-Abstimmung-Link routet korrekt auf
     `/gruppen/abstimmung`, normale Abstimmung auf `/abstimmungen/detail`;
     alle Testdaten danach entfernt.
-- **Feiner (offen):** Audience-Picker sind einfache Mehrfach-Selects ohne
-  Live-Vorschau („X Personen sehen das"); Medien-/Dateibereiche (Galerien,
-  Dokumente) könnten künftig auch
-  an eine Termine-Ankündigung statt an eine Abstimmung verlinkbar sein
-  (aktuell zeigt `galleries.event_id` weiter auf `events`/Abstimmungen).
+- ~~**Feiner**~~ – **erledigt (v1.58.0).** Audience-Picker zeigt jetzt live
+  „X Personen sehen das" (bzw. „Person" bei genau einer), aktualisiert bei
+  jeder Änderung an Personen/Gruppen/Tags (`GET /termine/sichtbarkeit-
+  vorschau`, JSON). Galerien und Dokumente-Ordner lassen sich jetzt
+  zusätzlich zu einer Abstimmung (`event_id`) auch an eine Termine-
+  Ankündigung verlinken (`announcement_id`, unabhängiges Feld, beides
+  gleichzeitig möglich).
 
 ## Account-Einladungen (TH-Fragen 2026-09-04)
 

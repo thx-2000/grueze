@@ -36,6 +36,9 @@
                 <span class="gallery-card-body">
                     <strong><?= e($f['title']) ?></strong>
                     <span class="muted"><?= $count === 1 ? '1 Datei' : e((string) $count) . ' Dateien' ?><?= (int) $f['subfolder_count'] > 0 ? ' · ' . (int) $f['subfolder_count'] . ' Unterordner' : '' ?></span>
+                    <?php if (trim((string) ($f['announcement_title'] ?? '')) !== ''): ?>
+                        <span class="gallery-card-event"><?= icon('calendar') ?><?= e($f['announcement_title']) ?></span>
+                    <?php endif; ?>
                     <?php if (trim((string) ($f['visible_group_name'] ?? '')) !== ''): ?>
                         <span class="gallery-card-event"><?= icon('eye') ?>nur „<?= e($f['visible_group_name']) ?>"</span>
                     <?php elseif (trim((string) ($f['owner_group_name'] ?? '')) !== ''): ?>
