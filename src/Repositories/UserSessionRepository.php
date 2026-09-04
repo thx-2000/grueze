@@ -66,6 +66,12 @@ final class UserSessionRepository
      */
     public function touch(string $sessionId, int $userId, string $ip, string $userAgent): bool
     {
+        // IP-Adresse nur speichern, wenn die Installation das ausdrücklich will
+        // (security.store_ip). Standard: aus – datenschutzfreundlich.
+        if (!(bool) config('security.store_ip', false)) {
+            $ip = '';
+        }
+
         $hash = $this->hash($sessionId);
         $stmt = $this->pdo->prepare(
             'INSERT INTO user_sessions (session_hash, user_id, ip_address, user_agent)
@@ -163,6 +169,16 @@ final class UserSessionRepository
             $stmt->execute();
 
             return $stmt->rowCount();
+        } catch (\Throwable) {
+            return 0;
+        }
+    }
+
+    /** Gespeicherte IP-Adressen entfernen – z. B. nachdem `store_ip` aus ist. */
+    public function forgetIps(): int
+    {
+        try {
+            return (int) $this->pdo->exec("UPDATE user_sessions SET ip_address = '' WHERE ip_address <> ''");
         } catch (\Throwable) {
             return 0;
         }

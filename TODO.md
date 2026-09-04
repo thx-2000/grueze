@@ -59,16 +59,15 @@ Ideen, falls es weitergeht (kein Muss):
 - ~~**Anmelde-Übersicht für Admin**~~ – **v1.33.0 erledigt.** Tabelle
   `user_sessions`, `/verwaltung/anmeldungen` (`SessionController`): „Gerade
   online" + Verlauf + Sitzung aus der Ferne beenden (`revoked_at`).
-- **IP-Adressen: Datenschutz vs. Nutzen abwägen** (TH 2026-09-04). IPs stehen
-  im Klartext in `user_sessions` und `login_attempts`. TH findet sie nützlich,
-  sieht aber das Datenschutz-Risiko für die öffentliche Version. Zu klären:
-  (a) IP-Anzeige/-Speicherung per config-Schalter (`security.store_ip` o. ä.)
-  steuerbar machen – bei der eigenen Instanz an, im ausgelieferten
-  `config.example.php` aus; (b) Alternative: nur Hash speichern und für die
-  Anzeige entschärfen (grobes Geo statt IP, oder nur „neue/bekannte Quelle");
-  (c) Aufbewahrungsfrist kürzen. Betrifft `UserSessionRepository`,
-  `SessionController`/`templates/admin/sessions.php`, `LogRepository`
-  (login_attempts) und die Datenschutzerklärung.
+- ~~**IP-Adressen: Datenschutz vs. Nutzen**~~ – **v1.38.0 erledigt.**
+  `login_attempts` speichert die IP jetzt immer nur gehasht; `user_sessions`
+  nur bei `security.store_ip = true` (Standard aus), sonst wird die Spalte
+  „Von wo" ausgeblendet und Altbestände per GC gelöscht. Retention über
+  `security.session_retention_days`. **TH-Aktion offen:** `'store_ip' => true`
+  in die eigene `config.php` eintragen, wenn die IPs behalten werden sollen –
+  und ggf. die Datenschutzerklärung anpassen.
+  Idee für später: statt roher IP eine entschärfte „bekannte/neue Quelle"-
+  Anzeige (grobes Geo oder Hash-Vergleich).
 - ~~**Gesendete Mails einsehen (für Sende-Berechtigte)**~~ – **v1.35.x
   erledigt.** Tabelle `sent_mails`, `/rundmail/verlauf` (`SentMailController`):
   Liste + Detail (Text, Empfänger + Zustellstatus) + „als Entwurf übernehmen"

@@ -35,6 +35,7 @@ final class SessionController extends BaseController
             'history' => $this->sessions->history(120),
             'currentHash' => $currentHash,
             'windowMinutes' => (int) round($window / 60),
+            'showIp' => (bool) config('security.store_ip', false),
         ]);
     }
 

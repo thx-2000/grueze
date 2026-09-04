@@ -449,7 +449,11 @@ try {
             Container::get(ContactRepository::class)->pruneTrashedContacts();
             Container::get(\App\Repositories\DataCheckRepository::class)->purgeExpired();
             Container::get(SettingRepository::class)->reencryptSecrets();
-            Container::get(\App\Repositories\UserSessionRepository::class)->pruneOld(90);
+            $sessionRepo = Container::get(\App\Repositories\UserSessionRepository::class);
+            $sessionRepo->pruneOld((int) config('security.session_retention_days', 90));
+            if (!(bool) config('security.store_ip', false)) {
+                $sessionRepo->forgetIps();
+            }
             Container::get(\App\Repositories\SentMailRepository::class)->pruneOld((int) config('mail.sent_retention_days', 365));
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.

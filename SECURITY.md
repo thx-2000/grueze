@@ -32,9 +32,16 @@ Ich melde mich in der Regel innerhalb einer Woche.
   festen `security.secret_key` in allen `config.php` setzen.
 - Nur über HTTPS betreiben (`app.force_https` = `true`, `.htaccess` erzwingt den
   Redirect). Die App setzt bei HTTPS zusätzlich `Strict-Transport-Security`.
+- **IP-Adressen:** Login-Versuche (`login_attempts`) werden immer nur
+  pseudonym (gehasht) gespeichert – nur fürs Rate-Limit, nirgends angezeigt.
+  Die IP angemeldeter Sitzungen (Verwaltung → Anmeldungen) wird nur bei
+  `security.store_ip = true` gespeichert und angezeigt; Standard ist `false`.
+  Aufbewahrung über `security.session_retention_days` (Standard 90) bzw.
+  `security.login_attempts_retention_days` (Standard 30).
 - Rechtstexte (Impressum, Datenschutz) vor dem Produktivbetrieb ausfüllen. Die
-  Datenschutzerklärung sollte IP-Protokollierung (`login_attempts`),
-  Änderungsprotokoll (`audit_log`) und Versandprotokoll (`mail_log`) benennen.
+  Datenschutzerklärung sollte das Änderungsprotokoll (`audit_log`), das
+  Versandprotokoll (`mail_log`) und – falls `security.store_ip` aktiv ist – die
+  IP-Speicherung angemeldeter Sitzungen benennen.
 - Backups enthalten Passwort-Hashes und alle personenbezogenen Daten. Beim
   Export lässt sich ein Passwort vergeben (ZIP dann AES-256-verschlüsselt) –
   empfohlen, wenn das Backup den Server verlässt. Sicher aufbewahren.

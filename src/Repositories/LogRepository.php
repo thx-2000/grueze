@@ -136,6 +136,22 @@ final class LogRepository
         )->fetchAll();
     }
 
+    /**
+     * Die Herkunft eines Login-Versuchs wird nur pseudonym gespeichert: Für das
+     * Rate-Limit reicht ein stabiler Hash der IP, die IP selbst braucht das
+     * Log nirgends (sie wird auch nirgends angezeigt).
+     */
+    private function ipKey(string $ip): string
+    {
+        $ip = trim($ip);
+        if ($ip === '') {
+            return '';
+        }
+        $pepper = trim((string) config('security.hash_pepper', ''));
+
+        return hash('sha256', $pepper . '|login-attempt|' . $ip);
+    }
+
     public function addLoginAttempt(string $email, string $ip, bool $successful): void
     {
         $stmt = $this->pdo->prepare(
@@ -143,7 +159,7 @@ final class LogRepository
         );
         $stmt->execute([
             'email' => $email,
-            'ip' => $ip,
+            'ip' => $this->ipKey($ip),
             'successful' => $successful ? 1 : 0,
         ]);
     }
@@ -156,7 +172,7 @@ final class LogRepository
              AND attempted_at >= DATE_SUB(NOW(), INTERVAL :minutes MINUTE)'
         );
         $stmt->bindValue(':email', $email);
-        $stmt->bindValue(':ip', $ip);
+        $stmt->bindValue(':ip', $this->ipKey($ip));
         $stmt->bindValue(':minutes', $minutes, PDO::PARAM_INT);
         $stmt->execute();
 
@@ -171,7 +187,7 @@ final class LogRepository
              WHERE ip_address = :ip AND successful = 0
              AND attempted_at >= DATE_SUB(NOW(), INTERVAL :minutes MINUTE)'
         );
-        $stmt->bindValue(':ip', $ip);
+        $stmt->bindValue(':ip', $this->ipKey($ip));
         $stmt->bindValue(':minutes', $minutes, PDO::PARAM_INT);
         $stmt->execute();
 

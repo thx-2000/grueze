@@ -3,6 +3,23 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.38.0
+
+**Datenschutz: IP-Adressen sparsamer.**
+
+- **Login-Versuche** speichern die Herkunft ab sofort nur noch **pseudonym
+  (gehasht)** – reicht fürs Rate-Limit, die IP selbst wird nirgends gebraucht
+  oder angezeigt. (Altbestände verschwinden nach 30 Tagen.)
+- **Angemeldete Sitzungen** (Verwaltung → Anmeldungen) speichern die IP nur
+  noch, wenn `security.store_ip` in der `config.php` auf `true` steht –
+  Standard ist **aus**. Ist der Schalter aus, wird die Spalte „Von wo"
+  ausgeblendet und vorhandene IPs werden bei der nächsten Aufräumrunde
+  entfernt.
+- Neue optionale Einstellungen: `security.store_ip` (Standard `false`) und
+  `security.session_retention_days` (Standard 90).
+- Keine Migration. **Wer die IPs in „Anmeldungen" behalten möchte, trägt
+  `'store_ip' => true` im `security`-Block der `config.php` ein.**
+
 ## 1.37.0
 
 **Neu: „Erhaltene Mails" – jede Person sieht die Rundmails, die an sie gingen.**

@@ -16,6 +16,9 @@ GRUEZE"). Nur wer das Produkt selbst umlabeln will, setzt
 2. `config/config.example.php` → `config/config.php` kopieren. Anpassen:
    `app.name`, `app.base_url`, `app.session_name`, `database.*`, `mail.*`
    (mindestens die erste `identities`-Identität und eine `reply_to_options`).
+   `security.store_ip` steht auf `false` – erst auf `true` setzen, wenn die IP
+   angemeldeter Sitzungen wirklich gebraucht wird und die Datenschutzerklärung
+   das abdeckt (Login-Versuche werden ohnehin immer nur gehasht abgelegt).
 3. `database/schema.sql` in die MySQL-/MariaDB-Datenbank importieren.
 4. Optional `phpmailer/phpmailer` per Composer installieren (sonst `mail()`).
 5. `public/assets/uploads/`, `storage/tmp/` und `storage/` beschreibbar machen

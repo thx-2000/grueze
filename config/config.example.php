@@ -128,6 +128,14 @@ return [
         // Quellhashes werden nach dieser Zeit automatisch gelöscht.
         'login_attempts_retention_days' => 30,
         'token_hit_retention_days' => 120,
+        // Anmelde-Sitzungen (Verwaltung → Anmeldungen) nach dieser Zeit löschen.
+        'session_retention_days' => 90,
+        // IP-Adressen angemeldeter Sitzungen speichern und in „Verwaltung →
+        // Anmeldungen" anzeigen? Standard: aus (datenschutzfreundlich). Auf
+        // `true` setzen, wenn die IP fürs Nachvollziehen gebraucht wird und die
+        // Datenschutzerklärung das abdeckt. Login-Versuche werden unabhängig
+        // davon immer nur pseudonym (gehasht) abgelegt.
+        'store_ip' => false,
         // Beliebige zufällige Zeichenkette. Macht die pseudonymen IP-Hashes
         // (Rate-Limits, „mehrere Geräte"-Erkennung) unumkehrbar. Leer lassen
         // heißt: schwächere, aber funktionierende Hashes.
