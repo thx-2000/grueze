@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.44.0
+
+**Nur Doku: zweiter Sicherheits-Audit.**
+
+- Vollständiger Code-Durchgang der seit v1.0.0 dazugekommenen Bereiche
+  (Termine, Gruppen, Daten-Check-Link, Sitzungen, gesendete/empfangene Mails,
+  Suche, …). Ergebnis in `docs/SECURITY-AUDIT.md`, Abschnitt „Zweiter
+  Durchgang".
+- Kein Einfallstor ohne Konto/Token gefunden. Die Befunde sind Härtung bzw.
+  Missbrauchs-/DoS-Themen; Umsetzung folgt in weiteren Releases.
+
 ## 1.43.0
 
 **Suche durchsucht jetzt alle sichtbaren Felder.**

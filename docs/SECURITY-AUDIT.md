@@ -497,3 +497,303 @@ Ergebnis: nach jedem Speichern von Impressum/Datenschutz ein 500 – der Wert
 liegt auf Shared Hosting weiterhin auf demselben Server wie die Daten – schützt
 also gegen DB-Dumps/SQL-Injection und weitergegebene Backups, nicht gegen eine
 vollständige Server-Übernahme. Echter Screenreader-Test steht weiterhin aus.
+
+
+---
+# Zweiter Durchgang – Stand v1.43.0 (2026-09)
+
+- **Stand:** 2026-09, Code nach Release v1.43.0.
+- **Anlass:** Seit dem ersten Audit (v1.0.0) sind viele Features dazugekommen –
+  Termine/Abstimmungen, Gruppen inkl. Gruppen-Mail und -Abstimmung,
+  Daten-Check-Link (Selbst-Service ohne Login), PWA, „at rest"-Verschlüsselung,
+  dynamische Routen mit `{param}`, Kontakt-Zusammenführung, Anmelde-Übersicht +
+  Sitzung-aus-der-Ferne-beenden, „Gesendete Nachrichten", „Erhaltene Mails",
+  Kontaktfelder Beruf/Webseite, globale Suche über alle sichtbaren Felder.
+- **Methodik:** manuelle Quelltext-Analyse, Blickwinkel „wie käme ich rein".
+  Kein Pentest gegen eine laufende Instanz, kein Abhängigkeits-Scan.
+- **Gesamtbild:** Die Grundlagen sind solide. Die schwerwiegenden Befunde aus
+  v1.0.0 sind weiterhin geschlossen; die neuen Flächen sind überwiegend sauber
+  gebaut (CSRF, parametrisierte Queries, WebAuthn korrekt verifiziert). Es gibt
+  **keine gefundene Möglichkeit, ohne gültiges Konto oder gültigen Token
+  einzudringen.** Die Befunde unten sind Härtung bzw. Missbrauchs-/DoS-Themen.
+
+Bewertung: **mittel** = zeitnah · **niedrig** = bei Gelegenheit / Härtung.
+
+## Zusammenfassung
+
+| # | Titel | Schwere | Voraussetzung |
+|---|---|---|---|
+| A1 | Geheim-Tokens im Query-String (`/meine-daten?token=`, `/registrieren?token=`) statt im Pfad – Leak über Zugriffslogs, Verlauf, Referrer | **mittel** | – (nur Kenntnis/Abfangen des Links) |
+| A2 | Daten-Check-Link ist nicht einmalig: `findValidByToken` ignoriert `used_at`, Link 30 Tage lang wiederverwendbar für PII-Schreibzugriff | **mittel** | gültiger Daten-Check-Token |
+| A3 | `registration_invites`: Token-Suche macht bis zu 50× bcrypt pro Request, ohne Formatprüfung/Rate-Limit → CPU-DoS | **mittel** | – (unauthentifiziert) |
+| A4 | Passwortwechsel/-Reset beendet andere Sitzungen nicht | **mittel** | kompromittierte Sitzung |
+| A5 | `users.manage` an eine Nicht-Admin-Rolle vergeben = faktisch Admin-Gewalt über Admin-Konten (Passwort setzen, impersonieren, sperren, Admin anlegen) | **mittel** | Fehlkonfiguration durch Admin |
+| B1 | Kein IP-unabhängiges Login-Lockout pro Konto → verteilter Brute-Force gegen bekannte Adresse möglich | niedrig | – |
+| B2 | `/orga-team` ohne Rate-Limit – jede eingeloggte Person kann unbegrenzt Mail ans Orga-Team schicken | niedrig | Konto (auch Mitglied) |
+| B3 | `sanitize_rich_html` lässt protokollrelative URLs (`//fremd.tld`) durch | niedrig | Admin (`users.manage`) |
+| B4 | Backup-Restore: keine Größenbegrenzung für ZIP / `database.json`; `DELETE FROM` ohne Backtick-Escape des Tabellennamens | niedrig | Admin + große/bösartige Datei |
+| B5 | `password_hash` liegt im View-Scope (`currentUser`), `UserRepository::search` lädt `users.*` in die Such-Ansicht | niedrig | – (latent, nirgends ausgegeben) |
+| B6 | `events.ical_uid` aus `UUID()` (MariaDB v1, teils vorhersehbar) für den öffentlichen `.ics`-Link | niedrig | Erraten der UID |
+| B7 | XLSX-Import: kein `is_uploaded_file()` (nur `error === UPLOAD_ERR_OK`) | niedrig | Admin |
+| B8 | Daten-Check-`save` ohne Rate-Limit | niedrig | gültiger Token |
+
+---
+
+## Befunde im Detail
+
+### A1 – Geheim-Tokens im Query-String
+
+**Betroffen:** `/meine-daten?token=…` (Daten-Check-Link, `DataCheckController`),
+`/registrieren?token=…` (Einladungs-/Registrierungslink, `RegistrationController`,
+`inviteUrl()`).
+
+Der Passwort-Reset wurde in v1.0.0 bewusst vom Query in ein **Pfad-Segment**
+verlegt (`/passwort-neu/<token>`) – Begründung im Code: „landet so nicht in
+Server-Logs, Browser-Verlauf oder Referrer-Headern". Genau diese Begründung
+gilt für die beiden anderen Links **gleichermaßen**, sie stehen aber weiter im
+Query:
+
+- `Referrer-Policy: same-origin` → beim Laden von `/assets/*` auf der
+  Token-Seite geht die **volle URL inkl. Token** als `Referer` an denselben
+  Server (steht damit in dessen Access-Log).
+- Die Anfragezeile `GET /meine-daten?token=… HTTP/1.1` steht ohnehin im
+  Webserver-Log.
+- Browser-Verlauf, geteilte Bookmarks, „Link kopieren".
+
+**Auswirkung:** Der Daten-Check-Token autorisiert **Schreibzugriff auf
+personenbezogene Daten** (Name, Adresse, Geburtstag, Telefon, E-Mail, Beruf,
+Webseite) eines Kontakts. Der Einladungstoken führt zu einem **neuen Konto
+für diese Adresse** (Angreifer setzt das Passwort).
+
+**Empfehlung:** Beide Links analog zum Passwort-Reset auf ein Pfad-Segment
+umstellen (`/meine-daten/<token>`, `/registrieren/<token>`), Alt-Query-Links per
+302-Shim auf die Pfad-Form umleiten. Zusätzlich `Referrer-Policy` auf
+`strict-origin` oder `no-referrer` für diese Seiten setzen.
+
+### A2 – Daten-Check-Link nicht einmalig
+
+`DataCheckRepository::findValidByToken()`:
+
+```sql
+WHERE dc.token_hash = :hash
+  AND dc.expires_at >= NOW()
+  AND c.archived_at IS NULL AND c.deleted_at IS NULL
+```
+
+Es fehlt `AND dc.used_at IS NULL`. `markUsed()` wird zwar aufgerufen, aber nie
+ausgewertet. Der Link bleibt damit bis zum Ablauf (Standard 30 Tage) gültig –
+`contacts.data_check_days`. In Kombination mit A1 (Token im Query, leakt in
+Logs/Verlauf) heißt das: wer den Link je gesehen hat, kann die Kontaktdaten
+30 Tage lang ändern.
+
+**Hinweis:** Die Wiederverwendbarkeit ist teils Absicht („Du kannst über
+denselben Link jederzeit noch etwas ändern, solange er gültig ist"). Wenn das
+so bleiben soll: Gültigkeit deutlich verkürzen (z. B. 72 h Default), Token in
+den Pfad (A1), und optional die Person beim Öffnen per Mail informieren
+(„Dein Daten-Link wurde gerade geöffnet").
+
+### A3 – bcrypt-Verstärkung bei der Einladungs-Token-Suche
+
+`RegistrationInviteRepository::findValidByToken()` lädt bis zu 50 offene
+Einladungen und ruft für jede `password_verify($token, $row['token_hash'])`
+(bcrypt). Kein `preg_match`-Formatcheck vorher, und der Pfad `/registrieren`
+(GET `form` und POST `complete`) hat **kein** Rate-Limit (das
+`recentCountByIp`-Limit sitzt nur in `requestSelf`).
+
+**Auswirkung:** Ein unauthentifizierter Angreifer, der `/registrieren?token=x`
+in einer Schleife abruft, erzwingt jeweils bis zu 50 bcrypt-Operationen
+(~2–5 s CPU pro Request). Bei mehreren offenen Einladungen ein wirksamer
+Rechen-DoS.
+
+**Empfehlung:** Analog zu `password_resets` (v1.0.0) eine
+`token_sha CHAR(64)`-Spalte + Index einführen, per SHA-256 in O(1) die eine
+Zeile holen und nur **einmal** `password_verify` rechnen. Zusätzlich
+Formatprüfung (`/^[a-f0-9]{48}$/`) und ein Rate-Limit auf `/registrieren`.
+
+### A4 – Sitzungen überleben Passwortwechsel
+
+`UserController::updateOwnPassword()`, `UserController::setPassword()` (Admin)
+und `PasswordResetService::reset()` setzen den `password_hash` neu, beenden aber
+**keine bestehenden `user_sessions`**. Wer eine Sitzung auf einem anderen Gerät
+hat (z. B. ein Angreifer nach Phishing), bleibt dort bis zum Timeout
+(30 min Inaktivität) angemeldet – auch wenn das Opfer sofort das Passwort
+ändert.
+
+**Empfehlung:** Seit v1.33 gibt es `user_sessions` + „Sitzung beenden". Bei
+jedem Passwortwechsel `UPDATE user_sessions SET revoked_at = NOW() WHERE
+user_id = :id` (außer der aktuellen Sitzung) – der Bootstrap-Check in
+`index.php` meldet die anderen dann beim nächsten Request ab.
+
+### A5 – `users.manage` ist „alles über alle, auch Admins"
+
+`UserController::store/setPassword/sendReset/toggleActive/resetPasskeys` und
+`impersonate` prüfen nur `requirePermission('users.manage')` bzw.
+`canAsOriginal('users.manage')` – **nicht** die Rolle des Ziel-Kontos relativ
+zur eigenen. Die Rechte-Matrix (`SettingsController::updatePermissions`) erlaubt
+es einem Admin, `users.manage` einer beliebigen Rolle zu geben.
+
+Folge: Eine Rolle mit `users.manage`, die nicht `admin` ist, kann
+Admin-Passwörter neu setzen, sich als Admin anmelden („impersonieren"),
+Admin-Konten sperren und neue Admin-Konten anlegen. Die einzige Bremse ist der
+„letzter aktiver Admin kann nicht gesperrt werden"-Check.
+
+**Empfehlung:** Eine von zwei Maßnahmen:
+1. In `updatePermissions` verhindern, dass `users.manage` einer Nicht-Admin-Rolle
+   zugewiesen wird (mit sichtbarer Begründung), **oder**
+2. In den genannten Aktionen zusätzlich `Auth::isAdmin()` verlangen, sobald das
+   Ziel-Konto die Rolle `admin` hat (bzw. für `impersonate` generell, wenn das
+   Ziel mehr Rechte hätte).
+
+### B1 – kein Konto-weites Login-Lockout
+
+`AuthController::login` sperrt nach `login_max_attempts` (5) Fehlversuchen pro
+`(E-Mail, IP)` **oder** `login_max_attempts_ip` (20) pro IP. Ein Angreifer mit
+vielen IPs (Botnet, Proxy-Pool) umgeht beides: pro IP 5 Versuche je Konto,
+Lockout-Fenster 10 min. Es gibt **keinen** Zähler „X Fehlversuche für diese
+E-Mail über alle IPs".
+
+**Empfehlung:** Weiches Backoff pro E-Mail (z. B. ab 20 Fehlversuchen in 15 min
+künstliche Verzögerung, oder eine kurze globale Cooldown-Phase). Kein hartes
+Lockout pro Konto (sonst DoS: Angreifer sperrt gezielt Nutzer aus). 12-Zeichen-
+Mindestlänge gilt bereits für Reset/Setup/Änderung – Alt-Konten aus dem Import
+haben aber ein Zufallspasswort, das ist ok.
+
+### B2 – `/orga-team` ohne Rate-Limit
+
+`OrgaController::send` – `requireAuth` + CSRF, sonst keine Drossel. Jede
+eingeloggte Person (auch „Mitglied") kann beliebig oft Betreff+Text ans
+Orga-Team schicken. Reply-To ist die echte Absenderadresse, Ziel ist nur das
+Orga-Team – der Schaden ist begrenzt, aber es ist ein Spam-/Reputations-Vektor
+(SMTP-Kontingent, Absender-Domain als Spam markiert).
+
+**Empfehlung:** Zähler wie bei der Selbst-Registrierung (z. B. max. 5/Stunde je
+Konto).
+
+### B3 – protokollrelative URLs in Rechtstexten
+
+`sanitize_rich_html`: `if (!preg_match('#^(https?:|mailto:|tel:|/|\#)#i', $href))
+{ removeAttribute }`. `//fremd.tld` beginnt mit `/` und passt. Der Link geht dann
+(mit `rel="noopener noreferrer nofollow"`) auf eine fremde Seite, obwohl er
+„intern" aussieht. Nur über Impressum/Datenschutz (Recht `users.manage`)
+einschleusbar.
+
+**Empfehlung:** `#^(https?://|mailto:|tel:|/(?!/)|\#)#i` – ein `/` nur, wenn ihm
+kein weiteres `/` folgt.
+
+### B4 – Backup-Restore: Größe & DELETE-Escape
+
+`BackupController::restore` prüft `is_uploaded_file`, aber nicht die Dateigröße;
+`BackupService::restoreArchive` liest `database.json` per `getFromName` komplett
+in den Speicher und `json_decode`t es. Eine sehr große (oder stark komprimierte)
+Datei kann den Speicher sprengen. Zusätzlich: `DELETE FROM \`$table\`` ohne
+`str_replace('\`','\`\`', $table)` (im INSERT-Pfad wird escaped). `$table` ist
+durch `tableExists()` auf echte Tabellennamen begrenzt, also praktisch nicht
+ausnutzbar – aber inkonsistent.
+
+**Empfehlung:** Obergrenze für die hochgeladene ZIP (z. B. 50 MB) und für die
+entpackte `database.json` (z. B. 100 MB). Backtick-Escape auch im DELETE.
+
+### B5 – `password_hash` im Ausgabe-Kontext
+
+`Auth::user()` gibt die volle `users`-Zeile zurück (inkl. `password_hash`);
+`BaseController::render()` reicht `currentUser` an **jedes** Template.
+`UserRepository::search()` macht `SELECT users.*` und das Ergebnis geht in die
+Such-Ansicht. Nirgends wird der Hash ausgegeben – aber ein einziges
+`json_encode($currentUser)` oder `<?= $currentUser['password_hash'] ?>` würde
+ihn exponieren.
+
+**Empfehlung:** In `BaseController::render()` `unset($user['password_hash'])`
+für das an die View gereichte `currentUser` (das interne `Auth::user()` für
+`password_verify` unangetastet lassen). `UserRepository::search()` auf die
+tatsächlich gebrauchten Spalten einschränken.
+
+### B6 – vorhersehbare `ical_uid`
+
+Migration `2026-09-18-termine-plus`: `UPDATE events SET ical_uid =
+REPLACE(UUID(),'-','')`. MariaDBs `UUID()` ist Version 1 (Zeit + Knoten-ID),
+also teilweise vorhersehbar. `/termine/termin.ics?k=<ical_uid>` ist öffentlich
+und liefert Titel, Datum, Ort, Beschreibung eines Termins. Keine Teilnehmer-PII.
+
+**Empfehlung:** `ical_uid` aus `bin2hex(random_bytes(16))` erzeugen (128 Bit
+Zufall). Geringe Priorität.
+
+### B7 – XLSX-Import ohne `is_uploaded_file`
+
+`ContactPortController::importXlsx` prüft `error === UPLOAD_ERR_OK`, ruft aber
+weder `is_uploaded_file()` noch `move_uploaded_file()` – der `tmp_name` geht
+direkt an `ContactImportService`. In normaler PHP-Umgebung unkritisch (nur der
+echte Upload-Temp kommt mit `UPLOAD_ERR_OK`), aber `is_uploaded_file()` wäre die
+saubere Absicherung. Recht `contacts.manage`.
+
+### B8 – Daten-Check-`save` ohne Rate-Limit
+
+`DataCheckController::save` – wer den Token hat, kann beliebig oft speichern.
+Der Token gibt ohnehin Schreibzugriff, also niedrige Priorität; ein kurzer
+Cooldown (z. B. 5 s wie bei „nochmal an mich") schadet nicht.
+
+---
+
+## Geprüft und in Ordnung
+
+- **CSRF:** flächendeckend. Token = `random_bytes(32)` hex, `hash_equals`,
+  rotiert bei Login/Impersonation. Alle ~110 zustandsändernden POST-Routen
+  validieren. Cron nutzt bewusst einen Schlüssel statt CSRF.
+- **SQL-Injection:** durchgängig parametrisiert. `ORDER BY` über Allowlist +
+  auf `ASC`/`DESC` normalisierte Richtung. `globalSearch` (neu): `?`-Platzhalter,
+  Bedingungen sind literale Strings, `LIMIT (int)`. `sent_mails`-Suche:
+  `contact_id` per `(int)`. Kein Fund.
+- **WebAuthn (`WebAuthnService::finishAuthentication`):** prüft Challenge
+  (einmalig, aus der Session, exakter Vergleich), Origin (exakt gegen
+  `app.base_url`), RP-ID-Hash (`hash_equals`), `type = webauthn.get`,
+  `crossOrigin`, Signatur (`openssl_verify` gegen den gespeicherten Public Key),
+  Flags **UP und UV**, Credential-ID-Bindung, Zähler-Rücklauf. Die `user_id`
+  kommt aus der gespeicherten Credential-Zeile, nie vom Client. **Kein
+  Auth-Bypass.** ES256-only ist eine Kompatibilitäts-, keine Sicherheitsfrage.
+- **Passwort-Reset:** 256-Bit-Token, bcrypt + SHA-256-Index, im **Pfad** (nicht
+  Query), Ablauf + `used_at` in SQL geprüft, bei Nutzung werden **alle** offenen
+  Tokens des Kontos verbraucht, Anti-Spam (max. 1/5 min), keine Enumeration
+  (Dummy-Hash für unbekannte Adressen).
+- **Datei-Uploads:** serverseitige MIME-Erkennung (`mime_content_type`, nicht
+  der Client-Header), Zufalls-Dateinamen, feste Endung aus MIME, **SVG explizit
+  abgelehnt** (Logo), Anhänge außerhalb des Webroots (`storage/tmp/`),
+  `preg_replace`+`basename` auf Namen.
+- **XXE:** `XlsxReader` nutzt `loadXML(..., LIBXML_NONET | LIBXML_NOERROR |
+  LIBXML_NOWARNING)` – **ohne** `LIBXML_NOENT`/`LIBXML_DTDLOAD`, dazu
+  `MAX_XML_BYTES`-Deckel. Externe Entities werden nicht aufgelöst.
+- **Theme-Tokens → `<style>`:** `ThemeService::tokenValueIsValid` verbietet
+  `< > { } ;`, `url(`, `expression`, `@import`, `/*`, Länge > 120; Farbe/Länge/
+  Font je eigene Regex. `normalizeTokens` läuft bei **jedem** Render erneut. Ein
+  `</style>`-Ausbruch ist nicht möglich (und die nonce-CSP würde eingeschleustes
+  `<script>` ohnehin blocken).
+- **`sanitize_rich_html`:** DOM-Allowlist, entfernt `script/style/iframe/object/
+  embed/noscript/template` **samt Inhalt**, streift alle Attribute außer einer
+  winzigen sicheren Menge, blockt `javascript:`/`data:` in `href` (bis auf den
+  protokollrelativen Fall B3).
+- **CSP:** `default-src 'self'`, Skripte nur mit Per-Request-Nonce,
+  `frame-ancestors 'none'`, `object-src 'none'`, `base-uri 'self'`,
+  `form-action 'self'`. `style-src 'unsafe-inline'` (für den Theme-`<style>`
+  nötig) – begrenzt, weil Ausgaben escaped sind und Theme-Werte streng gefiltert.
+- **Session-Cookie:** `HttpOnly`, `SameSite=Strict`, `Secure` (bei
+  `app.force_https`), `session_regenerate_id(true)` bei Login (Fixation),
+  Inaktivitäts-Timeout.
+- **Impersonation:** `canAsOriginal('users.manage')` (kein Verketten), Ziel ≠
+  selbst, Audit-Log; ENUM-Bug aus v1.7.1 behoben.
+- **Router:** dynamische Routen über `preg_quote`, Parameter `[^/]+`,
+  `rawurldecode` erst nach dem Match – keine Regex-Injection, kein
+  Pfad-Durchbruch.
+- **Backup-Restore:** Spaltennamen auf echte Spalten der Zieltabelle gefiltert
+  (`array_intersect_key` + `columnsOf`), Werte parametrisiert, Upload-Dateinamen
+  über `isSafeUploadName` (kein `.php`/`.htaccess`/Traversal). Die H1/H2-Befunde
+  aus v1.0.0 bleiben geschlossen.
+- **Mailversand:** CRLF aus allen Adressfeldern entfernt (`safeAddress`,
+  `replyToList`), Betreff im `mail()`-Pfad base64-kodiert → keine
+  Header-Injection.
+- **Cron:** `hash_equals` + Mindestlänge, 404 bei falschem/fehlendem Schlüssel
+  (Endpunkt verrät sich nicht).
+- **Selbst-Registrierung:** `default_role` kann nie `admin` sein (expliziter
+  Filter), Rate-Limit 5/h je Quelle, neutrale Antworten (keine Enumeration).
+- **Keine Konto-Enumeration** über Login, Reset oder Registrierung (überall
+  gleiche Antwort/Antwortzeit für „Adresse (un)bekannt").
+- **`view_partial()`:** alle 5 Aufrufe mit fest verdrahteten Namen – aktuell
+  keine LFI-Fläche. Falls je eine Variable übergeben wird: `..` und
+  Nicht-`[a-z0-9/_-]` ablehnen.
