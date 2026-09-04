@@ -48,6 +48,13 @@ Ideen, falls es weitergeht (kein Muss):
 - Echter Screenreader-Test (VoiceOver/NVDA) an den Kern-Workflows – nur am
   Gerät machbar.
 - Termine: Ranking-Variante.
+- **Anmelde-Übersicht für Admin** (TH-Wunsch 2026-09-04): (a) wer ist gerade
+  eingeloggt (aktive Sessions – gibt es noch keine Tabelle, `Session` müsste
+  eine `active_sessions`/`user_id`+`last_seen` führen), (b) Anmelde-Verlauf
+  „wer war wann eingeloggt" (Datenbasis teils da: `login_attempts` mit
+  `successful=1`; für sauberen Verlauf ggf. eigene `login_log`-Tabelle mit
+  Logout-Zeit). Anzeige unter Verwaltung, ggf. neben „Änderungs-/
+  Versandprotokoll".
 
 ## UX-Review – Umsetzung (Entscheidungen TH 2026-09-04)
 
