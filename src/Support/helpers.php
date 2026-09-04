@@ -81,6 +81,25 @@ function can_any(string ...$permissions): bool
     return false;
 }
 
+/**
+ * Nutzungshinweis für Galerie-Medien (Urheber-/Persönlichkeitsrechte).
+ * Instanzweit über `app_settings.gallery_usage_notice` anpassbar.
+ */
+function gallery_usage_notice(): string
+{
+    $default = 'Diese Aufnahmen sind für die Teilnehmenden des Treffens zum Ansehen gedacht. '
+        . 'Eine Weitergabe oder Veröffentlichung – etwa in sozialen Netzwerken – ist nur mit '
+        . 'Einverständnis der abgebildeten Personen zulässig.';
+
+    try {
+        $stored = App\Core\Container::get(App\Repositories\SettingRepository::class)->get('gallery_usage_notice');
+    } catch (Throwable) {
+        return $default;
+    }
+
+    return $stored !== null && trim($stored) !== '' ? $stored : $default;
+}
+
 function can_view_contact_field(string $field, ?array $contact = null): bool
 {
     return auth()->canViewContactField($field, $contact);
@@ -275,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.48.0';
+    return '1.49.0';
 }
 
 /**
@@ -564,6 +583,7 @@ function page_title(string $path): string
         '/galerien/neu'              => 'Neue Galerie',
         '/galerien/ansehen'          => 'Galerie',
         '/galerien/papierkorb'       => 'Galerie-Papierkorb',
+        '/galerien/auffang'          => 'Auffangraum',
         '/meine-daten'               => 'Daten-Check',
         '/search'                    => 'Suche',
         '/contacts/create'           => 'Neuer Kontakt',
@@ -620,8 +640,12 @@ function page_title(string $path): string
         return $exact[$path];
     }
 
-    // Token-Pfade: /meine-daten/<token>, /registrieren/<token>
-    foreach (['/meine-daten' => 'Daten-Check', '/registrieren' => 'Zugang einrichten'] as $prefix => $title) {
+    // Token-Pfade
+    foreach ([
+        '/meine-daten' => 'Daten-Check',
+        '/registrieren' => 'Zugang einrichten',
+        '/beitragen' => 'Fotos beisteuern',
+    ] as $prefix => $title) {
         if (str_starts_with($path, $prefix . '/')) {
             return $title;
         }

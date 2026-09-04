@@ -9,6 +9,35 @@
     var csrf = (window.APP && window.APP.csrfToken) || '';
     var uploadPanel = document.querySelector('[data-gallery-upload]');
     var grid = document.querySelector('[data-media-grid]');
+    var qrHolder = document.querySelector('[data-qr]');
+
+    // ----------------------------------------------------------------- QR-Code
+    if (qrHolder && typeof window.qrcode === 'function') {
+        try {
+            var qr = window.qrcode(0, 'M');
+            qr.addData(qrHolder.getAttribute('data-qr'));
+            qr.make();
+            qrHolder.innerHTML = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+            var svgEl = qrHolder.querySelector('svg');
+            if (svgEl) { svgEl.setAttribute('role', 'img'); svgEl.setAttribute('aria-label', qrHolder.getAttribute('data-qr-label') || 'QR-Code'); }
+        } catch (e) { qrHolder.textContent = 'QR-Code konnte nicht erzeugt werden.'; }
+    }
+    var qrSave = document.querySelector('[data-qr-save]');
+    if (qrSave && qrHolder) {
+        qrSave.addEventListener('click', function () {
+            var svg = qrHolder.querySelector('svg');
+            if (!svg) return;
+            var blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'upload-qr.svg';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+        });
+    }
+
     if (!grid && !uploadPanel) {
         return;
     }
@@ -29,6 +58,8 @@
         var n = Math.max(0, parseInt(countEl.textContent, 10) + delta);
         countEl.textContent = String(n);
         if (emptyEl) emptyEl.classList.toggle('is-hidden', n > 0);
+        var cc = document.querySelector('[data-contribute-count]');
+        if (cc && n > 0) cc.hidden = false;
     }
 
     // ---------------------------------------------------------------- Upload

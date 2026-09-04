@@ -8,6 +8,10 @@
  * @var string $usageNotice
  * @var int $mediaBytes
  * @var int $backupMax
+ * @var int $unassignedCount
+ * @var list<array<string,mixed>> $catchAllLinks
+ * @var array<string,mixed>|null $freshLink
+ * @var int $linkDays
  */
 ?>
 <header class="contacts-header">
@@ -102,7 +106,18 @@ $uploadMax = (int) ($capabilities['upload_max_bytes'] ?? 0);
     </div>
 <?php endif; ?>
 
+<?php if ($canManage && $unassignedCount > 0): ?>
+    <p class="gallery-trash-link">
+        <a class="ghost-button compact-action" href="<?= e(url('/galerien/auffang')) ?>"><?= icon('inbox') ?><span>Auffangraum: <?= (int) $unassignedCount ?> noch nicht zugeordnet</span></a>
+    </p>
+<?php endif; ?>
+
 <?php if ($canManage): ?>
+    <?php view_partial('galleries/_link-section', [
+        'galleryId' => null, 'links' => $catchAllLinks, 'freshLink' => $freshLink,
+        'csrfToken' => $csrfToken, 'linkDays' => $linkDays,
+    ]); ?>
+
     <section class="panel gallery-backup">
         <div class="panel-head"><div><h3>Sicherung der Medien</h3>
             <p class="muted">Alle Galerien und Dateien als ZIP – zusätzlich zur Sicherung beim Hoster. Die Galerie-Medien sind <strong>nicht</strong> im normalen Datensicherungs-Backup enthalten.</p>
@@ -134,4 +149,9 @@ $uploadMax = (int) ($capabilities['upload_max_bytes'] ?? 0);
             <a class="ghost-button compact-action" href="<?= e(url('/galerien/papierkorb')) ?>"><?= icon('trash') ?><span>Papierkorb (<?= (int) $trashedCount ?>)</span></a>
         </p>
     <?php endif; ?>
+
+    <?php if ($freshLink !== null): ?>
+        <script src="<?= e(asset_url('/assets/js/vendor-qrcode.js')) ?>" defer></script>
+    <?php endif; ?>
+    <script src="<?= e(asset_url('/assets/js/gallery.js')) ?>" defer></script>
 <?php endif; ?>

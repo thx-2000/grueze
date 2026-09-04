@@ -459,6 +459,7 @@ CREATE TABLE IF NOT EXISTS gallery_media (
     caption VARCHAR(500) NULL,
     position INT NOT NULL DEFAULT 0,
     uploaded_by INT UNSIGNED NULL,
+    via_link TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATETIME NULL,
     KEY idx_gallery_media_gallery (gallery_id, deleted_at),
@@ -466,6 +467,25 @@ CREATE TABLE IF NOT EXISTS gallery_media (
     KEY idx_gallery_media_position (gallery_id, position),
     CONSTRAINT fk_gallery_media_gallery FOREIGN KEY (gallery_id) REFERENCES galleries(id) ON DELETE CASCADE,
     CONSTRAINT fk_gallery_media_user FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS gallery_upload_links (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    gallery_id INT UNSIGNED NULL,
+    token_hash VARCHAR(255) NOT NULL,
+    token_sha CHAR(64) NOT NULL,
+    label VARCHAR(120) NULL,
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NULL,
+    revoked_at DATETIME NULL,
+    max_uploads INT UNSIGNED NULL,
+    upload_count INT UNSIGNED NOT NULL DEFAULT 0,
+    last_upload_at DATETIME NULL,
+    KEY idx_gul_token_sha (token_sha),
+    KEY idx_gul_gallery (gallery_id),
+    CONSTRAINT fk_gul_gallery FOREIGN KEY (gallery_id) REFERENCES galleries(id) ON DELETE CASCADE,
+    CONSTRAINT fk_gul_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO roles (name, label, description) VALUES

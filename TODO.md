@@ -100,15 +100,46 @@ Papierkorb (nur Admin sichtbar), Bilder nicht in die DB, Videos erlaubt.
   `HINWEIS.txt`. Medien-Sicherung im System: Export „Alle Medien sichern"
   (ZIP + manifest.json) und Import (neue Galerien, kein Merge), Limit
   `media.backup_max_bytes`. „Fehler 200"-Fix (ob_start + JSON-Puffer-Discard).
-- **Stufe 2 – handy-optimierter Upload + Weitergabe (offen):**
-  schlanke Upload-Seite fürs Handy; **Auffangraum** (`gallery_media.gallery_id`
-  ist bereits NULL-fähig) für nicht zugeordnete Uploads → später einer Galerie
-  zuweisen / neue Galerie daraus; **Weitergabe-Link** (Token wie Daten-Check)
-  + **QR-Code** zum Aushängen, Upload ohne Login. QR-Erzeugung muss in den
-  Stack (kleine PHP-Lib oder SVG selbst zeichnen).
+- **Stufe 2 – Weitergabe-Link + QR + Auffangraum – v1.49.0 erledigt.**
+  `gallery_upload_links` (Token sha+bcrypt, gallery_id NULL = Auffangraum,
+  expires/max_uploads/revoke). Öffentliche Seite `/beitragen/<token>`
+  (`GalleryContributeController`, kein Login, `via_link=1`, `uploaded_by=NULL`,
+  Session-Cap 150). QR clientseitig (`vendor-qrcode.js`, MIT, Kazuhiko Arase).
+  Auffangraum `/galerien/auffang`: Mehrfachauswahl → in Galerie/neue Galerie
+  verschieben. Migration `2026-09-30-galerie-beitragen`.
 - **Feiner (offen):** Sichtbarkeit einzelner Galerien auf bestimmte Gruppen
   begrenzen (jetzt gilt jedes Recht global); Sicherungs-Export als Stream statt
-  Temp-ZIP (Speicherplatz bei sehr großen Beständen).
+  Temp-ZIP; QR-Code für Alt-Links (aktuell nur direkt nach dem Erstellen, weil
+  der Klartext-Token nicht gespeichert wird).
+
+## Account-Einladungen (TH-Fragen 2026-09-04)
+
+**Was es schon gibt:**
+- Einzelne Person: Kontakt öffnen → „Einladungslink erstellen" (oder
+  Verwaltung → Selbst-Registrierung). Der Link ist an die Kontakt-Mailadresse
+  gebunden, die Person legt nur Name + Passwort fest (**min. 12 Zeichen wird
+  geprüft**, keine weitere Stärkeprüfung) oder Passkey. Rolle = das in
+  Verwaltung → Selbst-Registrierung eingestellte `registration_default_role`
+  (nie „admin"; auf „Mitglied"/Stufenmitglied stellen).
+- Selbst-Anmeldung: unter `/registrieren` kann jemand die eigene bekannte
+  Mailadresse eintragen und bekommt (nach Klick auf Bestätigungslink) den
+  Zugang; unbekannte Adressen landen in einer Freigabe-Warteschlange.
+
+**Gewünscht / offen:**
+1. **Sammel-Einladung** – für mehrere Kontakte auf einmal einen Link erzeugen
+   und mailen; „für alle ohne Account" als ein Knopf (Kontakte mit
+   Mailadresse ohne verknüpften Login).
+2. **Admin-Benachrichtigung** – wenn sich jemand über einen Link registriert,
+   eine Mail an den/die Admin(s).
+3. Passwort-Stärke: evtl. simple Zusatz-Checks (nicht nur Länge – z. B. nicht
+   nur eine Zeichenklasse, nicht in einer kleinen Blocklist).
+
+## Berechtigungs-Matrix (TH-Frage 2026-09-04)
+
+**Gibt es schon:** Verwaltung → Berechtigungen ist eine Matrix (Rechte-Zeilen
+× Rollen-Spalten mit Häkchen); Rollen anlegen/umbenennen/löschen unter
+Verwaltung → Rollen. Möglicher Ausbau: beides auf einer Seite, „neue Rolle"
+inline in der Matrix, Rechte nach Bereich gruppiert sichtbar.
 - **Chat für Online-Nutzer:innen** – TH hält es selbst für unwahrscheinlich,
   nur mitführen. Größter Brocken (Polling/SSE, Moderation, Datenschutz).
 

@@ -183,6 +183,9 @@ return [
         // Obergrenze für die Gesamt-Sicherung „Alle Medien sichern" (und den
         // Import). Darüber bittet die Oberfläche, einzelne Galerien zu sichern.
         'backup_max_bytes' => 2147483648, // 2 GiB
+        // Voreingestellte Gültigkeit (Tage) für Weitergabe-Links zum Beisteuern
+        // von Fotos ohne Login. Pro Link beim Erstellen überschreibbar.
+        'link_expiry_days' => 21,
         // Pfad zum ImageMagick-Binary – nur nötig, wenn die PHP-Erweiterung
         // imagick fehlt UND HEIC-Bilder umgewandelt werden sollen (all-inkl).
         'convert_bin' => '/usr/bin/convert',

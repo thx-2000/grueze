@@ -43,6 +43,7 @@ final class GalleryController extends BaseController
         private EventRepository $events,
         private LogRepository $logs,
         private SettingRepository $settings,
+        private \App\Repositories\GalleryUploadLinkRepository $uploadLinks,
     ) {
         parent::__construct($auth);
     }
@@ -53,15 +54,20 @@ final class GalleryController extends BaseController
     {
         $this->requireView();
 
+        $canManage = $this->canManage();
         $this->render('galleries/index', [
             'galleries' => $this->galleries->all(),
-            'trashedCount' => $this->canManage() ? count($this->galleries->trashed()) : 0,
+            'trashedCount' => $canManage ? count($this->galleries->trashed()) : 0,
             'capabilities' => $this->storage->capabilities(),
-            'canManage' => $this->canManage(),
+            'canManage' => $canManage,
             'canUpload' => $this->canUpload(),
-            'usageNotice' => $this->notice(),
-            'mediaBytes' => $this->canManage() ? $this->media->totalActiveBytes() : 0,
+            'usageNotice' => gallery_usage_notice(),
+            'mediaBytes' => $canManage ? $this->media->totalActiveBytes() : 0,
             'backupMax' => (int) config('media.backup_max_bytes', 2147483648),
+            'unassignedCount' => $canManage ? $this->media->countUnassigned() : 0,
+            'catchAllLinks' => $canManage ? $this->uploadLinks->active(0) : [],
+            'freshLink' => $canManage ? $this->takeFreshLink(null) : null,
+            'linkDays' => (int) config('media.link_expiry_days', 21),
         ]);
     }
 
@@ -105,16 +111,20 @@ final class GalleryController extends BaseController
         }
 
         $items = $this->media->forGallery((int) $gallery['id'], (string) $gallery['sort_mode']);
+        $canManage = $this->canManage();
 
         $this->render('galleries/show', [
             'gallery' => $gallery,
             'items' => $items,
             'events' => $this->events->all(),
             'capabilities' => $this->storage->capabilities(),
-            'canManage' => $this->canManage(),
+            'canManage' => $canManage,
             'canUpload' => $this->canUpload(),
             'currentUserId' => (int) $this->userId(),
-            'usageNotice' => $this->notice(),
+            'usageNotice' => gallery_usage_notice(),
+            'uploadLinks' => $canManage ? $this->uploadLinks->active((int) $gallery['id']) : [],
+            'freshLink' => $canManage ? $this->takeFreshLink((int) $gallery['id']) : null,
+            'linkDays' => (int) config('media.link_expiry_days', 21),
         ]);
     }
 
@@ -149,6 +159,100 @@ final class GalleryController extends BaseController
         $this->settings->set(self::NOTICE_KEY, $text !== '' ? mb_substr($text, 0, 1000) : self::NOTICE_DEFAULT);
         flash('success', 'Hinweistext gespeichert.');
         Redirect::to('/galerien');
+    }
+
+    // -------------------------------------------------- Weitergabe-Links (QR)
+
+    public function createLink(Request $request): void
+    {
+        $this->requireManage();
+        Csrf::validate($request->input('_csrf'));
+
+        $galleryId = (int) $request->input('gallery_id') ?: null;
+        $gallery = $galleryId !== null ? $this->galleries->find($galleryId) : null;
+        if ($galleryId !== null && $gallery === null) {
+            flash('error', 'Galerie nicht gefunden.');
+            Redirect::to('/galerien');
+        }
+
+        $days = max(1, min(365, (int) $request->input('days', (int) config('media.link_expiry_days', 21))));
+        $maxUploads = (int) $request->input('max_uploads') ?: null;
+        $label = trim((string) $request->input('label'));
+
+        $token = $this->uploadLinks->create($galleryId, $label !== '' ? $label : null, $days, $maxUploads, $this->userId());
+        $url = url('/beitragen/' . rawurlencode($token));
+
+        $_SESSION['fresh_upload_link'] = ['url' => $url, 'for_gallery' => $galleryId];
+        $this->logs->addAudit((int) $this->userId(), null, 'created',
+            'Galerie-Upload-Link erstellt' . ($gallery ? ' für „' . $gallery['title'] . '"' : ' (Auffangraum)') . ', gültig ' . $days . ' Tage.');
+        flash('success', 'Upload-Link erstellt – unten zum Kopieren und als QR-Code.');
+        Redirect::to($galleryId !== null ? '/galerien/ansehen?id=' . $galleryId : '/galerien');
+    }
+
+    public function revokeLink(Request $request): void
+    {
+        $this->requireManage();
+        Csrf::validate($request->input('_csrf'));
+
+        $link = $this->uploadLinks->find((int) $request->input('id'));
+        if ($link !== null) {
+            $this->uploadLinks->revoke((int) $link['id']);
+            flash('success', 'Der Upload-Link ist jetzt ungültig.');
+        }
+        Redirect::to($link && $link['gallery_id'] !== null ? '/galerien/ansehen?id=' . (int) $link['gallery_id'] : '/galerien');
+    }
+
+    // ---------------------------------------------------- Auffangraum
+
+    public function unassigned(): void
+    {
+        $this->requireManage();
+
+        $this->render('galleries/unassigned', [
+            'items' => $this->media->unassigned(),
+            'galleries' => $this->galleries->all(),
+            'usageNotice' => gallery_usage_notice(),
+        ]);
+    }
+
+    public function moveMedia(Request $request): void
+    {
+        $this->requireManage();
+        Csrf::validate($request->input('_csrf'));
+
+        $ids = array_values(array_filter(array_map('intval', (array) $request->input('media_id', []))));
+        if ($ids === []) {
+            flash('error', 'Keine Medien ausgewählt.');
+            Redirect::to('/galerien/auffang');
+        }
+
+        $target = (string) $request->input('target');
+        if ($target === 'new') {
+            $title = mb_substr(trim((string) $request->input('new_title')), 0, 190);
+            if ($title === '') {
+                flash('error', 'Bitte einen Titel für die neue Galerie angeben.');
+                Redirect::to('/galerien/auffang');
+            }
+            $galleryId = $this->galleries->create(['title' => $title, 'sort_mode' => 'captured'], $this->userId());
+        } else {
+            $galleryId = (int) $target;
+            if ($this->galleries->find($galleryId) === null) {
+                flash('error', 'Zielgalerie nicht gefunden.');
+                Redirect::to('/galerien/auffang');
+            }
+        }
+
+        $moved = 0;
+        foreach ($ids as $id) {
+            $item = $this->media->find($id, true);
+            if ($item !== null && $item['gallery_id'] === null && $item['deleted_at'] === null) {
+                $this->media->move($id, $galleryId);
+                $moved++;
+            }
+        }
+        $this->logs->addAudit((int) $this->userId(), null, 'updated', $moved . ' Medien aus dem Auffangraum einer Galerie zugeordnet.');
+        flash('success', $moved . ' ' . ($moved === 1 ? 'Medium' : 'Medien') . ' verschoben.');
+        Redirect::to('/galerien/ansehen?id=' . $galleryId);
     }
 
     // ------------------------------------------------------------- Upload
@@ -638,15 +742,30 @@ final class GalleryController extends BaseController
 
     private function notice(): string
     {
-        $stored = $this->settings->get(self::NOTICE_KEY);
-
-        return $stored !== null && trim($stored) !== '' ? $stored : self::NOTICE_DEFAULT;
+        return gallery_usage_notice();
     }
 
     private function noticePlain(): string
     {
         return "Hinweis zur Nutzung\n===================\n\n" . $this->notice()
             . "\n\nHeruntergeladen am " . date('d.m.Y') . ".\n";
+    }
+
+    /**
+     * Einmalig anzuzeigenden frischen Upload-Link aus der Session holen –
+     * nur wenn er zur gerade gezeigten Seite gehört (`null` = Übersicht).
+     *
+     * @return array<string,mixed>|null
+     */
+    private function takeFreshLink(?int $galleryId): ?array
+    {
+        $fresh = $_SESSION['fresh_upload_link'] ?? null;
+        if (!is_array($fresh) || ($fresh['for_gallery'] ?? null) !== $galleryId) {
+            return null;
+        }
+        unset($_SESSION['fresh_upload_link']);
+
+        return $fresh;
     }
 
     /** @param array<string,bool> $used */

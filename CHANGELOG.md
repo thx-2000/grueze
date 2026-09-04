@@ -3,6 +3,25 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.49.0
+
+**Galerien: Fotos beisteuern per Link + QR, ohne Login (Stufe 2).**
+
+- **Upload-Link zum Weitergeben:** Auf der Galerie-Seite (oder auf der
+  Übersicht für den Auffangraum) einen Link erzeugen – per Messenger/Mail
+  verschicken oder den **QR-Code ausdrucken und aushängen**. Wer den Link
+  öffnet, kann **ohne Login** Fotos/Videos hochladen. Der Nutzungshinweis
+  steht auch dort. Links haben eine Gültigkeit (Standard 21 Tage), optional
+  eine Obergrenze für die Zahl der Uploads, und lassen sich zurückziehen.
+- **Auffangraum:** Uploads über einen Link ohne feste Galerie sammeln sich
+  im Auffangraum (Verwaltung → Galerien). Von dort mehrere auf einmal einer
+  bestehenden Galerie zuordnen – oder eine neue Galerie daraus machen.
+- QR-Codes werden im Browser erzeugt (Bibliothek von Kazuhiko Arase, MIT) und
+  lassen sich als SVG speichern.
+
+**Migration `2026-09-30-galerie-beitragen`.** Optional in
+`config/config.example.php`: `media.link_expiry_days`.
+
 ## 1.48.0
 
 **Galerien: Rollen, Nutzungshinweis und eigener Sicherungs-Knopf.**

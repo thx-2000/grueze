@@ -8,6 +8,9 @@
  * @var bool $canUpload
  * @var int $currentUserId
  * @var string $usageNotice
+ * @var list<array<string,mixed>> $uploadLinks
+ * @var array<string,mixed>|null $freshLink
+ * @var int $linkDays
  */
 $g = $gallery;
 $sortMode = (string) $g['sort_mode'];
@@ -91,6 +94,11 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
         </div>
     </form>
 </details>
+
+<?php view_partial('galleries/_link-section', [
+    'galleryId' => (int) $g['id'], 'links' => $uploadLinks, 'freshLink' => $freshLink,
+    'csrfToken' => $csrfToken, 'linkDays' => $linkDays,
+]); ?>
 <?php endif; ?>
 
 <?php if ($canUpload): ?>
@@ -138,4 +146,7 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
     <p class="lightbox-notice"><?= e($usageNotice) ?></p>
 </div>
 
+<?php if ($canManage && $freshLink !== null): ?>
+    <script src="<?= e(asset_url('/assets/js/vendor-qrcode.js')) ?>" defer></script>
+<?php endif; ?>
 <script src="<?= e(asset_url('/assets/js/gallery.js')) ?>" defer></script>

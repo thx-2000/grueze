@@ -409,6 +409,7 @@ try {
     Container::factory(\App\Services\MediaService::class, static fn () => new \App\Services\MediaService());
     Container::factory(\App\Repositories\GalleryRepository::class, static fn () => new \App\Repositories\GalleryRepository(Container::get(PDO::class)));
     Container::factory(\App\Repositories\GalleryMediaRepository::class, static fn () => new \App\Repositories\GalleryMediaRepository(Container::get(PDO::class)));
+    Container::factory(\App\Repositories\GalleryUploadLinkRepository::class, static fn () => new \App\Repositories\GalleryUploadLinkRepository(Container::get(PDO::class)));
     Container::factory(\App\Controllers\GalleryController::class, static fn () => new \App\Controllers\GalleryController(
         Container::get(Auth::class),
         Container::get(\App\Repositories\GalleryRepository::class),
@@ -416,7 +417,14 @@ try {
         Container::get(\App\Services\MediaService::class),
         Container::get(EventRepository::class),
         Container::get(LogRepository::class),
-        Container::get(SettingRepository::class)
+        Container::get(SettingRepository::class),
+        Container::get(\App\Repositories\GalleryUploadLinkRepository::class)
+    ));
+    Container::factory(\App\Controllers\GalleryContributeController::class, static fn () => new \App\Controllers\GalleryContributeController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\GalleryUploadLinkRepository::class),
+        Container::get(\App\Repositories\GalleryMediaRepository::class),
+        Container::get(\App\Services\MediaService::class)
     ));
 
     // Angemeldete Sitzung mitschreiben (Verwaltung → Anmeldungen). Wurde die
@@ -488,6 +496,7 @@ try {
                     $galleryMediaRepo->hardDelete((int) $row['id']);
                 }
             }
+            Container::get(\App\Repositories\GalleryUploadLinkRepository::class)->pruneOld(30);
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
         }
@@ -646,6 +655,12 @@ try {
     $router->post('/galerien/endgueltig-loeschen', [\App\Controllers\GalleryController::class, 'purgeGallery']);
     $router->get('/galerien/datei', [\App\Controllers\GalleryController::class, 'file']);
     $router->get('/galerien/zip', [\App\Controllers\GalleryController::class, 'downloadZip']);
+    $router->get('/galerien/auffang', [\App\Controllers\GalleryController::class, 'unassigned']);
+    $router->post('/galerien/medien/verschieben', [\App\Controllers\GalleryController::class, 'moveMedia']);
+    $router->post('/galerien/link', [\App\Controllers\GalleryController::class, 'createLink']);
+    $router->post('/galerien/link/widerrufen', [\App\Controllers\GalleryController::class, 'revokeLink']);
+    $router->get('/beitragen/{token}', [\App\Controllers\GalleryContributeController::class, 'form']);
+    $router->post('/beitragen/{token}', [\App\Controllers\GalleryContributeController::class, 'upload']);
     $router->get('/meine-daten', [\App\Controllers\DataCheckController::class, 'show']);
     $router->get('/meine-daten/{token}', [\App\Controllers\DataCheckController::class, 'show']);
     $router->post('/meine-daten', [\App\Controllers\DataCheckController::class, 'save']);

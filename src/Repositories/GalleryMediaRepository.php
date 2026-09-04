@@ -52,20 +52,23 @@ final class GalleryMediaRepository
                     KEY idx_gallery_media_position (gallery_id, position)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
             );
+            $this->pdo->exec(
+                'ALTER TABLE gallery_media ADD COLUMN IF NOT EXISTS via_link TINYINT(1) NOT NULL DEFAULT 0 AFTER uploaded_by'
+            );
         } catch (\Throwable) {
             // Migration holt es nach.
         }
     }
 
-    public function add(int $galleryId, array $data, ?int $userId): int
+    public function add(?int $galleryId, array $data, ?int $userId, bool $viaLink = false): int
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO gallery_media
                 (gallery_id, kind, original_name, stored_path, thumb_path, web_path, mime,
-                 byte_size, width, height, duration_seconds, captured_at, position, uploaded_by)
+                 byte_size, width, height, duration_seconds, captured_at, position, uploaded_by, via_link)
              VALUES
                 (:gallery_id, :kind, :original_name, :stored_path, :thumb_path, :web_path, :mime,
-                 :byte_size, :width, :height, :duration_seconds, :captured_at, :position, :uploaded_by)'
+                 :byte_size, :width, :height, :duration_seconds, :captured_at, :position, :uploaded_by, :via_link)'
         );
         $stmt->execute([
             'gallery_id' => $galleryId,
@@ -82,19 +85,54 @@ final class GalleryMediaRepository
             'captured_at' => $data['captured_at'] ?? null,
             'position' => $this->nextPosition($galleryId),
             'uploaded_by' => $userId,
+            'via_link' => $viaLink ? 1 : 0,
         ]);
 
         return (int) $this->pdo->lastInsertId();
     }
 
-    private function nextPosition(int $galleryId): int
+    private function nextPosition(?int $galleryId): int
     {
         $stmt = $this->pdo->prepare(
-            'SELECT COALESCE(MAX(position), 0) + 1 FROM gallery_media WHERE gallery_id = :g'
+            'SELECT COALESCE(MAX(position), 0) + 1 FROM gallery_media WHERE gallery_id ' . ($galleryId === null ? 'IS NULL' : '= :g')
         );
-        $stmt->execute(['g' => $galleryId]);
+        $stmt->execute($galleryId === null ? [] : ['g' => $galleryId]);
 
         return (int) $stmt->fetchColumn();
+    }
+
+    /** Ein Medium einer anderen Galerie zuordnen (oder in den Auffangraum). */
+    public function move(int $mediaId, ?int $galleryId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE gallery_media SET gallery_id = :g, position = :p WHERE id = :id'
+        );
+        $stmt->execute([
+            'g' => $galleryId,
+            'p' => $this->nextPosition($galleryId),
+            'id' => $mediaId,
+        ]);
+    }
+
+    /**
+     * Auffangraum: Medien ohne Galerie-Zuordnung.
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function unassigned(): array
+    {
+        return $this->pdo->query(
+            'SELECT * FROM gallery_media
+             WHERE gallery_id IS NULL AND deleted_at IS NULL
+             ORDER BY COALESCE(captured_at, created_at) ASC, id ASC'
+        )->fetchAll();
+    }
+
+    public function countUnassigned(): int
+    {
+        return (int) $this->pdo->query(
+            'SELECT COUNT(*) FROM gallery_media WHERE gallery_id IS NULL AND deleted_at IS NULL'
+        )->fetchColumn();
     }
 
     /**
