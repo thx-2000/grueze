@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.41.0
+
+**„Kreide" ist der neue Standard.**
+
+- Das Theme **Kreide** wird beim Update aktiviert und ist ab jetzt der
+  Standard für neue Installationen. Jederzeit unter Verwaltung → Themes
+  wieder umstellbar (auch auf ein eigenes).
+- **Terrakotta** überarbeitet: die Aktionsfarbe ist jetzt ein gedecktes
+  Ton-/Ziegelrot statt eines Orange, insgesamt weniger orange-lastig.
+- Migration `2026-09-26-theme-kreide` – nach dem Upload
+  **Verwaltung → Aktualisieren**.
+
 ## 1.40.0
 
 **Zwei neue Farbwelten zur Auswahl.**

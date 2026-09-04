@@ -24,14 +24,15 @@ bzw. 3:1). Ein leeres Feld lässt den Token unverändert.
 
 Mitgeliefert:
 
-- `signalfarbe.php` – „Grün": Waldgrün auf viel Weiß. Der Standard für neue
-  Installationen und zugleich die Basis, auf die nicht gesetzte Tokens
+- `kreide.php` – „Kreide": **Standard für neue Installationen.** Fast weiße
+  kühle Flächen, kräftige matte Farben (Petrol / Ziegel / Amber), etwas
+  schärfere Ecken.
+- `signalfarbe.php` – „Grün": Waldgrün auf viel Weiß. Für Bestandsinstanzen
+  ohne gesetztes Theme, zugleich die Basis, auf die nicht gesetzte Tokens
   zurückfallen (Slug bleibt aus Kompatibilität `signalfarbe`).
 - `hell.php` – „Hell": viel Weiß, warmer Orange-Akzent, Teal als Zweitfarbe.
-- `terrakotta.php` – „Terrakotta": warme Erdtöne mit gebranntem Orange als
-  Signalfarbe.
-- `kreide.php` – „Kreide": fast weiße kühle Flächen, kräftige matte Farben
-  (Petrol / Ziegel / Amber), etwas schärfere Ecken.
+- `terrakotta.php` – „Terrakotta": warme Erdtöne mit gedecktem Ziegelrot als
+  Aktionsfarbe.
 - `dunkel.php` – „Dunkel": dunkle Oberfläche mit hellgrüner Aktionsfarbe.
   Zugleich die Referenz dafür, wie ein dunkles Theme aussehen muss (siehe unten).
 

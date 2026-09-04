@@ -3,7 +3,7 @@
 Das Produkt heißt **GRUEZE** – **GRU**ppen-**E**rreichbarkeits-**ZE**ntrale
 (und klingt wie „Grüezi"). Jede Installation ist eine
 **Instanz** davon und bekommt einen eigenen Namen. Eine frische Installation
-startet markenneutral mit generischen Texten und dem Theme `hell`; alles
+startet markenneutral mit generischen Texten und dem Theme `kreide`; alles
 Instanzspezifische wird danach eingestellt, nicht im Code geändert.
 
 Der Produktname GRUEZE bleibt sichtbar (Footer, Seitenleiste „läuft mit
@@ -26,7 +26,7 @@ GRUEZE"). Nur wer das Produkt selbst umlabeln will, setzt
    Verschlüsselung anlegen kann – alternativ `security.secret_key` in der
    `config.php` setzen).
 6. Seite `/setup/admin` aufrufen und das erste Admin-Konto anlegen. Dabei
-   wird das Theme `hell` als aktiv gesetzt.
+   wird das Theme `kreide` als aktiv gesetzt.
 7. Unter `/admin/migrations` alle Migrationen anwenden.
 
 ## 2. Branding
@@ -54,8 +54,9 @@ Logo und Support-Mail lassen sich auch komplett über die Oberfläche pflegen;
 
 ## 3. Aussehen
 
-Verwaltung → Themes. `hell` ist der Standard, `signalfarbe` und `dunkel` sind
-weitere Vorlagen. „Kopieren & bearbeiten" öffnet den Editor mit Live-Vorschau,
+Verwaltung → Themes. `kreide` ist der Standard für neue Installationen;
+`grün` (Slug `signalfarbe`), `hell`, `terrakotta` und `dunkel` sind weitere
+Vorlagen. „Kopieren & bearbeiten" öffnet den Editor mit Live-Vorschau,
 Farbwähler und Kontrasthinweisen. Details: `themes/README.md`.
 
 ## 4. Rollen, Rechte und Sichtbarkeit

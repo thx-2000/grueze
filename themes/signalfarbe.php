@@ -1,15 +1,17 @@
 <?php
 
-// „Grün" – das Standard-Theme (Slug bleibt aus Kompatibilität „signalfarbe").
-// Ruhiges Waldgrün als Aktionsfarbe auf viel Weiß, Lindgrün nur noch als
-// kleiner Marken-Funke. Fraunces für Überschriften, Hanken Grotesk für alles
-// andere (lokal eingebettet, siehe public/assets/css/fonts.css).
-// Zugleich die Basis, auf die nicht gesetzte Tokens zurückfallen.
+// „Grün" (Slug bleibt aus Kompatibilität „signalfarbe"). Ruhiges Waldgrün als
+// Aktionsfarbe auf viel Weiß, Lindgrün nur noch als kleiner Marken-Funke.
+// Fraunces für Überschriften, Hanken Grotesk für alles andere (lokal
+// eingebettet, siehe public/assets/css/fonts.css). Bestandsinstanzen ohne
+// gesetztes Theme laufen weiter hierauf; zugleich die Basis, auf die nicht
+// gesetzte Tokens zurückfallen. Neuer Standard für frische Installationen
+// ist „Kreide".
 // Aufbau eines Themes: siehe themes/README.md
 
 return [
     'name' => 'Grün',
-    'description' => 'Waldgrün auf viel Weiß, ruhig und wertig. Der Standard.',
+    'description' => 'Waldgrün auf viel Weiß, ruhig und wertig.',
     'tokens' => [
         'font_display'         => '"Fraunces", "Iowan Old Style", Georgia, serif',
         'font_body'            => '"Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',

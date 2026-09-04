@@ -1,15 +1,16 @@
 <?php
 
-// „Kreide" – fast weiße, kühle Flächen und schwarznaher Text; wichtige
-// Elemente in kräftigen, aber matten (nicht leuchtenden) Farben: tiefes
-// Petrol als Aktionsfarbe, warmes Ziegelrot als Zweitfarbe, mattes Amber
-// für Hervorhebungen. Etwas schärfere Ecken für einen modernen Auftritt.
-// Kontraste auf WCAG-AA ausgelegt (Fließtext >= 4.5:1, weiß auf Primär >= 4.5:1).
+// „Kreide" – das Standard-Theme für neue Installationen. Fast weiße, kühle
+// Flächen und schwarznaher Text; wichtige Elemente in kräftigen, aber matten
+// (nicht leuchtenden) Farben: tiefes Petrol als Aktionsfarbe, warmes
+// Ziegelrot als Zweitfarbe, mattes Amber für Hervorhebungen. Etwas schärfere
+// Ecken für einen modernen Auftritt.
+// Kontraste auf WCAG-AA ausgelegt (Fließtext >= 6:1, weiß auf Primär >= 7:1).
 // Aufbau eines Themes: siehe themes/README.md
 
 return [
     'name' => 'Kreide',
-    'description' => 'Fast weiße Flächen, kräftige matte Farben für wichtige Elemente – klar und modern.',
+    'description' => 'Fast weiße Flächen, kräftige matte Farben für wichtige Elemente – der Standard für neue Installationen.',
     'tokens' => [
         'font_display'         => '"Fraunces", "Iowan Old Style", Georgia, serif',
         'font_body'            => '"Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',

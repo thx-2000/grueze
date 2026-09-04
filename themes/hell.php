@@ -7,7 +7,7 @@
 
 return [
     'name' => 'Hell',
-    'description' => 'Viel Weiß, warmer Orange-Akzent, Teal als Zweitfarbe – der Standard für neue Installationen.',
+    'description' => 'Viel Weiß, warmer Orange-Akzent, Teal als Zweitfarbe.',
     'tokens' => [
         'font_display'         => '"Fraunces", "Iowan Old Style", Georgia, serif',
         'font_body'            => '"Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',

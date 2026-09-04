@@ -81,11 +81,11 @@ final class SetupController extends BaseController
             'is_active' => 1,
         ]);
 
-        // Frische Installation: helles Standard-Theme setzen. Bestandsinstanzen
+        // Frische Installation: aktuelles Standard-Theme setzen. Bestandsinstanzen
         // durchlaufen diesen Schritt nie und bleiben über die Theme-Migration
         // auf ihrem bisherigen Look.
         if ($this->settings->get('active_theme') === null) {
-            $this->settings->set('active_theme', ThemeService::FALLBACK_SLUG);
+            $this->settings->set('active_theme', ThemeService::NEW_INSTALL_SLUG);
         }
 
         // Ausgangsversion festhalten – damit spätere Uploads als Update erkannt werden.

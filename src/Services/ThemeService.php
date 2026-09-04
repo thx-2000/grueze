@@ -20,12 +20,16 @@ use Throwable;
  */
 final class ThemeService
 {
+    /** Notfall-Rückfall, wenn das eingestellte Theme nicht (mehr) existiert. */
     public const FALLBACK_SLUG = 'hell';
+
+    /** Aktuelles Standard-Theme für frische Installationen (SetupController). */
+    public const NEW_INSTALL_SLUG = 'kreide';
 
     /**
      * Solange in app_settings kein aktives Theme steht, bleibt es beim
      * bisherigen Look (Datei-Theme "signalfarbe"). Frische Installationen
-     * setzen "hell" beim Anlegen des ersten Admin-Kontos (SetupController),
+     * setzen NEW_INSTALL_SLUG beim Anlegen des ersten Admin-Kontos,
      * Bestandsinstanzen bekommen ihren Wert per Theme-Migration.
      */
     private const UNSET_DEFAULT_SLUG = 'signalfarbe';
