@@ -128,6 +128,7 @@ final class ContactImportService
             'vorname' => $contact['vorname'],
             'nachname' => $contact['nachname'],
             'geburtsname' => $contact['geburtsname'],
+            'anrede' => '',
             'category_id' => '',
             'geburtstag' => '',
             'strasse' => '',
@@ -160,6 +161,7 @@ final class ContactImportService
                 ? $imported['nachname']
                 : (string) $existing['nachname'],
             'geburtsname' => $imported['geburtsname'] !== '' ? $imported['geburtsname'] : (string) ($existing['geburtsname'] ?? ''),
+            'anrede' => (string) ($existing['anrede'] ?? ''),
             'category_id' => (string) ($existing['category_id'] ?? ''),
             'geburtstag' => (string) ($existing['geburtstag'] ?? ''),
             'strasse' => (string) ($existing['strasse'] ?? ''),

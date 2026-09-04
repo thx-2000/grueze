@@ -69,8 +69,8 @@ $vorname = trim((string) ($contact['vorname'] ?? ''));
                 <label><span>Geburtsname</span><input type="text" name="geburtsname" value="<?= e($field('geburtsname')) ?>"></label>
                 <label>
                     <span>Anrede</span>
-                    <select name="geschlecht">
-                        <?php $g = $field('geschlecht'); ?>
+                    <select name="anrede">
+                        <?php $g = $field('anrede'); ?>
                         <option value="">Neutral – „Hallo …"</option>
                         <option value="w" <?= $g === 'w' ? 'selected' : '' ?>>„Liebe …"</option>
                         <option value="m" <?= $g === 'm' ? 'selected' : '' ?>>„Lieber …"</option>

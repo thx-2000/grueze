@@ -52,10 +52,10 @@ Ideen, falls es weitergeht (kein Muss):
   Spalten `contacts.beruf` / `contacts.webseite` (Migration
   `2026-09-23-beruf-webseite`), Formular überall, Karte + „Deine
   Kontaktdaten", Änderungsverlauf, CSV, vCard (`TITLE` / `URL`).
-- **`contacts.geschlecht` → sauberes Feld `anrede`** (Folge der inklusiven
-  Ansprache): Spalte umbenennen, Werte migrieren (`m`→`lieber`, `w`→`liebe`,
-  NULL→`''`), alle ~8 Fundstellen anpassen. Aktuell nur umbenannt im UI, die
-  Codes `m`/`w`/`''` bleiben intern. Reines Aufräumen, keine Eile.
+- ~~**`contacts.geschlecht` → `contacts.anrede`**~~ – **v1.35.0 erledigt.**
+  Spalte umbenannt (Migration `2026-09-24-anrede-umbenennen`, `CHANGE COLUMN
+  IF EXISTS`), alle Fundstellen + Request-Feldname `anrede`. Codes `m`/`w`/leer
+  unverändert (kein Wert-Remap – das wäre nur Kosmetik ohne Nutzen).
 - ~~**Anmelde-Übersicht für Admin**~~ – **v1.33.0 erledigt.** Tabelle
   `user_sessions`, `/verwaltung/anmeldungen` (`SessionController`): „Gerade
   online" + Verlauf + Sitzung aus der Ferne beenden (`revoked_at`).
@@ -110,8 +110,8 @@ Stand betreffen.
 1. ~~**Genderneutrale/inklusive Ansprache**~~ – **v1.25.0 erledigt.** House-
    Style (TH): Neutralformulierung > Doppelpunkt > kein Sternchen. „Geschlecht"-
    Feld → „Anrede" (Neutral/Liebe/Lieber), „Teilnehmer" → „Teilnehmende",
-   „Benutzer" → „Zugänge/Konto" usw. Stil in `docs/SPRACHE.md`. Offen als
-   Aufräumaufgabe: Spalte `geschlecht` → `anrede` (siehe „Ideen").
+   „Benutzer" → „Zugänge/Konto" usw. Stil in `docs/SPRACHE.md`. Spalte
+   `geschlecht` → `anrede` mit v1.35.0 nachgezogen.
 2. ~~**Code-Kommentierung** + `ARCHITECTURE.md`~~ – **v1.26.0 erledigt.**
    `ARCHITECTURE.md` neu (Lebenszyklus, Datenmodell, Migrations-/ensureSchema-
    Regeln, „neue Seite"-Checkliste); `MailService` + `WebAuthnService`

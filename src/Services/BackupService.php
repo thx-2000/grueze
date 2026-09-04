@@ -353,7 +353,7 @@ final class BackupService
                         'vorname' => $vorname,
                         'nachname' => $nachname,
                         'geburtsname' => $geburtsname,
-                        'geschlecht' => (string) ($row['geschlecht'] ?? ''),
+                        'anrede' => (string) ($row['anrede'] ?? $row['geschlecht'] ?? ''),
                         'category_id' => $categoryName !== null ? $this->resolveCategoryId($categoryName, $stats) : null,
                         'geburtstag' => (string) ($row['geburtstag'] ?? ''),
                         'beruf' => (string) ($row['beruf'] ?? ''),
@@ -549,12 +549,15 @@ final class BackupService
     /** Füllt nur leere Felder eines bestehenden Kontakts aus dem Backup. */
     private function fillEmptyContactFields(int $contactId, array $backupRow, ?string $categoryName, array &$stats): int
     {
-        $stmt = $this->pdo->prepare('SELECT geschlecht, geburtstag, beruf, webseite, strasse, plz, ort, land, notizen, category_id FROM contacts WHERE id = :id');
+        $stmt = $this->pdo->prepare('SELECT anrede, geburtstag, beruf, webseite, strasse, plz, ort, land, notizen, category_id FROM contacts WHERE id = :id');
         $stmt->execute(['id' => $contactId]);
         $current = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
+        // Ältere Backups nennen das Anrede-Feld noch „geschlecht".
+        $backupRow['anrede'] ??= $backupRow['geschlecht'] ?? null;
+
         $updates = [];
-        foreach (['geschlecht', 'geburtstag', 'beruf', 'webseite', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
+        foreach (['anrede', 'geburtstag', 'beruf', 'webseite', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
             $currentValue = trim((string) ($current[$field] ?? ''));
             $backupValue = trim((string) ($backupRow[$field] ?? ''));
             if ($currentValue === '' && $backupValue !== '') {

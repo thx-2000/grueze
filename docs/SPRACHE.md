@@ -39,10 +39,9 @@ Die Mail-Anrede `{Anrede}` richtet sich nach dem Kontaktfeld **„Anrede"**:
 | „Liebe …" (intern `w`) | „Liebe" |
 | „Lieber …" (intern `m`) | „Lieber" |
 
-Der interne Spaltenname `contacts.geschlecht` und die Codes `m`/`w` sind
-Altbestand – im UI heißt das Feld nur „Anrede" und meint die Briefanrede,
-nicht das Geschlecht. Ein sauberes Feld `anrede` ist im `TODO.md` als
-Aufräumaufgabe notiert.
+Die Spalte heißt `contacts.anrede` (seit v1.34.x; vorher `geschlecht`). Sie
+meint die Briefanrede, nicht das Geschlecht. Die Codes `m`/`w`/leer sind rein
+intern und steuern nur „Lieber"/„Liebe"/„Hallo".
 
 ## Etablierte Fachbegriffe, die bleiben
 

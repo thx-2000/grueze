@@ -58,7 +58,7 @@ final class ContactDiff
             'Vorname' => [(string) ($before['vorname'] ?? ''), (string) $after['vorname']],
             'Nachname' => [(string) ($before['nachname'] ?? ''), (string) $after['nachname']],
             'Geburtsname' => [(string) ($before['geburtsname'] ?? ''), (string) $after['geburtsname']],
-            'Anrede' => [$salutation((string) ($before['geschlecht'] ?? '')), $salutation((string) $after['geschlecht'])],
+            'Anrede' => [$salutation((string) ($before['anrede'] ?? '')), $salutation((string) ($after['anrede'] ?? ''))],
             'Geburtstag' => [(string) ($before['geburtstag'] ?? ''), (string) $after['geburtstag']],
             'Beruf/Tätigkeit' => [(string) ($before['beruf'] ?? ''), (string) ($after['beruf'] ?? '')],
             'Webseite' => [(string) ($before['webseite'] ?? ''), (string) ($after['webseite'] ?? '')],

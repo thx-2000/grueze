@@ -34,7 +34,7 @@ CREATE TABLE contacts (
     vorname VARCHAR(120) NOT NULL,
     nachname VARCHAR(120) NOT NULL,
     geburtsname VARCHAR(120) NULL,
-    geschlecht CHAR(1) NULL,
+    anrede CHAR(1) NULL,
     category_id INT UNSIGNED NULL,
     geburtstag DATE NULL,
     beruf VARCHAR(160) NULL,

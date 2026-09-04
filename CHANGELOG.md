@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.35.0
+
+**Nur Aufräumen – kein sichtbarer Unterschied.**
+
+- Die Datenbankspalte `contacts.geschlecht` heißt jetzt `contacts.anrede` –
+  passend dazu, wie das Feld in der Oberfläche schon lange genannt wird. Die
+  gespeicherten Werte und das Verhalten (Brief-Anrede „Lieber"/„Liebe"/
+  „Hallo") ändern sich nicht.
+- Migration `2026-09-24-anrede-umbenennen` – nach dem Upload
+  **Verwaltung → Aktualisieren**. Ältere Backups mit dem alten Spaltennamen
+  lassen sich weiterhin einspielen.
+
 ## 1.34.0
 
 **Neu: zwei Kontaktfelder – „Beruf/Tätigkeit" und „Webseite".**

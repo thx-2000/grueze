@@ -437,7 +437,7 @@ final class MailService
      * Wert für den `{Anrede}`-Platzhalter. `$salutationMode` kommt aus dem
      * Mailformular: `liebe` / `lieber` / `hallo` erzwingen die Anrede für alle;
      * `auto` (Standard) richtet sich nach dem Kontakt-Anrede-Feld
-     * (`contacts.geschlecht`: `m` → „Lieber", `w` → „Liebe", leer → „Hallo").
+     * (`contacts.anrede`: `m` → „Lieber", `w` → „Liebe", leer → „Hallo").
      */
     private function resolveSalutation(array $contact, string $salutationMode): string
     {
@@ -445,7 +445,7 @@ final class MailService
             'liebe' => 'Liebe',
             'lieber' => 'Lieber',
             'hallo' => 'Hallo',
-            default => match (strtolower((string) ($contact['geschlecht'] ?? ''))) {
+            default => match (strtolower((string) ($contact['anrede'] ?? $contact['geschlecht'] ?? ''))) {
                 'm' => 'Lieber',
                 'w' => 'Liebe',
                 default => 'Hallo',

@@ -102,7 +102,7 @@ final class ContactInput
             'vorname' => trim((string) $request->input('vorname')),
             'nachname' => trim((string) $request->input('nachname')),
             'geburtsname' => trim((string) $request->input('geburtsname')),
-            'geschlecht' => self::salutationCode((string) $request->input('geschlecht')),
+            'anrede' => self::salutationCode((string) $request->input('anrede')),
             'geburtstag' => (string) $request->input('geburtstag'),
             'beruf' => trim((string) $request->input('beruf')),
             'webseite' => self::cleanWebsite((string) $request->input('webseite')),

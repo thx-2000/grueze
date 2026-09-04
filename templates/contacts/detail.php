@@ -8,7 +8,7 @@ $defaults = [
     'vorname' => old('vorname'),
     'nachname' => old('nachname'),
     'geburtsname' => old('geburtsname'),
-    'geschlecht' => old('geschlecht'),
+    'anrede' => old('anrede'),
     'category_id' => old('category_id'),
     'geburtstag' => old('geburtstag'),
     'beruf' => old('beruf'),
@@ -25,7 +25,7 @@ $defaults = [
 $values = $editing ? $contact : $defaults;
 if ($editing) {
     if ($hasOld) {
-        foreach (['vorname', 'nachname', 'geburtsname', 'geschlecht', 'category_id', 'geburtstag', 'beruf', 'webseite', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
+        foreach (['vorname', 'nachname', 'geburtsname', 'anrede', 'category_id', 'geburtstag', 'beruf', 'webseite', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
             $values[$field] = $defaults[$field];
         }
     }
@@ -103,10 +103,10 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <label><span>Geburtsname</span><input type="text" name="geburtsname" value="<?= e($values['geburtsname'] ?? '') ?>"></label>
             <label>
                 <span>Anrede</span>
-                <select name="geschlecht">
+                <select name="anrede">
                     <option value="">Neutral – „Hallo …"</option>
-                    <option value="w" <?= ($values['geschlecht'] ?? '') === 'w' ? 'selected' : '' ?>>„Liebe …"</option>
-                    <option value="m" <?= ($values['geschlecht'] ?? '') === 'm' ? 'selected' : '' ?>>„Lieber …"</option>
+                    <option value="w" <?= ($values['anrede'] ?? '') === 'w' ? 'selected' : '' ?>>„Liebe …"</option>
+                    <option value="m" <?= ($values['anrede'] ?? '') === 'm' ? 'selected' : '' ?>>„Lieber …"</option>
                 </select>
             </label>
             <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($values['geburtstag'] ?? '') ?>"></label>

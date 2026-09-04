@@ -98,10 +98,10 @@ Template per `require` lädt.
 
 - **`users`, `roles`** – Zugänge, Rollen, Aktivstatus, `last_login_at`.
   `roles.name` = fixer Rechte-Schlüssel, `roles.label` = editierbarer Anzeigename.
-- **`contacts`** – Stammdaten je Person. Spalte `geschlecht` (`m`/`w`/leer)
-  steuert nur die Brief-Anrede und heißt im UI „Anrede". `beruf` und
-  `webseite` sind freie Zusatzfelder (Webseite wird beim Speichern auf
-  `https://…` normalisiert).
+- **`contacts`** – Stammdaten je Person. Spalte `anrede` (`m`/`w`/leer, früher
+  `geschlecht`) steuert nur die Brief-Anrede. `beruf` und `webseite` sind
+  freie Zusatzfelder (Webseite wird beim Speichern auf `https://…`
+  normalisiert).
   `archived_at` / `deleted_at` / `retired_by` = Archiv bzw. 30-Tage-Papierkorb;
   „lebende" Kontakte haben beide Zeitstempel `NULL`
   (Filter `ContactRepository::LIVE`).

@@ -41,7 +41,8 @@ final class ContactRepository
                     ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL,
                     ADD COLUMN IF NOT EXISTS retired_by INT UNSIGNED NULL,
                     ADD COLUMN IF NOT EXISTS beruf VARCHAR(160) NULL,
-                    ADD COLUMN IF NOT EXISTS webseite VARCHAR(255) NULL'
+                    ADD COLUMN IF NOT EXISTS webseite VARCHAR(255) NULL,
+                    CHANGE COLUMN IF EXISTS geschlecht anrede CHAR(1) NULL'
             );
         } catch (\Throwable) {
             // Migration holt es nach; Repository bleibt lauffähig.
@@ -442,15 +443,15 @@ final class ContactRepository
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO contacts
-            (vorname, nachname, geburtsname, geschlecht, category_id, geburtstag, beruf, webseite, strasse, plz, ort, land, notizen, photo_path, created_by, updated_by)
+            (vorname, nachname, geburtsname, anrede, category_id, geburtstag, beruf, webseite, strasse, plz, ort, land, notizen, photo_path, created_by, updated_by)
             VALUES
-            (:vorname, :nachname, :geburtsname, :geschlecht, :category_id, :geburtstag, :beruf, :webseite, :strasse, :plz, :ort, :land, :notizen, :photo_path, :created_by, :updated_by)'
+            (:vorname, :nachname, :geburtsname, :anrede, :category_id, :geburtstag, :beruf, :webseite, :strasse, :plz, :ort, :land, :notizen, :photo_path, :created_by, :updated_by)'
         );
         $stmt->execute([
             'vorname' => $data['vorname'],
             'nachname' => $data['nachname'],
             'geburtsname' => $data['geburtsname'] ?: null,
-            'geschlecht' => $data['geschlecht'] ?: null,
+            'anrede' => ($data['anrede'] ?? '') ?: null,
             'category_id' => $data['category_id'] ?: null,
             'geburtstag' => $data['geburtstag'] ?: null,
             'beruf' => ($data['beruf'] ?? '') ?: null,
@@ -480,7 +481,7 @@ final class ContactRepository
              vorname = :vorname,
              nachname = :nachname,
              geburtsname = :geburtsname,
-             geschlecht = :geschlecht,
+             anrede = :anrede,
              category_id = :category_id,
              geburtstag = :geburtstag,
              beruf = :beruf,
@@ -499,7 +500,7 @@ final class ContactRepository
             'vorname' => $data['vorname'],
             'nachname' => $data['nachname'],
             'geburtsname' => $data['geburtsname'] ?: null,
-            'geschlecht' => $data['geschlecht'] ?: null,
+            'anrede' => ($data['anrede'] ?? '') ?: null,
             'category_id' => $data['category_id'] ?: null,
             'geburtstag' => $data['geburtstag'] ?: null,
             'beruf' => ($data['beruf'] ?? '') ?: null,
