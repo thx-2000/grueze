@@ -111,6 +111,18 @@ final class GroupRepository
         return $stmt->fetchColumn() !== false;
     }
 
+    /** @return list<int> Gruppen, in denen dieser Kontakt Leitung ist (für Galerien pro Gruppe). */
+    public function leadGroupIds(int $contactId): array
+    {
+        if ($contactId <= 0) {
+            return [];
+        }
+        $stmt = $this->pdo->prepare("SELECT group_id FROM contact_group_members WHERE contact_id = :c AND role = 'lead'");
+        $stmt->execute(['c' => $contactId]);
+
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
     public function setMemberRole(int $groupId, int $contactId, string $role): void
     {
         $role = $role === 'lead' ? 'lead' : 'member';

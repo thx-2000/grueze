@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.50.1';
+    return '1.51.0';
 }
 
 /**
@@ -553,6 +553,42 @@ function nav_show_groups(): bool
         $contactId = (int) ($user['contact_id'] ?? 0);
 
         return App\Core\Container::get(App\Repositories\GroupRepository::class)->navVisibleFor($contactId);
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+/**
+ * Ob der „Galerien"-Menüpunkt für die aktuelle Person angezeigt werden soll –
+ * über die globalen Rechte hinaus auch für Gruppenleitung (darf für die
+ * eigene Gruppe eine Galerie anlegen) und für Mitglieder einer Gruppe, deren
+ * Galerie auf sie beschränkt ist.
+ */
+function nav_show_galleries(): bool
+{
+    if (can_any('galleries.view', 'galleries.upload', 'galleries.manage')) {
+        return true;
+    }
+    try {
+        $user = App\Core\Container::get(App\Core\Auth::class)->user();
+        $contactId = (int) ($user['contact_id'] ?? 0);
+        if ($contactId <= 0) {
+            return false;
+        }
+        $groups = App\Core\Container::get(App\Repositories\GroupRepository::class)->forContact($contactId);
+        if ($groups === []) {
+            return false;
+        }
+        // Leitung darf jederzeit eine erste Galerie anlegen, auch wenn die
+        // Gruppe noch keine hat.
+        foreach ($groups as $group) {
+            if (($group['my_role'] ?? '') === 'lead') {
+                return true;
+            }
+        }
+        $groupIds = array_map(static fn (array $g): int => (int) $g['id'], $groups);
+
+        return App\Core\Container::get(App\Repositories\GalleryRepository::class)->hasGalleriesForGroups($groupIds);
     } catch (Throwable) {
         return false;
     }

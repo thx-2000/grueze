@@ -2,6 +2,8 @@
 /**
  * @var array<string,mixed>|null $gallery
  * @var list<array<string,mixed>> $events
+ * @var list<array<string,mixed>> $groupChoices
+ * @var bool $canPickGroup
  */
 $g = $gallery ?? [];
 $isEdit = $gallery !== null;
@@ -57,6 +59,8 @@ $action = $isEdit ? url('/galerien/speichern') : url('/galerien');
                 <?php endforeach; ?>
             </select>
         </label>
+
+        <?php view_partial('galleries/_visibility-fields', ['gallery' => $gallery, 'groupChoices' => $groupChoices, 'canPickGroup' => $canPickGroup]); ?>
 
         <div class="form-actions">
             <button type="submit" class="button-link"><?= icon('check') ?><span><?= $isEdit ? 'Speichern' : 'Anlegen' ?></span></button>

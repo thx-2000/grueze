@@ -426,7 +426,8 @@ try {
         Container::get(EventRepository::class),
         Container::get(LogRepository::class),
         Container::get(SettingRepository::class),
-        Container::get(\App\Repositories\GalleryUploadLinkRepository::class)
+        Container::get(\App\Repositories\GalleryUploadLinkRepository::class),
+        Container::get(GroupRepository::class)
     ));
     Container::factory(\App\Controllers\GalleryContributeController::class, static fn () => new \App\Controllers\GalleryContributeController(
         Container::get(Auth::class),

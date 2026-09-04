@@ -9,6 +9,7 @@ use App\Core\Request;
 use App\Repositories\EventRepository;
 use App\Repositories\GalleryMediaRepository;
 use App\Repositories\GalleryRepository;
+use App\Repositories\GroupRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\SettingRepository;
 use App\Services\MediaService;
@@ -21,11 +22,18 @@ use ZipArchive;
 /**
  * Galerien: Foto-/Video-Sammlungen (z. B. pro Stufentreffen).
  *
- * Drei Rechte:
+ * Drei globale Rechte:
  *  - galleries.view    ansehen + herunterladen
  *  - galleries.upload  Medien hochladen, eigene Uploads beschriften/löschen
  *  - galleries.manage  Galerien anlegen/bearbeiten/löschen, fremde Medien
- *                      verschieben/löschen, Titelbild, Sortierung, Sicherung
+ *                      verschieben/löschen, Titelbild, Sortierung, Sicherung,
+ *                      Auffangraum, Papierkorb, Sicherung – alles global
+ *
+ * Zusätzlich, unabhängig von den globalen Rechten: Gruppenleitung darf für
+ * die eigene Gruppe eine Galerie anlegen (`owner_group_id`) und verwalten,
+ * auch ohne `galleries.manage`. Jede Galerie kann ihre Sichtbarkeit auf eine
+ * Gruppe einschränken (`visible_group_id`, NULL = normale globale Rechte).
+ * Admin sieht/verwaltet über `galleries.manage` ohnehin immer alles.
  */
 final class GalleryController extends BaseController
 {
@@ -33,6 +41,9 @@ final class GalleryController extends BaseController
     private const NOTICE_DEFAULT = 'Diese Aufnahmen sind für die Teilnehmenden des Treffens zum Ansehen gedacht. '
         . 'Eine Weitergabe oder Veröffentlichung – etwa in sozialen Netzwerken – ist nur mit Einverständnis der '
         . 'abgebildeten Personen zulässig.';
+
+    private ?array $leadGroupIdsCache = null;
+    private ?array $memberGroupIdsCache = null;
 
     public function __construct(
         \App\Core\Auth $auth,
@@ -43,6 +54,7 @@ final class GalleryController extends BaseController
         private LogRepository $logs,
         private SettingRepository $settings,
         private \App\Repositories\GalleryUploadLinkRepository $uploadLinks,
+        private GroupRepository $groups,
     ) {
         parent::__construct($auth);
     }
@@ -51,11 +63,17 @@ final class GalleryController extends BaseController
 
     public function index(): void
     {
-        $this->requireView();
+        $this->requireGalleryAccess();
 
         $canManage = $this->canManage();
+        $visible = array_values(array_filter(
+            $this->galleries->all(),
+            fn (array $g): bool => $this->canViewGallery($g)
+        ));
+
         $this->render('galleries/index', [
-            'galleries' => $this->galleries->all(),
+            'galleries' => $visible,
+            'canCreate' => $this->canCreateGallery(),
             'trashedCount' => $canManage ? count($this->galleries->trashed()) : 0,
             'capabilities' => $this->storage->capabilities(),
             'canManage' => $canManage,
@@ -70,20 +88,22 @@ final class GalleryController extends BaseController
 
     public function createForm(): void
     {
-        $this->requireManage();
+        $this->requireCreate();
 
         $this->render('galleries/form', [
             'gallery' => null,
             'events' => $this->events->all(),
+            'groupChoices' => $this->groupChoicesForCreate(),
+            'canPickGroup' => $this->canManage(),
         ]);
     }
 
     public function store(Request $request): void
     {
-        $this->requireManage();
+        $this->requireCreate();
         Csrf::validate($request->input('_csrf'));
 
-        $data = $this->sanitize($request);
+        $data = $this->sanitizeGroups($this->sanitize($request), $request, null);
         if ($data['title'] === '') {
             flash('error', 'Bitte einen Titel angeben.');
             Redirect::to('/galerien/neu');
@@ -99,43 +119,45 @@ final class GalleryController extends BaseController
 
     public function show(Request $request): void
     {
-        $this->requireView();
-
+        $this->requireAuth();
         $gallery = $this->galleries->find((int) $request->input('id'));
-        if ($gallery === null) {
+        if ($gallery === null || !$this->canViewGallery($gallery)) {
             flash('error', 'Galerie nicht gefunden.');
             Redirect::to('/galerien');
         }
 
         $items = $this->media->forGallery((int) $gallery['id'], (string) $gallery['sort_mode']);
-        $canManage = $this->canManage();
+        $canManageThis = $this->canManageGallery($gallery);
+        $canUploadThis = $this->canUploadToGallery($gallery);
 
         $this->render('galleries/show', [
             'gallery' => $gallery,
             'items' => $items,
             'events' => $this->events->all(),
             'capabilities' => $this->storage->capabilities(),
-            'canManage' => $canManage,
-            'canUpload' => $this->canUpload(),
+            'canManage' => $canManageThis,
+            'canUpload' => $canUploadThis,
             'currentUserId' => (int) $this->userId(),
             'usageNotice' => gallery_usage_notice(),
-            'uploadLinks' => $canManage ? $this->uploadLinks->active((int) $gallery['id']) : [],
-            'freshLink' => $canManage ? $this->takeFreshLink((int) $gallery['id']) : null,
+            'uploadLinks' => $canManageThis ? $this->uploadLinks->active((int) $gallery['id']) : [],
+            'freshLink' => $canManageThis ? $this->takeFreshLink((int) $gallery['id']) : null,
             'linkDays' => (int) config('media.link_expiry_days', 21),
+            'groupChoices' => $this->groupChoicesForCreate(),
+            'canPickGroup' => $this->canManage(),
         ]);
     }
 
     public function update(Request $request): void
     {
-        $this->requireManage();
+        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
 
         $gallery = $this->galleries->find((int) $request->input('id'));
-        if ($gallery === null) {
+        if ($gallery === null || !$this->canManageGallery($gallery)) {
             Redirect::to('/galerien');
         }
 
-        $data = $this->sanitize($request);
+        $data = $this->sanitizeGroups($this->sanitize($request), $request, $gallery);
         if ($data['title'] === '') {
             flash('error', 'Bitte einen Titel angeben.');
             Redirect::to('/galerien/ansehen?id=' . $gallery['id']);
@@ -162,7 +184,7 @@ final class GalleryController extends BaseController
 
     public function createLink(Request $request): void
     {
-        $this->requireManage();
+        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
 
         $galleryId = (int) $request->input('gallery_id') ?: null;
@@ -170,6 +192,13 @@ final class GalleryController extends BaseController
         if ($galleryId !== null && $gallery === null) {
             flash('error', 'Galerie nicht gefunden.');
             Redirect::to('/galerien');
+        }
+        // Auffangraum-Link (kein $gallery) bleibt eine globale Verwaltungs-
+        // Aktion; ein Link auf eine bestimmte Galerie darf auch deren
+        // Gruppenleitung erzeugen.
+        $allowed = $gallery !== null ? $this->canManageGallery($gallery) : $this->canManage();
+        if (!$allowed) {
+            throw new RuntimeException('Zum Erzeugen eines Upload-Links fehlt die Berechtigung.');
         }
 
         $days = max(1, min(365, (int) $request->input('days', (int) config('media.link_expiry_days', 21))));
@@ -188,11 +217,16 @@ final class GalleryController extends BaseController
 
     public function revokeLink(Request $request): void
     {
-        $this->requireManage();
+        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
 
         $link = $this->uploadLinks->find((int) $request->input('id'));
         if ($link !== null) {
+            $gallery = $link['gallery_id'] !== null ? $this->galleries->find((int) $link['gallery_id']) : null;
+            $allowed = $gallery !== null ? $this->canManageGallery($gallery) : $this->canManage();
+            if (!$allowed) {
+                throw new RuntimeException('Zum Zurückziehen dieses Links fehlt die Berechtigung.');
+            }
             $this->uploadLinks->revoke((int) $link['id']);
             flash('success', 'Der Upload-Link ist jetzt ungültig.');
         }
@@ -261,12 +295,15 @@ final class GalleryController extends BaseController
         // verwirft den Puffer vor dem Senden.
         ob_start();
 
-        $this->requireUpload();
+        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
 
         $gallery = $this->galleries->find((int) $request->input('gallery_id'));
         if ($gallery === null) {
             JsonResponse::send(['ok' => false, 'error' => 'Galerie nicht gefunden.'], 404);
+        }
+        if (!$this->canUploadToGallery($gallery)) {
+            JsonResponse::send(['ok' => false, 'error' => 'Zum Hochladen fehlt die Berechtigung.'], 403);
         }
 
         $file = $request->file('file');
@@ -319,7 +356,7 @@ final class GalleryController extends BaseController
     public function mediaCaption(Request $request): void
     {
         ob_start();
-        $this->requireView();
+        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
 
         $item = $this->mediaInGallery($request);
@@ -331,11 +368,11 @@ final class GalleryController extends BaseController
     public function mediaReorder(Request $request): void
     {
         ob_start();
-        $this->requireManage();
+        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
 
         $gallery = $this->galleries->find((int) $request->input('gallery_id'));
-        if ($gallery === null) {
+        if ($gallery === null || !$this->canManageGallery($gallery)) {
             JsonResponse::send(['ok' => false], 404);
         }
         $ids = array_values(array_filter(array_map('intval', (array) $request->input('order', []))));
@@ -346,7 +383,7 @@ final class GalleryController extends BaseController
     public function mediaDelete(Request $request): void
     {
         ob_start();
-        $this->requireView();
+        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
 
         $item = $this->mediaInGallery($request);
@@ -358,10 +395,14 @@ final class GalleryController extends BaseController
     public function setCover(Request $request): void
     {
         ob_start();
-        $this->requireManage();
+        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
 
         $item = $this->mediaInGallery($request);
+        $gallery = $this->galleryOfMedia($item);
+        if ($gallery === null || !$this->canManageGallery($gallery)) {
+            JsonResponse::send(['ok' => false, 'error' => 'Keine Berechtigung.'], 403);
+        }
         $this->galleries->setCover((int) $item['gallery_id'], (int) $item['id']);
         JsonResponse::send(['ok' => true]);
     }
@@ -370,10 +411,13 @@ final class GalleryController extends BaseController
 
     public function deleteGallery(Request $request): void
     {
-        $this->requireManage();
+        $this->requireAuth();
         Csrf::validate($request->input('_csrf'));
 
         $gallery = $this->galleries->find((int) $request->input('id'));
+        if ($gallery !== null && !$this->canManageGallery($gallery)) {
+            throw new RuntimeException('Zum Löschen dieser Galerie fehlt die Berechtigung.');
+        }
         if ($gallery !== null) {
             $this->galleries->softDelete((int) $gallery['id']);
             $this->logs->addAudit((int) $this->userId(), null, 'deleted', 'Galerie in den Papierkorb: „' . $gallery['title'] . '".');
@@ -421,10 +465,16 @@ final class GalleryController extends BaseController
 
     public function file(Request $request): void
     {
-        $this->requireView();
+        $this->requireAuth();
 
         $item = $this->media->find((int) $request->input('id'), true);
         if ($item === null) {
+            http_response_code(404);
+            exit;
+        }
+        $gallery = $this->galleryOfMedia($item);
+        $allowed = $gallery !== null ? $this->canViewGallery($gallery) : $this->canManage();
+        if (!$allowed) {
             http_response_code(404);
             exit;
         }
@@ -472,10 +522,10 @@ final class GalleryController extends BaseController
 
     public function downloadZip(Request $request): void
     {
-        $this->requireView();
+        $this->requireAuth();
 
         $gallery = $this->galleries->find((int) $request->input('id'));
-        if ($gallery === null) {
+        if ($gallery === null || !$this->canViewGallery($gallery)) {
             flash('error', 'Galerie nicht gefunden.');
             Redirect::to('/galerien');
         }
@@ -537,22 +587,6 @@ final class GalleryController extends BaseController
         return $this->auth->can('galleries.manage');
     }
 
-    private function requireView(): void
-    {
-        $this->requireAuth();
-        if (!$this->canView()) {
-            throw new RuntimeException('Für die Galerien fehlt die Berechtigung.');
-        }
-    }
-
-    private function requireUpload(): void
-    {
-        $this->requireAuth();
-        if (!$this->canUpload()) {
-            throw new RuntimeException('Zum Hochladen fehlt die Berechtigung.');
-        }
-    }
-
     private function requireManage(): void
     {
         $this->requireAuth();
@@ -561,17 +595,184 @@ final class GalleryController extends BaseController
         }
     }
 
+    /** Betreten der Galerien-Übersicht: globale Rechte ODER eigene Gruppen-Galerien. */
+    private function requireGalleryAccess(): void
+    {
+        $this->requireAuth();
+        if (!$this->canView() && $this->leadGroupIds() === [] && $this->memberGroupIds() === []) {
+            throw new RuntimeException('Für die Galerien fehlt die Berechtigung.');
+        }
+    }
+
+    private function requireCreate(): void
+    {
+        $this->requireAuth();
+        if (!$this->canCreateGallery()) {
+            throw new RuntimeException('Zum Anlegen einer Galerie fehlt die Berechtigung.');
+        }
+    }
+
+    /** Globales Verwalten ODER Gruppenleitung mit mindestens einer Gruppe. */
+    private function canCreateGallery(): bool
+    {
+        return $this->canManage() || $this->leadGroupIds() !== [];
+    }
+
+    /** Darf diese eine Galerie angesehen (und heruntergeladen) werden? */
+    private function canViewGallery(array $gallery): bool
+    {
+        if ($this->canManage()) {
+            return true;
+        }
+        $groupId = (int) ($gallery['visible_group_id'] ?? 0) ?: null;
+
+        return $groupId === null ? $this->canView() : $this->isMemberOfGroup($groupId);
+    }
+
+    /** Darf diese eine Galerie verwaltet werden (bearbeiten/löschen/Titelbild/Links/Sortierung)? */
+    private function canManageGallery(array $gallery): bool
+    {
+        if ($this->canManage()) {
+            return true;
+        }
+        $ownerGroupId = (int) ($gallery['owner_group_id'] ?? 0) ?: null;
+
+        return $ownerGroupId !== null && $this->isLeadOfGroup($ownerGroupId);
+    }
+
+    /** Darf in diese eine Galerie hochgeladen werden? */
+    private function canUploadToGallery(array $gallery): bool
+    {
+        if ($this->canManageGallery($gallery)) {
+            return true;
+        }
+        $groupId = (int) ($gallery['visible_group_id'] ?? 0) ?: null;
+
+        return $groupId === null ? $this->canUpload() : ($this->isMemberOfGroup($groupId) && $this->canUpload());
+    }
+
     /** Darf die aktuelle Person dieses Medium bearbeiten/löschen? */
     private function requireMediaEdit(array $item): void
     {
-        if ($this->canManage()) {
+        $gallery = $this->galleryOfMedia($item);
+        if ($gallery !== null && $this->canManageGallery($gallery)) {
             return;
         }
+        if ($gallery === null && $this->canManage()) {
+            return; // Auffangraum: nur global verwaltbar
+        }
         $uid = $this->userId();
-        if ($uid !== null && (int) ($item['uploaded_by'] ?? 0) === $uid && $this->auth->can('galleries.upload')) {
+        if ($gallery !== null && $uid !== null && (int) ($item['uploaded_by'] ?? 0) === $uid && $this->canUploadToGallery($gallery)) {
             return;
         }
         JsonResponse::send(['ok' => false, 'error' => 'Nur eigene Uploads oder mit Verwalten-Recht.'], 403);
+    }
+
+    /** Galerie zu einem Medium – null, wenn das Medium (noch) im Auffangraum liegt. */
+    private function galleryOfMedia(array $item): ?array
+    {
+        $galleryId = (int) ($item['gallery_id'] ?? 0);
+
+        return $galleryId > 0 ? $this->galleries->find($galleryId) : null;
+    }
+
+    private function contactId(): int
+    {
+        return (int) ($this->auth->user()['contact_id'] ?? 0);
+    }
+
+    /** @return list<int> Gruppen, die die aktuelle Person leitet. */
+    private function leadGroupIds(): array
+    {
+        if ($this->leadGroupIdsCache === null) {
+            $cid = $this->contactId();
+            $this->leadGroupIdsCache = $cid > 0 ? $this->groups->leadGroupIds($cid) : [];
+        }
+
+        return $this->leadGroupIdsCache;
+    }
+
+    /** @return list<int> Gruppen, in denen die aktuelle Person Mitglied ist (Leitung eingeschlossen). */
+    private function memberGroupIds(): array
+    {
+        if ($this->memberGroupIdsCache === null) {
+            $cid = $this->contactId();
+            $this->memberGroupIdsCache = $cid > 0
+                ? array_map(static fn (array $g): int => (int) $g['id'], $this->groups->forContact($cid))
+                : [];
+        }
+
+        return $this->memberGroupIdsCache;
+    }
+
+    private function isLeadOfGroup(int $groupId): bool
+    {
+        return in_array($groupId, $this->leadGroupIds(), true);
+    }
+
+    private function isMemberOfGroup(int $groupId): bool
+    {
+        return in_array($groupId, $this->memberGroupIds(), true);
+    }
+
+    /**
+     * Gruppen, die als Galerie-Ziel wählbar sind: bei globalem Verwalten alle,
+     * sonst nur die eigenen geleiteten Gruppen.
+     *
+     * @return list<array<string,mixed>>
+     */
+    private function groupChoicesForCreate(): array
+    {
+        if ($this->canManage()) {
+            return $this->groups->all();
+        }
+        $leadIds = $this->leadGroupIds();
+
+        return array_values(array_filter(
+            $this->groups->all(),
+            static fn (array $g): bool => in_array((int) $g['id'], $leadIds, true)
+        ));
+    }
+
+    /**
+     * Gruppen-Felder zu den sanitierten Basisdaten ergänzen – je nachdem, ob
+     * global verwaltet wird oder nur eine Gruppenleitung anlegt/bearbeitet.
+     *
+     * @param array<string,mixed>      $data
+     * @param array<string,mixed>|null $existing null = Neuanlage
+     * @return array<string,mixed>
+     */
+    private function sanitizeGroups(array $data, Request $request, ?array $existing): array
+    {
+        $requestedVisible = (int) $request->input('visible_group_id') ?: null;
+
+        if ($this->canManage()) {
+            // Globale Verwaltung: jede Gruppe als Sichtbarkeit wählbar; die
+            // Zugehörigkeit (owner_group_id) bleibt unverändert/leer – die
+            // legt nur eine Gruppenleitung beim Anlegen fest.
+            $allGroupIds = array_map(static fn (array $g): int => (int) $g['id'], $this->groups->all());
+            $data['visible_group_id'] = $requestedVisible !== null && in_array($requestedVisible, $allGroupIds, true)
+                ? $requestedVisible
+                : null;
+            $data['owner_group_id'] = $existing['owner_group_id'] ?? null;
+
+            return $data;
+        }
+
+        // Gruppenleitung ohne globales Recht: owner_group_id ist bei Neuanlage
+        // eine der eigenen geleiteten Gruppen (fix danach), Sichtbarkeit ist
+        // entweder „alle" oder genau diese eine Gruppe – nichts anderes.
+        $ownerGroupId = $existing !== null
+            ? ((int) ($existing['owner_group_id'] ?? 0) ?: null)
+            : ((int) $request->input('owner_group_id') ?: null);
+        if ($ownerGroupId === null || !$this->isLeadOfGroup($ownerGroupId)) {
+            $ownerGroupId = $this->leadGroupIds()[0] ?? null;
+        }
+
+        $data['owner_group_id'] = $ownerGroupId;
+        $data['visible_group_id'] = ($ownerGroupId !== null && $requestedVisible === $ownerGroupId) ? $ownerGroupId : null;
+
+        return $data;
     }
 
     /**

@@ -11,6 +11,8 @@
  * @var list<array<string,mixed>> $uploadLinks
  * @var array<string,mixed>|null $freshLink
  * @var int $linkDays
+ * @var list<array<string,mixed>> $groupChoices
+ * @var bool $canPickGroup
  */
 $g = $gallery;
 $sortMode = (string) $g['sort_mode'];
@@ -27,6 +29,12 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
             <span data-media-count><?= count($items) ?></span> Medien
             <?php if (trim((string) ($g['event_title'] ?? '')) !== ''): ?>
                 · <a href="<?= e(url('/termine/detail?id=' . (int) $g['event_id'])) ?>"><?= icon('calendar') ?><?= e($g['event_title']) ?></a>
+            <?php endif; ?>
+            <?php if (trim((string) ($g['owner_group_name'] ?? '')) !== ''): ?>
+                · <span class="gallery-card-event"><?= icon('users') ?>Gruppe „<?= e($g['owner_group_name']) ?>"</span>
+            <?php endif; ?>
+            <?php if (trim((string) ($g['visible_group_name'] ?? '')) !== ''): ?>
+                · <span class="gallery-card-event"><?= icon('eye') ?>nur für „<?= e($g['visible_group_name']) ?>" sichtbar</span>
             <?php endif; ?>
         </p>
         <?php if (trim((string) ($g['description'] ?? '')) !== ''): ?>
@@ -89,6 +97,7 @@ $maxVideo = (int) config('media.max_video_bytes', 524288000);
                 <?php endforeach; ?>
             </select>
         </label>
+        <?php view_partial('galleries/_visibility-fields', ['gallery' => $g, 'groupChoices' => $groupChoices, 'canPickGroup' => $canPickGroup]); ?>
         <div class="form-actions">
             <button type="submit" class="button-link"><?= icon('check') ?><span>Speichern</span></button>
         </div>

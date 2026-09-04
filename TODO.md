@@ -107,10 +107,16 @@ Papierkorb (nur Admin sichtbar), Bilder nicht in die DB, Videos erlaubt.
   Session-Cap 150). QR clientseitig (`vendor-qrcode.js`, MIT, Kazuhiko Arase).
   Auffangraum `/galerien/auffang`: Mehrfachauswahl → in Galerie/neue Galerie
   verschieben. Migration `2026-09-30-galerie-beitragen`.
-- **Feiner (offen):** Sichtbarkeit einzelner Galerien auf bestimmte Gruppen
-  begrenzen (jetzt gilt jedes Recht global); Sicherungs-Export als Stream statt
-  Temp-ZIP; QR-Code für Alt-Links (aktuell nur direkt nach dem Erstellen, weil
-  der Klartext-Token nicht gespeichert wird).
+- ~~**Sichtbarkeit einzelner Galerien auf Gruppen begrenzen / Galerien für
+  Gruppenleitung**~~ – **erledigt (v1.51.0).** `owner_group_id` (wem gehört
+  die Galerie – deren Leitung darf verwalten, auch ohne `galleries.manage`)
+  + `visible_group_id` (Ansehen auf diese Gruppe eingeschränkt, NULL = normale
+  globale Rechte). Gruppenleitung kann ohne globales Recht anlegen/verwalten;
+  globale Verwaltung kann jede Galerie auf jede Gruppe einschränken.
+- **Feiner (offen):** Sicherungs-Export als Stream statt Temp-ZIP; QR-Code für
+  Alt-Links (aktuell nur direkt nach dem Erstellen, weil der Klartext-Token
+  nicht gespeichert wird); Galerie-Eigentümerschaft nachträglich auf eine
+  andere Gruppe übertragen (aktuell nur bei Neuanlage wählbar).
 
 ## Account-Einladungen (TH-Fragen 2026-09-04)
 

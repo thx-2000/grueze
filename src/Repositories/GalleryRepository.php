@@ -37,6 +37,8 @@ final class GalleryRepository
                     description TEXT NULL,
                     gallery_date DATE NULL,
                     event_id INT UNSIGNED NULL,
+                    owner_group_id INT UNSIGNED NULL,
+                    visible_group_id INT UNSIGNED NULL,
                     sort_mode ENUM(\'captured\', \'uploaded\', \'manual\') NOT NULL DEFAULT \'captured\',
                     cover_media_id INT UNSIGNED NULL,
                     created_by INT UNSIGNED NULL,
@@ -44,8 +46,15 @@ final class GalleryRepository
                     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     deleted_at DATETIME NULL,
                     KEY idx_galleries_event (event_id),
-                    KEY idx_galleries_deleted (deleted_at)
+                    KEY idx_galleries_deleted (deleted_at),
+                    KEY idx_galleries_owner_group (owner_group_id),
+                    KEY idx_galleries_visible_group (visible_group_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+            );
+            $this->pdo->exec(
+                'ALTER TABLE galleries
+                    ADD COLUMN IF NOT EXISTS owner_group_id INT UNSIGNED NULL AFTER event_id,
+                    ADD COLUMN IF NOT EXISTS visible_group_id INT UNSIGNED NULL AFTER owner_group_id'
             );
         } catch (\Throwable) {
             // Migration holt es nach.
@@ -61,12 +70,16 @@ final class GalleryRepository
     {
         $sql = 'SELECT g.*,
                        e.title AS event_title,
+                       og.name AS owner_group_name,
+                       vg.name AS visible_group_name,
                        COUNT(m.id) AS media_count,
                        SUM(CASE WHEN m.kind = \'video\' THEN 1 ELSE 0 END) AS video_count,
                        COALESCE(cover.thumb_path, cover.web_path) AS cover_path,
                        cover.kind AS cover_kind
                 FROM galleries g
                 LEFT JOIN events e ON e.id = g.event_id
+                LEFT JOIN contact_groups og ON og.id = g.owner_group_id
+                LEFT JOIN contact_groups vg ON vg.id = g.visible_group_id
                 LEFT JOIN gallery_media m ON m.gallery_id = g.id AND m.deleted_at IS NULL
                 LEFT JOIN gallery_media cover ON cover.id = g.cover_media_id AND cover.deleted_at IS NULL
                 WHERE g.deleted_at IS NULL
@@ -79,9 +92,11 @@ final class GalleryRepository
     /** @return array<string,mixed>|null */
     public function find(int $id, bool $withTrashed = false): ?array
     {
-        $sql = 'SELECT g.*, e.title AS event_title
+        $sql = 'SELECT g.*, e.title AS event_title, og.name AS owner_group_name, vg.name AS visible_group_name
                 FROM galleries g
                 LEFT JOIN events e ON e.id = g.event_id
+                LEFT JOIN contact_groups og ON og.id = g.owner_group_id
+                LEFT JOIN contact_groups vg ON vg.id = g.visible_group_id
                 WHERE g.id = :id' . ($withTrashed ? '' : ' AND g.deleted_at IS NULL');
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id]);
@@ -92,14 +107,16 @@ final class GalleryRepository
     public function create(array $data, ?int $userId): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO galleries (title, description, gallery_date, event_id, sort_mode, created_by)
-             VALUES (:title, :description, :gallery_date, :event_id, :sort_mode, :created_by)'
+            'INSERT INTO galleries (title, description, gallery_date, event_id, owner_group_id, visible_group_id, sort_mode, created_by)
+             VALUES (:title, :description, :gallery_date, :event_id, :owner_group_id, :visible_group_id, :sort_mode, :created_by)'
         );
         $stmt->execute([
             'title' => $data['title'],
             'description' => ($data['description'] ?? '') !== '' ? $data['description'] : null,
             'gallery_date' => ($data['gallery_date'] ?? '') !== '' ? $data['gallery_date'] : null,
             'event_id' => !empty($data['event_id']) ? (int) $data['event_id'] : null,
+            'owner_group_id' => !empty($data['owner_group_id']) ? (int) $data['owner_group_id'] : null,
+            'visible_group_id' => !empty($data['visible_group_id']) ? (int) $data['visible_group_id'] : null,
             'sort_mode' => in_array($data['sort_mode'] ?? '', self::SORT_MODES, true) ? $data['sort_mode'] : 'captured',
             'created_by' => $userId,
         ]);
@@ -112,7 +129,7 @@ final class GalleryRepository
         $stmt = $this->pdo->prepare(
             'UPDATE galleries
              SET title = :title, description = :description, gallery_date = :gallery_date,
-                 event_id = :event_id, sort_mode = :sort_mode
+                 event_id = :event_id, visible_group_id = :visible_group_id, sort_mode = :sort_mode
              WHERE id = :id'
         );
         $stmt->execute([
@@ -121,6 +138,7 @@ final class GalleryRepository
             'description' => ($data['description'] ?? '') !== '' ? $data['description'] : null,
             'gallery_date' => ($data['gallery_date'] ?? '') !== '' ? $data['gallery_date'] : null,
             'event_id' => !empty($data['event_id']) ? (int) $data['event_id'] : null,
+            'visible_group_id' => !empty($data['visible_group_id']) ? (int) $data['visible_group_id'] : null,
             'sort_mode' => in_array($data['sort_mode'] ?? '', self::SORT_MODES, true) ? $data['sort_mode'] : 'captured',
         ]);
     }
@@ -176,6 +194,30 @@ final class GalleryRepository
         $stmt->execute();
 
         return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    /**
+     * Gibt es eine aktive Galerie, die zu einer dieser Gruppen gehört oder auf
+     * sie beschränkt ist? Für die Rail-Navigation von Gruppenmitgliedern ohne
+     * globales Galerien-Recht.
+     *
+     * @param list<int> $groupIds
+     */
+    public function hasGalleriesForGroups(array $groupIds): bool
+    {
+        $groupIds = array_values(array_filter(array_map('intval', $groupIds), static fn (int $id): bool => $id > 0));
+        if ($groupIds === []) {
+            return false;
+        }
+        $placeholders = implode(',', array_fill(0, count($groupIds), '?'));
+        $stmt = $this->pdo->prepare(
+            "SELECT 1 FROM galleries
+             WHERE deleted_at IS NULL AND (owner_group_id IN ({$placeholders}) OR visible_group_id IN ({$placeholders}))
+             LIMIT 1"
+        );
+        $stmt->execute(array_merge($groupIds, $groupIds));
+
+        return $stmt->fetchColumn() !== false;
     }
 
     /** Für die Termin-Detailseite: Galerien zu einem Termin. */

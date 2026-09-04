@@ -6,6 +6,7 @@
  * @var bool $canManage
  * @var bool $canUpload
  * @var string $usageNotice
+ * @var bool $canCreate
  * @var int $unassignedCount
  * @var list<array<string,mixed>> $catchAllLinks
  * @var array<string,mixed>|null $freshLink
@@ -17,7 +18,7 @@
         <h1>Galerien</h1>
         <p class="muted">Foto- und Video-Sammlungen, zum Beispiel pro Stufentreffen.</p>
     </div>
-    <?php if ($canManage): ?>
+    <?php if ($canCreate): ?>
         <a class="button-link" href="<?= e(url('/galerien/neu')) ?>"><?= icon('plus') ?><span>Neue Galerie</span></a>
     <?php endif; ?>
 </header>
@@ -69,7 +70,7 @@ $uploadMax = (int) ($capabilities['upload_max_bytes'] ?? 0);
 <?php if ($galleries === []): ?>
     <section class="panel">
         <p class="muted">
-            <?php if ($canManage): ?>
+            <?php if ($canCreate): ?>
                 Noch keine Galerie. <a href="<?= e(url('/galerien/neu')) ?>">Erste Galerie anlegen</a>.
             <?php else: ?>
                 Es gibt noch keine Galerie.
@@ -97,6 +98,11 @@ $uploadMax = (int) ($capabilities['upload_max_bytes'] ?? 0);
                     </span>
                     <?php if (trim((string) ($g['event_title'] ?? '')) !== ''): ?>
                         <span class="gallery-card-event"><?= icon('calendar') ?><?= e($g['event_title']) ?></span>
+                    <?php endif; ?>
+                    <?php if (trim((string) ($g['visible_group_name'] ?? '')) !== ''): ?>
+                        <span class="gallery-card-event"><?= icon('eye') ?>nur „<?= e($g['visible_group_name']) ?>"</span>
+                    <?php elseif (trim((string) ($g['owner_group_name'] ?? '')) !== ''): ?>
+                        <span class="gallery-card-event"><?= icon('users') ?><?= e($g['owner_group_name']) ?></span>
                     <?php endif; ?>
                 </span>
             </a>

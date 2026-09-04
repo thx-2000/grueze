@@ -3,6 +3,27 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.51.0
+
+**Galerien für Gruppenleitung.**
+
+- Wer eine Gruppe leitet, kann jetzt **auch ohne globales Galerien-Recht**
+  eine Galerie für die eigene Gruppe anlegen und verwalten (hochladen,
+  Bildunterschriften, Titelbild, Sortierung, Upload-Link).
+- Beim Anlegen (und Bearbeiten) lässt sich die **Sichtbarkeit** wählen:
+  „Alle angemeldeten Personen mit Ansehen-Recht" (wie bisher) oder
+  „**Nur Teilnehmende der eigenen Gruppe**". Wer nicht in der Gruppe ist,
+  sieht eine so eingeschränkte Galerie gar nicht – auch nicht über einen
+  direkten Link.
+- Globale Verwaltung (`galleries.manage`, z. B. Team/Admin) kann jede Galerie
+  auf jede beliebige Gruppe einschränken, sieht und verwaltet aber weiterhin
+  alles.
+- Auffangraum, Papierkorb und die Medien-Sicherung bleiben globale
+  Verwaltungswerkzeuge.
+
+**Migration `2026-10-01-galerien-gruppen`** (zwei neue, leere Spalten an
+`galleries`).
+
 ## 1.50.1
 
 **Berechtigungen: echte Tabelle statt wiederholter Rollen-Labels.**

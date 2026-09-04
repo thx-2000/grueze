@@ -430,6 +430,8 @@ CREATE TABLE IF NOT EXISTS galleries (
     description TEXT NULL,
     gallery_date DATE NULL,
     event_id INT UNSIGNED NULL,
+    owner_group_id INT UNSIGNED NULL,
+    visible_group_id INT UNSIGNED NULL,
     sort_mode ENUM('captured', 'uploaded', 'manual') NOT NULL DEFAULT 'captured',
     cover_media_id INT UNSIGNED NULL,
     created_by INT UNSIGNED NULL,
@@ -438,8 +440,12 @@ CREATE TABLE IF NOT EXISTS galleries (
     deleted_at DATETIME NULL,
     KEY idx_galleries_event (event_id),
     KEY idx_galleries_deleted (deleted_at),
+    KEY idx_galleries_owner_group (owner_group_id),
+    KEY idx_galleries_visible_group (visible_group_id),
     CONSTRAINT fk_galleries_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL,
-    CONSTRAINT fk_galleries_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    CONSTRAINT fk_galleries_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_galleries_owner_group FOREIGN KEY (owner_group_id) REFERENCES contact_groups(id) ON DELETE SET NULL,
+    CONSTRAINT fk_galleries_visible_group FOREIGN KEY (visible_group_id) REFERENCES contact_groups(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS gallery_media (
