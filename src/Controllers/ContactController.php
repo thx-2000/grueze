@@ -13,6 +13,7 @@ use App\Repositories\GroupRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
+use App\Services\ContactMergeService;
 use App\Services\LinkedAccountService;
 use App\Services\UploadService;
 use App\Services\Validator;
@@ -41,6 +42,7 @@ final class ContactController extends BaseController
         private GroupRepository $groups,
         private DataCheckRepository $dataChecks,
         private LinkedAccountService $linkedAccounts,
+        private ContactMergeService $merges,
     ) {
         parent::__construct($auth);
     }
@@ -77,7 +79,7 @@ final class ContactController extends BaseController
                 ? array_sum($this->contacts->retiredCounts())
                 : 0,
             'duplicateCount' => can('contacts.manage')
-                ? $this->contacts->duplicateClusterCount()
+                ? $this->merges->duplicateClusterCount()
                 : 0,
         ]);
     }

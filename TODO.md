@@ -143,11 +143,13 @@ Stand betreffen.
      - v1.31.0: `templates/contacts/index.php` 685 → ~235 Z.; Blöcke in
        `templates/contacts/_index/` (own-contact/toolbar/table/cards/
        bulk-edit), neuer Helfer `view_partial()`.
-     - **fette Dateien damit alle unter ~500 Z.** Nächste Kandidaten bei
-       Bedarf: `ContactRepository` 1120 Z., `EventRepository` 988 Z.,
-       `SettingRepository` 616 Z., `app.js`.
-   - offen: Merge-/Dubletten-Logik aus `ContactRepository` in einen Service
-     (`ContactMergeService`) – wäre zugleich der Anfang der Repo-Verschlankung.
+     - v1.32.0: Dubletten/Merge (~275 Z.) aus `ContactRepository` in
+       `ContactMergeService`. Repo 1120 → ~845 Z.
+     - **Controller + Haupttemplate alle < ~500 Z.** Größte Dateien jetzt:
+       `EventRepository` 988 Z., `ContactRepository` 845 Z.,
+       `SettingRepository` 616 Z., `app.js`. Weiter nur bei konkretem Bedarf –
+       Repos sind kohäsiv (eine Tabelle, viele Abfragen), Aufteilen bringt
+       dort weniger als bei den Controllern.
 
 - **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
 

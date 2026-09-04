@@ -126,6 +126,10 @@ try {
     Container::factory(\App\Services\LinkedAccountService::class, static fn () => new \App\Services\LinkedAccountService(
         Container::get(UserRepository::class)
     ));
+    Container::factory(\App\Services\ContactMergeService::class, static fn () => new \App\Services\ContactMergeService(
+        Container::get(PDO::class),
+        Container::get(ContactRepository::class)
+    ));
     Container::factory(\App\Controllers\PwaController::class, static fn () => new \App\Controllers\PwaController());
     Container::factory(XlsxReader::class, static fn () => new XlsxReader());
     Container::factory(MailService::class, static fn () => new MailService(Container::get(LogRepository::class)));
@@ -186,13 +190,15 @@ try {
         Container::get(UploadService::class),
         Container::get(GroupRepository::class),
         Container::get(\App\Repositories\DataCheckRepository::class),
-        Container::get(\App\Services\LinkedAccountService::class)
+        Container::get(\App\Services\LinkedAccountService::class),
+        Container::get(\App\Services\ContactMergeService::class)
     ));
     Container::factory(\App\Controllers\ContactArchiveController::class, static fn () => new \App\Controllers\ContactArchiveController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
         Container::get(UserRepository::class),
-        Container::get(LogRepository::class)
+        Container::get(LogRepository::class),
+        Container::get(\App\Services\ContactMergeService::class)
     ));
     Container::factory(\App\Controllers\ContactPortController::class, static fn () => new \App\Controllers\ContactPortController(
         Container::get(Auth::class),

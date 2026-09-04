@@ -9,6 +9,7 @@ use App\Core\Request;
 use App\Repositories\ContactRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\UserRepository;
+use App\Services\ContactMergeService;
 use App\Support\ContactFieldRedactor;
 use App\Support\Redirect;
 
@@ -24,6 +25,7 @@ final class ContactArchiveController extends BaseController
         private ContactRepository $contacts,
         private UserRepository $users,
         private LogRepository $logs,
+        private ContactMergeService $merges,
     ) {
         parent::__construct($auth);
     }
@@ -111,7 +113,7 @@ final class ContactArchiveController extends BaseController
     public function duplicates(): void
     {
         $this->requirePermission('contacts.manage');
-        $clusters = $this->contacts->duplicateClusters();
+        $clusters = $this->merges->duplicateClusters();
         ContactFieldRedactor::applyToClusters($clusters, (int) ($this->auth->user()['contact_id'] ?? 0));
 
         $this->render('contacts/duplicates', [
@@ -151,7 +153,7 @@ final class ContactArchiveController extends BaseController
             if (!$sec) {
                 continue;
             }
-            $result = $this->contacts->merge($primaryId, $sid, $userId);
+            $result = $this->merges->merge($primaryId, $sid, $userId);
             $mergedNames[] = trim($sec['vorname'] . ' ' . $sec['nachname']);
             $filled = array_merge($filled, $result['filled']);
             if ($result['note'] !== '') {

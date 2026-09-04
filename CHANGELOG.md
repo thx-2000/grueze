@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.32.0
+
+**Nur Umbau unter der Haube – kein sichtbarer Unterschied, keine Migration.**
+
+- Dubletten-Finder und Zusammenführen lagen mit ~275 Zeilen im
+  `ContactRepository` (Clustering per Union-Find, eine mehrstufige
+  Transaktion über ein Dutzend Tabellen). Jetzt in `ContactMergeService`
+  ausgelagert. `ContactRepository` schrumpft von ~1120 auf ~845 Zeilen.
+- Verhalten unverändert. Getestet: Doppel-Einträge finden (Zähler +
+  Übersicht) und zwei Kontakte zusammenführen inkl. Änderungsverlauf.
+
 ## 1.31.0
 
 **Nur Umbau am Adressbuch-Template – kein sichtbarer Unterschied, keine Migration.**
