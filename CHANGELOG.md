@@ -3,6 +3,16 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.50.1
+
+**Berechtigungen: echte Tabelle statt wiederholter Rollen-Labels.**
+
+Verwaltung → Berechtigungen zeigt die Rollen jetzt einmal als Tabellenkopf,
+darunter eine Zeile pro Recht mit nur noch den Häkchen (plus einer
+„Admin"-Spalte als Erinnerung und einer „Standard"-Spalte statt des
+Hinweistexts unter jeder Zeile). Gruppiert wie bisher (Kontakte, Mailing, …).
+Keine Funktionsänderung – Feld-/Speicherlogik unverändert.
+
 ## 1.50.0
 
 **Sammel-Einladungen + Admin-Benachrichtigung bei Registrierung.**

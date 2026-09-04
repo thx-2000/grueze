@@ -5949,3 +5949,75 @@ body.lightbox-open { overflow: hidden; }
 
 /* Sammel-Einladung */
 .bulk-invite-sub { margin: -0.4rem 0 0.6rem 1.7rem; }
+
+/* Berechtigungen: Matrix-Tabelle (Rollen einmal oben, Rechte je Zeile) */
+.permission-table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--edge-hairline);
+    background: var(--color-surface);
+}
+.permission-table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.permission-table th,
+.permission-table td {
+    padding: 0.55rem 0.6rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--edge-hairline);
+    background: var(--color-surface-strong);
+    text-align: center;
+}
+.permission-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-raised);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+.permission-table-name {
+    text-align: left;
+    font-weight: 500;
+    max-width: 26rem;
+}
+.permission-table-group th {
+    text-align: left;
+    background: var(--surface-sunken);
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+.permission-table tbody tr:not(.permission-table-group):hover td {
+    background: var(--accent-veil);
+}
+.permission-table-admin {
+    color: var(--color-muted);
+    width: 3.5rem;
+}
+.permission-table-admin .icon { width: 0.95rem; height: 0.95rem; }
+.permission-table-default {
+    text-align: left;
+    font-size: 0.82rem;
+    white-space: normal;
+    min-width: 8rem;
+}
+.permission-table-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.permission-table-check input {
+    width: 1.05rem;
+    height: 1.05rem;
+    cursor: pointer;
+}
