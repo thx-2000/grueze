@@ -59,11 +59,21 @@ Ideen, falls es weitergeht (kein Muss):
 - ~~**Anmelde-Übersicht für Admin**~~ – **v1.33.0 erledigt.** Tabelle
   `user_sessions`, `/verwaltung/anmeldungen` (`SessionController`): „Gerade
   online" + Verlauf + Sitzung aus der Ferne beenden (`revoked_at`).
-- **Gesendete Mails einsehen (für Sende-Berechtigte)** (TH-Wunsch 2026-09-04):
-  jede sende-berechtigte Person sieht die von ihr (bzw. alle) versendeten
-  Rundmails wieder – Inhalt, Empfängerkreis, Zeitpunkt. Option, dieselbe Mail
-  erneut zu verschicken (an alle oder einzelne Personen). Datenbasis teils da:
-  `mail_jobs`/`mail_job_recipients`; ggf. den gerenderten Text je Job sichern.
+- **IP-Adressen: Datenschutz vs. Nutzen abwägen** (TH 2026-09-04). IPs stehen
+  im Klartext in `user_sessions` und `login_attempts`. TH findet sie nützlich,
+  sieht aber das Datenschutz-Risiko für die öffentliche Version. Zu klären:
+  (a) IP-Anzeige/-Speicherung per config-Schalter (`security.store_ip` o. ä.)
+  steuerbar machen – bei der eigenen Instanz an, im ausgelieferten
+  `config.example.php` aus; (b) Alternative: nur Hash speichern und für die
+  Anzeige entschärfen (grobes Geo statt IP, oder nur „neue/bekannte Quelle");
+  (c) Aufbewahrungsfrist kürzen. Betrifft `UserSessionRepository`,
+  `SessionController`/`templates/admin/sessions.php`, `LogRepository`
+  (login_attempts) und die Datenschutzerklärung.
+- ~~**Gesendete Mails einsehen (für Sende-Berechtigte)**~~ – **v1.35.x
+  erledigt.** Tabelle `sent_mails`, `/rundmail/verlauf` (`SentMailController`):
+  Liste + Detail (Text, Empfänger + Zustellstatus) + „als Entwurf übernehmen"
+  (alle oder einzelne). `MailController::batch` schreibt die Zeile bei
+  Abschluss.
 - **Empfangene Mails einsehen (für Empfangs-Berechtigte)** (TH-Wunsch
   2026-09-04): jede Person mit Login sieht die an sie gegangenen Rundmails im
   Archiv, kann sie erneut lesen und sich auf Wunsch nochmal ans eigene

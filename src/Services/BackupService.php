@@ -44,6 +44,7 @@ final class BackupService
         'login_attempts',
         'audit_log',
         'mail_log',
+        'sent_mails',
     ];
 
     /** Spalten, die binär sind und im JSON base64-kodiert abgelegt werden. */

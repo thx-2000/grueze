@@ -8,6 +8,7 @@ use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\ContactRepository;
 use App\Repositories\LogRepository;
+use App\Repositories\SentMailRepository;
 use App\Repositories\SettingRepository;
 use App\Services\MailComposer;
 use App\Services\MailRecipientResolver;
@@ -36,6 +37,7 @@ final class MailController extends BaseController
         private \App\Repositories\EventRepository $events,
         private MailRecipientResolver $recipients,
         private MailComposer $composer,
+        private SentMailRepository $sentMails,
     ) {
         parent::__construct($auth);
     }
@@ -318,6 +320,10 @@ final class MailController extends BaseController
             'contacts' => $contactIds,
             'subject' => $this->composer->composeSubject((string) $request->input('subject'), $subjectPrefix, $memberContactMode),
             'message' => $this->composer->composeMailBody($rawMessage, $memberContactMode),
+            // Rohfassung für den „Gesendete Nachrichten"-Verlauf (ohne Präfix/Fuß).
+            'raw_subject' => trim((string) $request->input('subject')),
+            'raw_message' => $rawMessage,
+            'subject_prefix' => $subjectPrefix,
             'sender_key' => $senderKey,
             'reply_to_key' => $replyTo['key'] ?? (string) $request->input('reply_to_key'),
             'salutation_mode' => $salutationMode,
@@ -369,6 +375,10 @@ final class MailController extends BaseController
             'contacts' => array_map('intval', array_keys($perContact)),
             'subject' => $this->composer->composeSubject((string) $batch['subject'], $this->settings->subjectPrefixOptions()[0] ?? '', false),
             'message' => (string) (reset($perContact) ?: ''),
+            'raw_subject' => trim((string) $batch['subject']),
+            'raw_message' => (string) (reset($batch['assignments']) ?: ''),
+            'subject_prefix' => (string) ($this->settings->subjectPrefixOptions()[0] ?? ''),
+            'kind' => 'gruesse',
             'per_contact_message' => $perContact,
             'sender_key' => $identity['key'],
             'reply_to_key' => $replyTo['key'] ?? (string) $batch['reply_to_key'],
@@ -440,8 +450,11 @@ final class MailController extends BaseController
                 $userId
             );
             $job['results'][] = [
-                'name' => $contact['vorname'] . ' ' . $contact['nachname'],
+                'contact_id' => (int) $contact['id'],
+                'email' => (string) ($contact['emails'][0]['email'] ?? ''),
+                'name' => trim($contact['vorname'] . ' ' . $contact['nachname']),
                 'ok' => $result['ok'],
+                'status' => $result['ok'] ? 'gesendet' : 'fehlgeschlagen',
                 'error' => $result['error'] ?? null,
             ];
 
@@ -454,6 +467,7 @@ final class MailController extends BaseController
 
         if ($done) {
             $this->uploads->cleanupAttachments($job['attachments']);
+            $this->recordSentMail($job, $user);
             unset($_SESSION['mail_job']);
         }
 
@@ -464,6 +478,47 @@ final class MailController extends BaseController
             'total' => count($contacts),
             'results' => $job['results'],
         ]);
+    }
+
+    /**
+     * Abgeschlossenen Versand in den „Gesendete Nachrichten"-Verlauf schreiben.
+     * Fehler hier dürfen den Abschluss des Versands nie stören.
+     *
+     * @param array<string,mixed> $job
+     * @param array<string,mixed>|null $user
+     */
+    private function recordSentMail(array $job, ?array $user): void
+    {
+        try {
+            $kind = (string) ($job['kind'] ?? match (true) {
+                (bool) ($job['member_contact_mode'] ?? false) => 'einzeln',
+                !empty($job['event_id']) => 'termin',
+                default => 'rundmail',
+            });
+
+            $recipients = array_map(static fn (array $r): array => [
+                'contact_id' => (int) ($r['contact_id'] ?? 0),
+                'email' => (string) ($r['email'] ?? ''),
+                'name' => (string) ($r['name'] ?? ''),
+                'status' => (string) ($r['status'] ?? (($r['ok'] ?? false) ? 'gesendet' : 'fehlgeschlagen')),
+                'error' => $r['error'] ?? null,
+            ], (array) ($job['results'] ?? []));
+
+            $this->sentMails->record([
+                'user_id' => (int) ($user['id'] ?? 0),
+                'sender_name' => (string) ($user['name'] ?? ''),
+                'kind' => $kind,
+                'subject' => (string) ($job['raw_subject'] ?? $job['subject'] ?? ''),
+                'subject_prefix' => (string) ($job['subject_prefix'] ?? ''),
+                'body' => (string) ($job['raw_message'] ?? $job['message'] ?? ''),
+                'salutation_mode' => (string) ($job['salutation_mode'] ?? 'auto'),
+                'sender_key' => (string) ($job['sender_key'] ?? ''),
+                'reply_to_key' => (string) ($job['reply_to_key'] ?? ''),
+                'recipients' => $recipients,
+            ]);
+        } catch (\Throwable) {
+            // Verlauf ist Beiwerk – nie den Versandabschluss gefährden.
+        }
     }
 
     private function requireMailAccess(): void

@@ -3,6 +3,21 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.36.0
+
+**Neu: „Gesendete Nachrichten" – Verlauf des Serienversands.**
+
+- Unter **Nachrichten → Gesendete Nachrichten** (Recht „Nachrichten senden")
+  sehen Sende-Berechtigte alle früheren Rundmails wieder: Betreff, Text,
+  Empfängerkreis mit Zustellstatus, Zeitpunkt und wer sie verschickt hat.
+- Aus dem Detail lässt sich eine Nachricht **erneut verschicken** – an alle
+  noch vorhandenen Empfänger oder nur an einzelne ausgewählte Personen. Der
+  Text landet als Entwurf auf der Schreiben-Seite; abgeschickt wird erst dort.
+- Jeder abgeschlossene Serienversand schreibt automatisch einen Eintrag.
+  Aufbewahrung standardmäßig 365 Tage (`mail.sent_retention_days`).
+- Migration `2026-09-25-gesendete-mails` (Tabelle `sent_mails`) – nach dem
+  Upload **Verwaltung → Aktualisieren**.
+
 ## 1.35.0
 
 **Nur Aufräumen – kein sichtbarer Unterschied.**

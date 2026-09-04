@@ -64,6 +64,8 @@ return [
         'batch_size' => 3,
         'send_delay_seconds' => 1,
         'max_attachment_size_total' => 10485760,
+        // Wie lange der Verlauf gesendeter Serien-Mails aufgehoben wird (Tage).
+        'sent_retention_days' => 365,
         'default_sender_key' => 'default',
         'default_reply_to_key' => 'default_reply',
         'allowed_attachment_types' => [

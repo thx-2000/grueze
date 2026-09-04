@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.35.0';
+    return '1.36.0';
 }
 
 /**
@@ -552,6 +552,8 @@ function page_title(string $path): string
         '/contacts/edit'             => 'Kontakt',
         '/contacts/import'           => 'Kontakte importieren',
         '/rundmail'                  => 'Nachrichten',
+        '/rundmail/verlauf'          => 'Gesendete Nachrichten',
+        '/rundmail/verlauf/ansehen'  => 'Gesendete Nachricht',
         '/verwaltung/gruesse'        => 'Grüße-Pool',
         '/gruesse/weihnachten'       => 'Weihnachtsgrüße',
         '/gruesse/geburtstage'       => 'Geburtstagsgrüße',

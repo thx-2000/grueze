@@ -274,6 +274,7 @@ try {
         Container::get(LogRepository::class)
     ));
     Container::factory(\App\Repositories\RecipientListRepository::class, static fn () => new \App\Repositories\RecipientListRepository(Container::get(PDO::class)));
+    Container::factory(\App\Repositories\SentMailRepository::class, static fn () => new \App\Repositories\SentMailRepository(Container::get(PDO::class)));
     Container::factory(\App\Services\MailRecipientResolver::class, static fn () => new \App\Services\MailRecipientResolver(
         Container::get(ContactRepository::class),
         Container::get(\App\Repositories\RecipientListRepository::class)
@@ -361,7 +362,13 @@ try {
         Container::get(TagRepository::class),
         Container::get(EventRepository::class),
         Container::get(\App\Services\MailRecipientResolver::class),
-        Container::get(\App\Services\MailComposer::class)
+        Container::get(\App\Services\MailComposer::class),
+        Container::get(\App\Repositories\SentMailRepository::class)
+    ));
+    Container::factory(\App\Controllers\SentMailController::class, static fn () => new \App\Controllers\SentMailController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\SentMailRepository::class),
+        Container::get(ContactRepository::class)
     ));
     Container::factory(\App\Controllers\RecipientListController::class, static fn () => new \App\Controllers\RecipientListController(
         Container::get(Auth::class),
@@ -435,6 +442,7 @@ try {
             Container::get(\App\Repositories\DataCheckRepository::class)->purgeExpired();
             Container::get(SettingRepository::class)->reencryptSecrets();
             Container::get(\App\Repositories\UserSessionRepository::class)->pruneOld(90);
+            Container::get(\App\Repositories\SentMailRepository::class)->pruneOld((int) config('mail.sent_retention_days', 365));
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
         }
@@ -534,6 +542,9 @@ try {
 
     $router->get('/rundmail', [MailController::class, 'rundmail']);
     $router->get('/rundmail/anzahl', [MailController::class, 'recipientCount']);
+    $router->get('/rundmail/verlauf', [\App\Controllers\SentMailController::class, 'index']);
+    $router->get('/rundmail/verlauf/ansehen', [\App\Controllers\SentMailController::class, 'show']);
+    $router->post('/rundmail/verlauf/erneut', [\App\Controllers\SentMailController::class, 'resend']);
     $router->post('/rundmail/liste-speichern', [\App\Controllers\RecipientListController::class, 'save']);
     $router->post('/rundmail/liste-umbenennen', [\App\Controllers\RecipientListController::class, 'rename']);
     $router->post('/rundmail/liste-loeschen', [\App\Controllers\RecipientListController::class, 'delete']);

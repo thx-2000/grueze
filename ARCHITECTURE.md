@@ -136,6 +136,10 @@ Template per `require` lädt.
   IP, User-Agent, `last_seen_at`, `ended_at`, `revoked_at`). Bei jedem Request
   aufgefrischt (`index.php`), speist „Verwaltung → Anmeldungen"; `revoked_at`
   meldet die Sitzung beim nächsten Request ab.
+- **`sent_mails`** – Verlauf des Serienversands: eine Zeile je abgeschlossenem
+  Auftrag mit Betreff, Rohtext und der Empfängerliste (JSON, inkl.
+  Zustellstatus). `MailController::batch()` schreibt sie beim Abschluss;
+  speist „Nachrichten → Gesendete Nachrichten" samt „erneut verschicken".
 - **`audit_log`, `mail_log`, `login_attempts`, `schema_migrations`, `themes`**.
 
 ## Rollen & Rechte
