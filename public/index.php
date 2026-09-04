@@ -162,7 +162,8 @@ try {
     Container::factory(StartController::class, static fn () => new StartController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
-        Container::get(EventRepository::class)
+        Container::get(EventRepository::class),
+        Container::get(GroupRepository::class)
     ));
 
     Container::factory(AuthController::class, static fn () => new AuthController(

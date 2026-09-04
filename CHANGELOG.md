@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.24.0
+
+**Startseite je nach Rolle (UX Teil 4)**
+
+Die Startseite zeigt jetzt für jede Rolle das Passende:
+
+- **Admin & Orga:** „Steht an" führt Abstimmungen mit fehlenden Rückmeldungen
+  zuerst (die mit der nächsten Frist ganz oben, „bald fällig"-Markierung),
+  danach Datenlücken. Schnellaktionen: Person hinzufügen · Neuer Termin ·
+  Nachricht schreiben.
+- **Mitglied:** „Deine offenen Abstimmungen" (wo die Rückmeldung fehlt oder
+  noch änderbar ist, mit Frist) und die Knöpfe „Meine Daten" / „Orga-Team
+  schreiben".
+- **Gruppenleitung:** zusätzlich „Deine Gruppen" mit offenen Beitrittsanfragen.
+- **Geburtstage diese Woche** für alle, die das Geburtstagsfeld sehen dürfen.
+
 ## 1.23.0
 
 **Gruppenleitung: alles Wichtige auf einen Blick (UX Teil 3)**

@@ -3068,6 +3068,10 @@ code {
     flex: 1 1 auto;
     min-width: 0;
     font-weight: 500;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
 }
 
 .start-widget-list a:hover .start-widget-main,

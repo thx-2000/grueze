@@ -2,31 +2,20 @@
 $firstName = trim((string) ($currentUser['name'] ?? ''));
 $firstName = $firstName !== '' ? explode(' ', $firstName)[0] : '';
 $canManage = can('contacts.manage');
+$canEvents = can('events.manage');
 $canMail = can('mail.send');
+$isMemberView = !$canManage && !$canMail;
+
+$board = $board ?? [];
+$myOpenVotes = $myOpenVotes ?? [];
+$leadGroups = $leadGroups ?? [];
+$birthdays = $birthdays ?? [];
 
 // Deutscher Wochentag + Datum ohne Intl-Abhängigkeit.
 $weekdays = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 $months = [1 => 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 $now = new DateTimeImmutable('now');
 $todayLong = $weekdays[(int) $now->format('w')] . ', ' . (int) $now->format('j') . '. ' . $months[(int) $now->format('n')];
-
-// „Steht an": Datenlücken als verlinkte Aufgabe. Nur für Rollen, die die
-// Vollständigkeits-Seite auch öffnen dürfen – sonst führen die Links ins Leere.
-$todos = [];
-if ($canManage && ($stats['without_email'] ?? 0) > 0) {
-    $todos[] = [
-        'count' => (int) $stats['without_email'],
-        'label' => 'Personen ohne Mailadresse – Lücken schließen',
-        'href' => url('/vollstaendigkeit?which=email'),
-    ];
-}
-if ($canManage && ($stats['without_phone'] ?? 0) > 0) {
-    $todos[] = [
-        'count' => (int) $stats['without_phone'],
-        'label' => 'Personen ohne Handynummer',
-        'href' => url('/vollstaendigkeit?which=phone'),
-    ];
-}
 ?>
 <section class="start-hero">
     <h1><?= $firstName !== '' ? 'Hallo, ' . e($firstName) : 'Willkommen' ?></h1>
@@ -40,10 +29,12 @@ if ($canManage && ($stats['without_phone'] ?? 0) > 0) {
     <button type="submit">Suchen</button>
 </form>
 
-<?php $isMemberView = !$canManage && !$canMail; ?>
 <div class="start-actions">
     <?php if ($canManage): ?>
         <a class="button-link" href="<?= e(url('/contacts/create')) ?>"><?= icon('plus') ?><span>Person hinzufügen</span></a>
+    <?php endif; ?>
+    <?php if ($canEvents): ?>
+        <a class="ghost-button" href="<?= e(url('/termine/neu')) ?>"><?= icon('calendar') ?><span>Neuer Termin</span></a>
     <?php endif; ?>
     <?php if ($canMail): ?>
         <a class="ghost-button" href="<?= e(url('/rundmail')) ?>"><?= icon('mail') ?><span>Nachricht schreiben</span></a>
@@ -54,69 +45,101 @@ if ($canManage && ($stats['without_phone'] ?? 0) > 0) {
     <?php endif; ?>
 </div>
 
-<?php if ($canManage): ?>
-<section class="panel start-board" aria-labelledby="startBoardTitle">
-    <div class="start-board-head">
-        <h2 id="startBoardTitle">Steht an</h2>
-        <p class="muted">
-            <?php if ($todos === []): ?>
-                Nichts Offenes – die Kontaktdaten sind vollständig gepflegt.
-            <?php else: ?>
-                <?= count($todos) === 1 ? 'Eine Sache wartet auf dich.' : count($todos) . ' Dinge warten auf dich.' ?>
-            <?php endif; ?>
-        </p>
-    </div>
+<?php if (!empty($showBoard)): ?>
+    <section class="panel start-board" aria-labelledby="startBoardTitle">
+        <div class="start-board-head">
+            <h2 id="startBoardTitle">Steht an</h2>
+            <p class="muted">
+                <?php if ($board === []): ?>
+                    Nichts Offenes – alle Rückmeldungen da, Kontaktdaten gepflegt.
+                <?php else: ?>
+                    <?= count($board) === 1 ? 'Eine Sache wartet auf dich.' : count($board) . ' Dinge warten auf dich.' ?>
+                <?php endif; ?>
+            </p>
+        </div>
 
-    <?php if ($todos === []): ?>
-        <p class="start-board-clear">
-            <?= icon('check') ?>
-            <span><?= e((string) ($stats['total'] ?? 0)) ?> Kontakte, alle mit Mailadresse und Telefonnummer.</span>
-        </p>
-    <?php else: ?>
-        <ul class="start-todo">
-            <?php foreach ($todos as $todo): ?>
-                <li>
-                    <a class="start-todo-link" href="<?= e($todo['href']) ?>">
-                        <span class="start-todo-count"><?= e((string) $todo['count']) ?></span>
-                        <span class="start-todo-label"><?= e($todo['label']) ?></span>
-                        <?= icon('chevron-right') ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
+        <?php if ($board === []): ?>
+            <p class="start-board-clear"><?= icon('check') ?><span>Alles erledigt.</span></p>
+        <?php else: ?>
+            <ul class="start-widget-list">
+                <?php foreach ($board as $item): ?>
+                    <li>
+                        <a href="<?= e($item['href']) ?>">
+                            <span class="start-widget-main">
+                                <?= e($item['label']) ?>
+                                <?php if (!empty($item['urgent'])): ?><span class="status-chip is-warn">bald fällig</span><?php endif; ?>
+                            </span>
+                            <span class="start-widget-meta"><?= e($item['meta']) ?></span>
+                            <?= icon('chevron-right') ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
 
-    <p class="start-board-foot">
-        <a href="<?= e(url('/kontakte')) ?>">Ganzes Adressbuch ansehen</a>
-        · <?= e((string) ($stats['total'] ?? 0)) ?> Kontakte
-    </p>
-</section>
+        <?php if ($canManage): ?>
+            <p class="start-board-foot">
+                <a href="<?= e(url('/kontakte')) ?>">Ganzes Adressbuch ansehen</a>
+                · <?= e((string) ($stats['total'] ?? 0)) ?> Kontakte
+            </p>
+        <?php endif; ?>
+    </section>
 <?php endif; ?>
 
-<?php $birthdays = $birthdays ?? []; $pendingEvents = $pendingEvents ?? []; ?>
-
-<?php if ($pendingEvents !== []): ?>
-    <section class="panel start-widget" aria-labelledby="startEventsTitle">
+<?php if ($myOpenVotes !== []): ?>
+    <section class="panel start-widget" aria-labelledby="startVotesTitle">
         <div class="start-board-head">
-            <h2 id="startEventsTitle">Offene Rückmeldungen</h2>
-            <p class="muted">Abstimmungen, bei denen noch nicht alle geantwortet haben.</p>
+            <h2 id="startVotesTitle">Deine offenen Abstimmungen</h2>
+            <p class="muted">Hier fehlt noch deine Rückmeldung – oder du kannst sie ändern.</p>
         </div>
         <ul class="start-widget-list">
-            <?php foreach ($pendingEvents as $ev): ?>
+            <?php foreach ($myOpenVotes as $ev): ?>
+                <?php $href = (int) ($ev['group_id'] ?? 0) > 0
+                    ? url('/gruppen/abstimmung?id=' . (int) $ev['id'])
+                    : url('/abstimmen?token=' . $ev['token']); ?>
                 <li>
-                    <a href="<?= e(url('/termine/detail?id=' . $ev['id'])) ?>">
-                        <span class="start-widget-main"><?= e($ev['title']) ?></span>
+                    <a href="<?= e($href) ?>">
+                        <span class="start-widget-main">
+                            <?= e($ev['title']) ?>
+                            <?php if ((int) ($ev['has_answered'] ?? 0) === 1): ?>
+                                <span class="status-chip is-ok">geantwortet</span>
+                            <?php else: ?>
+                                <span class="status-chip is-warn">offen</span>
+                            <?php endif; ?>
+                        </span>
                         <span class="start-widget-meta">
-                            <?= (int) $ev['answered_count'] ?>&nbsp;/&nbsp;<?= (int) $ev['participant_count'] ?> geantwortet<?php
-                            if (trim((string) ($ev['closes_at'] ?? '')) !== ''):
-                                ?> · Frist <?= e(time_until_hint($ev['closes_at'])) ?><?php
-                            endif; ?>
+                            <?php if (trim((string) ($ev['closes_at'] ?? '')) !== ''): ?>Frist <?= e(time_until_hint($ev['closes_at'])) ?><?php else: ?>ohne Frist<?php endif; ?>
                         </span>
                         <?= icon('chevron-right') ?>
                     </a>
                 </li>
             <?php endforeach; ?>
         </ul>
+    </section>
+<?php endif; ?>
+
+<?php if ($leadGroups !== []): ?>
+    <section class="panel start-widget" aria-labelledby="startGroupsTitle">
+        <div class="start-board-head">
+            <h2 id="startGroupsTitle">Deine Gruppen</h2>
+            <p class="muted">Gruppen, die du leitest.</p>
+        </div>
+        <ul class="start-widget-list">
+            <?php foreach ($leadGroups as $g): ?>
+                <?php $pending = (int) ($g['pending_requests'] ?? 0); ?>
+                <li>
+                    <a href="<?= e(url('/gruppen')) ?>">
+                        <span class="start-widget-main">
+                            <?= e($g['name']) ?>
+                            <?php if ($pending > 0): ?><span class="status-chip is-warn"><?= $pending ?> <?= $pending === 1 ? 'Anfrage' : 'Anfragen' ?></span><?php endif; ?>
+                        </span>
+                        <span class="start-widget-meta"><?= (int) ($g['member_count'] ?? 0) ?> <?= (int) ($g['member_count'] ?? 0) === 1 ? 'Mitglied' : 'Mitglieder' ?></span>
+                        <?= icon('chevron-right') ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+        <p class="start-board-foot"><a href="<?= e(url('/gruppen')) ?>">Zu den Gruppen – anschreiben, abstimmen</a></p>
     </section>
 <?php endif; ?>
 
@@ -129,16 +152,12 @@ if ($canManage && ($stats['without_phone'] ?? 0) > 0) {
         <ul class="start-widget-list">
             <?php foreach ($birthdays as $b): ?>
                 <li>
-                    <a href="<?= e(url('/contacts/edit?id=' . $b['id'])) ?>">
+                    <a href="<?= e(url(can('contacts.manage') ? '/contacts/edit?id=' . $b['id'] : '/kontakte?q=' . rawurlencode($b['vorname'] . ' ' . $b['nachname']))) ?>">
                         <span class="start-widget-main"><?= e(trim($b['vorname'] . ' ' . $b['nachname'])) ?></span>
                         <span class="start-widget-meta">
-                            <?php if ($b['in_days'] === 0): ?>
-                                <strong>heute</strong>
-                            <?php elseif ($b['in_days'] === 1): ?>
-                                morgen
-                            <?php else: ?>
-                                in <?= (int) $b['in_days'] ?> Tagen
-                            <?php endif; ?>
+                            <?php if ($b['in_days'] === 0): ?><strong>heute</strong>
+                            <?php elseif ($b['in_days'] === 1): ?>morgen
+                            <?php else: ?>in <?= (int) $b['in_days'] ?> Tagen<?php endif; ?>
                             · <?= e(format_date($b['geburtstag'])) ?><?php if ($b['turning'] !== null): ?> · wird <?= (int) $b['turning'] ?><?php endif; ?>
                         </span>
                         <?= icon('chevron-right') ?>

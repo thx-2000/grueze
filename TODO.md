@@ -73,9 +73,17 @@ Vollständige Analyse: `docs/UX-REVIEW.md`. Entscheidungen:
 - **Gruppenleitungs-Einstieg (C1)** – **v1.23.0 erledigt**: Abschnitt „Gruppen,
   die du leitest" auf `/gruppen` mit Groß-Knöpfen „Nachricht schreiben" +
   „Abstimmung starten", Beitrittsanfragen direkt auf der Karte.
-- **Startseiten rollenspezifisch (C4 + C2)** – offen, **als Nächstes nach der
-  Rollen-Abfrage mit TH** (die 3–5 wichtigsten Aufgaben je Rolle, einzeln
-  abgefragt).
+- **Startseiten rollenspezifisch (C4 + C2)** – **v1.24.0 erledigt.** Rollen
+  mit TH abgestimmt: Admin/Orga = „Steht an" (Abstimmungen Frist-zuerst, dann
+  Datenlücken) + Schnellaktionen inkl. „Neuer Termin". Mitglied = „Deine
+  offenen Abstimmungen" + Meine Daten/Orga-Team. Gruppenleitung = Mitglied +
+  „Deine Gruppen".
+- **C2 (Rail-Reihenfolge „Mein Eintrag" rollenabhängig)** – bewusst offen
+  gelassen; „Mein Eintrag" oben ist für Mitglieder richtig, für Verwalter nur
+  ein kleiner Schönheitsfehler. Bei Bedarf später.
+
+**Der UX-Review-Block ist damit weitgehend abgearbeitet** (A1–A2, B1–B4,
+C1/C3/C4). Rest siehe unten „lets discuss": Ansprache, Kommentare, Refactoring.
 
 ## Zur Entscheidung – „lets discuss" (2026-09-04, noch NICHT beauftragt)
 
