@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.37.0
+
+**Neu: „Erhaltene Mails" – jede Person sieht die Rundmails, die an sie gingen.**
+
+- Wer einen verknüpften Adressbuch-Eintrag hat, findet unter **Erhaltene
+  Mails** (Seitenleiste bzw. „Mein Eintrag") die Serien-Mails wieder, die an
+  ihn verschickt wurden – mit aufgelöster Anrede und aktuellem Mail-Fuß, so
+  wie sie im Postfach ankamen.
+- Pro Nachricht ein Knopf **„An mich senden"**: schickt sie erneut an die
+  eigene Login-Mailadresse.
+- Keine Migration – nutzt die mit 1.36.0 eingeführte Tabelle `sent_mails`.
+  Sichtbar werden nur Nachrichten, die ab 1.36.0 verschickt wurden.
+
 ## 1.36.0
 
 **Neu: „Gesendete Nachrichten" – Verlauf des Serienversands.**

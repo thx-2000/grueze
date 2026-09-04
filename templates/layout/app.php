@@ -112,6 +112,9 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                 <?php else: ?>
                     <a class="<?= $currentPath === '/orga-team' ? 'is-active' : '' ?>" href="<?= e(url('/orga-team')) ?>"><span class="rail-ic"><?= icon('mail') ?></span>Orga-Team schreiben</a>
                 <?php endif; ?>
+                <?php if (!empty($currentUser['contact_id'])): ?>
+                    <a class="<?= str_starts_with($currentPath, '/meine-nachrichten') ? 'is-active' : '' ?>" href="<?= e(url('/meine-nachrichten')) ?>"><span class="rail-ic"><?= icon('mail') ?></span>Erhaltene Mails</a>
+                <?php endif; ?>
                 <?php if (can('events.manage')): ?>
                     <a class="<?= $onEvents ? 'is-active' : '' ?>" href="<?= e(url('/termine')) ?>"><span class="rail-ic"><?= icon('calendar') ?></span>Termine</a>
                 <?php endif; ?>

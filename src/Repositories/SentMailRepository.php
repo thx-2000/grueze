@@ -141,6 +141,71 @@ final class SentMailRepository
         return $row;
     }
 
+    /**
+     * Serien-Mails, in deren Empfängerliste dieser Kontakt steht – für die
+     * „Erhaltene Mails"-Ansicht der betreffenden Person.
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function forContact(int $contactId, int $limit = 100): array
+    {
+        // Die Empfängerliste ist JSON `[{"contact_id":N,"email":…}, …]` – jede
+        // ID steht garantiert direkt vor einem Komma (danach folgt „email").
+        $stmt = $this->pdo->prepare(
+            'SELECT s.id, s.user_id, s.sender_name, s.subject, s.subject_prefix,
+                    s.body, s.salutation_mode, s.sender_key, s.reply_to_key,
+                    s.recipients, s.created_at, u.name AS current_sender_name
+             FROM sent_mails s
+             LEFT JOIN users u ON u.id = s.user_id
+             WHERE s.recipients LIKE :needle
+             ORDER BY s.created_at DESC
+             LIMIT :lim'
+        );
+        $stmt->bindValue(':needle', '%"contact_id":' . $contactId . ',%');
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            $row['own_status'] = $this->statusForContact((string) $row['recipients'], $contactId);
+            unset($row['recipients']);
+        }
+        unset($row);
+
+        return $rows;
+    }
+
+    /** Eine bestimmte Serien-Mail, aber nur wenn der Kontakt Empfänger war. */
+    public function findForContact(int $id, int $contactId): ?array
+    {
+        $entry = $this->find($id);
+        if ($entry === null) {
+            return null;
+        }
+
+        foreach ((array) $entry['recipients'] as $r) {
+            if ((int) ($r['contact_id'] ?? 0) === $contactId) {
+                $entry['own_status'] = (string) ($r['status'] ?? 'gesendet');
+                $entry['own_error'] = $r['error'] ?? null;
+
+                return $entry;
+            }
+        }
+
+        return null;
+    }
+
+    private function statusForContact(string $recipientsJson, int $contactId): string
+    {
+        foreach (json_decode($recipientsJson, true) ?: [] as $r) {
+            if ((int) ($r['contact_id'] ?? 0) === $contactId) {
+                return (string) ($r['status'] ?? 'gesendet');
+            }
+        }
+
+        return 'gesendet';
+    }
+
     public function pruneOld(int $days): int
     {
         try {

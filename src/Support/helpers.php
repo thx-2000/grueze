@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.36.0';
+    return '1.37.0';
 }
 
 /**
@@ -554,6 +554,8 @@ function page_title(string $path): string
         '/rundmail'                  => 'Nachrichten',
         '/rundmail/verlauf'          => 'Gesendete Nachrichten',
         '/rundmail/verlauf/ansehen'  => 'Gesendete Nachricht',
+        '/meine-nachrichten'         => 'Erhaltene Mails',
+        '/meine-nachrichten/ansehen' => 'Erhaltene Mail',
         '/verwaltung/gruesse'        => 'Grüße-Pool',
         '/gruesse/weihnachten'       => 'Weihnachtsgrüße',
         '/gruesse/geburtstage'       => 'Geburtstagsgrüße',

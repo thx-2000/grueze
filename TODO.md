@@ -74,11 +74,10 @@ Ideen, falls es weitergeht (kein Muss):
   Liste + Detail (Text, Empfänger + Zustellstatus) + „als Entwurf übernehmen"
   (alle oder einzelne). `MailController::batch` schreibt die Zeile bei
   Abschluss.
-- **Empfangene Mails einsehen (für Empfangs-Berechtigte)** (TH-Wunsch
-  2026-09-04): jede Person mit Login sieht die an sie gegangenen Rundmails im
-  Archiv, kann sie erneut lesen und sich auf Wunsch nochmal ans eigene
-  Postfach schicken lassen. Braucht pro Empfänger:in eine Zuordnung Job→Kontakt
-  plus Zugriff über „Mein Eintrag"/eigene Seite.
+- ~~**Empfangene Mails einsehen (für Empfangs-Berechtigte)**~~ – **v1.37.0
+  erledigt.** `/meine-nachrichten` (`ReceivedMailController`): Liste + Detail
+  (mit aufgelöster Anrede + Fuß) + „An mich senden". Keine Migration – nutzt
+  `sent_mails.recipients` (JSON-`LIKE`-Suche auf `contact_id`).
 
 ## UX-Review – Umsetzung (Entscheidungen TH 2026-09-04)
 

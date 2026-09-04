@@ -370,6 +370,14 @@ try {
         Container::get(\App\Repositories\SentMailRepository::class),
         Container::get(ContactRepository::class)
     ));
+    Container::factory(\App\Controllers\ReceivedMailController::class, static fn () => new \App\Controllers\ReceivedMailController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\SentMailRepository::class),
+        Container::get(ContactRepository::class),
+        Container::get(MailService::class),
+        Container::get(\App\Services\MailComposer::class),
+        Container::get(LogRepository::class)
+    ));
     Container::factory(\App\Controllers\RecipientListController::class, static fn () => new \App\Controllers\RecipientListController(
         Container::get(Auth::class),
         Container::get(\App\Repositories\RecipientListRepository::class),
@@ -545,6 +553,9 @@ try {
     $router->get('/rundmail/verlauf', [\App\Controllers\SentMailController::class, 'index']);
     $router->get('/rundmail/verlauf/ansehen', [\App\Controllers\SentMailController::class, 'show']);
     $router->post('/rundmail/verlauf/erneut', [\App\Controllers\SentMailController::class, 'resend']);
+    $router->get('/meine-nachrichten', [\App\Controllers\ReceivedMailController::class, 'index']);
+    $router->get('/meine-nachrichten/ansehen', [\App\Controllers\ReceivedMailController::class, 'show']);
+    $router->post('/meine-nachrichten/erneut-an-mich', [\App\Controllers\ReceivedMailController::class, 'resendToSelf']);
     $router->post('/rundmail/liste-speichern', [\App\Controllers\RecipientListController::class, 'save']);
     $router->post('/rundmail/liste-umbenennen', [\App\Controllers\RecipientListController::class, 'rename']);
     $router->post('/rundmail/liste-loeschen', [\App\Controllers\RecipientListController::class, 'delete']);

@@ -139,7 +139,10 @@ Template per `require` lädt.
 - **`sent_mails`** – Verlauf des Serienversands: eine Zeile je abgeschlossenem
   Auftrag mit Betreff, Rohtext und der Empfängerliste (JSON, inkl.
   Zustellstatus). `MailController::batch()` schreibt sie beim Abschluss;
-  speist „Nachrichten → Gesendete Nachrichten" samt „erneut verschicken".
+  speist „Nachrichten → Gesendete Nachrichten" (Sender-Sicht, `SentMailController`)
+  und „Erhaltene Mails" (Empfänger-Sicht, `ReceivedMailController` – findet über
+  `recipients LIKE '%"contact_id":N,%'` die Mails an den eigenen Kontakt und
+  rendert sie mit aufgelöster Anrede).
 - **`audit_log`, `mail_log`, `login_attempts`, `schema_migrations`, `themes`**.
 
 ## Rollen & Rechte

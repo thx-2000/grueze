@@ -241,6 +241,15 @@ foreach ($phones as $i => $entry) {
                 <small>Frage oder Hinweis ans Team</small>
             </span>
         </a>
+        <?php if (!empty($accountUser['contact_id'])): ?>
+            <a class="account-quicknav-item" href="<?= e(url('/meine-nachrichten')) ?>">
+                <span class="account-quicknav-icon"><?= icon('mail') ?></span>
+                <span>
+                    <strong>Erhaltene Mails</strong>
+                    <small>Rundmails an dich nachlesen</small>
+                </span>
+            </a>
+        <?php endif; ?>
     </div>
 </section>
 
