@@ -8,6 +8,7 @@ use App\Core\Csrf;
 use App\Core\Request;
 use App\Repositories\LogRepository;
 use App\Repositories\PasskeyRepository;
+use App\Repositories\UserSessionRepository;
 use App\Services\PasswordResetService;
 use App\Services\Validator;
 use App\Support\Redirect;
@@ -18,7 +19,8 @@ final class AuthController extends BaseController
         \App\Core\Auth $auth,
         private LogRepository $logs,
         private PasswordResetService $passwordResets,
-        private PasskeyRepository $passkeys
+        private PasskeyRepository $passkeys,
+        private UserSessionRepository $sessions
     ) {
         parent::__construct($auth);
     }
@@ -64,6 +66,7 @@ final class AuthController extends BaseController
     public function logout(Request $request): void
     {
         Csrf::validate($request->input('_csrf'));
+        $this->sessions->end(session_id());
         $this->auth->logout();
         Redirect::to('/login');
     }

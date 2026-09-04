@@ -116,6 +116,7 @@ try {
         Container::get(ThemeRepository::class)
     ));
     Container::factory(PasskeyRepository::class, static fn () => new PasskeyRepository(Container::get(PDO::class)));
+    Container::factory(\App\Repositories\UserSessionRepository::class, static fn () => new \App\Repositories\UserSessionRepository(Container::get(PDO::class)));
     Container::factory(Auth::class, static fn () => new Auth(
         Container::get(UserRepository::class),
         Container::get(SettingRepository::class)
@@ -177,7 +178,12 @@ try {
         Container::get(Auth::class),
         Container::get(LogRepository::class),
         Container::get(PasswordResetService::class),
-        Container::get(PasskeyRepository::class)
+        Container::get(PasskeyRepository::class),
+        Container::get(\App\Repositories\UserSessionRepository::class)
+    ));
+    Container::factory(\App\Controllers\SessionController::class, static fn () => new \App\Controllers\SessionController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\UserSessionRepository::class)
     ));
     Container::factory(\App\Repositories\DataCheckRepository::class, static fn () => new \App\Repositories\DataCheckRepository(Container::get(PDO::class)));
     Container::factory(ContactController::class, static fn () => new ContactController(
@@ -384,6 +390,27 @@ try {
         Container::get(UserRepository::class)
     ));
 
+    // Angemeldete Sitzung mitschreiben (Verwaltung → Anmeldungen). Wurde die
+    // Sitzung aus der Ferne beendet, hier abmelden und zur Anmeldung schicken.
+    if (!empty($_SESSION['user_id'])) {
+        try {
+            $revoked = Container::get(\App\Repositories\UserSessionRepository::class)->touch(
+                session_id(),
+                (int) $_SESSION['user_id'],
+                (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
+                (string) ($_SERVER['HTTP_USER_AGENT'] ?? '')
+            );
+            if ($revoked) {
+                $_SESSION = [];
+                session_destroy();
+                header('Location: ' . url('/login'));
+                exit;
+            }
+        } catch (\Throwable) {
+            // Sitzungs-Tracking ist unkritisch – nie den Request stören.
+        }
+    }
+
     // Optional: offene Migrationen beim ersten Request nach einem Upload selbst
     // anwenden. Standard aus – im Normalfall macht das ein Admin bewusst über
     // "Verwaltung → Aktualisieren" (mit Backup).
@@ -407,6 +434,7 @@ try {
             Container::get(ContactRepository::class)->pruneTrashedContacts();
             Container::get(\App\Repositories\DataCheckRepository::class)->purgeExpired();
             Container::get(SettingRepository::class)->reencryptSecrets();
+            Container::get(\App\Repositories\UserSessionRepository::class)->pruneOld(90);
         } catch (\Throwable) {
             // Aufräumen ist unkritisch – Fehler nie an den Request weiterreichen.
         }
@@ -590,6 +618,8 @@ try {
     $router->post('/admin/legal/datenschutz', [LegalController::class, 'updateDatenschutz']);
     $router->get('/logs/audit', [LogController::class, 'audit']);
     $router->get('/logs/mail', [LogController::class, 'mail']);
+    $router->get('/verwaltung/anmeldungen', [\App\Controllers\SessionController::class, 'index']);
+    $router->post('/verwaltung/anmeldungen/beenden', [\App\Controllers\SessionController::class, 'revoke']);
     $router->get('/settings/branding', [SettingsController::class, 'branding']);
     $router->post('/settings/branding', [SettingsController::class, 'updateBranding']);
     $router->get('/settings/themes', [\App\Controllers\ThemeController::class, 'index']);

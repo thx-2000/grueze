@@ -25,6 +25,7 @@ $groups = [
         ['users.manage', '/admin/backup', 'archive', 'Datensicherung', 'Voll-Backup herunterladen oder wiederherstellen.'],
         ['audit.view', '/logs/audit', 'history', 'Änderungsprotokoll', 'Wer hat wann welchen Kontakt geändert.'],
         ['mail.view_log', '/logs/mail', 'mail', 'Versandprotokoll', 'Welche Mails wurden verschickt, was schlug fehl.'],
+        ['users.manage', '/verwaltung/anmeldungen', 'login', 'Anmeldungen', 'Wer ist gerade online und wer hat sich wann angemeldet.'],
     ],
 ];
 ?>

@@ -56,13 +56,9 @@ Ideen, falls es weitergeht (kein Muss):
   Ansprache): Spalte umbenennen, Werte migrieren (`m`→`lieber`, `w`→`liebe`,
   NULL→`''`), alle ~8 Fundstellen anpassen. Aktuell nur umbenannt im UI, die
   Codes `m`/`w`/`''` bleiben intern. Reines Aufräumen, keine Eile.
-- **Anmelde-Übersicht für Admin** (TH-Wunsch 2026-09-04): (a) wer ist gerade
-  eingeloggt (aktive Sessions – gibt es noch keine Tabelle, `Session` müsste
-  eine `active_sessions`/`user_id`+`last_seen` führen), (b) Anmelde-Verlauf
-  „wer war wann eingeloggt" (Datenbasis teils da: `login_attempts` mit
-  `successful=1`; für sauberen Verlauf ggf. eigene `login_log`-Tabelle mit
-  Logout-Zeit). Anzeige unter Verwaltung, ggf. neben „Änderungs-/
-  Versandprotokoll".
+- ~~**Anmelde-Übersicht für Admin**~~ – **v1.33.0 erledigt.** Tabelle
+  `user_sessions`, `/verwaltung/anmeldungen` (`SessionController`): „Gerade
+  online" + Verlauf + Sitzung aus der Ferne beenden (`revoked_at`).
 - **Gesendete Mails einsehen (für Sende-Berechtigte)** (TH-Wunsch 2026-09-04):
   jede sende-berechtigte Person sieht die von ihr (bzw. alle) versendeten
   Rundmails wieder – Inhalt, Empfängerkreis, Zeitpunkt. Option, dieselbe Mail

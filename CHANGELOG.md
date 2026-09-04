@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.33.0
+
+**Neu: Anmelde-Übersicht für die Verwaltung.**
+
+- Unter **Verwaltung → Anmeldungen** (Recht „Zugänge verwalten") sieht man,
+  wer gerade online ist (Name, Rolle, seit wann, zuletzt aktiv, IP, Gerät)
+  und einen Verlauf der letzten Sitzungen (online / abgemeldet / aus der
+  Ferne beendet / abgelaufen).
+- Jede fremde Sitzung lässt sich per **Beenden** aus der Ferne abmelden –
+  beim nächsten Aufruf wird sie ausgeloggt.
+- Dafür schreibt die App pro Browser-Sitzung eine Zeile mit (nur der
+  SHA-256-Hash der Session-ID wird gespeichert, nicht die ID selbst). Ältere
+  Einträge verschwinden nach 90 Tagen automatisch.
+- Migration `2026-09-22-anmelde-uebersicht` legt die Tabelle `user_sessions`
+  an – nach dem Upload **Verwaltung → Aktualisieren**.
+
 ## 1.32.0
 
 **Nur Umbau unter der Haube – kein sichtbarer Unterschied, keine Migration.**

@@ -130,6 +130,10 @@ Template per `require` lädt.
   Die Mail-Passwörter (`mail_smtp_password`, `mail_imap_password`) liegen
   verschlüsselt (siehe „at rest").
 - **`registration_invites`** – Selbst-Registrierung (Token gehasht).
+- **`user_sessions`** – angemeldete Browser-Sitzungen (SHA-256 der Session-ID,
+  IP, User-Agent, `last_seen_at`, `ended_at`, `revoked_at`). Bei jedem Request
+  aufgefrischt (`index.php`), speist „Verwaltung → Anmeldungen"; `revoked_at`
+  meldet die Sitzung beim nächsten Request ab.
 - **`audit_log`, `mail_log`, `login_attempts`, `schema_migrations`, `themes`**.
 
 ## Rollen & Rechte

@@ -3920,6 +3920,11 @@ body { display: block; }
     color: var(--color-danger);
 }
 
+.status-chip.is-muted {
+    background: var(--fill-ghost);
+    color: var(--color-muted);
+}
+
 /* --- Karten an das schlanke Schema anpassen --- */
 .contacts-mobile .contact-card {
     grid-template-rows: none;

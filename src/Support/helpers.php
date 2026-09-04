@@ -263,7 +263,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.32.0';
+    return '1.33.0';
 }
 
 /**
@@ -584,6 +584,7 @@ function page_title(string $path): string
         '/admin/legal/datenschutz'   => 'Datenschutz bearbeiten',
         '/logs/audit'                => 'Änderungsprotokoll',
         '/logs/mail'                 => 'Versandprotokoll',
+        '/verwaltung/anmeldungen'    => 'Anmeldungen',
         '/settings/branding'         => 'Branding',
         '/settings/themes'           => 'Themes',
         '/settings/themes/bearbeiten' => 'Theme bearbeiten',
