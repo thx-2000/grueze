@@ -3,6 +3,26 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.29.0
+
+**Nur Umbau unter der Haube – kein sichtbarer Unterschied.**
+
+- Der `ContactController` war mit ~970 Zeilen die dickste Datei im Projekt und
+  vermischte Adressbuch-CRUD, Archiv/Papierkorb, Dubletten, Import/Export und
+  Vollständigkeit. Jetzt aufgeteilt:
+  - `ContactArchiveController` – Archiv, Papierkorb, Wiederherstellen,
+    endgültig löschen, Dubletten-Finder, Zusammenführen.
+  - `ContactPortController` – XLSX-Import, CSV- und vCard-Export.
+  - `CompletenessController` – die Seite „Vollständigkeit".
+  - `LinkedAccountService` – den optional an einem Kontakt hängenden Login
+    anlegen/aktualisieren/deaktivieren.
+  - `ContactDiff` / `ContactFieldRedactor` (Support) – Änderungsverlauf bzw.
+    das Ausblenden gesperrter Felder, vorher doppelt im Controller.
+  - `ContactController` selbst schrumpft auf ~400 Zeilen (Liste, Anlegen,
+    Bearbeiten, „Mein Eintrag", Sammeländerung, Gruppe aus Auswahl).
+- Alle URLs unverändert. Getestet: Bearbeiten mit Änderungsverlauf, Archiv →
+  Wiederherstellen, vCard-Export, „Liste teilen".
+
 ## 1.28.0
 
 **Nur Stylesheet – nichts an der Anwendung geändert.**

@@ -132,9 +132,15 @@ Stand betreffen.
      inkl. der zugehörigen Media-Query-Blöcke. Datei ~6.500 → 5.455 Zeilen,
      CSS ~145 KB → ~110 KB. Sieben Seiten Desktop+mobil geprüft, Optik
      unverändert.
-   - offen: fette Dateien aufteilen (`ContactController` ~970 Z.,
-     `MailController` 826 Z., `templates/contacts/index.php` 667 Z.),
-     Merge-/Dubletten-Logik aus `ContactRepository` in einen Service.
+   - **fette Dateien aufteilen** – **läuft:**
+     - v1.29.0: `ContactController` 970 → ~400 Z.; raus in
+       `ContactArchiveController`, `ContactPortController`,
+       `CompletenessController`, `LinkedAccountService`, `ContactDiff`,
+       `ContactFieldRedactor`.
+     - offen: `MailController` 826 Z. (Empfänger-Auflösung + Identität/
+       Antwortweg/Betreff/Fuß in Services ziehen, Empfängerlisten-CRUD in
+       eigenen Controller), `templates/contacts/index.php` 685 Z.
+   - offen: Merge-/Dubletten-Logik aus `ContactRepository` in einen Service.
 
 - **Design-/UX-Überarbeitung (Rolle: Design- und UX-Agentur)**: Navigation
 

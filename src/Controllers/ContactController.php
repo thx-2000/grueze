@@ -13,14 +13,21 @@ use App\Repositories\GroupRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\TagRepository;
 use App\Repositories\UserRepository;
-use App\Support\ContactInput;
-use App\Services\CsvExportService;
-use App\Services\ContactImportService;
+use App\Services\LinkedAccountService;
 use App\Services\UploadService;
-use App\Services\VCardService;
 use App\Services\Validator;
+use App\Support\ContactDiff;
+use App\Support\ContactFieldRedactor;
+use App\Support\ContactInput;
 use App\Support\Redirect;
 
+/**
+ * Kern-CRUD des Adressbuchs: Liste, Anlegen, Bearbeiten, Speichern, Selbst-
+ * Service („Mein Eintrag") sowie die beiden Sammelaktionen (Kategorie/Tags in
+ * einem Rutsch, Gruppe aus Auswahl). Archiv/Papierkorb/Dubletten liegen in
+ * ContactArchiveController, Import/Export in ContactPortController, die
+ * Vollständigkeit in CompletenessController.
+ */
 final class ContactController extends BaseController
 {
     public function __construct(
@@ -31,11 +38,9 @@ final class ContactController extends BaseController
         private UserRepository $users,
         private LogRepository $logs,
         private UploadService $uploads,
-        private CsvExportService $csv,
-        private ContactImportService $imports,
         private GroupRepository $groups,
         private DataCheckRepository $dataChecks,
-        private VCardService $vcards
+        private LinkedAccountService $linkedAccounts,
     ) {
         parent::__construct($auth);
     }
@@ -58,7 +63,7 @@ final class ContactController extends BaseController
         $ownContact = $ownContactId > 0 ? $this->contacts->find($ownContactId) : null;
 
         $contacts = $this->contacts->search($filters);
-        $this->redactHiddenFields($contacts, $ownContactId);
+        ContactFieldRedactor::apply($contacts, $ownContactId);
 
         $this->render('contacts/index', [
             'contacts' => $contacts,
@@ -77,148 +82,6 @@ final class ContactController extends BaseController
         ]);
     }
 
-    /**
-     * Entfernt personenbezogene Feldwerte aus der Kontaktliste, die die aktuelle
-     * Rolle nicht sehen darf – bevor die Daten überhaupt an die View gehen.
-     * Zeilen bleiben erhalten (Status „Mail/Tel. fehlt" braucht die Anzahl),
-     * nur die Werte werden geleert. Der eigene verknüpfte Kontakt bleibt
-     * unberührt (die Seite zeigt ihn separat, Notizen ausgenommen).
-     *
-     * @param array<int,array<string,mixed>> $contacts
-     */
-    private function redactHiddenFields(array &$contacts, int $ownContactId): void
-    {
-        $show = [
-            'address'  => can_view_contact_field('address'),
-            'birthday' => can_view_contact_field('birthday'),
-            'emails'   => can_view_contact_field('emails'),
-            'phones'   => can_view_contact_field('phones'),
-            'login'    => can_view_contact_field('login'),
-            'notes'    => can_view_contact_field('notes'),
-        ];
-        if (!in_array(false, $show, true)) {
-            return;
-        }
-
-        foreach ($contacts as &$contact) {
-            if ((int) ($contact['id'] ?? 0) === $ownContactId && $ownContactId > 0) {
-                continue;
-            }
-            if (!$show['emails']) {
-                foreach (($contact['emails'] ?? []) as $i => $_) {
-                    $contact['emails'][$i] = ['email' => '', 'label' => ''];
-                }
-            }
-            if (!$show['phones']) {
-                foreach (($contact['phones'] ?? []) as $i => $_) {
-                    $contact['phones'][$i] = ['phone' => '', 'label' => ''];
-                }
-            }
-            if (!$show['address']) {
-                $contact['strasse'] = $contact['plz'] = $contact['ort'] = $contact['land'] = '';
-            }
-            if (!$show['birthday']) {
-                $contact['geburtstag'] = null;
-            }
-            if (!$show['notes']) {
-                $contact['notizen'] = '';
-            }
-            if (!$show['login']) {
-                $contact['linked_user'] = null;
-            }
-        }
-        unset($contact);
-    }
-
-    /**
-     * Vollständigkeit (löst die Namensliste ab): Überblick über Datenlücken,
-     * pro Person direkte Aktionen, dazu die Namen als Kopiervorlage.
-     */
-    public function completeness(Request $request): void
-    {
-        $this->requirePermission('contacts.manage');
-
-        $categoryId = (string) $request->input('category_id', '');
-        $which = (string) $request->input('which', 'all');
-        $which = in_array($which, ['all', 'email', 'phone'], true) ? $which : 'all';
-        $numbered = (string) $request->input('numbered', '1') === '1';
-
-        $all = $this->contacts->search([
-            'category_id' => $categoryId,
-            'sort' => 'nachname',
-            'direction' => 'asc',
-        ]);
-
-        $stats = ['total' => count($all), 'without_email' => 0, 'without_phone' => 0];
-        $gaps = [];
-        foreach ($all as $contact) {
-            $missingEmail = ($contact['emails'] ?? []) === [];
-            $missingPhone = ($contact['phones'] ?? []) === [];
-            if ($missingEmail) {
-                $stats['without_email']++;
-            }
-            if ($missingPhone) {
-                $stats['without_phone']++;
-            }
-            if (!$missingEmail && !$missingPhone) {
-                continue;
-            }
-            if ($which === 'email' && !$missingEmail) {
-                continue;
-            }
-            if ($which === 'phone' && !$missingPhone) {
-                continue;
-            }
-            $gaps[] = [
-                'id' => (int) $contact['id'],
-                'name' => trim($contact['vorname'] . ' ' . $contact['nachname']),
-                'geburtsname' => ($contact['geburtsname'] ?? '') !== '' && $contact['geburtsname'] !== $contact['nachname'] ? (string) $contact['geburtsname'] : '',
-                'category_name' => (string) ($contact['category_name'] ?? ''),
-                'missing_email' => $missingEmail,
-                'missing_phone' => $missingPhone,
-                'email' => (string) ($contact['emails'][0]['email'] ?? ''),
-            ];
-        }
-
-        $lines = [];
-        foreach (array_values($all) as $index => $contact) {
-            $name = trim($contact['vorname'] . ' ' . $contact['nachname']);
-            $lines[] = $numbered ? ($index + 1) . '. ' . $name : $name;
-        }
-
-        $this->render('contacts/completeness', [
-            'categories' => $this->categories->all(),
-            'categoryId' => $categoryId,
-            'which' => $which,
-            'numbered' => $numbered,
-            'stats' => $stats,
-            'gaps' => $gaps,
-            'nameListText' => implode("\n", $lines),
-            'canShare' => can('mail.send'),
-        ]);
-    }
-
-    /** „Liste teilen": Namen als Nachrichtentext an den Nachrichten-Flow übergeben. */
-    public function shareCompleteness(Request $request): void
-    {
-        $this->requirePermission('contacts.manage');
-        Csrf::validate($request->input('_csrf'));
-
-        $list = trim((string) $request->input('name_list'));
-        $intro = trim((string) $request->input('intro'));
-        if ($list === '') {
-            flash('error', 'Die Namensliste ist leer.');
-            Redirect::to('/vollstaendigkeit');
-        }
-
-        $_SESSION['mail_draft'] = [
-            'subject' => 'Bitte die Namensliste auf Vollständigkeit prüfen',
-            'message' => ($intro !== '' ? $intro . "\n\n" : '') . $list,
-            'salutation_mode' => 'hallo',
-        ];
-        Redirect::to('/rundmail');
-    }
-
     public function create(): void
     {
         $this->requirePermission('contacts.manage');
@@ -230,54 +93,6 @@ final class ContactController extends BaseController
             'phoneLabels' => config('defaults.phone_labels', []),
             'history' => [],
         ]);
-    }
-
-    public function importForm(): void
-    {
-        $this->requirePermission('contacts.manage');
-        $this->render('contacts/import');
-    }
-
-    public function importXlsx(Request $request): void
-    {
-        $this->requirePermission('contacts.manage');
-        Csrf::validate($request->input('_csrf'));
-
-        $file = $request->file('import_file');
-        if (!$file || (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-            flash('error', 'Bitte eine XLSX-Datei auswählen.');
-            Redirect::to('/contacts/import');
-        }
-
-        $filename = (string) ($file['name'] ?? '');
-        if (!str_ends_with(strtolower($filename), '.xlsx')) {
-            flash('error', 'Bitte eine Datei im XLSX-Format hochladen.');
-            Redirect::to('/contacts/import');
-        }
-
-        if ((int) ($file['size'] ?? 0) > (int) config('security.import_max_size', 5242880)) {
-            flash('error', 'Die Datei ist zu groß (max. 5 MB).');
-            Redirect::to('/contacts/import');
-        }
-
-        try {
-            $summary = $this->imports->importRamaWorkbook((string) $file['tmp_name'], (int) $this->auth->user()['id']);
-            flash(
-                'success',
-                sprintf(
-                    'Import abgeschlossen: %d neu, %d aktualisiert, %d übersprungen, %d ohne Mailadresse.',
-                    $summary['created'],
-                    $summary['updated'],
-                    $summary['skipped'],
-                    $summary['without_email']
-                )
-            );
-        } catch (\Throwable $exception) {
-            flash('error', 'Import fehlgeschlagen: ' . $exception->getMessage());
-            Redirect::to('/contacts/import');
-        }
-
-        Redirect::to('/kontakte');
     }
 
     public function store(Request $request): void
@@ -298,7 +113,7 @@ final class ContactController extends BaseController
                 'login_email' => ['required', 'email'],
                 'role_id' => ['required'],
             ]));
-            $errors = array_merge($errors, $this->validateLinkedAccountUniqueness($data, null));
+            $errors = array_merge($errors, $this->linkedAccounts->validateUniqueness($data, null));
         }
 
         if ($errors !== []) {
@@ -309,7 +124,7 @@ final class ContactController extends BaseController
 
         $data['photo_path'] = $this->uploads->storePhoto($request->file('photo'));
         $contactId = $this->contacts->create($data, (int) $this->auth->user()['id']);
-        $accountMessage = $this->syncLinkedAccount($contactId, $data);
+        $accountMessage = $this->linkedAccounts->sync($contactId, $data);
         $this->logs->addAudit((int) $this->auth->user()['id'], $contactId, 'created', 'Kontakt wurde angelegt.');
         flash('success', trim('Der Kontakt wurde angelegt. ' . $accountMessage));
         Redirect::to('/kontakte');
@@ -368,7 +183,7 @@ final class ContactController extends BaseController
                 'login_email' => ['required', 'email'],
                 'role_id' => ['required'],
             ]));
-            $errors = array_merge($errors, $this->validateLinkedAccountUniqueness($data, $id));
+            $errors = array_merge($errors, $this->linkedAccounts->validateUniqueness($data, $id));
         }
         if ($errors !== []) {
             $_SESSION['_errors'] = $errors;
@@ -377,8 +192,8 @@ final class ContactController extends BaseController
         }
         $data['photo_path'] = $this->uploads->storePhoto($request->file('photo'), $existing['photo_path']);
         $this->contacts->update($id, $data, (int) $this->auth->user()['id']);
-        $accountMessage = $this->syncLinkedAccount($id, $data);
-        $changes = $this->contactChanges($existing, $data);
+        $accountMessage = $this->linkedAccounts->sync($id, $data);
+        $changes = ContactDiff::describe($existing, $data, $this->categories->all(), $this->tags->all());
         $summary = $changes === []
             ? 'Kontakt gespeichert, keine Feldänderung.'
             : 'Geändert: ' . implode(', ', array_keys($changes)) . '.';
@@ -424,220 +239,13 @@ final class ContactController extends BaseController
         }
 
         $this->contacts->update($contactId, $data, (int) $user['id']);
-        $changes = $this->contactChanges($existing, $data);
+        $changes = ContactDiff::describe($existing, $data, $this->categories->all(), $this->tags->all());
         $summary = $changes === []
             ? 'Eigener Eintrag gespeichert, keine Feldänderung.'
             : 'Selbst gepflegt: ' . implode(', ', array_keys($changes)) . '.';
         $this->logs->addAudit((int) $user['id'], $contactId, 'updated', $summary, $changes);
         flash('success', 'Deine Angaben wurden gespeichert – danke fürs Aktuell-Halten.');
         Redirect::to('/account');
-    }
-
-    /**
-     * Kontakt aus dem aktiven Bestand nehmen – wahlweise ins Archiv (bleibt
-     * dauerhaft, jederzeit zurückholbar) oder in den Papierkorb (nach 30 Tagen
-     * endgültig weg). Ein verknüpfter Login wird deaktiviert.
-     */
-    public function retire(Request $request): void
-    {
-        $this->requirePermission('contacts.delete');
-        Csrf::validate($request->input('_csrf'));
-        $id = (int) $request->input('id');
-        $mode = $request->input('mode') === 'archive' ? 'archive' : 'trash';
-        $contact = $this->contacts->find($id);
-        if (!$contact) {
-            flash('error', 'Kontakt nicht gefunden.');
-            Redirect::to('/kontakte');
-        }
-
-        $this->users->deactivateByContactId($id);
-        $name = trim($contact['vorname'] . ' ' . $contact['nachname']);
-        $userId = (int) $this->auth->user()['id'];
-
-        if ($mode === 'archive') {
-            $this->contacts->archive($id, $userId);
-            $this->logs->addAudit($userId, $id, 'updated', 'Kontakt ins Archiv gelegt: ' . $name . '.');
-            flash('success', $name . ' liegt jetzt im Archiv. Du kannst den Kontakt jederzeit zurückholen.');
-        } else {
-            $this->contacts->trash($id, $userId);
-            $this->logs->addAudit($userId, $id, 'deleted', 'Kontakt in den Papierkorb gelegt: ' . $name . '.');
-            flash('success', $name . ' liegt jetzt im Papierkorb und wird in ' . ContactRepository::TRASH_DAYS . ' Tagen endgültig gelöscht.');
-        }
-
-        Redirect::to('/kontakte');
-    }
-
-    /** Archiv & Papierkorb – Übersicht mit Zurückholen / endgültig löschen. */
-    public function retiredList(): void
-    {
-        $this->requirePermission('contacts.delete');
-        $lists = $this->contacts->retired();
-
-        $this->render('contacts/retired', [
-            'archived' => $lists['archived'],
-            'trashed' => $lists['trashed'],
-            'trashDays' => ContactRepository::TRASH_DAYS,
-        ]);
-    }
-
-    public function restore(Request $request): void
-    {
-        $this->requirePermission('contacts.delete');
-        Csrf::validate($request->input('_csrf'));
-        $id = (int) $request->input('id');
-        $contact = $this->contacts->find($id);
-        if (!$contact) {
-            flash('error', 'Kontakt nicht gefunden.');
-            Redirect::to('/kontakte/archiv');
-        }
-
-        $this->contacts->restore($id);
-        $name = trim($contact['vorname'] . ' ' . $contact['nachname']);
-        $this->logs->addAudit((int) $this->auth->user()['id'], $id, 'updated', 'Kontakt wiederhergestellt: ' . $name . '.');
-        flash('success', $name . ' ist wieder im aktiven Adressbuch. Ein früher verknüpfter Login bleibt deaktiviert – bei Bedarf unter „Zugänge" wieder aktivieren.');
-        Redirect::to('/kontakte/archiv');
-    }
-
-    public function purge(Request $request): void
-    {
-        $this->requirePermission('contacts.delete');
-        Csrf::validate($request->input('_csrf'));
-        $id = (int) $request->input('id');
-        $contact = $this->contacts->find($id);
-        $name = $contact ? trim($contact['vorname'] . ' ' . $contact['nachname']) : 'Kontakt';
-        $this->users->deactivateByContactId($id);
-        $this->contacts->purge($id);
-        $this->logs->addAudit((int) $this->auth->user()['id'], null, 'deleted', 'Kontakt endgültig gelöscht: ' . $name . '.');
-        flash('success', $name . ' wurde endgültig gelöscht.');
-        Redirect::to('/kontakte/archiv');
-    }
-
-    /** Dubletten-Finder: Kontakte, die vermutlich doppelt angelegt wurden. */
-    public function duplicates(): void
-    {
-        $this->requirePermission('contacts.manage');
-        $clusters = $this->contacts->duplicateClusters();
-        $this->redactHiddenFields2($clusters);
-
-        $this->render('contacts/duplicates', [
-            'clusters' => $clusters,
-            'canMerge' => can('contacts.delete'),
-        ]);
-    }
-
-    /** Zwei oder mehr Kontakte zu einem zusammenführen. */
-    public function merge(Request $request): void
-    {
-        $this->requirePermission('contacts.manage');
-        Csrf::validate($request->input('_csrf'));
-        if (!can('contacts.delete')) {
-            flash('error', 'Zum Zusammenführen fehlt die Berechtigung zum Löschen von Kontakten.');
-            Redirect::to('/kontakte/dubletten');
-        }
-
-        $primaryId = (int) $request->input('primary_id');
-        $secondaryIds = array_values(array_unique(array_filter(
-            array_map('intval', (array) $request->input('secondary_ids', [])),
-            static fn (int $id): bool => $id > 0 && $id !== $primaryId
-        )));
-
-        $primary = $this->contacts->find($primaryId);
-        if (!$primary || $secondaryIds === []) {
-            flash('error', 'Bitte einen Haupt-Kontakt und mindestens einen weiteren wählen.');
-            Redirect::to('/kontakte/dubletten');
-        }
-
-        $userId = (int) $this->auth->user()['id'];
-        $mergedNames = [];
-        $filled = [];
-        $notes = [];
-        foreach ($secondaryIds as $sid) {
-            $sec = $this->contacts->find($sid);
-            if (!$sec) {
-                continue;
-            }
-            $result = $this->contacts->merge($primaryId, $sid, $userId);
-            $mergedNames[] = trim($sec['vorname'] . ' ' . $sec['nachname']);
-            $filled = array_merge($filled, $result['filled']);
-            if ($result['note'] !== '') {
-                $notes[] = $result['note'];
-            }
-        }
-
-        $filled = array_values(array_unique($filled));
-        $summary = 'Zusammengeführt mit: ' . implode(', ', $mergedNames) . '.'
-            . ($filled !== [] ? ' Ergänzt: ' . implode(', ', $filled) . '.' : '');
-        $this->logs->addAudit($userId, $primaryId, 'updated', $summary);
-
-        flash('success', trim('Kontakte zusammengeführt. ' . implode(' ', $notes)));
-        Redirect::to('/contacts/edit?id=' . $primaryId);
-    }
-
-    /**
-     * Wie redactHiddenFields, aber über die Cluster-Struktur des Dubletten-Finders.
-     *
-     * @param array<int,array{reason:string,contacts:array<int,array<string,mixed>>}> $clusters
-     */
-    private function redactHiddenFields2(array &$clusters): void
-    {
-        $ownContactId = (int) ($this->auth->user()['contact_id'] ?? 0);
-        foreach ($clusters as &$cluster) {
-            $this->redactHiddenFields($cluster['contacts'], $ownContactId);
-        }
-        unset($cluster);
-    }
-
-    public function export(Request $request): never
-    {
-        $this->requirePermission('contacts.export');
-        $filters = [
-            'q' => trim((string) $request->input('q', '')),
-            'category_id' => (string) $request->input('category_id', ''),
-            'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
-            'sort' => (string) $request->input('sort', ''),
-            'direction' => (string) $request->input('direction', 'asc'),
-        ];
-        $this->csv->stream($this->contacts->search($filters));
-    }
-
-    /**
-     * vCard-Export (.vcf): einzelner Kontakt (`?id=`), aktuelle Auswahl
-     * (`selected_contacts[]` per POST) oder die gefilterte Liste (GET).
-     */
-    public function vcard(Request $request): never
-    {
-        $this->requirePermission('contacts.export');
-
-        $singleId = (int) $request->input('id');
-        $selected = array_values(array_unique(array_filter(
-            array_map('intval', (array) $request->input('selected_contacts', [])),
-            static fn (int $id): bool => $id > 0
-        )));
-
-        if ($singleId > 0) {
-            $contact = $this->contacts->find($singleId);
-            if (!$contact || !empty($contact['archived_at']) || !empty($contact['deleted_at'])) {
-                flash('error', 'Kontakt nicht gefunden.');
-                Redirect::to('/kontakte');
-            }
-            $name = trim($contact['vorname'] . ' ' . $contact['nachname']) ?: 'kontakt';
-            $this->vcards->stream([$contact], $name . '.vcf');
-        }
-
-        if ($selected !== []) {
-            $contacts = $this->contacts->findManyByIds($selected);
-            $this->vcards->stream($contacts, 'kontakte-auswahl.vcf');
-        }
-
-        $filters = [
-            'q' => trim((string) $request->input('q', '')),
-            'category_id' => (string) $request->input('category_id', ''),
-            'tag_ids' => array_map('intval', (array) $request->input('tag_ids', [])),
-            'group_ids' => array_map('intval', (array) $request->input('group_ids', [])),
-            'sort' => (string) $request->input('sort', ''),
-            'direction' => (string) $request->input('direction', 'asc'),
-        ];
-        $this->vcards->stream($this->contacts->search($filters), 'kontakte.vcf');
     }
 
     public function bulkUpdate(Request $request): void
@@ -784,187 +392,5 @@ final class ContactController extends BaseController
     private function sanitizeOwnProfilePayload(Request $request, array $existing): array
     {
         return ContactInput::selfServiceFields($request, $existing);
-    }
-
-    /**
-     * Feldweiser Vergleich alt → neu für den Änderungsverlauf. Nur tatsächlich
-     * geänderte Felder, Werte als menschenlesbarer Text.
-     *
-     * @param array<string, mixed> $before Kontakt aus find() (inkl. emails/phones/tags/linked_user)
-     * @param array<string, mixed> $after  bereinigte Formulardaten aus sanitizePayload()
-     * @return array<string, array{from: string, to: string}>
-     */
-    private function contactChanges(array $before, array $after): array
-    {
-        $geschlecht = static fn (string $v): string => match ($v) {
-            'm' => '„Lieber …"', 'w' => '„Liebe …"', default => 'neutral („Hallo …")',
-        };
-        $categoryName = static function (string $id, array $categories): string {
-            foreach ($categories as $category) {
-                if ((string) $category['id'] === $id && $id !== '') {
-                    return (string) $category['name'];
-                }
-            }
-
-            return '—';
-        };
-        $categories = $this->categories->all();
-        $tagNames = function (array $ids): string {
-            $ids = array_map('intval', $ids);
-            $names = [];
-            foreach ($this->tags->all() as $tag) {
-                if (in_array((int) $tag['id'], $ids, true)) {
-                    $names[] = (string) $tag['name'];
-                }
-            }
-            sort($names);
-
-            return $names === [] ? '—' : implode(', ', $names);
-        };
-        $emailText = static function (array $rows): string {
-            $parts = [];
-            foreach ($rows as $row) {
-                $label = trim((string) ($row['label'] ?? ''));
-                $parts[] = ($label !== '' ? $label . ': ' : '') . (string) ($row['email'] ?? '');
-            }
-            sort($parts);
-
-            return $parts === [] ? '—' : implode(', ', $parts);
-        };
-        $phoneText = static function (array $rows): string {
-            $parts = [];
-            foreach ($rows as $row) {
-                $label = trim((string) ($row['label'] ?? ''));
-                $parts[] = ($label !== '' ? $label . ': ' : '') . (string) ($row['phone'] ?? '');
-            }
-            sort($parts);
-
-            return $parts === [] ? '—' : implode(', ', $parts);
-        };
-
-        $pairs = [
-            'Vorname' => [(string) ($before['vorname'] ?? ''), (string) $after['vorname']],
-            'Nachname' => [(string) ($before['nachname'] ?? ''), (string) $after['nachname']],
-            'Geburtsname' => [(string) ($before['geburtsname'] ?? ''), (string) $after['geburtsname']],
-            'Anrede' => [$geschlecht((string) ($before['geschlecht'] ?? '')), $geschlecht((string) $after['geschlecht'])],
-            'Geburtstag' => [(string) ($before['geburtstag'] ?? ''), (string) $after['geburtstag']],
-            'Kategorie' => [
-                (string) ($before['category_name'] ?? '') ?: '—',
-                $categoryName((string) $after['category_id'], $categories),
-            ],
-            'Straße' => [(string) ($before['strasse'] ?? ''), (string) $after['strasse']],
-            'PLZ' => [(string) ($before['plz'] ?? ''), (string) $after['plz']],
-            'Ort' => [(string) ($before['ort'] ?? ''), (string) $after['ort']],
-            'Land' => [(string) ($before['land'] ?? ''), (string) $after['land']],
-            'Notizen' => [(string) ($before['notizen'] ?? ''), (string) $after['notizen']],
-            'Tags' => [
-                $tagNames(array_map(static fn (array $t): int => (int) $t['id'], $before['tags'] ?? [])),
-                $tagNames((array) $after['tag_ids']),
-            ],
-            'E-Mail' => [$emailText($before['emails'] ?? []), $emailText($after['emails'])],
-            'Telefon' => [$phoneText($before['phones'] ?? []), $phoneText($after['phones'])],
-        ];
-
-        $changes = [];
-        foreach ($pairs as $label => [$from, $to]) {
-            $from = trim($from);
-            $to = trim($to);
-            if ($from !== $to) {
-                $changes[$label] = [
-                    'from' => $from === '' ? '—' : $from,
-                    'to' => $to === '' ? '—' : $to,
-                ];
-            }
-        }
-
-        return $changes;
-    }
-
-    private function syncLinkedAccount(int $contactId, array $data): string
-    {
-        if (!can('users.manage')) {
-            return '';
-        }
-
-        $fullName = trim($data['vorname'] . ' ' . $data['nachname']);
-        $linkedUser = $this->users->findByContactId($contactId);
-
-        if (!$data['login_enabled']) {
-            if ($linkedUser) {
-                $this->users->updateLinkedAccount((int) $linkedUser['id'], [
-                    'name' => $fullName,
-                    'email' => $data['login_email'] ?: $linkedUser['email'],
-                    'role_id' => $data['role_id'] ?: (int) $linkedUser['role_id'],
-                    'is_active' => 0,
-                    'contact_id' => $contactId,
-                ]);
-
-                return 'Der verknüpfte Login wurde deaktiviert.';
-            }
-
-            return '';
-        }
-
-        if ($linkedUser) {
-            $this->users->updateLinkedAccount((int) $linkedUser['id'], [
-                'name' => $fullName,
-                'email' => $data['login_email'],
-                'role_id' => $data['role_id'],
-                'is_active' => 1,
-                'contact_id' => $contactId,
-            ]);
-
-            return 'Login und Rolle wurden aktualisiert.';
-        }
-
-        $existingUser = $this->users->findByEmail($data['login_email']);
-        if ($existingUser && empty($existingUser['contact_id'])) {
-            $this->users->updateLinkedAccount((int) $existingUser['id'], [
-                'name' => $fullName,
-                'email' => $data['login_email'],
-                'role_id' => $data['role_id'],
-                'is_active' => 1,
-                'contact_id' => $contactId,
-            ]);
-
-            return 'Bestehender Zugang wurde mit diesem Kontakt verknüpft.';
-        }
-
-        $password = $this->generatePassword();
-        $this->users->create([
-            'name' => $fullName,
-            'email' => $data['login_email'],
-            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
-            'role_id' => $data['role_id'],
-            'is_active' => 1,
-            'contact_id' => $contactId,
-        ]);
-
-        return 'Login angelegt. Erstpasswort: ' . $password;
-    }
-
-    private function generatePassword(): string
-    {
-        return substr(strtr(base64_encode(random_bytes(12)), '+/', 'AZ'), 0, 16);
-    }
-
-    private function validateLinkedAccountUniqueness(array $data, ?int $contactId): array
-    {
-        if (($data['login_email'] ?? '') === '') {
-            return [];
-        }
-
-        $existingUser = $this->users->findByEmail($data['login_email']);
-        if (!$existingUser) {
-            return [];
-        }
-
-        if ((int) ($existingUser['contact_id'] ?? 0) === (int) ($contactId ?? 0) || empty($existingUser['contact_id'])) {
-            return [];
-        }
-
-        return [
-            'login_email' => 'Diese Login-E-Mail wird bereits von einem anderen Zugang verwendet.',
-        ];
     }
 }

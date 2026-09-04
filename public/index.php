@@ -123,6 +123,9 @@ try {
     Container::factory(UploadService::class, static fn () => new UploadService());
     Container::factory(CsvExportService::class, static fn () => new CsvExportService());
     Container::factory(\App\Services\VCardService::class, static fn () => new \App\Services\VCardService());
+    Container::factory(\App\Services\LinkedAccountService::class, static fn () => new \App\Services\LinkedAccountService(
+        Container::get(UserRepository::class)
+    ));
     Container::factory(\App\Controllers\PwaController::class, static fn () => new \App\Controllers\PwaController());
     Container::factory(XlsxReader::class, static fn () => new XlsxReader());
     Container::factory(MailService::class, static fn () => new MailService(Container::get(LogRepository::class)));
@@ -181,11 +184,27 @@ try {
         Container::get(UserRepository::class),
         Container::get(LogRepository::class),
         Container::get(UploadService::class),
-        Container::get(CsvExportService::class),
-        Container::get(ContactImportService::class),
         Container::get(GroupRepository::class),
         Container::get(\App\Repositories\DataCheckRepository::class),
+        Container::get(\App\Services\LinkedAccountService::class)
+    ));
+    Container::factory(\App\Controllers\ContactArchiveController::class, static fn () => new \App\Controllers\ContactArchiveController(
+        Container::get(Auth::class),
+        Container::get(ContactRepository::class),
+        Container::get(UserRepository::class),
+        Container::get(LogRepository::class)
+    ));
+    Container::factory(\App\Controllers\ContactPortController::class, static fn () => new \App\Controllers\ContactPortController(
+        Container::get(Auth::class),
+        Container::get(ContactRepository::class),
+        Container::get(ContactImportService::class),
+        Container::get(CsvExportService::class),
         Container::get(\App\Services\VCardService::class)
+    ));
+    Container::factory(\App\Controllers\CompletenessController::class, static fn () => new \App\Controllers\CompletenessController(
+        Container::get(Auth::class),
+        Container::get(ContactRepository::class),
+        Container::get(CategoryRepository::class)
     ));
     Container::factory(\App\Controllers\DataCheckController::class, static fn () => new \App\Controllers\DataCheckController(
         Container::get(Auth::class),
@@ -417,24 +436,24 @@ try {
     $router->post('/setup/admin', [SetupController::class, 'storeAdmin']);
 
     $router->get('/contacts/create', [ContactController::class, 'create']);
-    $router->get('/contacts/import', [ContactController::class, 'importForm']);
-    $router->post('/contacts/import', [ContactController::class, 'importXlsx']);
+    $router->get('/contacts/import', [\App\Controllers\ContactPortController::class, 'importForm']);
+    $router->post('/contacts/import', [\App\Controllers\ContactPortController::class, 'importXlsx']);
     $router->post('/contacts/store', [ContactController::class, 'store']);
     $router->get('/contacts/edit', [ContactController::class, 'edit']);
     $router->post('/contacts/update', [ContactController::class, 'update']);
-    $router->post('/contacts/delete', [ContactController::class, 'retire']);
-    $router->get('/kontakte/archiv', [ContactController::class, 'retiredList']);
-    $router->post('/contacts/wiederherstellen', [ContactController::class, 'restore']);
-    $router->post('/contacts/endgueltig-loeschen', [ContactController::class, 'purge']);
+    $router->post('/contacts/delete', [\App\Controllers\ContactArchiveController::class, 'retire']);
+    $router->get('/kontakte/archiv', [\App\Controllers\ContactArchiveController::class, 'retiredList']);
+    $router->post('/contacts/wiederherstellen', [\App\Controllers\ContactArchiveController::class, 'restore']);
+    $router->post('/contacts/endgueltig-loeschen', [\App\Controllers\ContactArchiveController::class, 'purge']);
     $router->post('/contacts/datencheck', [\App\Controllers\DataCheckController::class, 'createLink']);
     $router->post('/contacts/datencheck/widerrufen', [\App\Controllers\DataCheckController::class, 'revokeLink']);
-    $router->get('/kontakte/dubletten', [ContactController::class, 'duplicates']);
-    $router->post('/contacts/zusammenfuehren', [ContactController::class, 'merge']);
+    $router->get('/kontakte/dubletten', [\App\Controllers\ContactArchiveController::class, 'duplicates']);
+    $router->post('/contacts/zusammenfuehren', [\App\Controllers\ContactArchiveController::class, 'merge']);
     $router->post('/contacts/bulk-update', [ContactController::class, 'bulkUpdate']);
     $router->post('/contacts/gruppe-aus-auswahl', [ContactController::class, 'groupFromSelection']);
-    $router->get('/contacts/export', [ContactController::class, 'export']);
-    $router->get('/contacts/vcard', [ContactController::class, 'vcard']);
-    $router->post('/contacts/vcard', [ContactController::class, 'vcard']);
+    $router->get('/contacts/export', [\App\Controllers\ContactPortController::class, 'export']);
+    $router->get('/contacts/vcard', [\App\Controllers\ContactPortController::class, 'vcard']);
+    $router->post('/contacts/vcard', [\App\Controllers\ContactPortController::class, 'vcard']);
 
     $router->post('/categories/store', [CategoryController::class, 'store']);
     $router->post('/tags/store', [TagController::class, 'store']);
@@ -470,8 +489,8 @@ try {
     $router->post('/rundmail/liste-speichern', [MailController::class, 'saveRecipientList']);
     $router->post('/rundmail/liste-umbenennen', [MailController::class, 'renameRecipientList']);
     $router->post('/rundmail/liste-loeschen', [MailController::class, 'deleteRecipientList']);
-    $router->get('/vollstaendigkeit', [ContactController::class, 'completeness']);
-    $router->post('/vollstaendigkeit/teilen', [ContactController::class, 'shareCompleteness']);
+    $router->get('/vollstaendigkeit', [\App\Controllers\CompletenessController::class, 'index']);
+    $router->post('/vollstaendigkeit/teilen', [\App\Controllers\CompletenessController::class, 'share']);
 
     $router->get('/verwaltung/gruesse', [GreetingController::class, 'manage']);
     $router->post('/verwaltung/gruesse', [GreetingController::class, 'store']);
