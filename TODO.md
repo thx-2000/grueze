@@ -107,6 +107,14 @@ Vollständige Analyse: `docs/UX-REVIEW.md`. Entscheidungen:
 **Der UX-Review-Block ist damit weitgehend abgearbeitet** (A1–A2, B1–B4,
 C1/C3/C4). Rest siehe unten „lets discuss": Ansprache, Kommentare, Refactoring.
 
+**Nachtrag Navigation (v1.39.0, nach TH-Rückfrage 2026-09-04):** Seitenleiste
+entstaubt – „Nachricht schreiben" statt „Nachrichten", eigene Icons je
+Mail-Eintrag + für Gruppen. Hub: neue Gruppe „Protokolle & Verlauf" (Gesendete
+Nachrichten / Änderungsprotokoll / Versandprotokoll / Anmeldungen) aus „System"
+herausgelöst. Offener Feinschliff-Gedanke für später: entschärfte
+„bekannte/neue Quelle"-Anzeige statt roher IP; „Mein Eintrag" in der Rail für
+Verwalter tiefer einsortieren.
+
 ## Zur Entscheidung – „lets discuss" (2026-09-04, noch NICHT beauftragt)
 
 Themen, die TH zur Diskussion gestellt hat. Thema 4 (UX/IA-Review) ist

@@ -1,5 +1,6 @@
 <?php
-// Gruppierung: „Wer darf was" · „Was steht drin" · „Wie sieht es aus" · „Betrieb".
+// Gruppierung: „Wer darf was" · „Was steht drin" · „Wie sieht es aus" ·
+// „Protokolle & Verlauf" · „Betrieb".
 $groups = [
     'Zugänge & Rollen' => [
         ['users.manage', '/users', 'user', 'Zugänge', 'Zugänge anlegen, sperren, Passkeys zurücksetzen.'],
@@ -20,13 +21,15 @@ $groups = [
         ['settings.manage', '/settings/mail-footer', 'mail', 'Mail-Einstellungen', 'Absender, Mailserver, Betreff-Präfixe und Mail-Fuß.'],
         ['users.manage', '/admin/legal/impressum', 'sliders', 'Rechtliches', 'Impressum und Datenschutzerklärung bearbeiten.'],
     ],
+    'Protokolle & Verlauf' => [
+        ['mail.send', '/rundmail/verlauf', 'message-send', 'Gesendete Nachrichten', 'Frühere Rundmails ansehen und erneut verschicken.'],
+        ['audit.view', '/logs/audit', 'history', 'Änderungsprotokoll', 'Wer hat wann welchen Kontakt geändert.'],
+        ['mail.view_log', '/logs/mail', 'mail', 'Versandprotokoll', 'Welche Mails wurden verschickt, was schlug fehl.'],
+        ['users.manage', '/verwaltung/anmeldungen', 'login', 'Anmeldungen', 'Wer ist gerade online und wer hat sich wann angemeldet.'],
+    ],
     'System' => [
         ['users.manage', '/admin/aktualisieren', 'upload', 'Aktualisieren', 'Nach einem Upload die Datenbank auf den neuen Stand bringen.'],
         ['users.manage', '/admin/backup', 'archive', 'Datensicherung', 'Voll-Backup herunterladen oder wiederherstellen.'],
-        ['audit.view', '/logs/audit', 'history', 'Änderungsprotokoll', 'Wer hat wann welchen Kontakt geändert.'],
-        ['mail.view_log', '/logs/mail', 'mail', 'Versandprotokoll', 'Welche Mails wurden verschickt, was schlug fehl.'],
-        ['mail.send', '/rundmail/verlauf', 'mail', 'Gesendete Nachrichten', 'Frühere Rundmails ansehen und erneut verschicken.'],
-        ['users.manage', '/verwaltung/anmeldungen', 'login', 'Anmeldungen', 'Wer ist gerade online und wer hat sich wann angemeldet.'],
     ],
 ];
 ?>

@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.39.0
+
+**Navigation aufgeräumt – nichts entfernt, nur klarer sortiert.**
+
+- **Seitenleiste:** „Nachrichten" heißt jetzt „Nachricht schreiben"; die drei
+  Mail-Einträge (Schreiben / Erhaltene Mails / Orga-Team) haben jeweils ein
+  eigenes Icon, „Gruppen" ein eigenes. Kein doppelter Briefumschlag mehr.
+- **Einstellungen:** Neue Gruppe **„Protokolle & Verlauf"** – Gesendete
+  Nachrichten, Änderungsprotokoll, Versandprotokoll und Anmeldungen sind aus
+  „System" dorthin gewandert. „System" enthält jetzt nur noch Aktualisieren
+  und Datensicherung.
+- Keine Migration.
+
 ## 1.38.0
 
 **Datenschutz: IP-Adressen sparsamer.**
