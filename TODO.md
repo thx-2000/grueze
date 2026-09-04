@@ -78,6 +78,35 @@ Ideen, falls es weitergeht (kein Muss):
   (mit aufgelöster Anrede + Fuß) + „An mich senden". Keine Migration – nutzt
   `sent_mails.recipients` (JSON-`LIKE`-Suche auf `contact_id`).
 
+## Bilder & Galerie (Ideen, TH 2026-09-04 – noch nicht beauftragt)
+
+Zusammenhängendes Thema, in Stufen denkbar. „Out of Scope" bisher war nur
+Kontaktformular/Newsletter – Foto-Themen sind neu.
+
+- **Chat für Online-Nutzer:innen** – TH hält es selbst für unwahrscheinlich,
+  nur mitführen. (Wäre technisch der größte Brocken: Polling/SSE, Moderation,
+  Aufbewahrung/Datenschutz. Niedrige Prio.)
+- **Bilder-Upload, handy-zuerst** – eine Upload-Möglichkeit, die vor allem
+  vom Handy aus **sehr** leicht ist (Kamera/Fotos direkt, mehrere auf einmal,
+  kein Konto-Gefummel). Baut auf `UploadService` auf (MIME serverseitig, SVG
+  verboten, Zufallsnamen), braucht aber Mehrfach-Upload + größere Limits +
+  ggf. clientseitiges Verkleinern.
+- **Galerie / „Räume"** – z. B. pro Stufentreffen ein Raum, in den alle
+  Bilder hochladen und die dann alle ansehen/herunterladen können.
+  - **Auffangraum** für Uploads ohne Zuordnung → später einem Raum zuweisen
+    oder einen neuen Raum daraus erstellen.
+  - Direkt-Upload in einen bestehenden Raum ebenso möglich.
+- **Upload-Link zum Weitergeben** – Token-Link (wie Daten-Check /
+  Abstimmung), per Messenger/Mail/**QR-Code** teilbar oder aushängbar, über
+  den man ohne Login Bilder in einen (bestehenden oder Auffang-)Raum lädt.
+  QR-Code-Erzeugung müsste dazukommen (bislang nicht im Stack).
+
+Zu klären, falls es kommt: Speicherort/-budget (Fotos sind groß – Platte
+vs. externes Objekt-Storage), Rechte (wer sieht/lädt welchen Raum), EXIF/
+Geodaten strippen, Missbrauch/Moderation bei offenen Upload-Links,
+Aufbewahrung, Einbindung ins Backup (aktuell sichert `BackupService` nur
+`public/assets/uploads`).
+
 ## UX-Review – Umsetzung (Entscheidungen TH 2026-09-04)
 
 Vollständige Analyse: `docs/UX-REVIEW.md`. Entscheidungen:
