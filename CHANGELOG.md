@@ -3,6 +3,21 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.60.0
+
+**Update-Hinweis: GRUEZE sagt Bescheid, wenn eine neue Version da ist.**
+
+- **Versionsprüfung:** Einmal am Tag (gecacht, Standard alle 12 Stunden)
+  schaut GRUEZE bei GitHub nach, ob eine neuere Version veröffentlicht
+  wurde. Wenn ja, sehen Admins oben einen ruhigen Hinweisstreifen und auf
+  **Verwaltung → Aktualisieren** die Details mit Link zum Changelog.
+  Abschaltbar über `app.release_check` in der `config/config.php`; ohne
+  Internet oder bei GitHub-Störung passiert einfach nichts.
+- **Aktualisieren-Seite erklärt jetzt den ganzen Weg:** ein neuer Abschnitt
+  „So läuft ein Update" beschreibt Schritt für Schritt, wie man neue Dateien
+  einspielt, ohne Einstellungen oder Daten zu verlieren (`config/` und
+  `storage/` bleiben unberührt, Migrationen ergänzen nur).
+
 ## 1.59.0
 
 **Berechtigungs-Matrix: neue Rolle direkt dort anlegen, klarere Bereiche.**

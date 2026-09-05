@@ -201,6 +201,17 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                     <a class="button-link" href="<?= e(url('/admin/aktualisieren')) ?>">Jetzt aktualisieren</a>
                 </div>
             <?php endif; ?>
+            <?php
+            $newRelease = (!empty($currentUser) && can('users.manage') && $currentPath !== '/admin/aktualisieren')
+                ? system_update_available()
+                : null;
+            ?>
+            <?php if ($newRelease !== null): ?>
+                <div class="update-banner update-banner--info" role="status">
+                    <span><?= icon('sparkles') ?> Neue Version <strong>v<?= e($newRelease['latest']) ?></strong> ist verfügbar – ihr nutzt gerade v<?= e($newRelease['current']) ?>.</span>
+                    <a class="button-link" href="<?= e(url('/admin/aktualisieren')) ?>">Was ist neu?</a>
+                </div>
+            <?php endif; ?>
             <?php foreach ($flashes as $type => $message): ?>
                 <?php if ($message): ?>
                     <div class="flash flash-<?= e($type) ?>" role="<?= $type === 'error' ? 'alert' : 'status' ?>"><?= e($message) ?></div>

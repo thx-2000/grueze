@@ -2,6 +2,7 @@
 $appliedNames = array_column($applied, 'migration');
 $pendingCount = count($pendingMigrations);
 $installedLabel = $installedVersion !== null ? 'v' . $installedVersion : 'unbekannt';
+$release = $release ?? ['enabled' => false, 'available' => false, 'latest' => null, 'url' => '', 'published_at' => null, 'checked_at' => null];
 ?>
 <header class="page-head page-head--split">
     <div>
@@ -22,6 +23,36 @@ $installedLabel = $installedVersion !== null ? 'v' . $installedVersion : 'unbeka
         <span class="version-badge-to">v<?= e($codeVersion) ?></span>
     </span>
 </header>
+
+<?php if ($release['enabled'] && $release['available']): ?>
+    <section class="panel stack new-release-panel">
+        <div class="panel-head">
+            <div>
+                <h3><?= icon('sparkles') ?> Neue Version <?= e('v' . $release['latest']) ?> verfügbar</h3>
+                <p class="muted">
+                    Ihr nutzt gerade <strong>v<?= e($codeVersion) ?></strong>.
+                    <?php if ($release['published_at']): ?>
+                        Veröffentlicht am <?= e(format_date(substr((string) $release['published_at'], 0, 10))) ?>.
+                    <?php endif; ?>
+                </p>
+            </div>
+        </div>
+        <div class="toolbar-actions">
+            <a class="button-link" href="<?= e($release['url']) ?>" target="_blank" rel="noopener">
+                <?= icon('history') ?><span>Was ist neu? (Changelog auf GitHub)</span>
+            </a>
+        </div>
+        <p class="detail-hint">
+            Das Aktualisieren ist unten Schritt für Schritt beschrieben. Eure
+            Einstellungen und Daten bleiben dabei erhalten.
+        </p>
+    </section>
+<?php elseif ($release['enabled'] && $release['latest'] !== null): ?>
+    <p class="detail-hint">
+        <?= icon('check') ?> Ihr seid auf dem neuesten Stand (v<?= e($codeVersion) ?>).
+        <?php if ($release['checked_at']): ?>Zuletzt geprüft: <?= e(format_datetime($release['checked_at'])) ?>.<?php endif; ?>
+    </p>
+<?php endif; ?>
 
 <?php if ($locked): ?>
     <section class="panel">
@@ -71,6 +102,45 @@ $installedLabel = $installedVersion !== null ? 'v' . $installedVersion : 'unbeka
         </p>
     </section>
 <?php endif; ?>
+
+<section class="panel stack">
+    <div class="panel-head">
+        <div>
+            <h3>So läuft ein Update</h3>
+            <p class="muted">In drei Schritten – Einstellungen, Kontakte, Medien und Dokumente bleiben dabei unangetastet.</p>
+        </div>
+    </div>
+    <ol class="update-steps">
+        <li>
+            <strong>Neue Dateien holen.</strong>
+            Die aktuelle Version gibt es auf GitHub unter
+            <a href="https://github.com/thx-2000/grueze/releases/latest" target="_blank" rel="noopener">Releases</a>
+            (ZIP „Source code") – oder per <code>git pull</code> im Projektordner.
+        </li>
+        <li>
+            <strong>Auf den Server laden.</strong>
+            Am einfachsten mit <code>bash scripts/deploy.sh</code>. Wer die Dateien
+            von Hand per FTP hochlädt, lässt dabei die Ordner
+            <code>config/</code> und <code>storage/</code> unberührt – dort liegen
+            Zugangsdaten, der Verschlüsselungs-Schlüssel und alle hochgeladenen
+            Dateien. Der Rest darf überschrieben werden.
+        </li>
+        <li>
+            <strong>Hier auf „Jetzt aktualisieren" klicken.</strong>
+            Der Haken „Vorher eine Datensicherung anlegen" bleibt am besten
+            gesetzt. Offene Datenbank-Migrationen laufen dann der Reihe nach –
+            sie <strong>ergänzen</strong> die Datenbank nur (neue Spalten,
+            neue Tabellen), es wird nie etwas gelöscht oder geleert.
+        </li>
+    </ol>
+    <p class="detail-hint">
+        Zwischen dem Hochladen und diesem Klick kann die Seite kurz einen Fehler
+        zeigen, falls neuer Code auf eine noch fehlende Spalte trifft – nach dem
+        Update ist das weg. Wer den Klick sparen will, setzt
+        <code>app.auto_migrate</code> in der <code>config/config.php</code> auf
+        <code>true</code>; dann laufen Migrationen beim ersten Aufruf von selbst.
+    </p>
+</section>
 
 <?php if (trim($changelog) !== ''): ?>
     <section class="panel">

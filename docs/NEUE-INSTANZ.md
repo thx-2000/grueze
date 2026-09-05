@@ -118,6 +118,12 @@ Ein neuer Upload darf vorhandene Daten nie überschreiben. Instanzspezifische
 Werte liegen in `app_settings` (Branding, Rechtstexte, Mail-Vorlagen) und in
 `config/config.php` – beide werden vom Deploy nicht angefasst.
 
+GRUEZE prüft dezent gegen GitHub, ob eine neuere Version veröffentlicht wurde
+(gecacht, Standard alle 12 h – `app.release_check` / `app.release_check_ttl_hours`
+in der config, `false` schaltet es ab). Gibt es eine, sehen Admins oben einen
+Hinweisstreifen und auf **Verwaltung → Aktualisieren** die Details samt
+Schritt-für-Schritt-Anleitung.
+
 Ablauf:
 
 1. Neue Dateien hochladen (`bash scripts/deploy.sh` oder per FTP; `config/config.php`

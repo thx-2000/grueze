@@ -159,10 +159,14 @@ try {
         Container::get(MigrationService::class),
         Container::get(BackupService::class)
     ));
+    Container::factory(\App\Services\ReleaseCheckService::class, static fn () => new \App\Services\ReleaseCheckService(
+        Container::get(SettingRepository::class)
+    ));
     Container::factory(AdminController::class, static fn () => new AdminController(
         Container::get(Auth::class),
         Container::get(MigrationService::class),
-        Container::get(UpdateService::class)
+        Container::get(UpdateService::class),
+        Container::get(\App\Services\ReleaseCheckService::class)
     ));
     Container::factory(BackupController::class, static fn () => new BackupController(
         Container::get(Auth::class),

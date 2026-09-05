@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Csrf;
 use App\Core\Request;
 use App\Services\MigrationService;
+use App\Services\ReleaseCheckService;
 use App\Services\UpdateService;
 use App\Support\Redirect;
 
@@ -16,6 +17,7 @@ final class AdminController extends BaseController
         \App\Core\Auth $auth,
         private MigrationService $migrations,
         private UpdateService $updates,
+        private ReleaseCheckService $releases,
     ) {
         parent::__construct($auth);
     }
@@ -27,6 +29,10 @@ final class AdminController extends BaseController
             throw new \RuntimeException('Für diesen Bereich fehlt die Berechtigung.');
         }
 
+        if (can('users.manage')) {
+            $this->releases->refresh();
+        }
+
         $this->render('admin/hub', []);
     }
 
@@ -34,6 +40,7 @@ final class AdminController extends BaseController
     {
         $this->requirePermission('users.manage');
         $this->updates->syncVersionIfClean();
+        $this->releases->refresh();
 
         $this->render('admin/update', [
             'installedVersion' => $this->updates->installedVersion(),
@@ -44,6 +51,7 @@ final class AdminController extends BaseController
             'applied' => $this->migrations->applied(),
             'locked' => $this->updates->locked(),
             'changelog' => $this->updates->changelogExcerpt(),
+            'release' => $this->releases->status(),
         ]);
     }
 

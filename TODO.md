@@ -5,6 +5,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Update-Hinweis (TH-Wunsch 2026-09-05):** erledigt v1.60.0. `ReleaseCheckService`
+  fragt gecacht (Standard 12 h, `app.release_check`/`_ttl_hours`) die
+  GitHub-Releases-API ab; bei neuerer Version Hinweisstreifen im Layout +
+  Karte auf `/admin/aktualisieren`. Dort neuer Abschnitt „So läuft ein
+  Update" (Datei-Upload ohne `config/`+`storage/` zu überschreiben,
+  Migrationen ergänzen nur). Cache-only `status()` fürs Layout,
+  `refresh()` nur auf Aktualisieren-Seite + Hub.
 - **Gruppen (Stufen A–E + Nachträge):** A v1.1.0, B v1.2.0, C v1.3.0, D v1.4.0,
   E (Terminfindung + Gruppenleitung) v1.5.0, Beitrittsanfragen v1.6.0,
   Adressbuch-Verzahnung (Gruppen-Spalte/-Filter, Tags/Gruppen sortierbar,

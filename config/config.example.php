@@ -17,6 +17,13 @@ return [
         // aus: im Normalfall macht das ein Admin bewusst über
         // "Verwaltung → Aktualisieren" (dort mit optionaler Vorab-Sicherung).
         'auto_migrate' => false,
+        // Dezente Prüfung gegen die GitHub-API, ob eine neuere GRUEZE-Version
+        // veröffentlicht wurde. Ergebnis wird gecacht (siehe TTL unten), also
+        // höchstens ~2 Abrufe/Tag. Admins sehen dann oben einen Hinweisstreifen
+        // und auf "Verwaltung → Aktualisieren" die Details. false schaltet die
+        // Prüfung ganz ab (dann kein ausgehender Verbindungsaufbau).
+        'release_check' => true,
+        'release_check_ttl_hours' => 12,
         // Geheimer Schlüssel für den Cron-Endpunkt /intern/cron. Nur mit diesem
         // Schlüssel läuft die Abstimmungs-Automatik (Fristen schließen,
         // Erinnerungen, Ergebnis-Mails) verlässlich. Beliebige lange

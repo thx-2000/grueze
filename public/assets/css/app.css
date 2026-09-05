@@ -1448,6 +1448,39 @@ td {
     gap: 0.45rem;
 }
 
+/* „Neue Version verfügbar" – ruhiger als der gelbe Migrations-Hinweis. */
+.update-banner--info {
+    background: var(--color-highlight);
+    border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+.update-banner + .update-banner { margin-top: 0.6rem; }
+
+.new-release-panel {
+    border-left: 3px solid var(--color-primary);
+}
+.new-release-panel h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.new-release-panel h3 .icon { width: 1.05rem; height: 1.05rem; }
+
+.update-steps {
+    margin: 0;
+    padding-left: 1.3rem;
+    display: grid;
+    gap: 0.9rem;
+    line-height: 1.6;
+}
+.update-steps li { padding-left: 0.2rem; }
+.update-steps code {
+    font-size: 0.9em;
+    background: var(--surface-sunken);
+    border: 1px solid var(--edge-hairline);
+    border-radius: 4px;
+    padding: 0.05rem 0.3rem;
+}
+
 .update-banner .button-link {
     padding: 0.5rem 0.9rem;
     flex: 0 0 auto;

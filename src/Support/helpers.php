@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.59.0';
+    return '1.60.0';
 }
 
 /**
@@ -526,6 +526,24 @@ function system_update_pending(): bool
         return App\Core\Container::get(App\Services\UpdateService::class)->updatePending();
     } catch (Throwable) {
         return false;
+    }
+}
+
+/**
+ * Gibt es eine neuere veröffentlichte GRUEZE-Version als die laufende? Liefert
+ * den zuletzt bekannten (gecachten) Prüf-Stand oder null. Reiner Cache-Zugriff,
+ * kein Netzwerk – für den Admin-Hinweisstreifen im Layout. Fehler geschluckt.
+ *
+ * @return array<string,mixed>|null
+ */
+function system_update_available(): ?array
+{
+    try {
+        $status = App\Core\Container::get(App\Services\ReleaseCheckService::class)->status();
+
+        return ($status['enabled'] && $status['available']) ? $status : null;
+    } catch (Throwable) {
+        return null;
     }
 }
 
