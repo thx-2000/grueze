@@ -157,7 +157,7 @@ $todayLong = $weekdays[(int) $now->format('w')] . ', ' . (int) $now->format('j')
             <?php foreach ($birthdays as $b): ?>
                 <li>
                     <a href="<?= e(url(can('contacts.manage') ? '/contacts/edit?id=' . $b['id'] : '/kontakte?q=' . rawurlencode($b['vorname'] . ' ' . $b['nachname']))) ?>">
-                        <span class="start-widget-main"><?= e(trim($b['vorname'] . ' ' . $b['nachname'])) ?></span>
+                        <span class="start-widget-main"><?= contact_avatar($b, 'sm') ?><span><?= e(trim($b['vorname'] . ' ' . $b['nachname'])) ?></span></span>
                         <span class="start-widget-meta">
                             <?php if ($b['in_days'] === 0): ?><strong>heute</strong>
                             <?php elseif ($b['in_days'] === 1): ?>morgen

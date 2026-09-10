@@ -56,7 +56,7 @@ final class GroupRepository
     {
         $stmt = $this->pdo->prepare(
             'SELECT m.contact_id, m.role, m.added_at,
-                    c.vorname, c.nachname,
+                    c.vorname, c.nachname, c.photo_path,
                     (SELECT email FROM contact_emails ce WHERE ce.contact_id = c.id ORDER BY ce.id LIMIT 1) AS email
              FROM contact_group_members m
              JOIN contacts c ON c.id = m.contact_id

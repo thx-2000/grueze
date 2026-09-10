@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.62.1';
+    return '1.63.0';
 }
 
 /**
@@ -886,6 +886,44 @@ function format_birth_name(array $contact): string
     }
 
     return '(ehem. ' . $geburtsname . ')';
+}
+
+/**
+ * Anzeige-Initiale für einen Personen-Datensatz: der Nachname, sonst der
+ * Vorname, sonst „?". Bei „Vorname Nachname" in einem Feld das letzte Wort.
+ *
+ * @param array<string,mixed> $person
+ */
+function person_initial(array $person): string
+{
+    $surname = trim((string) ($person['nachname'] ?? ''));
+    if ($surname === '') {
+        $whole = trim((string) ($person['name'] ?? $person['display_name'] ?? ''));
+        $parts = $whole !== '' ? (preg_split('/\s+/', $whole, -1, PREG_SPLIT_NO_EMPTY) ?: []) : [];
+        $surname = $parts !== [] ? (string) end($parts) : trim((string) ($person['vorname'] ?? ''));
+    }
+
+    return $surname !== '' ? mb_strtoupper(mb_substr($surname, 0, 1)) : '?';
+}
+
+/**
+ * Rundes Avatar: das hinterlegte Profilbild (`photo_path`), sonst ein Kreis
+ * mit der Namens-Initiale. `$size`: sm | md | lg.
+ *
+ * @param array<string,mixed> $contact
+ */
+function contact_avatar(array $contact, string $size = 'md'): string
+{
+    $size = in_array($size, ['sm', 'md', 'lg'], true) ? $size : 'md';
+    $photo = trim((string) ($contact['photo_path'] ?? ''));
+
+    if ($photo !== '') {
+        return '<span class="avatar avatar--' . $size . '">'
+            . '<img src="' . e(asset_url('/' . ltrim($photo, '/'))) . '" alt="" loading="lazy"></span>';
+    }
+
+    return '<span class="avatar avatar--' . $size . ' avatar--initial" aria-hidden="true">'
+        . e(person_initial($contact)) . '</span>';
 }
 
 /** Anzeigetext einer Termin-Antwortoption: Datum (+ Uhrzeit) oder Freitext-Label. */

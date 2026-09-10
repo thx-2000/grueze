@@ -634,6 +634,7 @@ try {
     $router->get('/users', [UserController::class, 'index']);
     $router->get('/account', [UserController::class, 'account']);
     $router->post('/mein-eintrag', [ContactController::class, 'updateOwnProfile']);
+    $router->post('/mein-eintrag/foto', [ContactController::class, 'updateOwnPhoto']);
     $router->get('/orga-team', [OrgaController::class, 'form']);
     $router->post('/orga-team', [OrgaController::class, 'send']);
     $router->post('/account/password', [UserController::class, 'updateOwnPassword']);

@@ -70,7 +70,9 @@ $actionLabel = static fn (string $a): string => match ($a) {
 ?>
 <p class="detail-backlink"><a href="<?= e(url('/kontakte')) ?>"><?= icon('chevron-right') ?>Zurück zum Adressbuch</a></p>
 
-<header class="contact-detail-head">
+<header class="contact-detail-head<?= $editing ? ' contact-detail-head--avatar' : '' ?>">
+    <?php if ($editing): ?><?= contact_avatar($contact, 'lg') ?><?php endif; ?>
+    <div class="contact-detail-head-main">
     <p class="eyebrow"><?= $editing ? 'Kontakt' : 'Neuer Kontakt' ?></p>
     <h1><?= $fullName !== '' ? e($fullName) : 'Kontakt anlegen' ?><?php if ($editing && ($bn = format_birth_name($contact)) !== ''): ?>
         <span class="birth-name-inline"><?= e($bn) ?></span>
@@ -94,6 +96,7 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <?php endif; ?>
         </div>
     <?php endif; ?>
+    </div>
 </header>
 
 <form method="post" action="<?= e(url($editing ? '/contacts/update' : '/contacts/store')) ?>" enctype="multipart/form-data" class="contact-detail-form" data-detail-form>
@@ -155,8 +158,14 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <label class="full-width">
                 <span>Profilbild</span>
                 <input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp" aria-describedby="photoHint">
-                <small class="field-hint" id="photoHint">JPG, PNG oder WEBP bis 2 MB.<?php if ($editing && !empty($contact['photo_path'])): ?> Aktuell ist ein Bild hinterlegt – ein neues ersetzt es.<?php endif; ?></small>
+                <small class="field-hint" id="photoHint">JPG, PNG oder WEBP bis 2 MB. Wird im Adressbuch, in Listen und auf der Startseite neben dem Namen gezeigt.<?php if ($editing && !empty($contact['photo_path'])): ?> Ein neues Bild ersetzt das aktuelle.<?php endif; ?></small>
             </label>
+            <?php if ($editing && !empty($contact['photo_path'])): ?>
+                <div class="full-width photo-field-current">
+                    <?= contact_avatar($contact, 'md') ?>
+                    <label class="inline-toggle"><input type="checkbox" name="photo_remove" value="1"><span>Aktuelles Bild entfernen</span></label>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 

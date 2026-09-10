@@ -15,7 +15,8 @@ final class UserRepository
     public function findByEmail(string $email): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname
+            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname,
+                    contacts.photo_path AS contact_photo_path
              FROM users
              JOIN roles ON roles.id = users.role_id
              LEFT JOIN contacts ON contacts.id = users.contact_id
@@ -29,7 +30,8 @@ final class UserRepository
     public function findById(int $id): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname
+            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname,
+                    contacts.photo_path AS contact_photo_path
              FROM users
              JOIN roles ON roles.id = users.role_id
              LEFT JOIN contacts ON contacts.id = users.contact_id
@@ -43,7 +45,8 @@ final class UserRepository
     public function all(): array
     {
         $rows = $this->pdo->query(
-            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname
+            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname,
+                    contacts.photo_path AS contact_photo_path
              FROM users
              JOIN roles ON roles.id = users.role_id
              LEFT JOIN contacts ON contacts.id = users.contact_id
@@ -82,7 +85,8 @@ final class UserRepository
     {
         $term = '%' . trim($query) . '%';
         $stmt = $this->pdo->prepare(
-            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname
+            'SELECT users.*, roles.name AS role_name, contacts.vorname, contacts.nachname,
+                    contacts.photo_path AS contact_photo_path
              FROM users
              JOIN roles ON roles.id = users.role_id
              LEFT JOIN contacts ON contacts.id = users.contact_id

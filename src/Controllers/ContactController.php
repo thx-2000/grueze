@@ -192,7 +192,9 @@ final class ContactController extends BaseController
             $_SESSION['_old'] = $request->all();
             Redirect::to('/contacts/edit?id=' . $id);
         }
-        $data['photo_path'] = $this->uploads->storePhoto($request->file('photo'), $existing['photo_path']);
+        $data['photo_path'] = $request->input('photo_remove')
+            ? null
+            : $this->uploads->storePhoto($request->file('photo'), $existing['photo_path']);
         $this->contacts->update($id, $data, (int) $this->auth->user()['id']);
         $accountMessage = $this->linkedAccounts->sync($id, $data);
         $changes = ContactDiff::describe($existing, $data, $this->categories->all(), $this->tags->all());
@@ -247,6 +249,49 @@ final class ContactController extends BaseController
             : 'Selbst gepflegt: ' . implode(', ', array_keys($changes)) . '.';
         $this->logs->addAudit((int) $user['id'], $contactId, 'updated', $summary, $changes);
         flash('success', 'Deine Angaben wurden gespeichert – danke fürs Aktuell-Halten.');
+        Redirect::to('/account');
+    }
+
+    /**
+     * Selbst-Service: eigenes Profilbild hochladen oder entfernen. Anders als der
+     * Rest von „Mein Eintrag" braucht das keine Feld-Sichtbarkeit – jede
+     * angemeldete Person mit verknüpftem Kontakt darf ihr eigenes Bild pflegen.
+     */
+    public function updateOwnPhoto(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+
+        $user = $this->auth->user();
+        $contactId = (int) ($user['contact_id'] ?? 0);
+        $existing = $contactId > 0 ? $this->contacts->find($contactId) : null;
+        if (!$existing) {
+            flash('error', 'Für dich ist noch kein Eintrag im Adressbuch verknüpft.');
+            Redirect::to('/account');
+        }
+
+        if ($request->input('photo_remove')) {
+            $this->contacts->setPhoto($contactId, null, (int) $user['id']);
+            $this->logs->addAudit((int) $user['id'], $contactId, 'updated', 'Eigenes Profilbild entfernt.');
+            flash('success', 'Dein Foto wurde entfernt.');
+            Redirect::to('/account');
+        }
+
+        try {
+            $path = $this->uploads->storePhoto($request->file('photo'), $existing['photo_path'] ?: null);
+        } catch (\RuntimeException $e) {
+            flash('error', $e->getMessage());
+            Redirect::to('/account');
+        }
+
+        if ($path === ($existing['photo_path'] ?: null)) {
+            flash('error', 'Bitte zuerst ein Bild auswählen.');
+            Redirect::to('/account');
+        }
+
+        $this->contacts->setPhoto($contactId, $path, (int) $user['id']);
+        $this->logs->addAudit((int) $user['id'], $contactId, 'updated', 'Eigenes Profilbild aktualisiert.');
+        flash('success', 'Dein Foto wurde gespeichert.');
         Redirect::to('/account');
     }
 

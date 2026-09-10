@@ -39,11 +39,14 @@
                         </label>
                     </td>
                     <td>
-                        <div class="contact-name-cell">
-                            <strong><?= e(trim($contact['vorname'] . ' ' . $contact['nachname'])) ?></strong>
-                            <?php if (($bn = format_birth_name($contact)) !== ''): ?>
-                                <span class="birth-name-inline"><?= e($bn) ?></span>
-                            <?php endif; ?>
+                        <div class="contact-name-cell contact-name-cell--avatar">
+                            <?= contact_avatar($contact, 'sm') ?>
+                            <div>
+                                <strong><?= e(trim($contact['vorname'] . ' ' . $contact['nachname'])) ?></strong>
+                                <?php if (($bn = format_birth_name($contact)) !== ''): ?>
+                                    <span class="birth-name-inline"><?= e($bn) ?></span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </td>
                     <td><span class="table-pill"><?= e($contact['category_name'] ?: '—') ?></span></td>

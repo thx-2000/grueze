@@ -3,6 +3,24 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.63.0
+
+**Profilbilder werden jetzt überall angezeigt.**
+
+- Bisher ließ sich ein Profilbild zwar hochladen, aber man sah es nirgends
+  (außer auf der Gedenkseite). Jetzt erscheint es – oder ersatzweise ein
+  Kreis mit dem Anfangsbuchstaben des Nachnamens – **im Adressbuch (Tabelle
+  und Karten), auf der Kontaktseite, in „Mein Eintrag", in Gruppen-
+  Mitgliederlisten, bei den Geburtstagen auf der Startseite** und oben
+  links neben dem eigenen Namen.
+- **„Mein Eintrag" hat jetzt einen eigenen Bereich „Dein Foto"** – jede
+  angemeldete Person kann ihr eigenes Bild hochladen oder entfernen, auch
+  ohne Bearbeitungsrechte am restlichen Eintrag.
+- Im Kontaktformular zeigt das Feld „Profilbild" das aktuelle Bild mit einer
+  Option **„Aktuelles Bild entfernen"**.
+
+Keine Datenbank-Änderung.
+
 ## 1.62.1
 
 **In Memoriam: kleine Korrekturen.**

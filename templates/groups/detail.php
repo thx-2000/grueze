@@ -86,6 +86,7 @@ ksort($byCategory);
                 <?php $isLead = ($member['role'] ?? 'member') === 'lead'; ?>
                 <li>
                     <span class="group-member-name">
+                        <?= contact_avatar($member, 'sm') ?>
                         <?= e(trim($member['vorname'] . ' ' . $member['nachname'])) ?>
                         <?php if ($isLead): ?><span class="events-status is-open">Leitung</span><?php endif; ?>
                         <?php if (trim((string) ($member['email'] ?? '')) === ''): ?><span class="status-chip is-warn">keine Mail</span><?php endif; ?>

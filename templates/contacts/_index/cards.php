@@ -19,13 +19,16 @@
                 <span aria-hidden="true">Auswählen</span>
             </label>
             <div class="contact-head">
-                <div class="contact-title-row">
-                    <h3><?= e(trim($contact['vorname'] . ' ' . $contact['nachname'])) ?></h3>
-                    <?php if (($bn = format_birth_name($contact)) !== ''): ?>
-                        <span class="birth-name-inline"><?= e($bn) ?></span>
-                    <?php endif; ?>
+                <?= contact_avatar($contact, 'sm') ?>
+                <div class="contact-head-main">
+                    <div class="contact-title-row">
+                        <h3><?= e(trim($contact['vorname'] . ' ' . $contact['nachname'])) ?></h3>
+                        <?php if (($bn = format_birth_name($contact)) !== ''): ?>
+                            <span class="birth-name-inline"><?= e($bn) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <span class="tag"><?= e($contact['category_name'] ?: '—') ?></span>
                 </div>
-                <span class="tag"><?= e($contact['category_name'] ?: '—') ?></span>
             </div>
 
             <?= $renderChips($statusChips($contact)) ?>

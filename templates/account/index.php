@@ -40,6 +40,29 @@ foreach ($phones as $i => $entry) {
     <p class="muted">Deine eigenen Angaben, offene Abstimmungen und dein Zugang – an einem Ort. <a href="<?= e(url('/hilfe/mitglied.html')) ?>" target="_blank" rel="noopener">Kurzanleitung</a>.</p>
 </header>
 
+<?php if ($ownContact !== null): ?>
+    <section class="detail-card">
+        <h2>Dein Foto</h2>
+        <div class="photo-self">
+            <?= contact_avatar($ownContact, 'lg') ?>
+            <form method="post" action="<?= e(url('/mein-eintrag/foto')) ?>" enctype="multipart/form-data" class="photo-self-form">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <label>
+                    <span>Neues Bild</span>
+                    <input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp" required>
+                </label>
+                <p class="field-hint">JPG, PNG oder WEBP bis 2 MB. Wird im Adressbuch und in Listen neben deinem Namen gezeigt.</p>
+                <div class="form-actions">
+                    <button type="submit"><?= icon('check') ?><span>Bild speichern</span></button>
+                    <?php if (!empty($ownContact['photo_path'])): ?>
+                        <button type="submit" name="photo_remove" value="1" formnovalidate class="ghost-button"><?= icon('trash') ?><span>Bild entfernen</span></button>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </section>
+<?php endif; ?>
+
 <?php if ($ownContact !== null && $canEditOwn): ?>
     <form method="post" action="<?= e(url('/mein-eintrag')) ?>" class="contact-detail-form" data-detail-form>
         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">

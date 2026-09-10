@@ -21,16 +21,19 @@ if ($ownContact === null || !in_array(true, $ownFields, true)) {
 ?>
 <section class="panel">
     <div class="panel-head">
-        <div>
-            <h2>Deine Kontaktdaten</h2>
-            <p class="muted">
-                Das ist bei uns zu dir hinterlegt.
-                <?php if ($canManage): ?>
-                    <a href="<?= e(url('/contacts/edit?id=' . (int) $ownContact['id'])) ?>">Bearbeiten</a>.
-                <?php elseif ($supportEmail !== ''): ?>
-                    Stimmt etwas nicht? Melde dich bei <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>.
-                <?php endif; ?>
-            </p>
+        <div class="own-contact-head">
+            <?= contact_avatar($ownContact, 'md') ?>
+            <div>
+                <h2>Deine Kontaktdaten</h2>
+                <p class="muted">
+                    Das ist bei uns zu dir hinterlegt.
+                    <?php if ($canManage): ?>
+                        <a href="<?= e(url('/contacts/edit?id=' . (int) $ownContact['id'])) ?>">Bearbeiten</a>.
+                    <?php elseif ($supportEmail !== ''): ?>
+                        Stimmt etwas nicht? Melde dich bei <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>.
+                    <?php endif; ?>
+                </p>
+            </div>
         </div>
     </div>
     <dl class="own-contact-list is-guarded">

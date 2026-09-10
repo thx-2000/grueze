@@ -5,6 +5,19 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Profilbilder sichtbar (TH-Frage 2026-09-10):** erledigt v1.63.0. `photo_path`
+  war seit jeher speicherbar, wurde aber nur auf der Gedenkseite angezeigt.
+  Neuer Helper `contact_avatar()` / `person_initial()` (Nachname-Initiale als
+  Fallback), CSS `.avatar--sm|md|lg`. Angezeigt in: Kontakt-Tabelle + -Karten,
+  Detail-Kopf + Formular-Vorschau (+ „Bild entfernen"), „Mein Eintrag"
+  (eigener Bereich „Dein Foto" mit Self-Upload/-Remove → neue Route
+  `POST /mein-eintrag/foto` → `ContactController::updateOwnPhoto`,
+  `ContactRepository::setPhoto()`), „Deine Kontaktdaten"-Panel, Gruppen-
+  Mitglieder (`GroupRepository::membersOf` + `c.photo_path`), Startseite-
+  Geburtstage (`upcomingBirthdays` + `photo_path`), Rail-Chip oben links
+  (`UserRepository::findById`/`all` + `contact_photo_path`). Keine Migration.
+  Kein Foto-GC (wie bei Memorials – Datei bleibt, nur `photo_path` wird NULL).
+
 - **In Memoriam (TH-Wunsch 2026-09-10):** erledigt v1.61.0. Gedenkseite
   `/memoriam`, Recht `memorials.manage` (Standard orga). Zwei Quellen:
   `contacts.deceased_at` (aus einem Kontakt, fällt aus LIVE/Mailing/

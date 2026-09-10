@@ -695,6 +695,98 @@ h1, h2, h3, h4 {
     margin: 0;
 }
 
+/* Avatar – Profilbild oder Namens-Initiale, überall wo Personen gelistet sind. */
+.avatar {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--surface-sunken);
+    color: var(--color-muted);
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar--sm { width: 1.9rem; height: 1.9rem; font-size: 0.78rem; }
+.avatar--md { width: 2.75rem; height: 2.75rem; font-size: 1.05rem; }
+.avatar--lg { width: 4.5rem; height: 4.5rem; font-size: 1.7rem; }
+
+.contact-name-cell--avatar {
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.contact-name-cell--avatar > div {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.contact-head-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.56rem;
+}
+
+.contact-detail-head-main {
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.contact-detail-head--avatar {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.contact-detail-head--avatar .contact-detail-head-main {
+    flex: 1 1 auto;
+}
+
+/* „Mein Eintrag" – Foto neben dem Upload-Formular. */
+.photo-self {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.photo-self-form {
+    flex: 1 1 16rem;
+    display: grid;
+    gap: 0.6rem;
+}
+
+.photo-field-current {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.own-contact-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
 .table-pill {
     display: inline-flex;
     align-items: center;
@@ -3500,10 +3592,12 @@ body { display: block; }
 .rail-me-ava {
     width: 34px; height: 34px; border-radius: 999px; flex: none;
     display: grid; place-items: center;
+    overflow: hidden;
     background: var(--color-highlight);
     color: var(--color-primary);
     font-weight: 700; font-size: 0.82rem;
 }
+.rail-me-ava img { width: 100%; height: 100%; object-fit: cover; }
 .rail-me-text { display: grid; line-height: 1.3; min-width: 0; }
 .rail-me-text strong { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rail-me-text span { font-size: 0.74rem; color: var(--color-muted); }

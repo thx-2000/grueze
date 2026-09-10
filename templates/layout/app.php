@@ -95,7 +95,7 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
             </a>
 
             <a class="rail-me<?= $onAccount ? ' is-active' : '' ?>" href="<?= e(url('/account')) ?>">
-                <span class="rail-me-ava" aria-hidden="true"><?= e($navInitials) ?></span>
+                <span class="rail-me-ava" aria-hidden="true"><?php if (!empty($currentUser['contact_photo_path'])): ?><img src="<?= e(asset_url('/' . ltrim((string) $currentUser['contact_photo_path'], '/'))) ?>" alt=""><?php else: ?><?= e($navInitials) ?><?php endif; ?></span>
                 <span class="rail-me-text">
                     <strong><?= e($currentUser['name']) ?></strong>
                     <span>Mein Eintrag</span>

@@ -343,7 +343,7 @@ final class ContactRepository
     public function upcomingBirthdays(int $days = 7): array
     {
         $rows = $this->pdo->query(
-            'SELECT id, vorname, nachname, geburtstag
+            'SELECT id, vorname, nachname, geburtstag, photo_path
              FROM contacts
              WHERE geburtstag IS NOT NULL
                AND archived_at IS NULL AND deleted_at IS NULL AND deceased_at IS NULL'
@@ -364,6 +364,7 @@ final class ContactRepository
                 'vorname' => (string) $row['vorname'],
                 'nachname' => (string) $row['nachname'],
                 'geburtstag' => (string) $row['geburtstag'],
+                'photo_path' => $row['photo_path'] !== null ? (string) $row['photo_path'] : null,
                 'in_days' => $countdown,
                 'turning' => $turning,
             ];
@@ -556,6 +557,15 @@ final class ContactRepository
         $this->syncEmails($id, $data['emails'] ?? []);
         $this->syncPhones($id, $data['phones'] ?? []);
         $this->syncTags($id, $data['tag_ids'] ?? []);
+    }
+
+    /** Nur das Profilbild setzen/entfernen – ohne die übrigen Felder anzufassen. */
+    public function setPhoto(int $id, ?string $path, int $userId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE contacts SET photo_path = :path, updated_by = :uid WHERE id = :id'
+        );
+        $stmt->execute(['path' => $path ?: null, 'uid' => $userId, 'id' => $id]);
     }
 
     // Dubletten-Finder und Zusammenführen liegen in App\Services\ContactMergeService.
