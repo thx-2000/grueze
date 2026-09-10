@@ -3,6 +3,15 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.63.1
+
+**Platzhalter jetzt mit zwei Initialen.**
+
+- Ohne Profilbild zeigt der Kreis jetzt **Vor- und Nachname** („AR" für Achim
+  Reinhardt) statt nur einem Buchstaben. Namenszusätze wie „von" oder
+  „de la" werden übersprungen: „Anna Groth de la Fuentes" → „AG", „Klara
+  von Stein" → „KS". Titel wie „Dr." zählen nicht als Vorname.
+
 ## 1.63.0
 
 **Profilbilder werden jetzt überall angezeigt.**

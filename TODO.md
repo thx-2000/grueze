@@ -17,6 +17,9 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   Geburtstage (`upcomingBirthdays` + `photo_path`), Rail-Chip oben links
   (`UserRepository::findById`/`all` + `contact_photo_path`). Keine Migration.
   Kein Foto-GC (wie bei Memorials – Datei bleibt, nur `photo_path` wird NULL).
+  v1.63.1: `person_initial()` → `person_initials()` – Vorname+Nachname („AR"),
+  Kleinschreib-Namenszusätze + Titel („Dr.") werden übersprungen. Gedenkseite
+  nutzt denselben Helper.
 
 - **In Memoriam (TH-Wunsch 2026-09-10):** erledigt v1.61.0. Gedenkseite
   `/memoriam`, Recht `memorials.manage` (Standard orga). Zwei Quellen:

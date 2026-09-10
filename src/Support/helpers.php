@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.63.0';
+    return '1.63.1';
 }
 
 /**
@@ -889,21 +889,49 @@ function format_birth_name(array $contact): string
 }
 
 /**
- * Anzeige-Initiale für einen Personen-Datensatz: der Nachname, sonst der
- * Vorname, sonst „?". Bei „Vorname Nachname" in einem Feld das letzte Wort.
+ * Anzeige-Initialen für einen Personen-Datensatz: Vorname + Nachname („AR" für
+ * „Achim Reinhardt"). Ein einzelner Name gibt einen Buchstaben, gar kein Name
+ * „?". Klein geschriebene Namenszusätze (von, de la …) werden für den
+ * Nachnamen-Buchstaben übersprungen: „Anna Groth de la Fuentes" → „AG",
+ * „Klara von Stein" → „KS".
+ *
+ * Erkennt entweder getrennte Felder (`vorname`/`nachname`) oder einen ganzen
+ * Namen (`name`/`display_name`).
  *
  * @param array<string,mixed> $person
  */
-function person_initial(array $person): string
+function person_initials(array $person): string
 {
-    $surname = trim((string) ($person['nachname'] ?? ''));
-    if ($surname === '') {
+    $first = trim((string) ($person['vorname'] ?? ''));
+    $last = trim((string) ($person['nachname'] ?? ''));
+
+    if ($first === '' && $last === '') {
         $whole = trim((string) ($person['name'] ?? $person['display_name'] ?? ''));
         $parts = $whole !== '' ? (preg_split('/\s+/', $whole, -1, PREG_SPLIT_NO_EMPTY) ?: []) : [];
-        $surname = $parts !== [] ? (string) end($parts) : trim((string) ($person['vorname'] ?? ''));
+        // Führende Titel wie „Dr." / „Prof." nicht als Vornamen zählen.
+        while (count($parts) > 1 && str_ends_with($parts[0], '.')) {
+            array_shift($parts);
+        }
+        if (count($parts) === 1) {
+            $first = $parts[0];
+        } elseif ($parts !== []) {
+            $first = array_shift($parts);
+            $last = implode(' ', $parts);
+        }
     }
 
-    return $surname !== '' ? mb_strtoupper(mb_substr($surname, 0, 1)) : '?';
+    // Für den Nachnamen-Buchstaben führende Kleinschreib-Zusätze überspringen.
+    $lastLetter = '';
+    foreach (preg_split('/\s+/', $last, -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word) {
+        $lastLetter = mb_substr($word, 0, 1);
+        if (mb_strtolower($word) !== $word) {
+            break;
+        }
+    }
+
+    $initials = mb_substr($first, 0, 1) . $lastLetter;
+
+    return $initials !== '' ? mb_strtoupper($initials) : '?';
 }
 
 /**
@@ -923,7 +951,7 @@ function contact_avatar(array $contact, string $size = 'md'): string
     }
 
     return '<span class="avatar avatar--' . $size . ' avatar--initial" aria-hidden="true">'
-        . e(person_initial($contact)) . '</span>';
+        . e(person_initials($contact)) . '</span>';
 }
 
 /** Anzeigetext einer Termin-Antwortoption: Datum (+ Uhrzeit) oder Freitext-Label. */
