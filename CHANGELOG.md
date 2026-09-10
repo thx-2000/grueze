@@ -3,6 +3,24 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.61.0
+
+**In Memoriam: eine ruhige Gedenkseite.**
+
+- Neuer Bereich **„In Memoriam"** (Menü, `/memoriam`). Für alle angemeldeten
+  Personen sichtbar; pflegen braucht das neue Recht `memorials.manage`
+  (Standard: Team + Admin).
+- **Zwei Wege, jemanden aufzunehmen:**
+  1. *Aus einem Kontakt:* auf der Kontakt-Detailseite „Als verstorben
+     eintragen" (Sterbedatum und Gedenkzeile optional). Die Person fällt
+     damit – wie beim Archiv – aus Adressbuch, Rundmails, Abstimmungen und
+     Geburtstagen und erscheint auf der Gedenkseite. Rückgängig machbar.
+  2. *Als freier Eintrag:* für Menschen, die nie im Adressbuch standen (z. B.
+     Lehrkräfte) – mit Name, Bereich, Lebensdaten, Gedenkzeile und Foto.
+- Die Einträge sind nach einem frei wählbaren Bereichs-Label gruppiert
+  (z. B. „Lehrkräfte", „Stufe 95"). Der Menüname lässt sich über
+  `branding.memorial_label` in der `config/config.php` überschreiben.
+
 ## 1.60.0
 
 **Update-Hinweis: GRUEZE sagt Bescheid, wenn eine neue Version da ist.**

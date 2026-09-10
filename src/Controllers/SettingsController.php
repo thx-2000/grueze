@@ -292,6 +292,7 @@ final class SettingsController extends BaseController
                 'Gruppen' => 'users',
                 'Galerien' => 'image',
                 'Dokumente' => 'file',
+                'In Memoriam' => 'star',
                 'Orga-Team' => 'message-send',
                 'Administration' => 'lock',
             ],
@@ -326,6 +327,9 @@ final class SettingsController extends BaseController
                     'documents.view' => 'Ordner und Dateien ansehen und herunterladen',
                     'documents.upload' => 'Dateien in Ordner hochladen (und eigene Uploads bearbeiten/löschen)',
                     'documents.manage' => 'Ordner anlegen, bearbeiten, löschen; fremde Dateien bearbeiten/löschen',
+                ],
+                'In Memoriam' => [
+                    'memorials.manage' => 'Gedenkseite pflegen: Verstorbene eintragen, freie Einträge anlegen (Ansehen ist für alle offen)',
                 ],
                 'Orga-Team' => [
                     'orga.contact_target' => 'Bekommt Nachrichten über den „Orga-Team schreiben"-Knopf',

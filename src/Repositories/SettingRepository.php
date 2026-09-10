@@ -203,6 +203,7 @@ final class SettingRepository
             'documents.view'       => ['orga', 'stufenmitglied'],
             'documents.upload'     => ['orga'],
             'documents.manage'     => ['orga'],
+            'memorials.manage'     => ['orga'],
             'orga.contact_target'  => ['orga'],
             'settings.manage'      => ['orga'],
         ];

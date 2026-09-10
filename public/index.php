@@ -466,6 +466,15 @@ try {
         Container::get(GroupRepository::class),
         Container::get(\App\Repositories\AnnouncementRepository::class)
     ));
+    Container::factory(\App\Repositories\MemorialRepository::class, static fn () => new \App\Repositories\MemorialRepository(Container::get(PDO::class)));
+    Container::factory(\App\Controllers\MemorialController::class, static fn () => new \App\Controllers\MemorialController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\MemorialRepository::class),
+        Container::get(ContactRepository::class),
+        Container::get(UserRepository::class),
+        Container::get(UploadService::class),
+        Container::get(LogRepository::class)
+    ));
 
     // Angemeldete Sitzung mitschreiben (Verwaltung → Anmeldungen). Wurde die
     // Sitzung aus der Ferne beendet, hier abmelden und zur Anmeldung schicken.
@@ -733,6 +742,16 @@ try {
     $router->post('/dokumente/datei/speichern', [\App\Controllers\DocumentController::class, 'documentUpdate']);
     $router->post('/dokumente/datei/loeschen', [\App\Controllers\DocumentController::class, 'documentDelete']);
     $router->get('/dokumente/datei', [\App\Controllers\DocumentController::class, 'file']);
+
+    $router->get('/memoriam', [\App\Controllers\MemorialController::class, 'index']);
+    $router->get('/memoriam/neu', [\App\Controllers\MemorialController::class, 'createForm']);
+    $router->post('/memoriam', [\App\Controllers\MemorialController::class, 'store']);
+    $router->get('/memoriam/bearbeiten', [\App\Controllers\MemorialController::class, 'editForm']);
+    $router->post('/memoriam/speichern', [\App\Controllers\MemorialController::class, 'update']);
+    $router->post('/memoriam/loeschen', [\App\Controllers\MemorialController::class, 'delete']);
+    $router->post('/kontakte/verstorben', [\App\Controllers\MemorialController::class, 'markDeceased']);
+    $router->post('/kontakte/verstorben/zuruecknehmen', [\App\Controllers\MemorialController::class, 'revive']);
+
     $router->get('/meine-daten', [\App\Controllers\DataCheckController::class, 'show']);
     $router->get('/meine-daten/{token}', [\App\Controllers\DataCheckController::class, 'show']);
     $router->post('/meine-daten', [\App\Controllers\DataCheckController::class, 'save']);

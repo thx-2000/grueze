@@ -8,8 +8,8 @@ use PDO;
 
 final class ContactRepository
 {
-    /** „Lebende" Kontakte: weder archiviert noch im Papierkorb. */
-    private const LIVE = ' AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL';
+    /** „Lebende" Kontakte: weder archiviert noch im Papierkorb noch verstorben. */
+    private const LIVE = ' AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL';
 
     /** Tage, die ein Kontakt im Papierkorb bleibt, bevor er endgültig gelöscht wird. */
     public const TRASH_DAYS = 30;
@@ -40,6 +40,7 @@ final class ContactRepository
                     ADD COLUMN IF NOT EXISTS archived_at DATETIME NULL,
                     ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL,
                     ADD COLUMN IF NOT EXISTS retired_by INT UNSIGNED NULL,
+                    ADD COLUMN IF NOT EXISTS deceased_at DATE NULL,
                     ADD COLUMN IF NOT EXISTS beruf VARCHAR(160) NULL,
                     ADD COLUMN IF NOT EXISTS webseite VARCHAR(255) NULL,
                     CHANGE COLUMN IF EXISTS geschlecht anrede CHAR(1) NULL'
@@ -243,7 +244,7 @@ final class ContactRepository
                  FROM contacts
                  LEFT JOIN categories ON categories.id = contacts.category_id
                  WHERE (' . implode(' OR ', $conds) . ")
-                   AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL
+                   AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL
                  ORDER BY contacts.nachname ASC, contacts.vorname ASC
                  LIMIT " . (int) $limit
             );
@@ -276,7 +277,7 @@ final class ContactRepository
                     WHERE cp.contact_id = contacts.id AND TRIM(COALESCE(cp.phone, "")) <> ""
                 ) THEN 1 ELSE 0 END) AS without_phone
              FROM contacts
-             WHERE contacts.archived_at IS NULL AND contacts.deleted_at IS NULL'
+             WHERE contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL'
         )->fetch();
 
         return [
@@ -295,7 +296,7 @@ final class ContactRepository
                  FROM contacts
                  JOIN contact_emails ON contact_emails.contact_id = contacts.id
                  WHERE contact_emails.email IS NOT NULL AND contact_emails.email <> ""
-                   AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL
+                   AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL
                  ORDER BY contacts.vorname ASC, contacts.nachname ASC'
             )->fetchAll(\PDO::FETCH_COLUMN)
         );
@@ -329,7 +330,7 @@ final class ContactRepository
                     (SELECT email FROM contact_emails WHERE contact_emails.contact_id = contacts.id ORDER BY contact_emails.id LIMIT 1) AS email
              FROM contacts
              WHERE contacts.geburtstag IS NOT NULL
-               AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL'
+               AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL'
         )->fetchAll();
     }
 
@@ -345,7 +346,7 @@ final class ContactRepository
             'SELECT id, vorname, nachname, geburtstag
              FROM contacts
              WHERE geburtstag IS NOT NULL
-               AND archived_at IS NULL AND deleted_at IS NULL'
+               AND archived_at IS NULL AND deleted_at IS NULL AND deceased_at IS NULL'
         )->fetchAll();
 
         $out = [];
@@ -386,7 +387,7 @@ final class ContactRepository
                     (SELECT email FROM contact_emails ce WHERE ce.contact_id = c.id ORDER BY ce.id LIMIT 1) AS email
              FROM contacts c
              WHERE c.geburtstag IS NOT NULL
-               AND c.archived_at IS NULL AND c.deleted_at IS NULL
+               AND c.archived_at IS NULL AND c.deleted_at IS NULL AND c.deceased_at IS NULL
                AND DATE_FORMAT(c.geburtstag, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')"
         );
 
@@ -584,6 +585,32 @@ final class ContactRepository
             'UPDATE contacts SET archived_at = NULL, deleted_at = NULL, retired_by = NULL WHERE id = :id'
         );
         $stmt->execute(['id' => $id]);
+    }
+
+    /**
+     * Kontakt als verstorben markieren – fällt damit (wie beim Archiv) aus
+     * Adressbuch, Rundmails, Abstimmungen und Geburtstagen. Der Gedenk-Eintrag
+     * selbst liegt in der Tabelle `memorials` (MemorialRepository).
+     */
+    public function markDeceased(int $id, ?string $diedOn, int $userId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE contacts
+             SET deceased_at = :d, archived_at = NULL, deleted_at = NULL, retired_by = :uid
+             WHERE id = :id'
+        );
+        $stmt->execute([
+            'id' => $id,
+            'uid' => $userId,
+            'd' => $diedOn !== null && $diedOn !== '' ? $diedOn : date('Y-m-d'),
+        ]);
+    }
+
+    /** „Doch nicht verstorben": zurück in den aktiven Bestand. */
+    public function unmarkDeceased(int $id): void
+    {
+        $this->pdo->prepare('UPDATE contacts SET deceased_at = NULL, retired_by = NULL WHERE id = :id')
+            ->execute(['id' => $id]);
     }
 
     /** Kontakt endgültig aus der Datenbank entfernen. */

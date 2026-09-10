@@ -50,6 +50,7 @@ CREATE TABLE contacts (
     archived_at DATETIME NULL,
     deleted_at DATETIME NULL,
     retired_by INT UNSIGNED NULL,
+    deceased_at DATE NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_contacts_archived (archived_at),
@@ -573,6 +574,27 @@ CREATE TABLE IF NOT EXISTS announcement_links (
     position INT NOT NULL DEFAULT 0,
     KEY idx_announcement_links_announcement (announcement_id),
     CONSTRAINT fk_announcement_links_announcement FOREIGN KEY (announcement_id) REFERENCES announcements(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- „In Memoriam": Gedenkseite. Ein Eintrag ist entweder mit einem Kontakt
+-- verknüpft (contact_id) oder frei (Person stand nie im Adressbuch).
+CREATE TABLE IF NOT EXISTS memorials (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    contact_id INT UNSIGNED NULL,
+    display_name VARCHAR(190) NOT NULL,
+    role_label VARCHAR(120) NULL,
+    born_year SMALLINT UNSIGNED NULL,
+    died_year SMALLINT UNSIGNED NULL,
+    died_on DATE NULL,
+    note VARCHAR(500) NULL,
+    photo_path VARCHAR(255) NULL,
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_memorials_contact (contact_id),
+    KEY idx_memorials_year (died_year),
+    CONSTRAINT fk_memorials_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE SET NULL,
+    CONSTRAINT fk_memorials_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO roles (name, label, description) VALUES

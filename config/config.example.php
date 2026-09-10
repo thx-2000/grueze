@@ -47,6 +47,8 @@ return [
         'system_label' => 'GRUEZE',
         'product_url' => 'https://github.com/thx-2000/grueze',
         'product_donate_url' => 'https://buymeacoffee.com/thomashageleit',
+        // Name des Gedenkbereichs (Menü + Seitentitel). Default „In Memoriam".
+        'memorial_label' => 'In Memoriam',
         'public_site_label' => '',
         'public_site_url' => '',
         'support_email' => '',

@@ -58,7 +58,7 @@ final class TagRepository
             'SELECT ct.contact_id
              FROM contact_tags ct
              JOIN contacts c ON c.id = ct.contact_id
-             WHERE ct.tag_id = :id AND c.archived_at IS NULL AND c.deleted_at IS NULL'
+             WHERE ct.tag_id = :id AND c.archived_at IS NULL AND c.deleted_at IS NULL AND c.deceased_at IS NULL'
         );
         $stmt->execute(['id' => $tagId]);
 

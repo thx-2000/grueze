@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.60.0';
+    return '1.61.0';
 }
 
 /**
@@ -370,6 +370,15 @@ function system_label(): string
 function product_url(): string
 {
     return trim(branding_default('product_url', 'https://github.com/thx-2000/grueze'));
+}
+
+/**
+ * Name des Gedenkbereichs. Default „In Memoriam"; per
+ * config('branding.memorial_label') überschreibbar (z. B. „Abschiede").
+ */
+function memorial_label(): string
+{
+    return trim(branding_default('memorial_label', 'In Memoriam')) ?: 'In Memoriam';
 }
 
 /**
@@ -613,6 +622,24 @@ function nav_show_galleries(): bool
 }
 
 /**
+ * Ob der „In Memoriam"-Menüpunkt angezeigt wird: für die Verwaltung immer,
+ * für alle anderen nur, wenn es mindestens einen Gedenk-Eintrag gibt (ein
+ * leerer Gedenklink wäre unschön).
+ */
+function nav_show_memorials(): bool
+{
+    try {
+        if (can('memorials.manage')) {
+            return true;
+        }
+
+        return App\Core\Container::get(App\Repositories\MemorialRepository::class)->countAll() > 0;
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+/**
  * Ob der „Dokumente"-Menüpunkt für die aktuelle Person angezeigt werden soll –
  * gleiche Logik wie bei den Galerien (globale Rechte, Gruppenleitung, oder
  * Mitglied einer Gruppe mit eigenem Ordner).
@@ -676,6 +703,9 @@ function page_title(string $path): string
         '/dokumente'                 => 'Dokumente',
         '/dokumente/neu'             => 'Neuer Ordner',
         '/dokumente/ansehen'         => 'Ordner',
+        '/memoriam'                  => memorial_label(),
+        '/memoriam/neu'              => 'Eintrag hinzufügen',
+        '/memoriam/bearbeiten'       => 'Eintrag bearbeiten',
         '/meine-daten'               => 'Daten-Check',
         '/search'                    => 'Suche',
         '/contacts/create'           => 'Neuer Kontakt',

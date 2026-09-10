@@ -129,6 +129,9 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                 <?php if (nav_show_documents()): ?>
                     <a class="<?= str_starts_with($currentPath, '/dokumente') ? 'is-active' : '' ?>" href="<?= e(url('/dokumente')) ?>"><span class="rail-ic"><?= icon('folder') ?></span>Dokumente</a>
                 <?php endif; ?>
+                <?php if (nav_show_memorials()): ?>
+                    <a class="<?= str_starts_with($currentPath, '/memoriam') ? 'is-active' : '' ?>" href="<?= e(url('/memoriam')) ?>"><span class="rail-ic"><?= icon('star') ?></span><?= e(memorial_label()) ?></a>
+                <?php endif; ?>
                 <?php if ($showAdminHub): ?>
                     <span class="rail-group">Verwaltung</span>
                     <a class="<?= $onAdminHub ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung')) ?>"><span class="rail-ic"><?= icon('sliders') ?></span>Einstellungen</a>

@@ -5,6 +5,13 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **In Memoriam (TH-Wunsch 2026-09-10):** erledigt v1.61.0. Gedenkseite
+  `/memoriam`, Recht `memorials.manage` (Standard orga). Zwei Quellen:
+  `contacts.deceased_at` (aus einem Kontakt, fällt aus LIVE/Mailing/
+  Geburtstagen) + freie `memorials`-Zeilen (Lehrkräfte o. Ä., mit
+  Foto-Upload). Gruppierung über freies `role_label` (bei Kontakten aus der
+  Kategorie vorbelegt). Menüname per `branding.memorial_label`.
+  Migration `2026-09-10-in-memoriam.sql`.
 - **Update-Hinweis (TH-Wunsch 2026-09-05):** erledigt v1.60.0. `ReleaseCheckService`
   fragt gecacht (Standard 12 h, `app.release_check`/`_ttl_hours`) die
   GitHub-Releases-API ab; bei neuerer Version Hinweisstreifen im Layout +

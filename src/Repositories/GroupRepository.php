@@ -61,7 +61,7 @@ final class GroupRepository
              FROM contact_group_members m
              JOIN contacts c ON c.id = m.contact_id
              WHERE m.group_id = :group_id
-               AND c.archived_at IS NULL AND c.deleted_at IS NULL
+               AND c.archived_at IS NULL AND c.deleted_at IS NULL AND c.deceased_at IS NULL
              ORDER BY c.nachname ASC, c.vorname ASC'
         );
         $stmt->execute(['group_id' => $groupId]);
@@ -77,7 +77,7 @@ final class GroupRepository
              FROM contact_group_members m
              JOIN contacts c ON c.id = m.contact_id
              WHERE m.group_id = :group_id
-               AND c.archived_at IS NULL AND c.deleted_at IS NULL'
+               AND c.archived_at IS NULL AND c.deleted_at IS NULL AND c.deceased_at IS NULL'
         );
         $stmt->execute(['group_id' => $groupId]);
 
@@ -421,7 +421,7 @@ final class GroupRepository
              FROM contact_group_members m
              JOIN contacts c ON c.id = m.contact_id
              WHERE m.group_id = :g AND m.role = 'lead'
-               AND c.archived_at IS NULL AND c.deleted_at IS NULL"
+               AND c.archived_at IS NULL AND c.deleted_at IS NULL AND c.deceased_at IS NULL"
         );
         $stmt->execute(['g' => $groupId]);
 

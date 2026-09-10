@@ -324,11 +324,52 @@ $canImpersonateThis = $editing
 <?php
 $isArchived = $editing && !empty($contact['archived_at']);
 $isTrashed = $editing && !empty($contact['deleted_at']);
+$isDeceased = $editing && !empty($contact['deceased_at']);
 $dataCheckActive = $dataCheckActive ?? null;
 $dataCheckFreshLink = $dataCheckFreshLink ?? null;
 ?>
 
-<?php if ($editing && can('contacts.manage') && !$isArchived && !$isTrashed): ?>
+<?php if ($isDeceased && can('memorials.manage')): ?>
+    <section class="detail-card detail-danger">
+        <h2><?= e(memorial_label()) ?></h2>
+        <p class="muted">
+            <strong><?= e($fullName) ?></strong> ist als verstorben eingetragen<?php if (!empty($contact['deceased_at'])): ?> (<?= e(format_date(substr((string) $contact['deceased_at'], 0, 10))) ?>)<?php endif; ?>
+            und steht nicht mehr im aktiven Adressbuch, in Rundmails oder Abstimmungen.
+        </p>
+        <div class="toolbar-actions">
+            <a class="ghost-button" href="<?= e(url('/memoriam')) ?>"><?= icon('star') ?><span>Zur Gedenkseite</span></a>
+            <form method="post" action="<?= e(url('/kontakte/verstorben/zuruecknehmen')) ?>" data-confirm="Den Verstorben-Eintrag für „<?= e($fullName) ?>“ zurücknehmen? Der Kontakt kommt zurück ins Adressbuch, der Gedenk-Eintrag wird entfernt.">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+                <button type="submit" class="ghost-button">Eintrag zurücknehmen</button>
+            </form>
+        </div>
+    </section>
+<?php elseif ($editing && !$isDeceased && !$isTrashed && can('memorials.manage')): ?>
+    <section class="detail-card">
+        <h2><?= e(memorial_label()) ?></h2>
+        <p class="muted">Falls <strong><?= e($fullName) ?></strong> verstorben ist: hier eintragen. Die Person wird dann aus Adressbuch, Rundmails, Abstimmungen und Geburtstagen genommen und erscheint auf der Gedenkseite. Rückgängig machbar.</p>
+        <form method="post" action="<?= e(url('/kontakte/verstorben')) ?>" class="stack" data-confirm="„<?= e($fullName) ?>“ als verstorben eintragen?">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+            <div class="form-grid">
+                <label>
+                    <span>Sterbedatum (optional)</span>
+                    <input type="date" name="died_on">
+                </label>
+            </div>
+            <label>
+                <span>Gedenkzeile (optional)</span>
+                <input type="text" name="note" maxlength="500" placeholder="Ein Satz zum Gedenken">
+            </label>
+            <div class="form-actions">
+                <button type="submit" class="ghost-button"><?= icon('star') ?><span>Als verstorben eintragen</span></button>
+            </div>
+        </form>
+    </section>
+<?php endif; ?>
+
+<?php if ($editing && can('contacts.manage') && !$isArchived && !$isTrashed && !$isDeceased): ?>
     <section class="detail-card">
         <h2>Daten-Check-Link</h2>
         <p class="muted">Ein Link ohne Login, über den <strong><?= e($fullName) ?></strong> die eigenen Stammdaten, die Adresse und die Kontaktwege selbst prüfen und korrigieren kann. Kategorie, Tags, Notizen und der Zugang bleiben unberührt.</p>
@@ -379,7 +420,7 @@ $dataCheckFreshLink = $dataCheckFreshLink ?? null;
             <a class="ghost-button" href="<?= e(url('/kontakte/archiv')) ?>">Archiv &amp; Papierkorb</a>
         </div>
     </section>
-<?php elseif ($editing && can('contacts.delete')): ?>
+<?php elseif ($editing && can('contacts.delete') && !$isDeceased): ?>
     <section class="detail-card detail-danger">
         <h2>Kontakt aus dem Adressbuch nehmen</h2>
         <p class="muted">Ein verknüpfter Login wird dabei deaktiviert.</p>
