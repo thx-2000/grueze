@@ -12,6 +12,10 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   Foto-Upload). Gruppierung über freies `role_label` (bei Kontakten aus der
   Kategorie vorbelegt). Menüname per `branding.memorial_label`.
   Migration `2026-09-10-in-memoriam.sql`.
+  Feinschliff v1.62.0: Kreuz-Icon statt Stern, dezent graue Flächen,
+  volles Geburtsdatum (`memorials.born_on`, bei Kontakten aus `geburtstag`)
+  mit automatischer Alters-Anzeige. Migration
+  `2026-09-10-memorial-geburtsdatum.sql`.
 - **Update-Hinweis (TH-Wunsch 2026-09-05):** erledigt v1.60.0. `ReleaseCheckService`
   fragt gecacht (Standard 12 h, `app.release_check`/`_ttl_hours`) die
   GitHub-Releases-API ab; bei neuerer Version Hinweisstreifen im Layout +

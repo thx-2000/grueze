@@ -3,14 +3,25 @@
  * @var array<string, list<array<string,mixed>>> $groups  Bereichs-Label => Einträge
  * @var bool $canManage
  */
+// Lebensspanne: volle Daten wenn bekannt, sonst nur die Jahre. Ist das Alter
+// bestimmbar, wird es angehängt (grobe Jahresdifferenz mit „ca.").
 $lifespan = static function (array $e): string {
-    $born = $e['born_year'] ? (string) $e['born_year'] : '';
-    $died = $e['died_year'] ? (string) $e['died_year'] : '';
+    $born = !empty($e['born_on']) ? format_date((string) $e['born_on']) : ($e['born_year'] ? (string) $e['born_year'] : '');
+    $died = !empty($e['died_on']) ? format_date((string) $e['died_on']) : ($e['died_year'] ? (string) $e['died_year'] : '');
+
     if ($born !== '' && $died !== '') {
-        return $born . ' – ' . $died;
+        $span = $born . ' – ' . $died;
+    } elseif ($died !== '') {
+        $span = '† ' . $died;
+    } else {
+        return '';
     }
 
-    return $died !== '' ? '† ' . $died : '';
+    if ($e['age'] !== null) {
+        $span .= ' · ' . (empty($e['age_exact']) ? 'ca. ' : '') . (int) $e['age'] . ' Jahre';
+    }
+
+    return $span;
 };
 
 $card = static function (array $e) use ($canManage, $lifespan, $csrfToken): void {

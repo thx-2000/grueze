@@ -35,6 +35,7 @@ final class MemorialRepository
                     display_name VARCHAR(190) NOT NULL,
                     role_label VARCHAR(120) NULL,
                     born_year SMALLINT UNSIGNED NULL,
+                    born_on DATE NULL,
                     died_year SMALLINT UNSIGNED NULL,
                     died_on DATE NULL,
                     note VARCHAR(500) NULL,
@@ -46,6 +47,7 @@ final class MemorialRepository
                     KEY idx_memorials_year (died_year)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
             );
+            $this->pdo->exec('ALTER TABLE memorials ADD COLUMN IF NOT EXISTS born_on DATE NULL AFTER born_year');
             $this->pdo->exec('ALTER TABLE contacts ADD COLUMN IF NOT EXISTS deceased_at DATE NULL');
         } catch (\Throwable) {
             // Migration holt es nach.
@@ -149,9 +151,14 @@ final class MemorialRepository
         $existing = $this->forContact((int) $contact['id']);
 
         $bornYear = null;
+        $bornOn = null;
         $geb = trim((string) ($contact['geburtstag'] ?? ''));
-        if (preg_match('/^(\d{4})-\d{2}-\d{2}/', $geb, $mm)) {
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})/', $geb, $mm)) {
             $bornYear = (int) $mm[1];
+            // Nur ein vollständiges Datum (kein 0000er-Platzhalter) übernehmen.
+            if ($mm[2] !== '00' && $mm[3] !== '00' && (int) $mm[1] >= 1900) {
+                $bornOn = $mm[1] . '-' . $mm[2] . '-' . $mm[3];
+            }
         }
 
         $diedOn = $diedOn !== null && $diedOn !== '' ? $diedOn : null;
@@ -167,6 +174,7 @@ final class MemorialRepository
                 'display_name' => $name,
                 'role_label' => $existing['role_label'] ?? ($contact['category_name'] ?? null),
                 'born_year' => $bornYear,
+                'born_on' => $bornOn,
                 'died_year' => $diedYear,
                 'died_on' => $diedOn,
                 'note' => $note !== '' ? $note : ($existing['note'] ?? null),
@@ -176,14 +184,15 @@ final class MemorialRepository
         }
 
         $stmt = $this->pdo->prepare(
-            'INSERT INTO memorials (contact_id, display_name, role_label, born_year, died_year, died_on, note, created_by)
-             VALUES (:cid, :name, :role, :born, :dyear, :don, :note, :uid)'
+            'INSERT INTO memorials (contact_id, display_name, role_label, born_year, born_on, died_year, died_on, note, created_by)
+             VALUES (:cid, :name, :role, :born, :bornon, :dyear, :don, :note, :uid)'
         );
         $stmt->execute([
             'cid' => (int) $contact['id'],
             'name' => $name,
             'role' => trim((string) ($contact['category_name'] ?? '')) ?: null,
             'born' => $bornYear,
+            'bornon' => $bornOn,
             'dyear' => $diedYear,
             'don' => $diedOn,
             'note' => $note !== '' ? $note : null,
@@ -197,8 +206,8 @@ final class MemorialRepository
     public function createFree(array $data, int $userId): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO memorials (contact_id, display_name, role_label, born_year, died_year, died_on, note, photo_path, created_by)
-             VALUES (NULL, :name, :role, :born, :dyear, :don, :note, :photo, :uid)'
+            'INSERT INTO memorials (contact_id, display_name, role_label, born_year, born_on, died_year, died_on, note, photo_path, created_by)
+             VALUES (NULL, :name, :role, :born, :bornon, :dyear, :don, :note, :photo, :uid)'
         );
         $stmt->execute($this->params($data) + ['uid' => $userId]);
 
@@ -210,7 +219,7 @@ final class MemorialRepository
     {
         $fields = [];
         $params = ['id' => $id];
-        foreach (['display_name', 'role_label', 'born_year', 'died_year', 'died_on', 'note', 'photo_path'] as $key) {
+        foreach (['display_name', 'role_label', 'born_year', 'born_on', 'died_year', 'died_on', 'note', 'photo_path'] as $key) {
             if (array_key_exists($key, $data)) {
                 $fields[] = "$key = :$key";
                 $params[$key] = $data[$key] === '' ? null : $data[$key];
@@ -239,11 +248,19 @@ final class MemorialRepository
         $born = (int) ($data['born_year'] ?? 0);
         $died = (int) ($data['died_year'] ?? 0);
         $diedOn = trim((string) ($data['died_on'] ?? ''));
+        $bornOn = trim((string) ($data['born_on'] ?? ''));
+        $bornOn = preg_match('/^\d{4}-\d{2}-\d{2}$/', $bornOn) ? $bornOn : null;
+
+        // Volles Geburtsdatum eingetragen, aber kein Jahr → Jahr daraus ableiten.
+        if ($born < 1900 && $bornOn !== null) {
+            $born = (int) substr($bornOn, 0, 4);
+        }
 
         return [
             'name' => mb_substr(trim((string) ($data['display_name'] ?? '')), 0, 190),
             'role' => ($r = mb_substr(trim((string) ($data['role_label'] ?? '')), 0, 120)) !== '' ? $r : null,
             'born' => $born >= 1900 && $born <= 2100 ? $born : null,
+            'bornon' => $bornOn,
             'dyear' => $died >= 1900 && $died <= 2100 ? $died : ($diedOn !== '' ? (int) substr($diedOn, 0, 4) : null),
             'don' => preg_match('/^\d{4}-\d{2}-\d{2}$/', $diedOn) ? $diedOn : null,
             'note' => ($n = mb_substr(trim((string) ($data['note'] ?? '')), 0, 500)) !== '' ? $n : null,
@@ -269,8 +286,36 @@ final class MemorialRepository
 
         $bornYear = $row['born_year'] !== null ? (int) $row['born_year'] : null;
         $diedYear = $row['died_year'] !== null ? (int) $row['died_year'] : null;
-        if ($diedYear === null && trim((string) ($row['died_on'] ?? '')) !== '') {
-            $diedYear = (int) substr((string) $row['died_on'], 0, 4);
+        $diedOn = trim((string) ($row['died_on'] ?? '')) ?: null;
+        if ($diedYear === null && $diedOn !== null) {
+            $diedYear = (int) substr($diedOn, 0, 4);
+        }
+
+        // Volles Geburtsdatum: am Eintrag selbst, sonst (bei Kontakt) aus dem Kontakt.
+        $bornOn = trim((string) ($row['born_on'] ?? ''));
+        if ($bornOn === '' && $linked) {
+            $bornOn = trim((string) ($row['c_geburtstag'] ?? ''));
+        }
+        $bornOn = preg_match('/^\d{4}-\d{2}-\d{2}$/', $bornOn) && strpos($bornOn, '-00') === false
+            ? $bornOn
+            : null;
+        if ($bornOn !== null && $bornYear === null) {
+            $bornYear = (int) substr($bornOn, 0, 4);
+        }
+
+        // Lebensalter: exakt bei zwei vollen Daten, sonst grobe Jahresdifferenz.
+        $age = null;
+        $ageExact = false;
+        if ($bornOn !== null && $diedOn !== null) {
+            $b = \DateTimeImmutable::createFromFormat('Y-m-d', $bornOn) ?: null;
+            $d = \DateTimeImmutable::createFromFormat('Y-m-d', $diedOn) ?: null;
+            if ($b !== null && $d !== null && $d >= $b) {
+                $age = $b->diff($d)->y;
+                $ageExact = true;
+            }
+        }
+        if ($age === null && $bornYear !== null && $diedYear !== null && $diedYear >= $bornYear) {
+            $age = $diedYear - $bornYear;
         }
 
         $photo = trim((string) ($row['photo_path'] ?? ''));
@@ -301,8 +346,11 @@ final class MemorialRepository
             'role_label' => $roleLabel,
             'group_key' => $roleLabel,
             'born_year' => $bornYear,
+            'born_on' => $bornOn,
             'died_year' => $diedYear,
-            'died_on' => trim((string) ($row['died_on'] ?? '')) ?: null,
+            'died_on' => $diedOn,
+            'age' => $age,
+            'age_exact' => $ageExact,
             'note' => trim((string) ($row['note'] ?? '')) ?: null,
             'photo_path' => $photo ?: null,
         ];

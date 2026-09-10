@@ -584,6 +584,7 @@ CREATE TABLE IF NOT EXISTS memorials (
     display_name VARCHAR(190) NOT NULL,
     role_label VARCHAR(120) NULL,
     born_year SMALLINT UNSIGNED NULL,
+    born_on DATE NULL,
     died_year SMALLINT UNSIGNED NULL,
     died_on DATE NULL,
     note VARCHAR(500) NULL,

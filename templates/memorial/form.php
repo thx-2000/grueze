@@ -54,10 +54,17 @@ $action = $isEdit ? url('/memoriam/speichern') : url('/memoriam');
                 <input type="number" name="died_year" min="1900" max="2100" step="1" inputmode="numeric" value="<?= e((string) ($e['died_year'] ?? old('died_year'))) ?>">
             </label>
         </div>
-        <label>
-            <span>Genaues Sterbedatum (optional)</span>
-            <input type="date" name="died_on" value="<?= e(substr((string) ($e['died_on'] ?? old('died_on')), 0, 10)) ?>">
-        </label>
+        <div class="form-grid">
+            <label>
+                <span>Genaues Geburtsdatum (optional)</span>
+                <input type="date" name="born_on" value="<?= e(substr((string) ($e['born_on'] ?? old('born_on')), 0, 10)) ?>">
+            </label>
+            <label>
+                <span>Genaues Sterbedatum (optional)</span>
+                <input type="date" name="died_on" value="<?= e(substr((string) ($e['died_on'] ?? old('died_on')), 0, 10)) ?>">
+            </label>
+        </div>
+        <small class="field-hint">Sind beide vollen Daten bekannt, wird das Lebensalter automatisch berechnet.</small>
 
         <label>
             <span>Gedenkzeile</span>

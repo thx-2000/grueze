@@ -3,6 +3,20 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.62.0
+
+**In Memoriam: Feinschliff.**
+
+- **Kreuz statt Stern** als Symbol für den Bereich (Menü, Kontaktseite,
+  Rechte-Übersicht).
+- **Ruhigere Optik:** die Gedenk-Flächen sind jetzt dezent ins Graue
+  gezogen – dem Anlass angemessen, in hellen wie dunklen Themes.
+- **Geburtsdatum:** je Eintrag lässt sich ein volles Geburts- (und Sterbe-)
+  Datum hinterlegen. Bei Kontakten wird das Geburtsdatum automatisch
+  übernommen. Sind beide Daten bekannt, zeigt die Seite das **Lebensalter**
+  („· 73 Jahre", bei nur bekannten Jahren „· ca. 73 Jahre").
+- Migration `2026-09-10-memorial-geburtsdatum.sql`.
+
 ## 1.61.0
 
 **In Memoriam: eine ruhige Gedenkseite.**

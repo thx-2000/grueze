@@ -209,6 +209,7 @@ final class MemorialController extends BaseController
             'display_name' => mb_substr(trim((string) $request->input('display_name')), 0, 190),
             'role_label' => mb_substr(trim((string) $request->input('role_label')), 0, 120),
             'born_year' => (int) $request->input('born_year') ?: null,
+            'born_on' => trim((string) $request->input('born_on')),
             'died_year' => (int) $request->input('died_year') ?: null,
             'died_on' => trim((string) $request->input('died_on')),
             'note' => mb_substr(trim((string) $request->input('note')), 0, 500),

@@ -337,7 +337,7 @@ $dataCheckFreshLink = $dataCheckFreshLink ?? null;
             und steht nicht mehr im aktiven Adressbuch, in Rundmails oder Abstimmungen.
         </p>
         <div class="toolbar-actions">
-            <a class="ghost-button" href="<?= e(url('/memoriam')) ?>"><?= icon('star') ?><span>Zur Gedenkseite</span></a>
+            <a class="ghost-button" href="<?= e(url('/memoriam')) ?>"><?= icon('cross') ?><span>Zur Gedenkseite</span></a>
             <form method="post" action="<?= e(url('/kontakte/verstorben/zuruecknehmen')) ?>" data-confirm="Den Verstorben-Eintrag für „<?= e($fullName) ?>“ zurücknehmen? Der Kontakt kommt zurück ins Adressbuch, der Gedenk-Eintrag wird entfernt.">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
@@ -363,7 +363,7 @@ $dataCheckFreshLink = $dataCheckFreshLink ?? null;
                 <input type="text" name="note" maxlength="500" placeholder="Ein Satz zum Gedenken">
             </label>
             <div class="form-actions">
-                <button type="submit" class="ghost-button"><?= icon('star') ?><span>Als verstorben eintragen</span></button>
+                <button type="submit" class="ghost-button"><?= icon('cross') ?><span>Als verstorben eintragen</span></button>
             </div>
         </form>
     </section>

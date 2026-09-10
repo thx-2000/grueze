@@ -292,7 +292,7 @@ final class SettingsController extends BaseController
                 'Gruppen' => 'users',
                 'Galerien' => 'image',
                 'Dokumente' => 'file',
-                'In Memoriam' => 'star',
+                'In Memoriam' => 'cross',
                 'Orga-Team' => 'message-send',
                 'Administration' => 'lock',
             ],
