@@ -3,35 +3,36 @@
  * @var array<string, list<array<string,mixed>>> $groups  Bereichs-Label => Einträge
  * @var bool $canManage
  */
-// Lebensspanne: volle Daten wenn bekannt, sonst nur die Jahre. Ist das Alter
-// bestimmbar, wird es angehängt (grobe Jahresdifferenz mit „ca.").
+// Lebensspanne: volle Daten wenn bekannt, sonst nur die Jahre. Das Alter steht
+// bewusst in einer eigenen Zeile (siehe unten), nicht im selben Fließtext.
 $lifespan = static function (array $e): string {
     $born = !empty($e['born_on']) ? format_date((string) $e['born_on']) : ($e['born_year'] ? (string) $e['born_year'] : '');
     $died = !empty($e['died_on']) ? format_date((string) $e['died_on']) : ($e['died_year'] ? (string) $e['died_year'] : '');
 
     if ($born !== '' && $died !== '') {
-        $span = $born . ' – ' . $died;
-    } elseif ($died !== '') {
-        $span = '† ' . $died;
-    } else {
+        return $born . ' – ' . $died;
+    }
+
+    return $died !== '' ? '† ' . $died : '';
+};
+
+// „73 Jahre" bzw. „ca. 73 Jahre" (grobe Jahresdifferenz), sonst leer.
+$ageLabel = static function (array $e): string {
+    if ($e['age'] === null) {
         return '';
     }
 
-    if ($e['age'] !== null) {
-        $span .= ' · ' . (empty($e['age_exact']) ? 'ca. ' : '') . (int) $e['age'] . ' Jahre';
-    }
-
-    return $span;
+    return (empty($e['age_exact']) ? 'ca. ' : '') . (int) $e['age'] . ' Jahre';
 };
 
-$card = static function (array $e) use ($canManage, $lifespan, $csrfToken): void {
+$card = static function (array $e) use ($canManage, $lifespan, $ageLabel, $csrfToken): void {
     ?>
     <li class="memorial-card">
         <div class="memorial-portrait" aria-hidden="true">
             <?php if (!empty($e['photo_path'])): ?>
                 <img src="<?= e(asset_url('/' . ltrim((string) $e['photo_path'], '/'))) ?>" alt="">
             <?php else: ?>
-                <span class="memorial-portrait-fallback"><?= e(mb_substr((string) $e['name'], 0, 1)) ?></span>
+                <span class="memorial-portrait-fallback"><?= e((string) $e['initial']) ?></span>
             <?php endif; ?>
         </div>
         <div class="memorial-body">
@@ -41,6 +42,9 @@ $card = static function (array $e) use ($canManage, $lifespan, $csrfToken): void
             </p>
             <?php if (($span = $lifespan($e)) !== ''): ?>
                 <p class="memorial-dates"><?= e($span) ?></p>
+            <?php endif; ?>
+            <?php if (($age = $ageLabel($e)) !== ''): ?>
+                <p class="memorial-age"><?= e($age) ?></p>
             <?php endif; ?>
             <?php if (!empty($e['note'])): ?>
                 <p class="memorial-note"><?= nl2br(e((string) $e['note'])) ?></p>

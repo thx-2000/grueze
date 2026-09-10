@@ -16,6 +16,8 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
   volles Geburtsdatum (`memorials.born_on`, bei Kontakten aus `geburtstag`)
   mit automatischer Alters-Anzeige. Migration
   `2026-09-10-memorial-geburtsdatum.sql`.
+  v1.62.1: Alter in eigener Zeile (`.memorial-age`), Platzhalter-Buchstabe
+  aus dem Nachnamen (`decorate()['initial']`).
 - **Update-Hinweis (TH-Wunsch 2026-09-05):** erledigt v1.60.0. `ReleaseCheckService`
   fragt gecacht (Standard 12 h, `app.release_check`/`_ttl_hours`) die
   GitHub-Releases-API ab; bei neuerer Version Hinweisstreifen im Layout +

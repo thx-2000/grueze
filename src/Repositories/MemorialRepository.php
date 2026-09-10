@@ -337,11 +337,22 @@ final class MemorialRepository
             $roleLabel = trim((string) ($row['c_category'] ?? ''));
         }
 
+        // Platzhalter-Buchstabe: der Nachname (bei Kontakten sauber getrennt,
+        // beim freien Eintrag das letzte Namenswort – nicht „Dr." oder Vorname).
+        if ($linked) {
+            $surname = trim((string) ($row['c_nachname'] ?? ''));
+        } else {
+            $parts = preg_split('/\s+/', trim((string) $row['display_name']), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $surname = $parts !== [] ? end($parts) : '';
+        }
+        $initial = mb_strtoupper(mb_substr($surname !== '' ? $surname : $name, 0, 1));
+
         return [
             'id' => (int) $row['id'],
             'contact_id' => $linked ? (int) $row['contact_id'] : null,
             'contact_reachable' => $linked && $row['c_archived_at'] === null && $row['c_deleted_at'] === null,
             'name' => $name,
+            'initial' => $initial,
             'birth_name' => $birthName,
             'role_label' => $roleLabel,
             'group_key' => $roleLabel,

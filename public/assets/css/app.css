@@ -2672,6 +2672,18 @@ a.completeness-tile:hover {
     font-variant-numeric: tabular-nums;
 }
 
+/* Lebensalter bewusst als eigene Zeile/„Feld", nicht im Datums-Fließtext. */
+.memorial-age {
+    margin: 0.25rem 0 0;
+    align-self: start;
+    padding: 0.05rem 0.45rem;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--color-surface-strong) 70%, var(--color-muted));
+    font-size: 0.8rem;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+}
+
 .memorial-note {
     margin: 0.15rem 0 0;
     font-size: 0.92rem;

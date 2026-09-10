@@ -3,6 +3,15 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.62.1
+
+**In Memoriam: kleine Korrekturen.**
+
+- Das **Lebensalter** steht jetzt in einer eigenen Zeile (kleines Feld) statt
+  im selben Fließtext wie die Daten – kein unschöner Umbruch mehr.
+- Der **Platzhalter-Buchstabe** (wenn kein Foto da ist) nimmt jetzt den
+  Nachnamen, nicht mehr „Dr." oder den Vornamen.
+
 ## 1.62.0
 
 **In Memoriam: Feinschliff.**
