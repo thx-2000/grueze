@@ -475,6 +475,14 @@ try {
         Container::get(UploadService::class),
         Container::get(LogRepository::class)
     ));
+    Container::factory(\App\Repositories\RosterRepository::class, static fn () => new \App\Repositories\RosterRepository(Container::get(PDO::class)));
+    Container::factory(\App\Controllers\RosterController::class, static fn () => new \App\Controllers\RosterController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\RosterRepository::class),
+        Container::get(\App\Repositories\MemorialRepository::class),
+        Container::get(UploadService::class),
+        Container::get(LogRepository::class)
+    ));
 
     // Angemeldete Sitzung mitschreiben (Verwaltung → Anmeldungen). Wurde die
     // Sitzung aus der Ferne beendet, hier abmelden und zur Anmeldung schicken.
@@ -752,6 +760,13 @@ try {
     $router->post('/memoriam/loeschen', [\App\Controllers\MemorialController::class, 'delete']);
     $router->post('/kontakte/verstorben', [\App\Controllers\MemorialController::class, 'markDeceased']);
     $router->post('/kontakte/verstorben/zuruecknehmen', [\App\Controllers\MemorialController::class, 'revive']);
+
+    $router->get('/weitere-personen', [\App\Controllers\RosterController::class, 'index']);
+    $router->get('/weitere-personen/neu', [\App\Controllers\RosterController::class, 'createForm']);
+    $router->post('/weitere-personen', [\App\Controllers\RosterController::class, 'store']);
+    $router->get('/weitere-personen/bearbeiten', [\App\Controllers\RosterController::class, 'editForm']);
+    $router->post('/weitere-personen/speichern', [\App\Controllers\RosterController::class, 'update']);
+    $router->post('/weitere-personen/loeschen', [\App\Controllers\RosterController::class, 'delete']);
 
     $router->get('/meine-daten', [\App\Controllers\DataCheckController::class, 'show']);
     $router->get('/meine-daten/{token}', [\App\Controllers\DataCheckController::class, 'show']);

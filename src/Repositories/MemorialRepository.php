@@ -8,8 +8,9 @@ use PDO;
 
 /**
  * Gedenk-Einträge für die „In Memoriam"-Seite. Ein Eintrag ist entweder mit
- * einem Kontakt verknüpft (`contact_id` – Name, Foto, Geburtsjahr kommen dann
- * aus dem Kontakt) oder frei (Person stand nie im Adressbuch, z. B. Lehrkräfte).
+ * einem Kontakt verknüpft (`contact_id`), mit einer Person aus „Weitere
+ * Personen" (`roster_person_id` – z. B. Lehrkräfte, siehe RosterRepository)
+ * oder frei (Name/Foto/Daten stehen nur am Eintrag selbst).
  */
 final class MemorialRepository
 {
@@ -32,6 +33,7 @@ final class MemorialRepository
                 'CREATE TABLE IF NOT EXISTS memorials (
                     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                     contact_id INT UNSIGNED NULL,
+                    roster_person_id INT UNSIGNED NULL,
                     display_name VARCHAR(190) NOT NULL,
                     role_label VARCHAR(120) NULL,
                     born_year SMALLINT UNSIGNED NULL,
@@ -48,6 +50,7 @@ final class MemorialRepository
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
             );
             $this->pdo->exec('ALTER TABLE memorials ADD COLUMN IF NOT EXISTS born_on DATE NULL AFTER born_year');
+            $this->pdo->exec('ALTER TABLE memorials ADD COLUMN IF NOT EXISTS roster_person_id INT UNSIGNED NULL AFTER contact_id');
             $this->pdo->exec('ALTER TABLE contacts ADD COLUMN IF NOT EXISTS deceased_at DATE NULL');
         } catch (\Throwable) {
             // Migration holt es nach.
@@ -58,10 +61,13 @@ final class MemorialRepository
                    c.vorname AS c_vorname, c.nachname AS c_nachname, c.geburtsname AS c_geburtsname,
                    c.photo_path AS c_photo_path, c.geburtstag AS c_geburtstag,
                    cat.name AS c_category,
-                   c.archived_at AS c_archived_at, c.deleted_at AS c_deleted_at
+                   c.archived_at AS c_archived_at, c.deleted_at AS c_deleted_at,
+                   r.name AS r_name, r.photo_path AS r_photo_path, r.born_on AS r_born_on,
+                   r.role_label AS r_role_label
             FROM memorials m
             LEFT JOIN contacts c ON c.id = m.contact_id
-            LEFT JOIN categories cat ON cat.id = c.category_id';
+            LEFT JOIN categories cat ON cat.id = c.category_id
+            LEFT JOIN roster_people r ON r.id = m.roster_person_id';
 
     /**
      * Alle Einträge, nach Bereichs-Label gruppiert (ohne Label → Schlüssel "").
@@ -111,6 +117,16 @@ final class MemorialRepository
     {
         $stmt = $this->pdo->prepare(self::SELECT . ' WHERE m.contact_id = :cid LIMIT 1');
         $stmt->execute(['cid' => $contactId]);
+        $row = $stmt->fetch();
+
+        return $row ? $this->decorate($row) : null;
+    }
+
+    /** @return array<string,mixed>|null */
+    public function forRoster(int $rosterId): ?array
+    {
+        $stmt = $this->pdo->prepare(self::SELECT . ' WHERE m.roster_person_id = :rid LIMIT 1');
+        $stmt->execute(['rid' => $rosterId]);
         $row = $stmt->fetch();
 
         return $row ? $this->decorate($row) : null;
@@ -202,6 +218,55 @@ final class MemorialRepository
         return (int) $this->pdo->lastInsertId();
     }
 
+    /**
+     * Eintrag aus einer Person in „Weitere Personen" anlegen/aktualisieren
+     * (idempotent) – aufgerufen, sobald dort ein Todesdatum gesetzt ist.
+     * Die Person bleibt in ihrer eigenen Liste stehen, das hier ist nur der
+     * Spiegel auf der Gedenkseite.
+     *
+     * @param array<string,mixed> $person  Datensatz aus RosterRepository
+     */
+    public function upsertFromRoster(array $person, int $userId): int
+    {
+        $existing = $this->forRoster((int) $person['id']);
+        $bornOn = trim((string) ($person['born_on'] ?? '')) ?: null;
+        $diedOn = trim((string) ($person['died_on'] ?? '')) ?: null;
+        $diedYear = $diedOn !== null ? (int) substr($diedOn, 0, 4) : (int) date('Y');
+        $name = trim((string) ($person['name'] ?? ''));
+        // Bewusst NICHT das persönliche Fach/Rolle-Feld der Person (sonst zerfällt
+        // die Gedenkseite in viele Ein-Personen-Gruppen) – alle Einträge aus
+        // „Weitere Personen" landen in einer gemeinsamen Gruppe.
+        $role = roster_label();
+
+        if ($existing !== null) {
+            $this->update((int) $existing['id'], [
+                'display_name' => $name,
+                'role_label' => $role,
+                'born_on' => $bornOn,
+                'died_year' => $diedYear,
+                'died_on' => $diedOn,
+            ]);
+
+            return (int) $existing['id'];
+        }
+
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO memorials (roster_person_id, display_name, role_label, born_on, died_year, died_on, created_by)
+             VALUES (:rid, :name, :role, :born, :dyear, :don, :uid)'
+        );
+        $stmt->execute([
+            'rid' => (int) $person['id'],
+            'name' => $name,
+            'role' => $role,
+            'born' => $bornOn,
+            'dyear' => $diedYear,
+            'don' => $diedOn,
+            'uid' => $userId,
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
     /** Freier Eintrag (kein Kontakt). @param array<string,mixed> $data */
     public function createFree(array $data, int $userId): int
     {
@@ -242,6 +307,11 @@ final class MemorialRepository
         $this->pdo->prepare('DELETE FROM memorials WHERE contact_id = :cid')->execute(['cid' => $contactId]);
     }
 
+    public function deleteForRoster(int $rosterId): void
+    {
+        $this->pdo->prepare('DELETE FROM memorials WHERE roster_person_id = :rid')->execute(['rid' => $rosterId]);
+    }
+
     /** @param array<string,mixed> $data @return array<string,mixed> */
     private function params(array $data): array
     {
@@ -278,10 +348,13 @@ final class MemorialRepository
     private function decorate(array $row): array
     {
         $linked = $row['contact_id'] !== null;
+        $linkedRoster = $row['roster_person_id'] !== null;
 
         $name = trim((string) $row['display_name']);
         if ($linked) {
             $name = trim(($row['c_vorname'] ?? '') . ' ' . ($row['c_nachname'] ?? '')) ?: $name;
+        } elseif ($linkedRoster) {
+            $name = trim((string) ($row['r_name'] ?? '')) ?: $name;
         }
 
         $bornYear = $row['born_year'] !== null ? (int) $row['born_year'] : null;
@@ -291,10 +364,13 @@ final class MemorialRepository
             $diedYear = (int) substr($diedOn, 0, 4);
         }
 
-        // Volles Geburtsdatum: am Eintrag selbst, sonst (bei Kontakt) aus dem Kontakt.
+        // Volles Geburtsdatum: am Eintrag selbst, sonst aus dem verknüpften
+        // Kontakt bzw. der Person aus „Weitere Personen".
         $bornOn = trim((string) ($row['born_on'] ?? ''));
         if ($bornOn === '' && $linked) {
             $bornOn = trim((string) ($row['c_geburtstag'] ?? ''));
+        } elseif ($bornOn === '' && $linkedRoster) {
+            $bornOn = trim((string) ($row['r_born_on'] ?? ''));
         }
         $bornOn = preg_match('/^\d{4}-\d{2}-\d{2}$/', $bornOn) && strpos($bornOn, '-00') === false
             ? $bornOn
@@ -321,6 +397,8 @@ final class MemorialRepository
         $photo = trim((string) ($row['photo_path'] ?? ''));
         if ($photo === '' && $linked) {
             $photo = trim((string) ($row['c_photo_path'] ?? ''));
+        } elseif ($photo === '' && $linkedRoster) {
+            $photo = trim((string) ($row['r_photo_path'] ?? ''));
         }
 
         $birthName = '';
@@ -335,6 +413,8 @@ final class MemorialRepository
         $roleLabel = trim((string) ($row['role_label'] ?? ''));
         if ($roleLabel === '' && $linked) {
             $roleLabel = trim((string) ($row['c_category'] ?? ''));
+        } elseif ($roleLabel === '' && $linkedRoster) {
+            $roleLabel = trim((string) ($row['r_role_label'] ?? ''));
         }
 
         // Platzhalter-Initialen (Vorname + Nachname), s. person_initials().
@@ -346,6 +426,7 @@ final class MemorialRepository
             'id' => (int) $row['id'],
             'contact_id' => $linked ? (int) $row['contact_id'] : null,
             'contact_reachable' => $linked && $row['c_archived_at'] === null && $row['c_deleted_at'] === null,
+            'roster_person_id' => $linkedRoster ? (int) $row['roster_person_id'] : null,
             'name' => $name,
             'initial' => $initial,
             'birth_name' => $birthName,

@@ -278,6 +278,7 @@ final class SettingsController extends BaseController
     {
         $this->requirePermission('users.manage');
         $roles = $this->roleContext();
+        $rosterLabel = roster_label();
 
         $this->render('settings/permissions', [
             'matrix' => $this->settings->permissionMatrix(),
@@ -292,6 +293,7 @@ final class SettingsController extends BaseController
                 'Gruppen' => 'users',
                 'Galerien' => 'image',
                 'Dokumente' => 'file',
+                $rosterLabel => 'briefcase',
                 'In Memoriam' => 'cross',
                 'Orga-Team' => 'message-send',
                 'Administration' => 'lock',
@@ -327,6 +329,9 @@ final class SettingsController extends BaseController
                     'documents.view' => 'Ordner und Dateien ansehen und herunterladen',
                     'documents.upload' => 'Dateien in Ordner hochladen (und eigene Uploads bearbeiten/löschen)',
                     'documents.manage' => 'Ordner anlegen, bearbeiten, löschen; fremde Dateien bearbeiten/löschen',
+                ],
+                $rosterLabel => [
+                    'roster.manage' => 'Einträge in „' . $rosterLabel . '" anlegen, bearbeiten, löschen (Ansehen ist für alle offen)',
                 ],
                 'In Memoriam' => [
                     'memorials.manage' => 'Gedenkseite pflegen: Verstorbene eintragen, freie Einträge anlegen (Ansehen ist für alle offen)',

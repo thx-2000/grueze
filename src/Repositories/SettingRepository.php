@@ -204,6 +204,7 @@ final class SettingRepository
             'documents.upload'     => ['orga'],
             'documents.manage'     => ['orga'],
             'memorials.manage'     => ['orga'],
+            'roster.manage'        => ['orga'],
             'orga.contact_target'  => ['orga'],
             'settings.manage'      => ['orga'],
         ];

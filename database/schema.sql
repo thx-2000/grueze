@@ -576,11 +576,41 @@ CREATE TABLE IF NOT EXISTS announcement_links (
     CONSTRAINT fk_announcement_links_announcement FOREIGN KEY (announcement_id) REFERENCES announcements(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- „Weitere Personen": eine zusätzliche Personenliste außerhalb des
+-- Adressbuchs (bei dieser Instanz als „Lehrkräfte" beschriftet, siehe
+-- config('branding.roster_label')). Mit eigenen Kontakt-/Lebensdaten und
+-- einem freien Rollenfeld (Fach/Kurs, Position, o. Ä.). Ein Todesdatum
+-- spiegelt sich automatisch als Eintrag auf der Gedenkseite (memorials.
+-- roster_person_id) – die Person bleibt trotzdem in dieser Liste stehen.
+-- Muss vor „memorials" stehen (dessen FK darauf verweist).
+CREATE TABLE IF NOT EXISTS roster_people (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(190) NOT NULL,
+    role_label VARCHAR(160) NULL,
+    email VARCHAR(190) NULL,
+    mobile VARCHAR(60) NULL,
+    born_on DATE NULL,
+    died_on DATE NULL,
+    strasse VARCHAR(190) NULL,
+    plz VARCHAR(20) NULL,
+    ort VARCHAR(120) NULL,
+    land VARCHAR(80) NULL,
+    note VARCHAR(500) NULL,
+    photo_path VARCHAR(255) NULL,
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_roster_people_name (name),
+    CONSTRAINT fk_roster_people_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- „In Memoriam": Gedenkseite. Ein Eintrag ist entweder mit einem Kontakt
--- verknüpft (contact_id) oder frei (Person stand nie im Adressbuch).
+-- verknüpft (contact_id), mit einer Person aus „Weitere Personen"
+-- (roster_person_id) oder frei (Person stand nirgends).
 CREATE TABLE IF NOT EXISTS memorials (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     contact_id INT UNSIGNED NULL,
+    roster_person_id INT UNSIGNED NULL,
     display_name VARCHAR(190) NOT NULL,
     role_label VARCHAR(120) NULL,
     born_year SMALLINT UNSIGNED NULL,
@@ -593,8 +623,10 @@ CREATE TABLE IF NOT EXISTS memorials (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_memorials_contact (contact_id),
+    KEY idx_memorials_roster (roster_person_id),
     KEY idx_memorials_year (died_year),
     CONSTRAINT fk_memorials_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE SET NULL,
+    CONSTRAINT fk_memorials_roster FOREIGN KEY (roster_person_id) REFERENCES roster_people(id) ON DELETE SET NULL,
     CONSTRAINT fk_memorials_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

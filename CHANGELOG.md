@@ -3,6 +3,26 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.65.0
+
+**„Weitere Personen": eine zusätzliche Liste außerhalb des Adressbuchs.**
+
+- Neuer Bereich (Menüpunkt standardmäßig „Weitere Personen", bei dieser
+  Instanz „Lehrkräfte" – umbenennbar über `branding.roster_label`). Komplett
+  getrennt vom Adressbuch: landet nirgends in Rundmails, Abstimmungen,
+  Gruppen oder Geburtstagslisten.
+- Pro Eintrag: Name, Fach/Rolle (frei wählbar), E-Mail, Handy,
+  Geburtsdatum, Todesdatum, Post-Adresse, Foto und eine Notiz.
+- **Verzahnt mit In Memoriam:** ein gesetztes Todesdatum lässt die Person
+  automatisch auf der Gedenkseite erscheinen – die Person bleibt dabei in
+  „Weitere Personen" stehen, nur mit einem Kreuz markiert. Bereits
+  bestehende freie Gedenk-Einträge (z. B. für Lehrkräfte) werden beim
+  ersten Aufruf automatisch als Personen übernommen, nichts muss doppelt
+  eingetragen werden.
+- Neues Recht `roster.manage` (Standard: Team + Admin) fürs Pflegen;
+  Ansehen ist für alle offen, wie bei In Memoriam.
+- Migration `2026-10-07-weitere-personen.sql`.
+
 ## 1.64.0
 
 **Profilbilder groß ansehen.**

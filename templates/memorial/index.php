@@ -57,8 +57,10 @@ $card = static function (array $e) use ($canManage, $lifespan, $ageLabel, $csrfT
                     <a class="ghost-button compact-action" href="<?= e(url('/memoriam/bearbeiten?id=' . (int) $e['id'])) ?>"><?= icon('edit') ?><span>Bearbeiten</span></a>
                     <?php if ($e['contact_id'] !== null && $e['contact_reachable']): ?>
                         <a class="ghost-button compact-action" href="<?= e(url('/contacts/edit?id=' . (int) $e['contact_id'])) ?>"><?= icon('contacts') ?><span>Kontakt</span></a>
+                    <?php elseif ($e['roster_person_id'] !== null && can('roster.manage')): ?>
+                        <a class="ghost-button compact-action" href="<?= e(url('/weitere-personen/bearbeiten?id=' . (int) $e['roster_person_id'])) ?>"><?= icon('contacts') ?><span><?= e(roster_label()) ?></span></a>
                     <?php endif; ?>
-                    <form method="post" action="<?= e(url('/memoriam/loeschen')) ?>" data-confirm="„<?= e((string) $e['name']) ?>“ von der Gedenkseite entfernen?<?= $e['contact_id'] !== null ? ' Der verknüpfte Kontakt kommt dabei zurück ins Adressbuch.' : '' ?>">
+                    <form method="post" action="<?= e(url('/memoriam/loeschen')) ?>" data-confirm="„<?= e((string) $e['name']) ?>“ von der Gedenkseite entfernen?<?= $e['contact_id'] !== null ? ' Der verknüpfte Kontakt kommt dabei zurück ins Adressbuch.' : ($e['roster_person_id'] !== null ? ' Der Eintrag in „' . e(roster_label()) . '“ bleibt bestehen.' : '') ?>">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <input type="hidden" name="id" value="<?= (int) $e['id'] ?>">
                         <button type="submit" class="danger-button compact-action"><?= icon('trash') ?><span>Entfernen</span></button>

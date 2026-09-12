@@ -5,6 +5,49 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **„Weitere Personen" / Lehrkräfte-Liste (TH-Wunsch 2026-09-12):** erledigt
+  v1.65.0. Neue Tabelle `roster_people` (Name, Fach/Rolle, E-Mail, Handy,
+  Geburts-/Todesdatum, Adresse, Notiz, Foto) + `RosterRepository`/
+  `RosterController`, Routen `/weitere-personen*`. Label konfigurierbar über
+  `branding.roster_label` (Default „Weitere Personen", config-only wie
+  `memorial_label`) – für diese Instanz auf „Lehrkräfte" setzen.
+  Recht `roster.manage` (Standard orga), Ansehen offen für alle.
+  **Verzahnung mit In Memoriam** (TH: „Option 1, die In-Memoriam-Personen
+  nutzen, die stimmen schon"): `memorials.roster_person_id` (parallel zu
+  `contact_id`), `MemorialRepository::upsertFromRoster()`/`deleteForRoster()`
+  – ein Todesdatum in „Weitere Personen" spiegelt sich automatisch als
+  Gedenk-Eintrag; die Person bleibt in ihrer Liste stehen (TH: „mit einem
+  deutlichen Kreuz am Namen" – `icon('cross')` neben dem Namen, keine
+  Archivierung/kein Verschwinden). Alle Gedenk-Einträge aus dieser Quelle
+  gruppieren sich unter dem festen `roster_label()`-Wert, NICHT dem
+  persönlichen Fach jeder Person (sonst zerfällt die Gedenkseite in viele
+  Ein-Personen-Gruppen). Auf der Gedenkseite/-Formular sind Name, Rolle,
+  Lebensdaten und Foto für roster-verlinkte Einträge gesperrt (kommen aus
+  „Weitere Personen", sonst würde ein erneuter Abgleich sie überschreiben) –
+  nur die Gedenkzeile bleibt dort frei editierbar.
+  **Automatische Übernahme bestehender Daten:** `RosterRepository::
+  backfillFromFreeMemorials()` (in `ensureSchema()`, läuft sich nach dem
+  ersten Mal leer) übernimmt alle bisherigen freien Gedenk-Einträge
+  (`contact_id IS NULL`, meist die schon vorhandenen Lehrkräfte) automatisch
+  als Personen und verlinkt zurück – nichts muss neu eingetragen werden.
+  **Konstruktions-Reihenfolge beachtet:** da `RosterController` seine
+  `RosterRepository` vor der `MemorialRepository` auflöst, zieht
+  `RosterRepository::ensureSchema()` die Spalte `memorials.roster_person_id`
+  sicherheitshalber selbst nach (nicht nur `MemorialRepository`) – sonst
+  schlägt der Backfill beim allerersten Aufruf nach einem Deploy fehl.
+  `person_initials()` erkennt jetzt zusätzlich bloße Anreden ohne Punkt
+  („Herr", „Frau", „Familie", „Fräulein") als Nicht-Vornamen (wie schon
+  „Dr."/„Prof." mit Punkt) – „Herr Dr. Krause" → „K", „Frau Bergmann-Weiss"
+  → „B" statt „HD"/„FB". Bewusst NICHT zusätzlich in Kontakt-Kartenansichten
+  zoombar/verlinkt in Tabelle/Karten von Kontakten (unverändert), aber die
+  Fotos in der neuen Liste selbst sind klickbar (`contact_avatar(..., true)`,
+  wie bei Kontakten/Memoriam aus v1.64.0).
+  Getestet (Docker, Playwright): Backfill (2 alte freie Einträge →
+  Personen + Verlinkung), Todesdatum setzen/entfernen (erscheint/verschwindet
+  auf der Gedenkseite, Person bleibt stehen), Gedenkseiten-Formular zeigt bei
+  Verlinkung nur die Gedenkzeile + Link zurück zu „Weitere Personen“,
+  Foto-Zoom in der Tabelle, 768px (Tablet) ohne seitliches Verschieben.
+  Testdaten restlos entfernt, `.htaccess` zurückgesetzt.
 - **Profilbilder groß ansehen + Tablet-Check (TH-Wunsch 2026-09-12):** erledigt
   v1.64.0. Auch 768px (Tablet) auf das seitliche-Verschieben-Problem geprüft
   – 0 Treffer, der `html`-Fix aus v1.63.2 greift breitenunabhängig.

@@ -49,6 +49,11 @@ return [
         'product_donate_url' => 'https://buymeacoffee.com/thomashageleit',
         // Name des Gedenkbereichs (Menü + Seitentitel). Default „In Memoriam".
         'memorial_label' => 'In Memoriam',
+        // Name der zusätzlichen Personenliste außerhalb des Adressbuchs
+        // (Menü + Seitentitel). Default „Weitere Personen" – z. B. für einen
+        // Abi-Jahrgang auf „Lehrkräfte" umbenennen, für einen Verein auf
+        // „Trainer:innen" o. Ä.
+        'roster_label' => 'Weitere Personen',
         'public_site_label' => '',
         'public_site_url' => '',
         'support_email' => '',

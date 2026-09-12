@@ -104,13 +104,19 @@ final class MemorialController extends BaseController
         }
 
         $data = $this->sanitize($request);
-        if ($data['display_name'] === '' && $entry['contact_id'] === null) {
+        $isAnyLinked = $entry['contact_id'] !== null || $entry['roster_person_id'] !== null;
+        if ($data['display_name'] === '' && !$isAnyLinked) {
             flash('error', 'Bitte einen Namen angeben.');
             Redirect::to('/memoriam/bearbeiten?id=' . $id);
         }
 
-        // Bei verknüpften Einträgen kommen Name/Foto aus dem Kontakt – nicht überschreiben.
-        if ($entry['contact_id'] !== null) {
+        // Bei verknüpften Einträgen kommen Name/Foto aus dem Kontakt bzw. der
+        // Person aus „Weitere Personen" – nicht überschreiben. Bei Weitere-
+        // Personen-Einträgen kommen zusätzlich Rolle und Lebensdaten von dort,
+        // sonst würde sie der nächste Abgleich (upsertFromRoster) überschreiben.
+        if ($entry['roster_person_id'] !== null) {
+            unset($data['display_name'], $data['photo_path'], $data['role_label'], $data['born_year'], $data['born_on'], $data['died_year'], $data['died_on']);
+        } elseif ($entry['contact_id'] !== null) {
             unset($data['display_name'], $data['photo_path']);
         } else {
             try {

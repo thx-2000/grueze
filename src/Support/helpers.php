@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.64.0';
+    return '1.65.0';
 }
 
 /**
@@ -379,6 +379,16 @@ function product_url(): string
 function memorial_label(): string
 {
     return trim(branding_default('memorial_label', 'In Memoriam')) ?: 'In Memoriam';
+}
+
+/**
+ * Name der zusätzlichen Personenliste außerhalb des Adressbuchs. Default
+ * „Weitere Personen"; per config('branding.roster_label') überschreibbar
+ * (z. B. „Lehrkräfte", „Trainer:innen", „Externe Kontakte").
+ */
+function roster_label(): string
+{
+    return trim(branding_default('roster_label', 'Weitere Personen')) ?: 'Weitere Personen';
 }
 
 /**
@@ -640,6 +650,23 @@ function nav_show_memorials(): bool
 }
 
 /**
+ * Ob der „Weitere Personen"-Menüpunkt angezeigt wird: für die Verwaltung
+ * immer, für alle anderen nur, wenn es mindestens einen Eintrag gibt.
+ */
+function nav_show_roster(): bool
+{
+    try {
+        if (can('roster.manage')) {
+            return true;
+        }
+
+        return App\Core\Container::get(App\Repositories\RosterRepository::class)->countAll() > 0;
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+/**
  * Ob der „Dokumente"-Menüpunkt für die aktuelle Person angezeigt werden soll –
  * gleiche Logik wie bei den Galerien (globale Rechte, Gruppenleitung, oder
  * Mitglied einer Gruppe mit eigenem Ordner).
@@ -706,6 +733,9 @@ function page_title(string $path): string
         '/memoriam'                  => memorial_label(),
         '/memoriam/neu'              => 'Eintrag hinzufügen',
         '/memoriam/bearbeiten'       => 'Eintrag bearbeiten',
+        '/weitere-personen'          => roster_label(),
+        '/weitere-personen/neu'      => 'Eintrag hinzufügen',
+        '/weitere-personen/bearbeiten' => 'Eintrag bearbeiten',
         '/meine-daten'               => 'Daten-Check',
         '/search'                    => 'Suche',
         '/contacts/create'           => 'Neuer Kontakt',
@@ -908,8 +938,13 @@ function person_initials(array $person): string
     if ($first === '' && $last === '') {
         $whole = trim((string) ($person['name'] ?? $person['display_name'] ?? ''));
         $parts = $whole !== '' ? (preg_split('/\s+/', $whole, -1, PREG_SPLIT_NO_EMPTY) ?: []) : [];
-        // Führende Titel wie „Dr." / „Prof." nicht als Vornamen zählen.
-        while (count($parts) > 1 && str_ends_with($parts[0], '.')) {
+        // Führende Titel („Dr.", „Prof.") und Anreden ohne Punkt („Herr",
+        // „Frau" – z. B. bei freien Einträgen ohne bekannten Vornamen) nicht
+        // als Vornamen zählen.
+        $salutations = ['herr', 'herrn', 'frau', 'familie', 'fräulein'];
+        while (count($parts) > 1 && (
+            str_ends_with($parts[0], '.') || in_array(mb_strtolower($parts[0]), $salutations, true)
+        )) {
             array_shift($parts);
         }
         if (count($parts) === 1) {
