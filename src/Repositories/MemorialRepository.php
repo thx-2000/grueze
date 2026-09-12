@@ -231,7 +231,9 @@ final class MemorialRepository
         $existing = $this->forRoster((int) $person['id']);
         $bornOn = trim((string) ($person['born_on'] ?? '')) ?: null;
         $diedOn = trim((string) ($person['died_on'] ?? '')) ?: null;
-        $diedYear = $diedOn !== null ? (int) substr($diedOn, 0, 4) : (int) date('Y');
+        // Todesjahr wie am Eintrag bekannt – bei „verstorben, Datum/Jahr
+        // unbekannt" bleibt es null (keine erfundene Jahreszahl vortäuschen).
+        $diedYear = $person['died_year'] !== null ? (int) $person['died_year'] : null;
         $name = trim((string) ($person['name'] ?? ''));
         // Bewusst NICHT das persönliche Fach/Rolle-Feld der Person (sonst zerfällt
         // die Gedenkseite in viele Ein-Personen-Gruppen) – alle Einträge aus

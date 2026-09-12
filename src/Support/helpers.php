@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.65.0';
+    return '1.66.0';
 }
 
 /**
@@ -919,18 +919,18 @@ function format_birth_name(array $contact): string
 }
 
 /**
- * Anzeige-Initialen für einen Personen-Datensatz: Vorname + Nachname („AR" für
- * „Achim Reinhardt"). Ein einzelner Name gibt einen Buchstaben, gar kein Name
- * „?". Klein geschriebene Namenszusätze (von, de la …) werden für den
- * Nachnamen-Buchstaben übersprungen: „Anna Groth de la Fuentes" → „AG",
- * „Klara von Stein" → „KS".
- *
- * Erkennt entweder getrennte Felder (`vorname`/`nachname`) oder einen ganzen
- * Namen (`name`/`display_name`).
+ * Zerlegt einen Personen-Datensatz in vorname-/nachname-artige Teile – Basis
+ * für `person_initials()` und `person_surname()`. Erkennt entweder getrennte
+ * Felder (`vorname`/`nachname`) oder einen ganzen Namen (`name`/`display_name`).
+ * Führende Titel („Dr.", „Prof.") und Anreden ohne Punkt („Herr", „Frau" –
+ * z. B. bei freien Einträgen ohne bekannten Vornamen) zählen dabei nicht als
+ * Vorname. Bleibt nach dem Überspringen nur ein Wort übrig, gilt das als
+ * Nachname (nicht als Vorname) – „Herr Dr. Krause" → nur Nachname „Krause".
  *
  * @param array<string,mixed> $person
+ * @return array{first: string, last: string}
  */
-function person_initials(array $person): string
+function person_name_parts(array $person): array
 {
     $first = trim((string) ($person['vorname'] ?? ''));
     $last = trim((string) ($person['nachname'] ?? ''));
@@ -938,9 +938,6 @@ function person_initials(array $person): string
     if ($first === '' && $last === '') {
         $whole = trim((string) ($person['name'] ?? $person['display_name'] ?? ''));
         $parts = $whole !== '' ? (preg_split('/\s+/', $whole, -1, PREG_SPLIT_NO_EMPTY) ?: []) : [];
-        // Führende Titel („Dr.", „Prof.") und Anreden ohne Punkt („Herr",
-        // „Frau" – z. B. bei freien Einträgen ohne bekannten Vornamen) nicht
-        // als Vornamen zählen.
         $salutations = ['herr', 'herrn', 'frau', 'familie', 'fräulein'];
         while (count($parts) > 1 && (
             str_ends_with($parts[0], '.') || in_array(mb_strtolower($parts[0]), $salutations, true)
@@ -948,12 +945,30 @@ function person_initials(array $person): string
             array_shift($parts);
         }
         if (count($parts) === 1) {
-            $first = $parts[0];
+            $last = $parts[0];
         } elseif ($parts !== []) {
             $first = array_shift($parts);
             $last = implode(' ', $parts);
         }
     }
+
+    return ['first' => $first, 'last' => $last];
+}
+
+/**
+ * Anzeige-Initialen für einen Personen-Datensatz: Vorname + Nachname („AR" für
+ * „Achim Reinhardt"). Ein einzelner Name gibt einen Buchstaben, gar kein Name
+ * „?". Klein geschriebene Namenszusätze (von, de la …) werden für den
+ * Nachnamen-Buchstaben übersprungen: „Anna Groth de la Fuentes" → „AG",
+ * „Klara von Stein" → „KS".
+ *
+ * @param array<string,mixed> $person
+ */
+function person_initials(array $person): string
+{
+    $parts = person_name_parts($person);
+    $first = $parts['first'];
+    $last = $parts['last'];
 
     // Für den Nachnamen-Buchstaben führende Kleinschreib-Zusätze überspringen.
     $lastLetter = '';
@@ -967,6 +982,20 @@ function person_initials(array $person): string
     $initials = mb_substr($first, 0, 1) . $lastLetter;
 
     return $initials !== '' ? mb_strtoupper($initials) : '?';
+}
+
+/**
+ * Nachname (bzw. bestmögliche Näherung) für die Sortierung freier Namens-
+ * Einträge ohne getrennte Vorname-/Nachname-Felder – z. B. „Weitere Personen"
+ * nach Nachname sortieren. Siehe `person_name_parts()` für die Erkennung.
+ *
+ * @param array<string,mixed> $person
+ */
+function person_surname(array $person): string
+{
+    $last = person_name_parts($person)['last'];
+
+    return $last !== '' ? $last : trim((string) ($person['name'] ?? $person['display_name'] ?? ''));
 }
 
 /**

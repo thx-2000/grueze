@@ -148,9 +148,10 @@ final class RosterController extends BaseController
     // --------------------------------------------------------------------- intern
 
     /**
-     * Nach jedem Speichern die Gedenkseite abgleichen: Todesdatum gesetzt →
-     * Eintrag dort anlegen/aktualisieren, sonst einen bestehenden Spiegel
-     * wieder entfernen (die Person selbst bleibt hier unberührt stehen).
+     * Nach jedem Speichern die Gedenkseite abgleichen: als verstorben markiert
+     * (Datum, Jahr oder nur der Haken) → Eintrag dort anlegen/aktualisieren,
+     * sonst einen bestehenden Spiegel wieder entfernen (die Person selbst
+     * bleibt hier unberührt stehen).
      */
     private function syncMemorial(int $id): void
     {
@@ -158,7 +159,7 @@ final class RosterController extends BaseController
         if ($person === null) {
             return;
         }
-        if ($person['died_on'] !== null) {
+        if ($person['is_deceased']) {
             $this->memorials->upsertFromRoster($person, (int) $this->userId());
         } else {
             $this->memorials->deleteForRoster($id);
@@ -176,10 +177,13 @@ final class RosterController extends BaseController
         return [
             'name' => mb_substr(trim((string) $request->input('name')), 0, 190),
             'role_label' => mb_substr(trim((string) $request->input('role_label')), 0, 160),
+            'subjects' => mb_substr(trim((string) $request->input('subjects')), 0, 255),
             'email' => mb_substr(trim((string) $request->input('email')), 0, 190),
             'mobile' => mb_substr(trim((string) $request->input('mobile')), 0, 60),
             'born_on' => trim((string) $request->input('born_on')),
+            'died_year' => (int) $request->input('died_year') ?: null,
             'died_on' => trim((string) $request->input('died_on')),
+            'deceased_unknown' => $request->input('deceased_unknown') !== null,
             'strasse' => mb_substr(trim((string) $request->input('strasse')), 0, 190),
             'plz' => mb_substr(trim((string) $request->input('plz')), 0, 20),
             'ort' => mb_substr(trim((string) $request->input('ort')), 0, 120),

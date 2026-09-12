@@ -3,6 +3,20 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.66.0
+
+**„Weitere Personen": Todesjahr, unbekanntes Sterbedatum, Fächer, Sortierung.**
+
+- **Todesjahr statt exaktem Datum** möglich – und ein Haken „Verstorben, aber
+  weder Datum noch Jahr bekannt" für Fälle ganz ohne Information. Alle drei
+  lassen die Person automatisch auf der Gedenkseite erscheinen; in „Weitere
+  Personen" bleibt sie in jedem Fall stehen, nur mit einem Kreuz markiert.
+- **Fächer** als eigenes Feld (mehrere durch Komma getrennt, als Chips
+  angezeigt) – getrennt von der allgemeinen Rolle/Gruppierung.
+- Die Liste ist jetzt **nach Nachname sortiert**.
+
+Migration `2026-10-08-weitere-personen-todesjahr-faecher.sql`.
+
 ## 1.65.0
 
 **„Weitere Personen": eine zusätzliche Liste außerhalb des Adressbuchs.**

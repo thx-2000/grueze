@@ -41,10 +41,13 @@ final class RosterRepository
                     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(190) NOT NULL,
                     role_label VARCHAR(160) NULL,
+                    subjects VARCHAR(255) NULL,
                     email VARCHAR(190) NULL,
                     mobile VARCHAR(60) NULL,
                     born_on DATE NULL,
+                    died_year SMALLINT UNSIGNED NULL,
                     died_on DATE NULL,
+                    deceased_unknown TINYINT(1) NOT NULL DEFAULT 0,
                     strasse VARCHAR(190) NULL,
                     plz VARCHAR(20) NULL,
                     ort VARCHAR(120) NULL,
@@ -61,6 +64,9 @@ final class RosterRepository
             // dieser Anfrage schon vorher lief (Konstruktions-Reihenfolge im
             // Container ist nicht garantiert) – die Spalte notfalls selbst nachziehen.
             $this->pdo->exec('ALTER TABLE memorials ADD COLUMN IF NOT EXISTS roster_person_id INT UNSIGNED NULL AFTER contact_id');
+            $this->pdo->exec('ALTER TABLE roster_people ADD COLUMN IF NOT EXISTS died_year SMALLINT UNSIGNED NULL AFTER born_on');
+            $this->pdo->exec('ALTER TABLE roster_people ADD COLUMN IF NOT EXISTS deceased_unknown TINYINT(1) NOT NULL DEFAULT 0 AFTER died_on');
+            $this->pdo->exec('ALTER TABLE roster_people ADD COLUMN IF NOT EXISTS subjects VARCHAR(255) NULL AFTER role_label');
             $this->backfillFromFreeMemorials();
         } catch (\Throwable) {
             // Migration holt es nach.
@@ -110,17 +116,25 @@ final class RosterRepository
     }
 
     /**
-     * Alle Einträge, alphabetisch. Jeder Eintrag bekommt `age` (falls
-     * Geburts-/Todesdatum bzw. -jahr bekannt) und `initial` (Platzhalter-
-     * Buchstaben ohne Foto) wie bei den Gedenk-Einträgen.
+     * Alle Einträge, nach Nachname sortiert (freier Namenseintrag – siehe
+     * `person_surname()`). Jeder Eintrag bekommt `age` (falls Geburts-/
+     * Todesdatum bzw. -jahr bekannt), `is_deceased` und `initial`
+     * (Platzhalter-Buchstabe ohne Foto) wie bei den Gedenk-Einträgen.
      *
      * @return list<array<string,mixed>>
      */
     public function all(): array
     {
-        $rows = $this->pdo->query('SELECT * FROM roster_people ORDER BY name ASC')->fetchAll();
+        $rows = $this->pdo->query('SELECT * FROM roster_people')->fetchAll();
+        $entries = array_map($this->decorate(...), $rows);
 
-        return array_map($this->decorate(...), $rows);
+        usort(
+            $entries,
+            static fn (array $a, array $b): int => strnatcasecmp($a['surname'], $b['surname'])
+                ?: strnatcasecmp($a['name'], $b['name'])
+        );
+
+        return $entries;
     }
 
     /** @return array<string,mixed>|null */
@@ -161,9 +175,11 @@ final class RosterRepository
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO roster_people
-                (name, role_label, email, mobile, born_on, died_on, strasse, plz, ort, land, note, photo_path, created_by)
+                (name, role_label, subjects, email, mobile, born_on, died_year, died_on, deceased_unknown,
+                 strasse, plz, ort, land, note, photo_path, created_by)
              VALUES
-                (:name, :role, :email, :mobile, :born, :died, :strasse, :plz, :ort, :land, :note, :photo, :uid)'
+                (:name, :role, :subjects, :email, :mobile, :born, :dyear, :died, :unknown,
+                 :strasse, :plz, :ort, :land, :note, :photo, :uid)'
         );
         $stmt->execute($this->params($data) + ['uid' => $userId]);
 
@@ -181,7 +197,9 @@ final class RosterRepository
             $column = match ($key) {
                 'role' => 'role_label',
                 'born' => 'born_on',
+                'dyear' => 'died_year',
                 'died' => 'died_on',
+                'unknown' => 'deceased_unknown',
                 default => $key,
             };
             $fields[] = "$column = :$key";
@@ -205,14 +223,27 @@ final class RosterRepository
     {
         $born = trim((string) ($data['born_on'] ?? ''));
         $died = trim((string) ($data['died_on'] ?? ''));
+        $diedYear = (int) ($data['died_year'] ?? 0);
+        // Volles Todesdatum eingetragen, aber kein Jahr → Jahr daraus ableiten.
+        if ($diedYear < 1900 && preg_match('/^\d{4}-\d{2}-\d{2}$/', $died)) {
+            $diedYear = (int) substr($died, 0, 4);
+        }
+        // „Verstorben, Datum/Jahr unbekannt" nur zählen, wenn wirklich nichts
+        // Genaueres bekannt ist – ein Datum/Jahr ist die stärkere Aussage.
+        $died = preg_match('/^\d{4}-\d{2}-\d{2}$/', $died) ? $died : null;
+        $diedYear = $diedYear >= 1900 && $diedYear <= 2100 ? $diedYear : null;
+        $deceasedUnknown = !empty($data['deceased_unknown']) && $died === null && $diedYear === null;
 
         return [
             'name' => mb_substr(trim((string) ($data['name'] ?? '')), 0, 190),
             'role' => ($r = mb_substr(trim((string) ($data['role_label'] ?? '')), 0, 160)) !== '' ? $r : null,
+            'subjects' => ($f = mb_substr(trim((string) ($data['subjects'] ?? '')), 0, 255)) !== '' ? $f : null,
             'email' => ($e = mb_substr(trim((string) ($data['email'] ?? '')), 0, 190)) !== '' ? $e : null,
             'mobile' => ($m = mb_substr(trim((string) ($data['mobile'] ?? '')), 0, 60)) !== '' ? $m : null,
             'born' => preg_match('/^\d{4}-\d{2}-\d{2}$/', $born) ? $born : null,
-            'died' => preg_match('/^\d{4}-\d{2}-\d{2}$/', $died) ? $died : null,
+            'dyear' => $diedYear,
+            'died' => $died,
+            'unknown' => $deceasedUnknown ? 1 : 0,
             'strasse' => ($s = mb_substr(trim((string) ($data['strasse'] ?? '')), 0, 190)) !== '' ? $s : null,
             'plz' => ($p = mb_substr(trim((string) ($data['plz'] ?? '')), 0, 20)) !== '' ? $p : null,
             'ort' => ($o = mb_substr(trim((string) ($data['ort'] ?? '')), 0, 120)) !== '' ? $o : null,
@@ -229,22 +260,54 @@ final class RosterRepository
     private function decorate(array $row): array
     {
         $bornOn = trim((string) ($row['born_on'] ?? '')) ?: null;
+        $bornYear = $bornOn !== null ? (int) substr($bornOn, 0, 4) : null;
         $diedOn = trim((string) ($row['died_on'] ?? '')) ?: null;
+        $diedYear = $row['died_year'] !== null ? (int) $row['died_year'] : ($diedOn !== null ? (int) substr($diedOn, 0, 4) : null);
+        $deceasedUnknown = (bool) $row['deceased_unknown'];
+        // Verstorben, sobald irgendetwas davon bekannt ist – ein genaues Datum,
+        // nur das Jahr, oder (mangels beidem) der reine Haken "verstorben".
+        $isDeceased = $diedOn !== null || $diedYear !== null || $deceasedUnknown;
 
+        // Lebensalter: exakt bei zwei vollen Daten, sonst grobe Jahresdifferenz
+        // (nur bei Lebenden gegen heute – bei Verstorbenen ohne jedes Datum
+        // lässt sich kein Alter berechnen, „heute" wäre hier falsch).
         $age = null;
+        $ageExact = false;
         if ($bornOn !== null) {
             $b = \DateTimeImmutable::createFromFormat('Y-m-d', $bornOn) ?: null;
-            $ref = $diedOn !== null ? \DateTimeImmutable::createFromFormat('Y-m-d', $diedOn) : new \DateTimeImmutable('today');
-            if ($b !== null && $ref !== false && $ref !== null && $ref >= $b) {
-                $age = $b->diff($ref)->y;
+            if ($isDeceased) {
+                if ($b !== null && $diedOn !== null) {
+                    $d = \DateTimeImmutable::createFromFormat('Y-m-d', $diedOn) ?: null;
+                    if ($d !== null && $d >= $b) {
+                        $age = $b->diff($d)->y;
+                        $ageExact = true;
+                    }
+                }
+                if ($age === null && $diedYear !== null && $bornYear !== null && $diedYear >= $bornYear) {
+                    $age = $diedYear - $bornYear;
+                }
+            } elseif ($b !== null) {
+                $today = new \DateTimeImmutable('today');
+                if ($today >= $b) {
+                    $age = $b->diff($today)->y;
+                    $ageExact = true;
+                }
             }
         }
 
         $row['born_on'] = $bornOn;
+        $row['died_year'] = $diedYear;
         $row['died_on'] = $diedOn;
-        $row['is_deceased'] = $diedOn !== null;
+        $row['deceased_unknown'] = $deceasedUnknown;
+        $row['is_deceased'] = $isDeceased;
         $row['age'] = $age;
+        $row['age_exact'] = $ageExact;
+        $row['subjects'] = trim((string) ($row['subjects'] ?? '')) ?: null;
+        $row['subjects_list'] = $row['subjects'] !== null
+            ? array_values(array_filter(array_map('trim', explode(',', $row['subjects']))))
+            : [];
         $row['initial'] = person_initials(['name' => (string) $row['name']]);
+        $row['surname'] = person_surname(['name' => (string) $row['name']]);
 
         return $row;
     }

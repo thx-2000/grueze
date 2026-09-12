@@ -5,6 +5,37 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **„Weitere Personen": Todesjahr/unbekannt, Fächer, Sortierung (TH 2026-09-13):**
+  erledigt v1.66.0. TH-Beobachtung: zwei Lehrkräfte fehlten auf der Gedenkseite,
+  weil nur ein Todesjahr (kein exaktes Datum) bekannt war – `is_deceased` hing
+  bisher ausschließlich an `died_on`. Jetzt: `roster_people.died_year`
+  (mirrort memorials' eigenes Muster) + neuer Haken `deceased_unknown`
+  TINYINT für „verstorben, aber gar nichts Genaueres bekannt". `is_deceased`
+  = irgendeins der drei Signale. `RosterRepository::decorate()` berechnet
+  Alter jetzt fallabhängig: exakt bei zwei vollen Daten, grob bei Todesjahr,
+  **gar keins** wenn Sterbedatum komplett unbekannt (nicht fälschlich „heute"
+  rechnen). `MemorialRepository::upsertFromRoster()` reicht `died_year` durch
+  (kein Phantom-Jahr mehr, wenn nichts bekannt ist). Formular: „Todesjahr"
+  neben „Todesdatum" + Checkbox „Verstorben, Datum/Jahr unbekannt"
+  (server-seitig nur wirksam, wenn wirklich weder Datum noch Jahr gesetzt
+  sind – die stärkere Angabe gewinnt immer).
+  **Fächer:** neues Feld `roster_people.subjects` (Freitext, kommagetrennt),
+  in der Liste als `.tag`-Chips angezeigt – bewusst getrennt von `role_label`
+  (jetzt "Rolle", allgemeine Gruppierung z. B. „Lehrkräfte", TH: „super für
+  die Gruppenbezeichnung").
+  **Sortierung nach Nachname:** neuer Helper `person_surname()` +
+  `person_name_parts()` (aus `person_initials()` herausgezogen, gleiche
+  Anrede-/Titel-Erkennung wie schon für die Initialen – „Herr Dr. Krause" →
+  Nachname „Krause"). `RosterRepository::all()` sortiert jetzt per
+  `usort()`+`strnatcasecmp()` nach diesem Nachnamen statt per SQL
+  `ORDER BY name` (das freie `name`-Feld hat ja keinen echten Nachnamen-Wert).
+  Migration `2026-10-08-weitere-personen-todesjahr-faecher.sql`.
+  Getestet (Docker, Playwright): alle drei Verstorben-Signale einzeln
+  (Datum/Jahr/nur-Haken) → erscheinen korrekt auf der Gedenkseite mit
+  passender Lebensspanne-Anzeige („† 04.05.2020" / „† 2015" / „verstorben"),
+  Haken zurücknehmen entfernt den Gedenk-Eintrag wieder (Person bleibt in der
+  Liste), Sortierung Adler/Bergmann-Weiss/Reinhardt/Zorn korrekt nach
+  Nachname, mehrere Fächer als getrennte Chips. Testdaten entfernt.
 - **„Weitere Personen" / Lehrkräfte-Liste (TH-Wunsch 2026-09-12):** erledigt
   v1.65.0. Neue Tabelle `roster_people` (Name, Fach/Rolle, E-Mail, Handy,
   Geburts-/Todesdatum, Adresse, Notiz, Foto) + `RosterRepository`/

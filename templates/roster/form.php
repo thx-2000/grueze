@@ -15,8 +15,12 @@ $action = $isEdit ? url('/weitere-personen/speichern') : url('/weitere-personen'
     <div class="contact-detail-head-main">
         <p class="eyebrow"><?= e(roster_label()) ?></p>
         <h1><?= $isEdit ? e((string) $p['name']) : 'Eintrag hinzufügen' ?></h1>
-        <?php if ($isEdit && $p['is_deceased']): ?>
-            <p class="muted"><?= icon('cross') ?> Als verstorben eingetragen<?php if (!empty($p['died_on'])): ?> (<?= e(format_date((string) $p['died_on'])) ?>)<?php endif; ?> – erscheint auf der Gedenkseite.</p>
+        <?php if ($isEdit && $p['is_deceased']):
+            $deathInfo = !empty($p['died_on'])
+                ? format_date((string) $p['died_on'])
+                : (!empty($p['died_year']) ? (string) $p['died_year'] : 'Datum unbekannt');
+        ?>
+            <p class="muted"><?= icon('cross') ?> Als verstorben eingetragen (<?= e($deathInfo) ?>) – erscheint auf der Gedenkseite.</p>
         <?php endif; ?>
     </div>
 </header>
@@ -34,9 +38,9 @@ $action = $isEdit ? url('/weitere-personen/speichern') : url('/weitere-personen'
                     <input type="text" name="name" required maxlength="190" value="<?= e((string) ($p['name'] ?? old('name'))) ?>" autofocus>
                 </label>
                 <label class="full-width">
-                    <span>Fach / Rolle</span>
-                    <input type="text" name="role_label" maxlength="160" list="rosterRoles" value="<?= e((string) ($p['role_label'] ?? old('role_label'))) ?>" placeholder="z. B. Deutsch LK, Mathe GK">
-                    <small class="field-hint">Frei wählbar – z. B. Fach/Kurs beim Abi-Jahrgang oder eine andere Zuordnung.</small>
+                    <span>Rolle</span>
+                    <input type="text" name="role_label" maxlength="160" list="rosterRoles" value="<?= e((string) ($p['role_label'] ?? old('role_label'))) ?>" placeholder="z. B. Lehrkräfte">
+                    <small class="field-hint">Allgemeine Zuordnung/Gruppierung dieser Person.</small>
                 </label>
                 <?php if ($roleSuggestions !== []): ?>
                     <datalist id="rosterRoles">
@@ -45,16 +49,33 @@ $action = $isEdit ? url('/weitere-personen/speichern') : url('/weitere-personen'
                         <?php endforeach; ?>
                     </datalist>
                 <?php endif; ?>
+                <label class="full-width">
+                    <span>Fächer</span>
+                    <input type="text" name="subjects" maxlength="255" value="<?= e((string) ($p['subjects'] ?? old('subjects'))) ?>" placeholder="z. B. Deutsch LK, Mathe GK">
+                    <small class="field-hint">Mehrere Fächer durch Komma trennen.</small>
+                </label>
                 <label>
                     <span>Geburtsdatum</span>
                     <input type="date" name="born_on" value="<?= e(substr((string) ($p['born_on'] ?? old('born_on')), 0, 10)) ?>">
                 </label>
+            </div>
+            <div class="form-grid">
                 <label>
                     <span>Todesdatum</span>
                     <input type="date" name="died_on" value="<?= e(substr((string) ($p['died_on'] ?? old('died_on')), 0, 10)) ?>">
-                    <small class="field-hint">Gesetzt = erscheint automatisch auf <?= e(memorial_label()) ?>, bleibt aber hier stehen.</small>
+                </label>
+                <label>
+                    <span>Todesjahr (falls das genaue Datum unbekannt ist)</span>
+                    <input type="number" name="died_year" min="1900" max="2100" step="1" inputmode="numeric" value="<?= e((string) ($p['died_year'] ?? old('died_year'))) ?>">
                 </label>
             </div>
+            <label class="inline-toggle">
+                <input type="checkbox" name="deceased_unknown" value="1" <?= (bool) ($p['deceased_unknown'] ?? old('deceased_unknown')) ? 'checked' : '' ?>>
+                <span>Verstorben, aber weder Datum noch Jahr bekannt</span>
+            </label>
+            <small class="field-hint">
+                Jede dieser drei Angaben lässt die Person automatisch auf <?= e(memorial_label()) ?> erscheinen – hier stehen bleibt sie in jedem Fall, nur markiert.
+            </small>
         </section>
 
         <section class="detail-card">

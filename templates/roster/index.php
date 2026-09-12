@@ -13,16 +13,21 @@ $addressLine = static function (array $p): string {
     return implode(', ', $parts);
 };
 
-// „12.03.1950 – 04.07.2020 · 70 Jahre" (lebt: nur Geburtsdatum + aktuelles Alter).
+// „12.03.1950 – 04.07.2020 · 70 Jahre" (lebt: nur Geburtsdatum + aktuelles
+// Alter). Bei nur bekanntem Todesjahr „† 2020", bei bekanntem Tod ohne jede
+// Datumsangabe schlicht „verstorben".
 $lifespan = static function (array $p): string {
     $born = !empty($p['born_on']) ? format_date((string) $p['born_on']) : '';
-    $died = !empty($p['died_on']) ? format_date((string) $p['died_on']) : '';
+    $died = !empty($p['died_on'])
+        ? format_date((string) $p['died_on'])
+        : (!empty($p['died_year']) ? (string) $p['died_year'] : '');
+
     if ($born === '' && $died === '') {
-        return '';
+        return !empty($p['deceased_unknown']) ? 'verstorben' : '';
     }
     $span = $died !== '' ? ($born !== '' ? $born . ' – ' . $died : '† ' . $died) : $born;
     if ($p['age'] !== null) {
-        $span .= ' · ' . (int) $p['age'] . ' Jahre';
+        $span .= ' · ' . (empty($p['age_exact']) ? 'ca. ' : '') . (int) $p['age'] . ' Jahre';
     }
 
     return $span;
@@ -74,7 +79,16 @@ $lifespan = static function (array $p): string {
                                     </div>
                                 </div>
                             </td>
-                            <td><?= $p['role_label'] !== null ? e((string) $p['role_label']) : '—' ?></td>
+                            <td>
+                                <?= $p['role_label'] !== null ? e((string) $p['role_label']) : '<span class="muted">—</span>' ?>
+                                <?php if ($p['subjects_list'] !== []): ?>
+                                    <div class="tag-cluster">
+                                        <?php foreach ($p['subjects_list'] as $subject): ?>
+                                            <span class="tag tag-secondary"><?= e($subject) ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </td>
                             <td>
                                 <div class="table-stack">
                                     <?php if (!empty($p['email'])): ?><a href="mailto:<?= e((string) $p['email']) ?>"><?= e((string) $p['email']) ?></a><?php endif; ?>
