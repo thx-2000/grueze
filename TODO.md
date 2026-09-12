@@ -5,6 +5,19 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Seite auf dem Handy seitlich verschiebbar (TH-Meldung 2026-09-12):** erledigt
+  v1.63.2. `html { overflow-x: hidden }` (nur `html`, bewusst NICHT `body` –
+  das würde `position: sticky` bei `.app-topbar`/`.app-rail` kaputt machen,
+  getestet). Ursache war kein einzelnes zu breites Element, sondern ein
+  generelles Mobile-Layout-Verhalten: ohne die Bremse weitet der Browser den
+  Layout-Viewport großzügig auf, sobald irgendwo im Baum eine Breite knapp
+  nicht passt (Grid-/Flex-Kinder ohne `min-width: 0` an irgendeiner Stelle),
+  und die ganze Seite wird dann zoomed-out wischbar. `.table-wrap` (eigenes
+  `overflow-x: auto`) scrollt unabhängig davon weiterhin normal. Geprüft:
+  40 Seiten mobil (375 px, Playwright) – vorher 3 mit Layout-Viewport bis zu
+  1114 px (`/admin/backup`), `/verwaltung/anmeldungen` (449 px, die gemeldete
+  Seite), `/settings/roles` (492 px); nachher überall exakt 375 px, sticky
+  Topbar/Rail unverändert, Tabellen-Innenscroll + mobiles Hamburger-Menü ok.
 - **Profilbilder sichtbar (TH-Frage 2026-09-10):** erledigt v1.63.0. `photo_path`
   war seit jeher speicherbar, wurde aber nur auf der Gedenkseite angezeigt.
   Neuer Helper `contact_avatar()` / `person_initial()` (Nachname-Initiale als

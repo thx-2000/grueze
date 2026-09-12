@@ -2,9 +2,17 @@
     box-sizing: border-box;
 }
 
-/* Überscroll-Bereich (oberhalb der fixierten Kopfleiste) in Themefarbe. */
+/* Überscroll-Bereich (oberhalb der fixierten Kopfleiste) in Themefarbe.
+   overflow-x: hidden verhindert, dass ein zu breites Element (z. B. eine
+   Tabelle ohne greifende Breitenbegrenzung) auf dem Handy die ganze Seite
+   nach rechts aufzieht und seitlich wischbar macht – einzelne Bereiche wie
+   .table-wrap scrollen trotzdem weiter für sich, das ist unabhängig davon.
+   Bewusst nur auf <html>, NICHT zusätzlich auf <body>: Letzteres würde body
+   einen eigenen Overflow (auto) zuweisen und dabei .app-topbar/.app-rail
+   ihr position: sticky kaputt machen (schon getestet – nicht wiederholen). */
 html {
     background: var(--color-bg);
+    overflow-x: hidden;
 }
 
 /* Das hidden-Attribut zuverlaessig durchsetzen (schlaegt sonst gegen

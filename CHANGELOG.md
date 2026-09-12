@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.63.2
+
+**Seite lässt sich auf dem Handy nicht mehr seitlich verschieben.**
+
+- Auf manchen Seiten (z. B. „Anmeldungen") ließ sich die ganze Seite auf dem
+  Handy nach links/rechts wischen, obwohl dafür kein Grund bestand – eine zu
+  breite Tabelle hat die komplette Seite mit aufgezogen. Behoben, ohne dass
+  breite Tabellen ihr eigenes seitliches Scrollen verlieren.
+- Auf allen 40 geprüften Seiten kontrolliert (mobil, 375 px): kein
+  seitliches Verschieben mehr, sticky Kopfleiste/Navigation unverändert.
+
+Keine Datenbank-Änderung.
+
 ## 1.63.1
 
 **Platzhalter jetzt mit zwei Initialen.**
