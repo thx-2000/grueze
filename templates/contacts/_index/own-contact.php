@@ -22,7 +22,7 @@ if ($ownContact === null || !in_array(true, $ownFields, true)) {
 <section class="panel">
     <div class="panel-head">
         <div class="own-contact-head">
-            <?= contact_avatar($ownContact, 'md') ?>
+            <?= contact_avatar($ownContact, 'md', true) ?>
             <div>
                 <h2>Deine Kontaktdaten</h2>
                 <p class="muted">

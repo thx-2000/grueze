@@ -5,6 +5,25 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Profilbilder groß ansehen + Tablet-Check (TH-Wunsch 2026-09-12):** erledigt
+  v1.64.0. Auch 768px (Tablet) auf das seitliche-Verschieben-Problem geprüft
+  – 0 Treffer, der `html`-Fix aus v1.63.2 greift breitenunabhängig.
+  `contact_avatar()` bekam einen dritten Parameter `$zoomable` (Default
+  `false`): mit Foto + `true` ein `<button data-photo-zoom="…" data-photo-zoom-alt="…">`
+  statt eines `<span>` (ohne Foto bleibt es beim reinen Platzhalter – nichts
+  zu vergrößern). Aktiviert bei: Kontakt-Detailkopf (lg), Formular-
+  Bildvorschau (md), „Deine Kontaktdaten"-Panel (md), „Mein Eintrag" →
+  „Dein Foto" (lg). Kleine Avatare in Tabellen/Karten/Gruppen/Rail-Chip
+  bleiben bewusst nicht klickbar (zu klein, Zeilen navigieren schon per
+  Klick zur Detailseite). `memorial/index.php`s `.memorial-portrait` analog
+  zum `<button>` gemacht, wenn ein Foto da ist (vorher `aria-hidden`,
+  jetzt nur noch beim reinen Platzhalter). Neue globale Einzelbild-Lightbox
+  in `templates/layout/app.php` (`[data-photo-zoom-overlay]`, wiederverwendet
+  die bestehenden `.lightbox`-CSS-Klassen der Galerie, eigene schlanke
+  JS-Logik in `app.js` statt `gallery.js` – kein Vor/Zurück/Download nötig).
+  Schließen: Backdrop-Klick, Kreuz, Esc. Getestet: Klick + Enter/Tastatur,
+  aria-label „Foto von NAME groß ansehen", Escape/Backdrop schließen,
+  Kontakt- und Memorial-Foto beide korrekt. Keine Migration.
 - **Seite auf dem Handy seitlich verschiebbar (TH-Meldung 2026-09-12):** erledigt
   v1.63.2. `html { overflow-x: hidden }` (nur `html`, bewusst NICHT `body` –
   das würde `position: sticky` bei `.app-topbar`/`.app-rail` kaputt machen,

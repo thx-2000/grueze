@@ -731,6 +731,15 @@ h1, h2, h3, h4 {
 .avatar--md { width: 2.75rem; height: 2.75rem; font-size: 0.95rem; }
 .avatar--lg { width: 4.5rem; height: 4.5rem; font-size: 1.5rem; }
 
+/* Mit Foto + Zoom ist das Avatar ein <button> (Bild groß ansehen) –
+   Button-Grundstile zurücksetzen, sieht sonst weiter wie ein Kreis aus. */
+button.avatar--zoomable {
+    border: 0;
+    padding: 0;
+    font: inherit;
+    cursor: zoom-in;
+}
+
 .contact-name-cell--avatar {
     align-items: center;
     flex-wrap: nowrap;
@@ -2739,6 +2748,15 @@ a.completeness-tile:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Mit Foto ist die Fläche ein <button> (Bild groß ansehen) – Button-Grundstile
+   zurücksetzen, damit sie weiter wie ein reiner Platzhalter-Kreis aussieht. */
+button.memorial-portrait {
+    border: 0;
+    padding: 0;
+    font: inherit;
+    cursor: zoom-in;
 }
 
 .memorial-portrait img {

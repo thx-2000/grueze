@@ -1197,3 +1197,35 @@ document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
     document.querySelectorAll('details.tool-menu[open]').forEach((menu) => menu.removeAttribute('open'));
 });
+
+// Foto groß ansehen: Klick auf ein Profilbild (Kontakt-Avatar, In Memoriam)
+// öffnet es in der schlanken Einzelbild-Lightbox aus dem Layout.
+const photoZoom = document.querySelector('[data-photo-zoom-overlay]');
+if (photoZoom) {
+    const photoZoomImg = photoZoom.querySelector('[data-photo-zoom-img]');
+    const openPhotoZoom = (trigger) => {
+        photoZoomImg.src = trigger.dataset.photoZoom;
+        photoZoomImg.alt = trigger.dataset.photoZoomAlt || '';
+        photoZoom.hidden = false;
+        document.body.classList.add('lightbox-open');
+    };
+    const closePhotoZoom = () => {
+        photoZoom.hidden = true;
+        photoZoomImg.src = '';
+        document.body.classList.remove('lightbox-open');
+    };
+    document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-photo-zoom]');
+        if (trigger) {
+            event.preventDefault();
+            openPhotoZoom(trigger);
+            return;
+        }
+        if (event.target === photoZoom || event.target.closest('[data-photo-zoom-close]')) {
+            closePhotoZoom();
+        }
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !photoZoom.hidden) closePhotoZoom();
+    });
+}

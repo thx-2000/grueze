@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.63.2';
+    return '1.64.0';
 }
 
 /**
@@ -938,16 +938,32 @@ function person_initials(array $person): string
  * Rundes Avatar: das hinterlegte Profilbild (`photo_path`), sonst ein Kreis
  * mit der Namens-Initiale. `$size`: sm | md | lg.
  *
+ * `$zoomable`: bei vorhandenem Foto einen Button statt eines Spans ausgeben
+ * (`data-photo-zoom`, siehe app.js) – ein Klick zeigt das Bild groß. Ohne
+ * Foto gibt es nichts zu vergrößern, dann bleibt es beim reinen Platzhalter.
+ *
  * @param array<string,mixed> $contact
  */
-function contact_avatar(array $contact, string $size = 'md'): string
+function contact_avatar(array $contact, string $size = 'md', bool $zoomable = false): string
 {
     $size = in_array($size, ['sm', 'md', 'lg'], true) ? $size : 'md';
     $photo = trim((string) ($contact['photo_path'] ?? ''));
 
     if ($photo !== '') {
-        return '<span class="avatar avatar--' . $size . '">'
-            . '<img src="' . e(asset_url('/' . ltrim($photo, '/'))) . '" alt="" loading="lazy"></span>';
+        $url = asset_url('/' . ltrim($photo, '/'));
+        $img = '<img src="' . e($url) . '" alt="" loading="lazy">';
+
+        if ($zoomable) {
+            $name = trim(($contact['vorname'] ?? '') . ' ' . ($contact['nachname'] ?? ''))
+                ?: trim((string) ($contact['name'] ?? $contact['display_name'] ?? ''));
+            $label = $name !== '' ? 'Foto von ' . $name . ' groß ansehen' : 'Foto groß ansehen';
+
+            return '<button type="button" class="avatar avatar--' . $size . ' avatar--zoomable" '
+                . 'data-photo-zoom="' . e($url) . '" data-photo-zoom-alt="' . e($name) . '" '
+                . 'aria-label="' . e($label) . '">' . $img . '</button>';
+        }
+
+        return '<span class="avatar avatar--' . $size . '">' . $img . '</span>';
     }
 
     return '<span class="avatar avatar--' . $size . ' avatar--initial" aria-hidden="true">'

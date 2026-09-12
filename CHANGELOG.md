@@ -3,6 +3,18 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.64.0
+
+**Profilbilder groß ansehen.**
+
+- Ein Klick auf ein Profilbild – auf der Kontaktseite, in „Mein Eintrag",
+  in „Deine Kontaktdaten" und auf der In-Memoriam-Seite – zeigt es jetzt
+  vergrößert an. Schließen per Klick daneben, Kreuz oder Esc.
+- Zusätzlich auf Tablet-Breite (768 px) geprüft: kein seitliches Verschieben
+  mehr, wie schon in 1.63.2 für das Handy behoben.
+
+Keine Datenbank-Änderung.
+
 ## 1.63.2
 
 **Seite lässt sich auf dem Handy nicht mehr seitlich verschieben.**

@@ -71,7 +71,7 @@ $actionLabel = static fn (string $a): string => match ($a) {
 <p class="detail-backlink"><a href="<?= e(url('/kontakte')) ?>"><?= icon('chevron-right') ?>Zurück zum Adressbuch</a></p>
 
 <header class="contact-detail-head<?= $editing ? ' contact-detail-head--avatar' : '' ?>">
-    <?php if ($editing): ?><?= contact_avatar($contact, 'lg') ?><?php endif; ?>
+    <?php if ($editing): ?><?= contact_avatar($contact, 'lg', true) ?><?php endif; ?>
     <div class="contact-detail-head-main">
     <p class="eyebrow"><?= $editing ? 'Kontakt' : 'Neuer Kontakt' ?></p>
     <h1><?= $fullName !== '' ? e($fullName) : 'Kontakt anlegen' ?><?php if ($editing && ($bn = format_birth_name($contact)) !== ''): ?>
@@ -162,7 +162,7 @@ $actionLabel = static fn (string $a): string => match ($a) {
             </label>
             <?php if ($editing && !empty($contact['photo_path'])): ?>
                 <div class="full-width photo-field-current">
-                    <?= contact_avatar($contact, 'md') ?>
+                    <?= contact_avatar($contact, 'md', true) ?>
                     <label class="inline-toggle"><input type="checkbox" name="photo_remove" value="1"><span>Aktuelles Bild entfernen</span></label>
                 </div>
             <?php endif; ?>

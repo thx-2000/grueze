@@ -253,6 +253,15 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
     <?php endif; ?>
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- Foto groß ansehen: ein Klick auf ein Profilbild (Kontakt, In Memoriam)
+         öffnet es hier vergrößert. Ein Bild, keine Navigation – daher schlanker
+         als die Galerie-Lightbox, aber optisch dieselben .lightbox-Klassen. -->
+    <div class="lightbox" data-photo-zoom-overlay hidden>
+        <button type="button" class="lightbox-close" data-photo-zoom-close aria-label="Schließen"><?= icon('close') ?></button>
+        <figure class="lightbox-stage"><img data-photo-zoom-img src="" alt=""></figure>
+    </div>
+
     <script nonce="<?= e(csp_nonce()) ?>">
         window.APP = {
             csrfToken: <?= json_encode($csrfToken, JSON_THROW_ON_ERROR) ?>,

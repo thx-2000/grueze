@@ -44,7 +44,7 @@ foreach ($phones as $i => $entry) {
     <section class="detail-card">
         <h2>Dein Foto</h2>
         <div class="photo-self">
-            <?= contact_avatar($ownContact, 'lg') ?>
+            <?= contact_avatar($ownContact, 'lg', true) ?>
             <form method="post" action="<?= e(url('/mein-eintrag/foto')) ?>" enctype="multipart/form-data" class="photo-self-form">
                 <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                 <label>

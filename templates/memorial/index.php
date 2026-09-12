@@ -28,13 +28,16 @@ $ageLabel = static function (array $e): string {
 $card = static function (array $e) use ($canManage, $lifespan, $ageLabel, $csrfToken): void {
     ?>
     <li class="memorial-card">
-        <div class="memorial-portrait" aria-hidden="true">
-            <?php if (!empty($e['photo_path'])): ?>
-                <img src="<?= e(asset_url('/' . ltrim((string) $e['photo_path'], '/'))) ?>" alt="">
-            <?php else: ?>
+        <?php if (!empty($e['photo_path'])): ?>
+            <?php $photoUrl = asset_url('/' . ltrim((string) $e['photo_path'], '/')); ?>
+            <button type="button" class="memorial-portrait" data-photo-zoom="<?= e($photoUrl) ?>" data-photo-zoom-alt="<?= e((string) $e['name']) ?>" aria-label="Foto von <?= e((string) $e['name']) ?> groß ansehen">
+                <img src="<?= e($photoUrl) ?>" alt="">
+            </button>
+        <?php else: ?>
+            <div class="memorial-portrait" aria-hidden="true">
                 <span class="memorial-portrait-fallback"><?= e((string) $e['initial']) ?></span>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
         <div class="memorial-body">
             <p class="memorial-name">
                 <?= e((string) $e['name']) ?>
