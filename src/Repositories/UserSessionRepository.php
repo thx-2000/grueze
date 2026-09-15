@@ -184,6 +184,48 @@ final class UserSessionRepository
         return $stmt->fetchAll();
     }
 
+    /**
+     * Anmelde-Verlauf der letzten `$days` Tage (unabhängig vom Zustand).
+     * `$hardCap` bremst ausufernde Ergebnismengen bei sehr langer
+     * Aufbewahrung (security.session_retention_days) ab.
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function historySince(int $days, int $hardCap = 5000): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT s.*, u.name AS user_name, u.email AS user_email, r.name AS role_name
+             FROM user_sessions s
+             JOIN users u ON u.id = s.user_id
+             JOIN roles r ON r.id = u.role_id
+             WHERE s.created_at >= (NOW() - INTERVAL :days DAY)
+             ORDER BY s.created_at DESC
+             LIMIT :lim'
+        );
+        $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+        $stmt->bindValue(':lim', $hardCap, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Anzahl gerade aktiver Sitzungen – schlanke Variante von `active()` ohne
+     * Joins, für die Online-Anzeige im Verwaltungs-Rail auf jeder Seite.
+     */
+    public function countActive(int $withinSeconds): int
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM user_sessions
+             WHERE ended_at IS NULL AND revoked_at IS NULL
+               AND last_seen_at >= (NOW() - INTERVAL :sec SECOND)'
+        );
+        $stmt->bindValue(':sec', $withinSeconds, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
     /** Alte Sitzungszeilen entfernen (Verlauf begrenzen). */
     public function pruneOld(int $days = 90): int
     {

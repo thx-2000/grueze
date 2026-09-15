@@ -3686,6 +3686,25 @@ body { display: block; }
     cursor: pointer;
 }
 .rail-logout:hover { border-color: color-mix(in srgb, var(--color-text) 25%, transparent); }
+/* Schlanke Online-Anzeige (nur users.manage) – Punkt + Zahl, verlinkt auf
+   „Verwaltung → Anmeldungen". */
+.rail-online {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: fit-content;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-muted);
+}
+.rail-online:hover { color: var(--color-text); }
+.rail-online-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-success);
+    flex: none;
+}
 .rail-legal {
     display: grid;
     gap: 0.15rem;
@@ -4733,6 +4752,7 @@ body { display: block; }
 
 .events-tabs {
     display: inline-flex;
+    flex-wrap: wrap;
     gap: 0.25rem;
     padding: 0.25rem;
     border-radius: 999px;

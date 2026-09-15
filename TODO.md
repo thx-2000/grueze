@@ -5,6 +5,22 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Online-Anzeige + Zeitraum bei Anmeldungen (TH-Wunsch 2026-09-15):** erledigt
+  v1.67.0. Neuer Helper `online_count()` (`UserSessionRepository::countActive()`,
+  schlank ohne Joins) – Anzeige im Rail-Footer nur bei `can('users.manage')`,
+  verlinkt auf `/verwaltung/anmeldungen`. `SessionController::index()` liest
+  `?range=` (Default `20`) gegen eine Konstante `RANGES` (20/100/200/500
+  Sitzungen per `history()`, 7d/14d/30d/90d Tage per neuem
+  `UserSessionRepository::historySince()`, mit Notbremse `$hardCap` gegen
+  ausufernde Ergebnismengen bei der auf dieser Instanz sehr hohen
+  `session_retention_days` von 1440). Zwei `.events-tabs`-Umschalter
+  (Anzahl / Zeitraum) auf der Anmeldungen-Seite, `.events-tabs` bekam
+  `flex-wrap: wrap` (war vorher `inline-flex` ohne Wrap – bei 8 Optionen
+  auf schmalem Bildschirm sonst potenziell zu breit). Getestet (Docker,
+  Playwright): Badge zeigt korrekte Zahl/Singular-Plural, alle 8
+  Zeiträume liefern die rechnerisch richtige Zeilenzahl, 375px ohne
+  seitliches Verschieben, mobiles Menü zeigt die Anzeige ebenfalls.
+  Keine Migration.
 - **„Weitere Personen": Todesjahr/unbekannt, Fächer, Sortierung (TH 2026-09-13):**
   erledigt v1.66.0. TH-Beobachtung: zwei Lehrkräfte fehlten auf der Gedenkseite,
   weil nur ein Todesjahr (kein exaktes Datum) bekannt war – `is_deceased` hing

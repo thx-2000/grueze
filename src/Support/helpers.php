@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.66.0';
+    return '1.67.0';
 }
 
 /**
@@ -646,6 +646,23 @@ function nav_show_memorials(): bool
         return App\Core\Container::get(App\Repositories\MemorialRepository::class)->countAll() > 0;
     } catch (Throwable) {
         return false;
+    }
+}
+
+/**
+ * Anzahl gerade angemeldeter Sitzungen, für die schlanke Online-Anzeige
+ * unten in der Seitenleiste (nur `users.manage`, siehe Layout). `null` bei
+ * einem Fehler (z. B. Migration noch offen) – dann bleibt die Anzeige weg,
+ * statt eine kaputte Zahl zu zeigen.
+ */
+function online_count(): ?int
+{
+    try {
+        $window = (int) config('app.session_timeout', 1800);
+
+        return App\Core\Container::get(App\Repositories\UserSessionRepository::class)->countActive($window);
+    } catch (Throwable) {
+        return null;
     }
 }
 

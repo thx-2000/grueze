@@ -159,6 +159,12 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                         <button type="submit" class="rail-logout">Abmelden</button>
                     </form>
                 </div>
+                <?php if (can('users.manage') && ($onlineCount = online_count()) !== null): ?>
+                    <a class="rail-online" href="<?= e(url('/verwaltung/anmeldungen')) ?>">
+                        <span class="rail-online-dot" aria-hidden="true"></span>
+                        <?= e((string) $onlineCount) ?> <?= $onlineCount === 1 ? 'Person' : 'Personen' ?> online
+                    </a>
+                <?php endif; ?>
                 <nav class="rail-legal" aria-label="Rechtliches">
                     <a href="<?= e(url('/impressum')) ?>">Impressum</a>
                     <a href="<?= e(url('/datenschutz')) ?>">Datenschutz</a>

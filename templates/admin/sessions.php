@@ -105,12 +105,25 @@ $row = static function (array $r) use ($deviceLabel, $showIp): void {
     <?php endif; ?>
 </section>
 
-<section class="panel stack">
+<section class="panel stack" id="verlauf">
     <div class="panel-head">
         <div>
             <h2>Anmelde-Verlauf</h2>
-            <p class="muted">Die letzten Sitzungen. Ältere Einträge werden nach <?= e((string) $retentionDays) ?> Tagen automatisch entfernt.</p>
+            <p class="muted"><?= e($rangeLabel) ?> Ältere Einträge werden nach <?= e((string) $retentionDays) ?> Tagen automatisch entfernt.</p>
         </div>
+    </div>
+
+    <div class="stack">
+        <nav class="events-tabs" aria-label="Anzahl Sitzungen">
+            <?php foreach (['20', '100', '200', '500'] as $key): ?>
+                <a class="<?= $rangeKey === $key ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung/anmeldungen?range=' . $key)) ?>#verlauf"><?= e($ranges[$key]['short']) ?></a>
+            <?php endforeach; ?>
+        </nav>
+        <nav class="events-tabs" aria-label="Zeitraum">
+            <?php foreach (['7d', '14d', '30d', '90d'] as $key): ?>
+                <a class="<?= $rangeKey === $key ? 'is-active' : '' ?>" href="<?= e(url('/verwaltung/anmeldungen?range=' . $key)) ?>#verlauf"><?= e($ranges[$key]['short']) ?></a>
+            <?php endforeach; ?>
+        </nav>
     </div>
 
     <?php if ($history === []): ?>

@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.67.0
+
+**Online-Anzeige in der Seitenleiste + wählbarer Zeitraum bei den Anmeldungen.**
+
+- Wer `users.manage` hat, sieht jetzt unten in der Seitenleiste auf jeder
+  Seite eine schlanke Anzeige „● N Personen online" – verlinkt direkt auf
+  „Verwaltung → Anmeldungen".
+- Der Anmelde-Verlauf zeigt standardmäßig die letzten 20 Sitzungen, lässt
+  sich aber umschalten: letzte 100/200/500 Sitzungen, oder nach Zeitraum
+  (7 Tage, 14 Tage, 1 Monat, 3 Monate).
+
+Keine Datenbank-Änderung.
+
 ## 1.66.0
 
 **„Weitere Personen": Todesjahr, unbekanntes Sterbedatum, Fächer, Sortierung.**
