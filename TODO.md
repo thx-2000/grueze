@@ -5,6 +5,19 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Seite je Sitzung bei Anmeldungen (TH-Wunsch 2026-09-15):** erledigt
+  v1.68.0. Neue Spalte `user_sessions.last_path`, bei jedem Request in
+  `public/index.php` mit `(new Request())->path()` mitgeschrieben (im
+  selben `touch()`-Aufruf wie `last_seen_at`, kein Zusatz-Query).
+  Anzeige in „Gerade online" und im Anmelde-Verlauf über einen neuen
+  `page_title($path)`-Fallback (`$title !== '' ? $title : $path` – die
+  bestehende `page_title()`-Zuordnung deckt dank Query-String-basierter IDs
+  (statt Pfad-Segmenten) praktisch schon alle Detailseiten ab, nur ein paar
+  Rand-Routen wie `/hilfe/cron`, `/termine/sichtbarkeit-vorschau`,
+  `/passwort-neu/{token}` ergänzt). Migration `2026-10-09-anmeldungen-seite.sql`.
+  Getestet (Docker, Playwright, zwei parallele Sitzungen): jede Sitzung
+  zeigt korrekt ihre eigene zuletzt aufgerufene Seite, live bei jedem
+  Request aktualisiert. Testdaten entfernt.
 - **Online-Anzeige + Zeitraum bei Anmeldungen (TH-Wunsch 2026-09-15):** erledigt
   v1.67.0. Neuer Helper `online_count()` (`UserSessionRepository::countActive()`,
   schlank ohne Joins) – Anzeige im Rail-Footer nur bei `can('users.manage')`,

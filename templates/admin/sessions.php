@@ -34,11 +34,24 @@ $deviceLabel = static function (string $ua): string {
 
 $retentionDays = (int) config('security.session_retention_days', 90);
 
+// Zuletzt aufgerufene Seite lesbar machen – bekannte Pfade über page_title(),
+// sonst der rohe Pfad, damit trotzdem eine Spur zu sehen ist.
+$pageLabel = static function (?string $path): string {
+    $path = trim((string) $path);
+    if ($path === '') {
+        return '—';
+    }
+    $title = page_title($path);
+
+    return $title !== '' ? $title : $path;
+};
+
 /** Eine Zeile rendern (aktiv oder Verlauf). */
-$row = static function (array $r) use ($deviceLabel, $showIp): void {
+$row = static function (array $r) use ($deviceLabel, $pageLabel, $showIp): void {
     ?>
     <td><?= e(format_datetime((string) $r['created_at'])) ?></td>
     <td><?= e(format_datetime((string) $r['last_seen_at'])) ?></td>
+    <td><?= e($pageLabel($r['last_path'] ?? null)) ?></td>
     <?php if ($showIp): ?><td><?= e((string) ($r['ip_address'] ?: '—')) ?></td><?php endif; ?>
     <td><?= e($deviceLabel((string) $r['user_agent'])) ?></td>
     <?php
@@ -47,7 +60,7 @@ $row = static function (array $r) use ($deviceLabel, $showIp): void {
 <header class="page-head">
     <p class="eyebrow">Verwaltung</p>
     <h1>Anmeldungen</h1>
-    <p class="muted">Wer ist gerade angemeldet und wer hat sich zuletzt angemeldet. „Online" heißt: in den letzten <?= e((string) $windowMinutes) ?> Minuten aktiv.</p>
+    <p class="muted">Wer ist gerade angemeldet und wer hat sich zuletzt angemeldet, inklusive der zuletzt aufgerufenen Seite. „Online" heißt: in den letzten <?= e((string) $windowMinutes) ?> Minuten aktiv.</p>
     <?php if (!$showIp): ?>
         <p class="field-hint"><?= icon('lock') ?><span>IP-Adressen werden in dieser Installation nicht gespeichert (<code>security.store_ip</code>).</span></p>
     <?php endif; ?>
@@ -71,6 +84,7 @@ $row = static function (array $r) use ($deviceLabel, $showIp): void {
                         <th>Wer</th>
                         <th>Angemeldet seit</th>
                         <th>Zuletzt aktiv</th>
+                        <th>Seite</th>
                         <?php if ($showIp): ?><th>Von wo</th><?php endif; ?>
                         <th>Gerät</th>
                         <th><span class="visually-hidden">Aktion</span></th>
@@ -136,6 +150,7 @@ $row = static function (array $r) use ($deviceLabel, $showIp): void {
                         <th>Wer</th>
                         <th>Angemeldet</th>
                         <th>Zuletzt aktiv</th>
+                        <th>Seite</th>
                         <?php if ($showIp): ?><th>Von wo</th><?php endif; ?>
                         <th>Gerät</th>
                         <th>Status</th>

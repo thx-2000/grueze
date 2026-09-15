@@ -41,6 +41,7 @@ final class UserSessionRepository
                     user_id INT UNSIGNED NOT NULL,
                     ip_address VARCHAR(64) NOT NULL DEFAULT \'\',
                     user_agent VARCHAR(255) NOT NULL DEFAULT \'\',
+                    last_path VARCHAR(255) NULL,
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     last_seen_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     ended_at DATETIME NULL,
@@ -50,6 +51,7 @@ final class UserSessionRepository
                     INDEX idx_user_sessions_seen (last_seen_at)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
             );
+            $this->pdo->exec('ALTER TABLE user_sessions ADD COLUMN IF NOT EXISTS last_path VARCHAR(255) NULL AFTER user_agent');
         } catch (\Throwable) {
             // Ohne Rechte für DDL o. Ä. – dann greift die reguläre Migration.
         }
@@ -63,8 +65,10 @@ final class UserSessionRepository
     /**
      * Sitzung anlegen bzw. auffrischen. Gibt `true` zurück, wenn diese Sitzung
      * aus der Ferne beendet wurde – die aufrufende Stelle soll dann abmelden.
+     * `$path` ist die zuletzt aufgerufene Seite (ohne Query-String), für die
+     * „Gerade online"-Übersicht in der Verwaltung.
      */
-    public function touch(string $sessionId, int $userId, string $ip, string $userAgent): bool
+    public function touch(string $sessionId, int $userId, string $ip, string $userAgent, string $path = ''): bool
     {
         // IP-Adresse nur speichern, wenn die Installation das ausdrücklich will
         // (security.store_ip). Standard: aus – datenschutzfreundlich.
@@ -74,12 +78,13 @@ final class UserSessionRepository
 
         $hash = $this->hash($sessionId);
         $stmt = $this->pdo->prepare(
-            'INSERT INTO user_sessions (session_hash, user_id, ip_address, user_agent)
-             VALUES (:h, :u, :ip, :ua)
+            'INSERT INTO user_sessions (session_hash, user_id, ip_address, user_agent, last_path)
+             VALUES (:h, :u, :ip, :ua, :path)
              ON DUPLICATE KEY UPDATE
                 last_seen_at = NOW(),
                 ip_address = VALUES(ip_address),
                 user_agent = VALUES(user_agent),
+                last_path = VALUES(last_path),
                 ended_at = NULL'
         );
         $stmt->execute([
@@ -87,6 +92,7 @@ final class UserSessionRepository
             'u' => $userId,
             'ip' => substr($ip, 0, 64),
             'ua' => substr($userAgent, 0, 255),
+            'path' => substr($path, 0, 255) ?: null,
         ]);
 
         $check = $this->pdo->prepare('SELECT revoked_at FROM user_sessions WHERE session_hash = :h LIMIT 1');

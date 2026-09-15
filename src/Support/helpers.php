@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.67.0';
+    return '1.68.0';
 }
 
 /**
@@ -806,6 +806,8 @@ function page_title(string $path): string
         '/settings/mail-footer'      => 'Mail-Einstellungen',
         '/settings/visibility'       => 'Sichtbarkeit',
         '/settings/permissions'      => 'Berechtigungen',
+        '/hilfe/cron'                => 'Cronjob einrichten',
+        '/termine/sichtbarkeit-vorschau' => 'Sichtbarkeits-Vorschau',
     ];
 
     if (isset($exact[$path])) {
@@ -817,6 +819,7 @@ function page_title(string $path): string
         '/meine-daten' => 'Daten-Check',
         '/registrieren' => 'Zugang einrichten',
         '/beitragen' => 'Fotos beisteuern',
+        '/passwort-neu' => 'Neues Passwort',
     ] as $prefix => $title) {
         if (str_starts_with($path, $prefix . '/')) {
             return $title;

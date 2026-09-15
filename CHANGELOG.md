@@ -3,6 +3,16 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.68.0
+
+**Anmeldungen zeigen jetzt auch, auf welcher Seite jemand gerade ist.**
+
+- Sowohl bei „Gerade online" als auch im Anmelde-Verlauf gibt es eine neue
+  Spalte „Seite" mit der zuletzt aufgerufenen Seite – aktualisiert sich bei
+  jedem Klick mit.
+
+Migration `2026-10-09-anmeldungen-seite.sql`.
+
 ## 1.67.0
 
 **Online-Anzeige in der Seitenleiste + wählbarer Zeitraum bei den Anmeldungen.**

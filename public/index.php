@@ -492,7 +492,8 @@ try {
                 session_id(),
                 (int) $_SESSION['user_id'],
                 (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
-                (string) ($_SERVER['HTTP_USER_AGENT'] ?? '')
+                (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''),
+                (new Request())->path()
             );
             if ($revoked) {
                 $_SESSION = [];
