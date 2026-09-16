@@ -55,7 +55,7 @@ CREATE TABLE contacts (
     newsletter_opt_out_at DATETIME NULL,
     hidden_at DATETIME NULL,
     hidden_by INT UNSIGNED NULL,
-    contact_visibility ENUM('stufe','orga') NOT NULL DEFAULT 'stufe',
+    contact_visibility ENUM('stufe','orga') NOT NULL DEFAULT 'orga',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_contacts_archived (archived_at),

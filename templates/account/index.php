@@ -101,8 +101,8 @@ foreach ($phones as $i => $entry) {
                 <label>
                     <span>Wer darf deine Kontaktdaten sehen?</span>
                     <select name="contact_visibility">
-                        <option value="stufe" <?= $field('contact_visibility', 'stufe') === 'stufe' ? 'selected' : '' ?>>Die ganze Stufe (Standard)</option>
-                        <option value="orga" <?= $field('contact_visibility', 'stufe') === 'orga' ? 'selected' : '' ?>>Nur das Orga-Team</option>
+                        <option value="orga" <?= $field('contact_visibility', 'orga') !== 'stufe' ? 'selected' : '' ?>>Nur das Orga-Team (Standard)</option>
+                        <option value="stufe" <?= $field('contact_visibility', 'orga') === 'stufe' ? 'selected' : '' ?>>Die ganze Stufe</option>
                     </select>
                     <small class="field-hint">Gilt für Adresse, Geburtstag, Mail und Telefon.</small>
                 </label>

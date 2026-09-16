@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.70.1
+
+**Korrektur: Sichtbarkeit der Kontaktdaten standardmäßig „nur Orga-Team".**
+
+- Die in v1.70.0 eingeführte Sichtbarkeits-Wahl stand versehentlich
+  standardmäßig auf „die ganze Stufe" – jetzt korrekt „nur das Orga-Team".
+  Gilt auch rückwirkend: alle bestehenden Kontakte wurden auf „nur Orga-Team"
+  umgestellt. Wer möchte, dass die ganze Stufe die eigenen Kontaktdaten sieht,
+  stellt das selbst wieder um (Mein Eintrag, Daten-Check-Link oder durchs
+  Orga-Team am Kontakt).
+
+Migration `2026-10-12-kontakt-sichtbarkeit-standard-orga.sql`.
+
 ## 1.70.0
 
 **Rundmail-Abmeldung, versteckte Kontakte, Sichtbarkeits-Wahl und vCard für alle.**

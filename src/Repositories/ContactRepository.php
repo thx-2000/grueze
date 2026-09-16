@@ -52,7 +52,7 @@ final class ContactRepository
                     ADD COLUMN IF NOT EXISTS newsletter_opt_out_at DATETIME NULL,
                     ADD COLUMN IF NOT EXISTS hidden_at DATETIME NULL,
                     ADD COLUMN IF NOT EXISTS hidden_by INT UNSIGNED NULL,
-                    ADD COLUMN IF NOT EXISTS contact_visibility ENUM(\'stufe\',\'orga\') NOT NULL DEFAULT \'stufe\',
+                    ADD COLUMN IF NOT EXISTS contact_visibility ENUM(\'stufe\',\'orga\') NOT NULL DEFAULT \'orga\',
                     CHANGE COLUMN IF EXISTS geschlecht anrede CHAR(1) NULL'
             );
         } catch (\Throwable) {
@@ -548,7 +548,7 @@ final class ContactRepository
             'notizen' => $data['notizen'] ?: null,
             'photo_path' => $data['photo_path'] ?: null,
             'newsletter_opt_out' => !empty($data['newsletter_opt_out']) ? 1 : 0,
-            'contact_visibility' => ($data['contact_visibility'] ?? '') === 'orga' ? 'orga' : 'stufe',
+            'contact_visibility' => ($data['contact_visibility'] ?? '') === 'stufe' ? 'stufe' : 'orga',
             'created_by' => $userId,
             'updated_by' => $userId,
         ]);
@@ -603,7 +603,7 @@ final class ContactRepository
             'notizen' => $data['notizen'] ?: null,
             'photo_path' => $data['photo_path'] ?: null,
             'newsletter_opt_out' => !empty($data['newsletter_opt_out']) ? 1 : 0,
-            'contact_visibility' => ($data['contact_visibility'] ?? '') === 'orga' ? 'orga' : 'stufe',
+            'contact_visibility' => ($data['contact_visibility'] ?? '') === 'stufe' ? 'stufe' : 'orga',
             'updated_by' => $userId,
         ]);
 

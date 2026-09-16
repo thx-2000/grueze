@@ -5,6 +5,28 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Standard der Sichtbarkeits-Wahl auf „nur Orga-Team" korrigiert
+  (TH-Rückfrage 2026-09-16, direkt nach v1.70.0):** erledigt v1.70.1. TH hatte
+  nachgefragt, ob der Standard „nur Orga-Team" sein sollte (richtig) oder
+  „ganze Stufe" (falsch) – war beim Bau von v1.70.0 versehentlich auf „stufe"
+  gesetzt (Begründung damals: „ändert nichts am bisherigen Sichtbarkeits-
+  Verhalten"), TH wollte stattdessen datenschutzfreundlich „nur Orga-Team" als
+  Default, UND rückwirkend für alle bestehenden Kontakte (nicht nur neue).
+  Migration `2026-10-12-kontakt-sichtbarkeit-standard-orga.sql`:
+  `ALTER ... MODIFY COLUMN contact_visibility ... DEFAULT 'orga'` +
+  `UPDATE contacts SET contact_visibility = 'orga'` (unbedingt, da zum
+  Zeitpunkt der Korrektur noch niemand die Wahl real genutzt hatte). Alle
+  Stellen mit dem alten Default umgedreht: `database/schema.sql`,
+  `ContactRepository::ensureSchema()`/`create()`/`update()`,
+  `ContactInput::baseFields()`, `Auth::contactRestrictedToOrga()`
+  (Fallback jetzt `?? 'orga'`), die drei Formular-Selects (Verwaltung, Mein
+  Eintrag, Daten-Check-Link – Option „Nur das Orga-Team (Standard)" jetzt
+  zuerst gelistet), `ContactDiff`/`DataCheckController::diff()`. Status-Chip
+  auf der Kontaktseite umgedreht: zeigt jetzt „für die ganze Stufe sichtbar"
+  (das ist jetzt der erwähnenswerte Ausnahmefall) statt vorher „nur Orga-Team
+  sichtbar". Getestet (Docker): neuer Kontakt startet mit „orga" vorausgewählt,
+  bestehender Kontakt zeigt nach der Migration ebenfalls „orga" statt „stufe".
+  `.htaccess` zurückgesetzt.
 - **Rundmail-Abmeldung, versteckte Kontakte, Sichtbarkeits-Wahl, vCard für alle
   (TH-Wunsch 2026-09-16):** erledigt v1.70.0. Vier zusammenhängende, aber
   eigenständige Kontakt-Features in einer Migration

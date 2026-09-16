@@ -228,7 +228,7 @@ final class Auth
     {
         return $contact !== null
             && in_array($field, self::OWN_CHOICE_FIELDS, true)
-            && (string) ($contact['contact_visibility'] ?? 'stufe') === 'orga';
+            && (string) ($contact['contact_visibility'] ?? 'orga') !== 'stufe';
     }
 
     private function roleAllowsContactField(array $user, string $field): bool

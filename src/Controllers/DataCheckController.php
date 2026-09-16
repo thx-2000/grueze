@@ -215,8 +215,8 @@ final class DataCheckController extends BaseController
                 !empty($after['newsletter_opt_out']) ? 'abgemeldet' : 'aktiv',
             ],
             'Sichtbarkeit der Kontaktdaten' => [
-                ((string) ($before['contact_visibility'] ?? 'stufe')) === 'orga' ? 'nur Orga-Team' : 'ganze Stufe',
-                ((string) ($after['contact_visibility'] ?? 'stufe')) === 'orga' ? 'nur Orga-Team' : 'ganze Stufe',
+                ((string) ($before['contact_visibility'] ?? 'orga')) === 'stufe' ? 'ganze Stufe' : 'nur Orga-Team',
+                ((string) ($after['contact_visibility'] ?? 'orga')) === 'stufe' ? 'ganze Stufe' : 'nur Orga-Team',
             ],
         ];
 

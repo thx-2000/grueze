@@ -23,7 +23,7 @@ $defaults = [
     'tag_ids' => old('tag_ids', []),
     'emails' => old('emails', [['email' => '', 'label' => '']]),
     'phones' => old('phones', [['phone' => '', 'label' => 'Mobil']]),
-    'contact_visibility' => old('contact_visibility', 'stufe'),
+    'contact_visibility' => old('contact_visibility', 'orga'),
     'newsletter_opt_out' => old('newsletter_opt_out') !== null,
 ];
 $values = $editing ? $contact : $defaults;
@@ -101,8 +101,8 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <?php if (!empty($contact['newsletter_opt_out_at'])): ?>
                 <span class="status-chip is-warn">Rundmail abbestellt</span>
             <?php endif; ?>
-            <?php if (($contact['contact_visibility'] ?? 'stufe') === 'orga'): ?>
-                <span class="table-pill">nur Orga-Team sichtbar</span>
+            <?php if (($contact['contact_visibility'] ?? 'orga') === 'stufe'): ?>
+                <span class="table-pill">für die ganze Stufe sichtbar</span>
             <?php endif; ?>
             <?php if (!empty($contact['created_at'])): ?>
                 <span class="muted">im Adressbuch seit <?= e(format_date(substr((string) $contact['created_at'], 0, 10))) ?></span>
@@ -232,8 +232,8 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <label>
                 <span>Wer darf die Kontaktdaten sehen?</span>
                 <select name="contact_visibility">
-                    <option value="stufe" <?= ($values['contact_visibility'] ?? 'stufe') === 'stufe' ? 'selected' : '' ?>>Die ganze Stufe (Standard)</option>
-                    <option value="orga" <?= ($values['contact_visibility'] ?? 'stufe') === 'orga' ? 'selected' : '' ?>>Nur das Orga-Team</option>
+                    <option value="orga" <?= ($values['contact_visibility'] ?? 'orga') !== 'stufe' ? 'selected' : '' ?>>Nur das Orga-Team (Standard)</option>
+                    <option value="stufe" <?= ($values['contact_visibility'] ?? 'orga') === 'stufe' ? 'selected' : '' ?>>Die ganze Stufe</option>
                 </select>
                 <small class="field-hint">Gilt für Adresse, Geburtstag, Mail und Telefon – schränkt die allgemeine Rollen-Sichtbarkeit für diese Person weiter ein, erweitert sie nie.</small>
             </label>
