@@ -47,8 +47,10 @@ final class VCardService
             $lines[] = 'X-MAIDENNAME:' . $this->esc($geburtsname);
         }
 
+        // Ohne bekanntes Jahr keinen Platzhalter-Jahrgang exportieren – vCard
+        // 3.0 kennt kein reines Tag/Monat-Datum.
         $bday = trim((string) ($contact['geburtstag'] ?? ''));
-        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $bday)) {
+        if (empty($contact['geburtstag_jahr_unbekannt']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $bday)) {
             $lines[] = 'BDAY:' . $bday;
         }
 

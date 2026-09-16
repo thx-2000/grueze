@@ -56,7 +56,7 @@ if ($ownContact === null || !in_array(true, $ownFields, true)) {
             </dd></div>
         <?php endif; ?>
         <?php if ($ownFields['birthday'] && trim((string) ($ownContact['geburtstag'] ?? '')) !== ''): ?>
-            <div><dt>Geburtstag</dt><dd><?= e(format_date($ownContact['geburtstag'])) ?></dd></div>
+            <div><dt>Geburtstag</dt><dd><?= e(format_birthday($ownContact['geburtstag'], (bool) ($ownContact['geburtstag_jahr_unbekannt'] ?? false))) ?></dd></div>
         <?php endif; ?>
         <?php if ($ownFields['emails'] && ($ownContact['emails'] ?? []) !== []): ?>
             <div><dt>E-Mail</dt><dd>

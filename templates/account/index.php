@@ -19,6 +19,12 @@ $field = static function (string $key, $fallback = '') use ($hasOld, $oldInput, 
     return (string) ($ownContact[$key] ?? $fallback);
 };
 
+// Geburtstag ohne Jahr: Datumsfeld leer lassen (sonst zeigt der Picker den
+// Platzhalter-Jahrgang), stattdessen Tag/Monat vorbelegen.
+$birthday = $hasOld
+    ? ['geburtstag' => (string) ($oldInput['geburtstag'] ?? ''), 'geburtstag_tag' => (string) ($oldInput['geburtstag_tag'] ?? ''), 'geburtstag_monat' => (string) ($oldInput['geburtstag_monat'] ?? '')]
+    : \App\Support\ContactInput::birthdayFormValues($ownContact ?? []);
+
 $emails = $hasOld ? (array) ($oldInput['emails'] ?? []) : ($ownContact['emails'] ?? []);
 if ($emails === []) {
     $emails = [['email' => '', 'label' => '']];
@@ -83,7 +89,10 @@ foreach ($phones as $i => $entry) {
                         <option value="m" <?= $g === 'm' ? 'selected' : '' ?>>„Lieber …"</option>
                     </select>
                 </label>
-                <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($field('geburtstag')) ?>"></label>
+                <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($birthday['geburtstag']) ?>"></label>
+                <label><span>Tag (falls das Jahr unbekannt ist)</span><input type="number" name="geburtstag_tag" min="1" max="31" step="1" inputmode="numeric" value="<?= e($birthday['geburtstag_tag']) ?>"></label>
+                <label><span>Monat (falls das Jahr unbekannt ist)</span><input type="number" name="geburtstag_monat" min="1" max="12" step="1" inputmode="numeric" value="<?= e($birthday['geburtstag_monat']) ?>"></label>
+                <p class="field-hint full-width">Tag &amp; Monat nur ausfüllen, wenn das Geburtsjahr nicht bekannt ist – dann bei „Geburtstag" oben nichts eintragen.</p>
                 <label><span>Beruf/Tätigkeit</span><input type="text" name="beruf" value="<?= e($field('beruf')) ?>" maxlength="160"></label>
                 <label><span>Webseite</span><input type="text" name="webseite" value="<?= e($field('webseite')) ?>" inputmode="url" placeholder="https://…"></label>
             </div>

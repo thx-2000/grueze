@@ -11,6 +11,8 @@ $defaults = [
     'anrede' => old('anrede'),
     'category_id' => old('category_id'),
     'geburtstag' => old('geburtstag'),
+    'geburtstag_tag' => old('geburtstag_tag'),
+    'geburtstag_monat' => old('geburtstag_monat'),
     'beruf' => old('beruf'),
     'webseite' => old('webseite'),
     'strasse' => old('strasse'),
@@ -25,9 +27,13 @@ $defaults = [
 $values = $editing ? $contact : $defaults;
 if ($editing) {
     if ($hasOld) {
-        foreach (['vorname', 'nachname', 'geburtsname', 'anrede', 'category_id', 'geburtstag', 'beruf', 'webseite', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
+        foreach (['vorname', 'nachname', 'geburtsname', 'anrede', 'category_id', 'geburtstag', 'geburtstag_tag', 'geburtstag_monat', 'beruf', 'webseite', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
             $values[$field] = $defaults[$field];
         }
+    } else {
+        // Ohne Jahr: Datumsfeld leer lassen (sonst zeigt der Picker den
+        // Platzhalter-Jahrgang), stattdessen Tag/Monat vorbelegen.
+        $values = array_merge($values, \App\Support\ContactInput::birthdayFormValues($contact));
     }
     $values['emails'] = old('emails', $contact['emails'] ?: [['email' => '', 'label' => '']]);
     $values['phones'] = old('phones', $contact['phones'] ?: [['phone' => '', 'label' => 'Mobil']]);
@@ -119,6 +125,9 @@ $actionLabel = static fn (string $a): string => match ($a) {
                 </select>
             </label>
             <label><span>Geburtstag</span><input type="date" name="geburtstag" value="<?= e($values['geburtstag'] ?? '') ?>"></label>
+            <label><span>Tag (falls das Jahr unbekannt ist)</span><input type="number" name="geburtstag_tag" min="1" max="31" step="1" inputmode="numeric" value="<?= e($values['geburtstag_tag'] ?? '') ?>"></label>
+            <label><span>Monat (falls das Jahr unbekannt ist)</span><input type="number" name="geburtstag_monat" min="1" max="12" step="1" inputmode="numeric" value="<?= e($values['geburtstag_monat'] ?? '') ?>"></label>
+            <p class="field-hint full-width">Tag &amp; Monat nur ausfüllen, wenn das Geburtsjahr nicht bekannt ist – dann bei „Geburtstag" oben nichts eintragen.</p>
             <label><span>Beruf/Tätigkeit</span><input type="text" name="beruf" value="<?= e($values['beruf'] ?? '') ?>" maxlength="160"></label>
             <label><span>Webseite</span><input type="text" name="webseite" value="<?= e($values['webseite'] ?? '') ?>" inputmode="url" placeholder="https://…"></label>
             <label>

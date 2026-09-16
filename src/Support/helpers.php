@@ -294,7 +294,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.68.0';
+    return '1.69.0';
 }
 
 /**
@@ -920,6 +920,27 @@ function birthday_countdown(?string $ymd): ?int
     }
 
     return (int) $today->diff($next)->days;
+}
+
+/**
+ * Geburtstag fürs Anzeigen: ohne bekanntes Jahr nur „24.12.", sonst wie
+ * format_date() mit Jahr.
+ */
+function format_birthday(?string $value, bool $yearUnknown = false): string
+{
+    $value = trim((string) $value);
+    if ($value === '') {
+        return '';
+    }
+    if (!$yearUnknown) {
+        return format_date($value);
+    }
+
+    try {
+        return (new DateTimeImmutable($value))->format('d.m.');
+    } catch (Throwable) {
+        return $value;
+    }
 }
 
 /**

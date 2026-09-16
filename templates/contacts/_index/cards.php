@@ -61,7 +61,7 @@
                         <p class="is-guarded"><?= icon('location') ?><span><?= e(contact_address_line($contact)) ?><br><?= e(contact_country_label($contact)) ?></span></p>
                     <?php endif; ?>
                     <?php if ($visibleContactFields['birthday'] && trim((string) ($contact['geburtstag'] ?? '')) !== ''): ?>
-                        <p class="is-guarded"><?= icon('cake') ?><span><?= e(format_date($contact['geburtstag'])) ?></span></p>
+                        <p class="is-guarded"><?= icon('cake') ?><span><?= e(format_birthday($contact['geburtstag'], (bool) ($contact['geburtstag_jahr_unbekannt'] ?? false))) ?></span></p>
                     <?php endif; ?>
                     <?php if ($visibleContactFields['emails'] && $contact['emails'] !== []): ?>
                         <ul class="mini-list is-guarded">

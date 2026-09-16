@@ -192,6 +192,10 @@ final class ContactMergeService
                     $filled[] = $label;
                 }
             }
+            if (isset($params['geburtstag']) && !empty($secondary['geburtstag_jahr_unbekannt'])) {
+                $set[] = 'geburtstag_jahr_unbekannt = :geburtstag_jahr_unbekannt';
+                $params['geburtstag_jahr_unbekannt'] = 1;
+            }
             $primaryNotes = trim((string) ($primary['notizen'] ?? ''));
             $secondaryNotes = trim((string) ($secondary['notizen'] ?? ''));
             if ($secondaryNotes !== '' && $secondaryNotes !== $primaryNotes) {

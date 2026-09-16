@@ -25,7 +25,7 @@ $withoutEmail = array_values(array_filter($rows, static fn (array $r): bool => t
                 <li class="completeness-row">
                     <div class="completeness-person">
                         <strong><?= e(trim($r['vorname'] . ' ' . $r['nachname'])) ?></strong>
-                        <span class="muted"><?= $r['days_until'] === 0 ? 'heute' : 'in ' . $r['days_until'] . ' Tag' . ($r['days_until'] === 1 ? '' : 'en') ?> · <?= e(format_date($r['geburtstag'])) ?></span>
+                        <span class="muted"><?= $r['days_until'] === 0 ? 'heute' : 'in ' . $r['days_until'] . ' Tag' . ($r['days_until'] === 1 ? '' : 'en') ?> · <?= e(format_birthday($r['geburtstag'], (bool) ($r['geburtstag_jahr_unbekannt'] ?? false))) ?></span>
                         <?php if (trim((string) ($r['email'] ?? '')) === ''): ?><span class="status-chip is-warn">keine Mail</span><?php endif; ?>
                     </div>
                 </li>

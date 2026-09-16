@@ -5,6 +5,36 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Geburtstag ohne bekanntes Jahr (TH-Wunsch 2026-09-16):** erledigt v1.69.0.
+  TH-Beobachtung: bisher ließ sich nur ein volles Datum eintragen – bei
+  Personen, deren Geburtsjahr niemand kennt, blieb das Feld leer. Neue Spalte
+  `contacts.geburtstag_jahr_unbekannt` (Migration
+  `2026-10-10-geburtstag-jahr-unbekannt.sql`); `geburtstag` bleibt weiterhin
+  ein volles `DATE` und bekommt bei unbekanntem Jahr ein Platzhalterjahr
+  (1600, ein Schaltjahr wegen des 29.2.) – so bleiben `birthday_countdown()`
+  und die Geburtstags-Abfragen unverändert (die zählen ohnehin nur nach
+  Monat/Tag). Formular: zusätzlich zum bestehenden `<input type="date">`
+  zwei Felder „Tag"/„Monat" – bleibt „Geburtstag" leer und sind beide
+  gesetzt, greift der Platzhalter (`ContactInput::baseFields()`); beim
+  erneuten Öffnen zeigt `ContactInput::birthdayFormValues()` bei unbekanntem
+  Jahr nur Tag/Monat und lässt das Datumsfeld leer (sonst stünde dort der
+  Platzhalter-Jahrgang). Gilt für alle drei Formulare (Verwaltung, Selbst-
+  Service „Mein Eintrag", Daten-Check-Link – gemeinsamer Code in
+  `ContactInput`). Anzeige über neuen Helper `format_birthday()`: ohne
+  bekanntes Jahr nur „24.12." statt vollem Datum, an allen Stellen
+  (Adressbuch Tabelle/Karten, eigener Eintrag, Startseiten-Widget,
+  Geburtstagsgrüße, Dubletten-Ansicht, Änderungsverlauf). Die Alters-
+  Berechnung in `upcomingBirthdays()` (`turning`) nutzt jetzt das
+  Flag statt der bisherigen Heuristik „Jahr > 1900". Export: vCard lässt
+  `BDAY` bei unbekanntem Jahr ganz weg (vCard 3.0 kennt kein reines
+  Tag/Monat-Datum), CSV schreibt „24.12." statt des Platzhalter-Jahrgangs.
+  Kontakt-Zusammenführung (`ContactMergeService`) übernimmt das Flag mit,
+  wenn das Geburtsdatum von der Dublette aufgefüllt wird. Getestet (Docker,
+  Playwright/curl): Anlegen ohne Jahr, erneutes Öffnen zeigt korrekt
+  Tag/Monat statt Platzhalter-Datum, Umstellen auf volles Datum löscht das
+  Flag wieder, Anzeige in allen Listen ohne Jahr/Alter, vCard ohne BDAY,
+  CSV mit „18.09.", Änderungsverlauf lesbar („18.09. → 18.09.1985"). Testdaten
+  entfernt.
 - **Seite je Sitzung bei Anmeldungen (TH-Wunsch 2026-09-15):** erledigt
   v1.68.0. Neue Spalte `user_sessions.last_path`, bei jedem Request in
   `public/index.php` mit `(new Request())->path()` mitgeschrieben (im

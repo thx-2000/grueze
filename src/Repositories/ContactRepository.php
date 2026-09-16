@@ -43,6 +43,7 @@ final class ContactRepository
                     ADD COLUMN IF NOT EXISTS deceased_at DATE NULL,
                     ADD COLUMN IF NOT EXISTS beruf VARCHAR(160) NULL,
                     ADD COLUMN IF NOT EXISTS webseite VARCHAR(255) NULL,
+                    ADD COLUMN IF NOT EXISTS geburtstag_jahr_unbekannt TINYINT(1) NOT NULL DEFAULT 0,
                     CHANGE COLUMN IF EXISTS geschlecht anrede CHAR(1) NULL'
             );
         } catch (\Throwable) {
@@ -321,12 +322,12 @@ final class ContactRepository
     /**
      * Kontakte mit hinterlegtem Geburtstag (für die Geburtstagsgrüße).
      *
-     * @return list<array{id:int,vorname:string,nachname:string,geburtstag:string,email:?string}>
+     * @return list<array{id:int,vorname:string,nachname:string,geburtstag:string,geburtstag_jahr_unbekannt:int,email:?string}>
      */
     public function withBirthdays(): array
     {
         return $this->pdo->query(
-            'SELECT contacts.id, contacts.vorname, contacts.nachname, contacts.geburtstag,
+            'SELECT contacts.id, contacts.vorname, contacts.nachname, contacts.geburtstag, contacts.geburtstag_jahr_unbekannt,
                     (SELECT email FROM contact_emails WHERE contact_emails.contact_id = contacts.id ORDER BY contact_emails.id LIMIT 1) AS email
              FROM contacts
              WHERE contacts.geburtstag IS NOT NULL
@@ -338,12 +339,12 @@ final class ContactRepository
      * Kontakte mit Geburtstag in den nächsten $days Tagen (heute eingeschlossen),
      * für das Startseiten-Widget. Sortiert nach Nähe.
      *
-     * @return list<array{id:int, vorname:string, nachname:string, geburtstag:string, in_days:int, turning:?int}>
+     * @return list<array{id:int, vorname:string, nachname:string, geburtstag:string, geburtstag_jahr_unbekannt:bool, in_days:int, turning:?int}>
      */
     public function upcomingBirthdays(int $days = 7): array
     {
         $rows = $this->pdo->query(
-            'SELECT id, vorname, nachname, geburtstag, photo_path
+            'SELECT id, vorname, nachname, geburtstag, geburtstag_jahr_unbekannt, photo_path
              FROM contacts
              WHERE geburtstag IS NOT NULL
                AND archived_at IS NULL AND deleted_at IS NULL AND deceased_at IS NULL'
@@ -355,8 +356,9 @@ final class ContactRepository
             if ($countdown === null || $countdown > $days) {
                 continue;
             }
+            $yearUnknown = !empty($row['geburtstag_jahr_unbekannt']);
             $birthYear = (int) substr((string) $row['geburtstag'], 0, 4);
-            $turning = $birthYear > 1900
+            $turning = !$yearUnknown
                 ? (int) (new \DateTimeImmutable('today'))->modify('+' . $countdown . ' days')->format('Y') - $birthYear
                 : null;
             $out[] = [
@@ -364,6 +366,7 @@ final class ContactRepository
                 'vorname' => (string) $row['vorname'],
                 'nachname' => (string) $row['nachname'],
                 'geburtstag' => (string) $row['geburtstag'],
+                'geburtstag_jahr_unbekannt' => $yearUnknown,
                 'photo_path' => $row['photo_path'] !== null ? (string) $row['photo_path'] : null,
                 'in_days' => $countdown,
                 'turning' => $turning,
@@ -483,9 +486,9 @@ final class ContactRepository
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO contacts
-            (vorname, nachname, geburtsname, anrede, category_id, geburtstag, beruf, webseite, strasse, plz, ort, land, notizen, photo_path, created_by, updated_by)
+            (vorname, nachname, geburtsname, anrede, category_id, geburtstag, geburtstag_jahr_unbekannt, beruf, webseite, strasse, plz, ort, land, notizen, photo_path, created_by, updated_by)
             VALUES
-            (:vorname, :nachname, :geburtsname, :anrede, :category_id, :geburtstag, :beruf, :webseite, :strasse, :plz, :ort, :land, :notizen, :photo_path, :created_by, :updated_by)'
+            (:vorname, :nachname, :geburtsname, :anrede, :category_id, :geburtstag, :geburtstag_jahr_unbekannt, :beruf, :webseite, :strasse, :plz, :ort, :land, :notizen, :photo_path, :created_by, :updated_by)'
         );
         $stmt->execute([
             'vorname' => $data['vorname'],
@@ -494,6 +497,7 @@ final class ContactRepository
             'anrede' => ($data['anrede'] ?? '') ?: null,
             'category_id' => $data['category_id'] ?: null,
             'geburtstag' => $data['geburtstag'] ?: null,
+            'geburtstag_jahr_unbekannt' => !empty($data['geburtstag_jahr_unbekannt']) ? 1 : 0,
             'beruf' => ($data['beruf'] ?? '') ?: null,
             'webseite' => ($data['webseite'] ?? '') ?: null,
             'strasse' => $data['strasse'],
@@ -524,6 +528,7 @@ final class ContactRepository
              anrede = :anrede,
              category_id = :category_id,
              geburtstag = :geburtstag,
+             geburtstag_jahr_unbekannt = :geburtstag_jahr_unbekannt,
              beruf = :beruf,
              webseite = :webseite,
              strasse = :strasse,
@@ -543,6 +548,7 @@ final class ContactRepository
             'anrede' => ($data['anrede'] ?? '') ?: null,
             'category_id' => $data['category_id'] ?: null,
             'geburtstag' => $data['geburtstag'] ?: null,
+            'geburtstag_jahr_unbekannt' => !empty($data['geburtstag_jahr_unbekannt']) ? 1 : 0,
             'beruf' => ($data['beruf'] ?? '') ?: null,
             'webseite' => ($data['webseite'] ?? '') ?: null,
             'strasse' => $data['strasse'],

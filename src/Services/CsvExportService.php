@@ -55,7 +55,10 @@ final class CsvExportService
                 $contact['geburtsname'],
                 $contact['category_name'],
                 $tags,
-                $contact['geburtstag'],
+                // Ohne bekanntes Jahr keinen Platzhalter-Jahrgang exportieren.
+                !empty($contact['geburtstag_jahr_unbekannt'])
+                    ? format_birthday($contact['geburtstag'], true)
+                    : $contact['geburtstag'],
                 $contact['beruf'] ?? '',
                 $contact['webseite'] ?? '',
                 $contact['strasse'],

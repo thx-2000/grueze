@@ -37,6 +37,7 @@ CREATE TABLE contacts (
     anrede CHAR(1) NULL,
     category_id INT UNSIGNED NULL,
     geburtstag DATE NULL,
+    geburtstag_jahr_unbekannt TINYINT(1) NOT NULL DEFAULT 0,
     beruf VARCHAR(160) NULL,
     webseite VARCHAR(255) NULL,
     strasse VARCHAR(190) NOT NULL,

@@ -60,7 +60,7 @@ $fullName = static fn (array $c): string => trim($c['vorname'] . ' ' . $c['nachn
                                         <div><dt>Adresse</dt><dd><?= e(trim(($c['strasse'] ?? '') . ', ' . ($c['plz'] ?? '') . ' ' . ($c['ort'] ?? ''), ', ')) ?></dd></div>
                                     <?php endif; ?>
                                     <?php if (trim((string) ($c['geburtstag'] ?? '')) !== ''): ?>
-                                        <div><dt>Geburtstag</dt><dd><?= e(format_date((string) $c['geburtstag'])) ?></dd></div>
+                                        <div><dt>Geburtstag</dt><dd><?= e(format_birthday((string) $c['geburtstag'], (bool) ($c['geburtstag_jahr_unbekannt'] ?? false))) ?></dd></div>
                                     <?php endif; ?>
                                     <?php if (($c['groups'] ?? []) !== []): ?>
                                         <div><dt>Gruppen</dt><dd><?= e(implode(', ', array_map(static fn ($g) => (string) $g['name'], $c['groups']))) ?></dd></div>

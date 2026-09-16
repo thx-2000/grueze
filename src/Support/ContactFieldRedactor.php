@@ -51,6 +51,7 @@ final class ContactFieldRedactor
             }
             if (!$show['birthday']) {
                 $contact['geburtstag'] = null;
+                $contact['geburtstag_jahr_unbekannt'] = false;
             }
             if (!$show['notes']) {
                 $contact['notizen'] = '';

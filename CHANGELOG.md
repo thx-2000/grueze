@@ -3,6 +3,20 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.69.0
+
+**Geburtstag ohne bekanntes Jahr.**
+
+- Beim Kontakt lässt sich jetzt auch nur Tag & Monat eintragen, wenn das
+  Geburtsjahr nicht bekannt ist – im Kontaktformular, im Selbst-Service
+  „Mein Eintrag" und im Daten-Check-Link.
+- Überall in der Anzeige (Adressbuch, Karten, Startseiten-Widget,
+  Geburtstagsgrüße) erscheint dann nur „24.12." statt eines vollen Datums,
+  und es wird kein Alter berechnet. Export (CSV/vCard) lässt das
+  Platzhalter-Jahr ebenfalls weg.
+
+Migration `2026-10-10-geburtstag-jahr-unbekannt.sql`.
+
 ## 1.68.0
 
 **Anmeldungen zeigen jetzt auch, auf welcher Seite jemand gerade ist.**

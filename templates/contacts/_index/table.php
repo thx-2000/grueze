@@ -81,7 +81,7 @@
                         </td>
                     <?php endif; ?>
                     <?php if (isset($optionalColumns['geburtstag'])): ?>
-                        <td data-col="geburtstag"><span class="is-guarded"><?= e($contact['geburtstag'] ? format_date($contact['geburtstag']) : '—') ?></span></td>
+                        <td data-col="geburtstag"><span class="is-guarded"><?= e($contact['geburtstag'] ? format_birthday($contact['geburtstag'], (bool) ($contact['geburtstag_jahr_unbekannt'] ?? false)) : '—') ?></span></td>
                     <?php endif; ?>
                     <?php if (isset($optionalColumns['emails'])): ?>
                         <td data-col="emails">

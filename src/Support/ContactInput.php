@@ -20,6 +20,12 @@ use App\Core\Request;
  */
 final class ContactInput
 {
+    /**
+     * Platzhalterjahr für einen Geburtstag ohne bekanntes Jahr – ein
+     * Schaltjahr, damit auch der 29.2. eingetragen werden kann.
+     */
+    private const BIRTHDAY_PLACEHOLDER_YEAR = 1600;
+
     /** „mailto:" und Steuerzeichen entfernen, trimmen. */
     public static function cleanEmail(string $value): string
     {
@@ -98,12 +104,15 @@ final class ContactInput
      */
     public static function baseFields(Request $request): array
     {
+        [$geburtstag, $geburtstagJahrUnbekannt] = self::birthday($request);
+
         return [
             'vorname' => trim((string) $request->input('vorname')),
             'nachname' => trim((string) $request->input('nachname')),
             'geburtsname' => trim((string) $request->input('geburtsname')),
             'anrede' => self::salutationCode((string) $request->input('anrede')),
-            'geburtstag' => (string) $request->input('geburtstag'),
+            'geburtstag' => $geburtstag,
+            'geburtstag_jahr_unbekannt' => $geburtstagJahrUnbekannt,
             'beruf' => trim((string) $request->input('beruf')),
             'webseite' => self::cleanWebsite((string) $request->input('webseite')),
             'strasse' => trim((string) $request->input('strasse')),
@@ -111,6 +120,53 @@ final class ContactInput
             'ort' => trim((string) $request->input('ort')),
             'land' => trim((string) $request->input('land', (string) config('defaults.country', 'Deutschland'))),
         ];
+    }
+
+    /**
+     * Geburtstag aus dem Formular: entweder das volle Datum aus dem
+     * Date-Picker, oder – wenn das leer bleibt – Tag/Monat ohne Jahr.
+     *
+     * @return array{0:string,1:bool}
+     */
+    private static function birthday(Request $request): array
+    {
+        $full = trim((string) $request->input('geburtstag'));
+        if ($full !== '') {
+            return [$full, false];
+        }
+
+        $day = (int) $request->input('geburtstag_tag');
+        $month = (int) $request->input('geburtstag_monat');
+        if ($day > 0 && $month > 0 && checkdate($month, $day, self::BIRTHDAY_PLACEHOLDER_YEAR)) {
+            return [sprintf('%d-%02d-%02d', self::BIRTHDAY_PLACEHOLDER_YEAR, $month, $day), true];
+        }
+
+        return ['', false];
+    }
+
+    /**
+     * Umgekehrte Richtung fürs Formular: das Datumsfeld nur befüllen, wenn
+     * das Jahr bekannt ist – sonst Tag/Monat einzeln vorbelegen, damit der
+     * Platzhalter-Jahrgang nirgends als echtes Jahr auftaucht.
+     *
+     * @param array<string,mixed> $contact
+     * @return array{geburtstag:string, geburtstag_tag:string, geburtstag_monat:string}
+     */
+    public static function birthdayFormValues(array $contact): array
+    {
+        $value = trim((string) ($contact['geburtstag'] ?? ''));
+        $empty = ['geburtstag' => $value, 'geburtstag_tag' => '', 'geburtstag_monat' => ''];
+        if ($value === '' || empty($contact['geburtstag_jahr_unbekannt'])) {
+            return $empty;
+        }
+
+        try {
+            $date = new \DateTimeImmutable($value);
+        } catch (\Throwable) {
+            return $empty;
+        }
+
+        return ['geburtstag' => '', 'geburtstag_tag' => $date->format('j'), 'geburtstag_monat' => $date->format('n')];
     }
 
     /**

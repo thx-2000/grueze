@@ -162,7 +162,7 @@ $todayLong = $weekdays[(int) $now->format('w')] . ', ' . (int) $now->format('j')
                             <?php if ($b['in_days'] === 0): ?><strong>heute</strong>
                             <?php elseif ($b['in_days'] === 1): ?>morgen
                             <?php else: ?>in <?= (int) $b['in_days'] ?> Tagen<?php endif; ?>
-                            · <?= e(format_date($b['geburtstag'])) ?><?php if ($b['turning'] !== null): ?> · wird <?= (int) $b['turning'] ?><?php endif; ?>
+                            · <?= e(format_birthday($b['geburtstag'], (bool) $b['geburtstag_jahr_unbekannt'])) ?><?php if ($b['turning'] !== null): ?> · wird <?= (int) $b['turning'] ?><?php endif; ?>
                         </span>
                         <?= icon('chevron-right') ?>
                     </a>
