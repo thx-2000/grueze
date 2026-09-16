@@ -78,7 +78,7 @@ $todayLong = $weekdays[(int) $now->format('w')] . ', ' . (int) $now->format('j')
                     <form method="post" action="<?= e(url('/start/entpinnen')) ?>" class="pins-tile-remove">
                         <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
                         <input type="hidden" name="id" value="<?= e((string) $pin['id']) ?>">
-                        <input type="hidden" name="back" value="<?= e(url('/')) ?>">
+                        <input type="hidden" name="back" value="/">
                         <button type="submit" aria-label="„<?= e((string) $pin['label']) ?>“ von der Startseite lösen"><?= icon('close') ?></button>
                     </form>
                 </article>

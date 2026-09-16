@@ -77,7 +77,7 @@ $groups = [
                         <?php $pinId = ($pinnedPaths ?? [])[$path] ?? null; ?>
                         <form method="post" action="<?= e(url($pinId !== null ? '/start/entpinnen' : '/start/anpinnen')) ?>" class="hub-tile-pin">
                             <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
-                            <input type="hidden" name="back" value="<?= e(url('/verwaltung')) ?>">
+                            <input type="hidden" name="back" value="/verwaltung">
                             <?php if ($pinId !== null): ?>
                                 <input type="hidden" name="id" value="<?= e((string) $pinId) ?>">
                             <?php else: ?>

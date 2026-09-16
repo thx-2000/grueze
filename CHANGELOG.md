@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.72.1
+
+**Fix: 404 nach dem Anpinnen/Lösen einer Kachel.**
+
+- Der Rücksprung nach „Anpinnen"/„Lösen" (Einstellungen-Hub und Startseite)
+  führte zu einem 404, weil die Zieladresse doppelt aufgebaut wurde. Das
+  Anpinnen/Lösen selbst hat trotzdem funktioniert – nur die Weiterleitung
+  landete falsch. Jetzt korrekt.
+
+Keine Migration.
+
 ## 1.72.0
 
 **Eigene Kacheln auf der Startseite.**

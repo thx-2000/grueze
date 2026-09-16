@@ -5,6 +5,30 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Fix: 404 nach Anpinnen/Lösen einer Kachel (TH-Beobachtung 2026-09-16):**
+  erledigt v1.72.1. TH testete v1.72.0 im echten Browser: Anpinnen/Lösen
+  landete auf einer 404-Seite, die Aktion selbst war aber korrekt
+  durchgeführt. Ursache: die `back`-Redirect-Felder in `templates/admin/hub.php`
+  und `templates/start/index.php` enthielten bereits `url('/verwaltung')`
+  bzw. `url('/')` (volle Adresse mit Domain) – `DashboardPinController` gibt
+  das per `Redirect::to()` weiter, das INTERN nochmal `url()` aufruft. Das
+  doppelte Anhängen der Basis-URL ergab eine kaputte Adresse wie
+  `https://zentrale.abi95.eu/https://zentrale.abi95.eu/verwaltung` → 404.
+  Der generische Anpinnen-Knopf im Layout (`templates/layout/app.php`) hatte
+  denselben Fehler nicht, weil dort von Anfang an der rohe Pfad
+  (`$_SERVER['REQUEST_URI']`, ohne `url()`) verwendet wurde – daran als
+  Vorbild orientiert und die beiden anderen Stellen auf rohe Pfade
+  (`/verwaltung`, `/`) umgestellt.
+  **Lektion:** `back`-/Redirect-Felder immer als ROHEN Pfad ins Formular
+  schreiben, nie durch `url()` vorverarbeiten – `Redirect::to()`/`url()`
+  übernehmen das Voranstellen der Basis-URL schon selbst, ein zweites Mal
+  ergibt eine doppelte Domain. Gilt für jede künftige Stelle mit einem
+  `back`-Feld nach demselben Muster.
+  Getestet (Docker, curl): beide Redirect-Ziele zeigen jetzt korrekt auf
+  `http://localhost:8095/verwaltung` bzw. `http://localhost:8095` statt der
+  kaputten doppelten Adresse; Anpinnen/Lösen weiterhin funktional korrekt
+  (DB-Stand vorher/nachher geprüft). `.htaccess` zurückgesetzt.
+  Keine Migration.
 - **Eigene Kacheln auf der Startseite (TH-Wunsch 2026-09-16):** erledigt
   v1.72.0. TH wünschte sich (als Admin, mit Blick auf spätere Freischaltung
   für Orga/Stufenmitglieder und andere GRUEZE-Instanzen) selbst wählbare
