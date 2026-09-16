@@ -23,17 +23,21 @@ $defaults = [
     'tag_ids' => old('tag_ids', []),
     'emails' => old('emails', [['email' => '', 'label' => '']]),
     'phones' => old('phones', [['phone' => '', 'label' => 'Mobil']]),
+    'contact_visibility' => old('contact_visibility', 'stufe'),
+    'newsletter_opt_out' => old('newsletter_opt_out') !== null,
 ];
 $values = $editing ? $contact : $defaults;
 if ($editing) {
     if ($hasOld) {
-        foreach (['vorname', 'nachname', 'geburtsname', 'anrede', 'category_id', 'geburtstag', 'geburtstag_tag', 'geburtstag_monat', 'beruf', 'webseite', 'strasse', 'plz', 'ort', 'land', 'notizen'] as $field) {
+        foreach (['vorname', 'nachname', 'geburtsname', 'anrede', 'category_id', 'geburtstag', 'geburtstag_tag', 'geburtstag_monat', 'beruf', 'webseite', 'strasse', 'plz', 'ort', 'land', 'notizen', 'contact_visibility'] as $field) {
             $values[$field] = $defaults[$field];
         }
+        $values['newsletter_opt_out'] = $defaults['newsletter_opt_out'];
     } else {
         // Ohne Jahr: Datumsfeld leer lassen (sonst zeigt der Picker den
         // Platzhalter-Jahrgang), stattdessen Tag/Monat vorbelegen.
         $values = array_merge($values, \App\Support\ContactInput::birthdayFormValues($contact));
+        $values['newsletter_opt_out'] = !empty($contact['newsletter_opt_out_at']);
     }
     $values['emails'] = old('emails', $contact['emails'] ?: [['email' => '', 'label' => '']]);
     $values['phones'] = old('phones', $contact['phones'] ?: [['phone' => '', 'label' => 'Mobil']]);
@@ -94,10 +98,16 @@ $actionLabel = static fn (string $a): string => match ($a) {
             <?php if (trim((string) ($contact['category_name'] ?? '')) !== ''): ?>
                 <span class="table-pill"><?= e($contact['category_name']) ?></span>
             <?php endif; ?>
+            <?php if (!empty($contact['newsletter_opt_out_at'])): ?>
+                <span class="status-chip is-warn">Rundmail abbestellt</span>
+            <?php endif; ?>
+            <?php if (($contact['contact_visibility'] ?? 'stufe') === 'orga'): ?>
+                <span class="table-pill">nur Orga-Team sichtbar</span>
+            <?php endif; ?>
             <?php if (!empty($contact['created_at'])): ?>
                 <span class="muted">im Adressbuch seit <?= e(format_date(substr((string) $contact['created_at'], 0, 10))) ?></span>
             <?php endif; ?>
-            <?php if (can('contacts.export') && empty($contact['archived_at']) && empty($contact['deleted_at'])): ?>
+            <?php if (empty($contact['archived_at']) && empty($contact['deleted_at'])): ?>
                 <a class="linkish" href="<?= e(url('/contacts/vcard?id=' . (int) $contact['id'])) ?>"><?= icon('contacts') ?><span>Als vCard</span></a>
             <?php endif; ?>
         </div>
@@ -214,6 +224,25 @@ $actionLabel = static fn (string $a): string => match ($a) {
                 <?php endforeach; ?>
             </div>
         </div>
+    </section>
+
+    <section class="detail-card">
+        <h2>Sichtbarkeit &amp; Rundmail</h2>
+        <div class="form-grid">
+            <label>
+                <span>Wer darf die Kontaktdaten sehen?</span>
+                <select name="contact_visibility">
+                    <option value="stufe" <?= ($values['contact_visibility'] ?? 'stufe') === 'stufe' ? 'selected' : '' ?>>Die ganze Stufe (Standard)</option>
+                    <option value="orga" <?= ($values['contact_visibility'] ?? 'stufe') === 'orga' ? 'selected' : '' ?>>Nur das Orga-Team</option>
+                </select>
+                <small class="field-hint">Gilt für Adresse, Geburtstag, Mail und Telefon – schränkt die allgemeine Rollen-Sichtbarkeit für diese Person weiter ein, erweitert sie nie.</small>
+            </label>
+        </div>
+        <label class="inline-toggle">
+            <input type="checkbox" name="newsletter_opt_out" value="1" <?= !empty($values['newsletter_opt_out']) ? 'checked' : '' ?>>
+            <span>Keine Rundmails/automatischen Grüße erhalten</span>
+        </label>
+        <small class="field-hint">Der Kontakt bleibt ganz normal im Adressbuch – bekommt aber keine Rundmail, Geburtstags- oder Weihnachtsgrüße mehr zugestellt.</small>
     </section>
 
     <section class="detail-card">
@@ -343,9 +372,35 @@ $canImpersonateThis = $editing
 $isArchived = $editing && !empty($contact['archived_at']);
 $isTrashed = $editing && !empty($contact['deleted_at']);
 $isDeceased = $editing && !empty($contact['deceased_at']);
+$isHidden = $editing && !empty($contact['hidden_at']);
 $dataCheckActive = $dataCheckActive ?? null;
 $dataCheckFreshLink = $dataCheckFreshLink ?? null;
 ?>
+
+<?php if ($editing && is_admin()): ?>
+    <section class="detail-card<?= $isHidden ? ' detail-danger' : '' ?>">
+        <h2>Versteckt</h2>
+        <?php if ($isHidden): ?>
+            <p class="muted">
+                <strong><?= e($fullName) ?></strong> ist versteckt seit <?= e(format_date(substr((string) $contact['hidden_at'], 0, 10))) ?> – sichtbar nur noch für Admins. Adressbuch, Suche, Mailings und Geburtstage überspringen diesen Kontakt, Daten und Login bleiben erhalten.
+            </p>
+            <div class="toolbar-actions">
+                <form method="post" action="<?= e(url('/contacts/einblenden')) ?>">
+                    <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                    <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+                    <button type="submit"><?= icon('eye') ?><span>Wieder einblenden</span></button>
+                </form>
+            </div>
+        <?php else: ?>
+            <p class="muted">Macht <strong><?= e($fullName) ?></strong> für alle außer Admins unsichtbar – auch fürs Orga-Team, auch in Mailings und Geburtstagen. Anders als Archiv/Papierkorb bleibt der Login aktiv. Daten bleiben in jedem Fall vollständig erhalten.</p>
+            <form method="post" action="<?= e(url('/contacts/verstecken')) ?>" data-confirm="„<?= e($fullName) ?>“ vor allen außer Admins verstecken?">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <input type="hidden" name="id" value="<?= e((string) $contact['id']) ?>">
+                <button type="submit" class="ghost-button"><?= icon('eye-off') ?><span>Verstecken</span></button>
+            </form>
+        <?php endif; ?>
+    </section>
+<?php endif; ?>
 
 <?php if ($isDeceased && can('memorials.manage')): ?>
     <section class="detail-card detail-danger">

@@ -10,6 +10,7 @@ use App\Repositories\ContactRepository;
 use App\Services\ContactImportService;
 use App\Services\CsvExportService;
 use App\Services\VCardService;
+use App\Support\ContactFieldRedactor;
 use App\Support\Redirect;
 
 /**
@@ -99,26 +100,36 @@ final class ContactPortController extends BaseController
     /**
      * vCard-Export (.vcf): einzelner Kontakt (`?id=`), aktuelle Auswahl
      * (`selected_contacts[]` per POST) oder die gefilterte Liste (GET).
+     *
+     * Die Einzelperson-Karte darf sich jede angemeldete Person herunterladen
+     * (wie ein Eintrag fürs eigene Adressbuch auf Handy/Rechner) – mit
+     * denselben Feldern, die sie auch im Adressbuch sieht. Sammel-Export
+     * (Auswahl oder gefilterte Liste) bleibt an `contacts.export` gebunden.
      */
     public function vcard(Request $request): never
     {
-        $this->requirePermission('contacts.export');
+        $this->requireAuth();
 
         $singleId = (int) $request->input('id');
+        if ($singleId > 0) {
+            $contact = $this->contacts->find($singleId);
+            if (!$contact || !empty($contact['archived_at']) || !empty($contact['deleted_at'])
+                || (!empty($contact['hidden_at']) && !$this->auth->isAdmin())) {
+                flash('error', 'Kontakt nicht gefunden.');
+                Redirect::to('/kontakte');
+            }
+            $contacts = [$contact];
+            ContactFieldRedactor::apply($contacts, (int) ($this->auth->user()['contact_id'] ?? 0));
+            $name = trim($contacts[0]['vorname'] . ' ' . $contacts[0]['nachname']) ?: 'kontakt';
+            $this->vcards->stream($contacts, $name . '.vcf');
+        }
+
+        $this->requirePermission('contacts.export');
+
         $selected = array_values(array_unique(array_filter(
             array_map('intval', (array) $request->input('selected_contacts', [])),
             static fn (int $id): bool => $id > 0
         )));
-
-        if ($singleId > 0) {
-            $contact = $this->contacts->find($singleId);
-            if (!$contact || !empty($contact['archived_at']) || !empty($contact['deleted_at'])) {
-                flash('error', 'Kontakt nicht gefunden.');
-                Redirect::to('/kontakte');
-            }
-            $name = trim($contact['vorname'] . ' ' . $contact['nachname']) ?: 'kontakt';
-            $this->vcards->stream([$contact], $name . '.vcf');
-        }
 
         if ($selected !== []) {
             $contacts = $this->contacts->findManyByIds($selected);

@@ -80,6 +80,14 @@ final class ContactDiff
             ],
             'E-Mail' => [$rowText($before['emails'] ?? [], 'email'), $rowText($after['emails'], 'email')],
             'Telefon' => [$rowText($before['phones'] ?? [], 'phone'), $rowText($after['phones'], 'phone')],
+            'Rundmail-Empfang' => [
+                empty($before['newsletter_opt_out_at']) ? 'aktiv' : 'abgemeldet',
+                !empty($after['newsletter_opt_out']) ? 'abgemeldet' : 'aktiv',
+            ],
+            'Sichtbarkeit der Kontaktdaten' => [
+                ((string) ($before['contact_visibility'] ?? 'stufe')) === 'orga' ? 'nur Orga-Team' : 'ganze Stufe',
+                ((string) ($after['contact_visibility'] ?? 'stufe')) === 'orga' ? 'nur Orga-Team' : 'ganze Stufe',
+            ],
         ];
 
         $changes = [];

@@ -3,6 +3,28 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.70.0
+
+**Rundmail-Abmeldung, versteckte Kontakte, Sichtbarkeits-Wahl und vCard für alle.**
+
+- Neue Option „Keine Rundmails/automatischen Grüße erhalten" am Kontakt – selbst
+  setzbar (Mein Eintrag, Daten-Check-Link) oder durchs Orga-Team. Der Kontakt
+  bleibt ganz normal im Adressbuch, wird aber bei Rundmail, Geburtstags- und
+  Weihnachtsgrüßen übersprungen.
+- Neu für Admins: Kontakte „Verstecken" – verschwinden aus Adressbuch, Suche,
+  Mailings und Geburtstagen für alle außer Admins (auch fürs Orga-Team), Daten
+  und Login bleiben erhalten. Übersicht unter „Versteckte Kontakte".
+- Jede Person kann jetzt selbst wählen, wer ihre Kontaktdaten (Adresse,
+  Geburtstag, Mail, Telefon) sehen darf: die ganze Stufe (Standard) oder nur
+  das Orga-Team – schränkt die allgemeine Rollen-Sichtbarkeit pro Person
+  weiter ein.
+- Einzelne Kontakte lassen sich jetzt von jeder angemeldeten Person als vCard
+  herunterladen (Adressbuch-Tabelle, Karten, Kontaktseite) – mit denselben
+  Feldern, die im Adressbuch sichtbar sind. Der Sammel-Export bleibt an die
+  Export-Berechtigung gebunden.
+
+Migration `2026-10-11-kontakt-sichtbarkeit-newsletter.sql`.
+
 ## 1.69.0
 
 **Geburtstag ohne bekanntes Jahr.**

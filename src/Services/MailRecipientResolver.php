@@ -55,10 +55,13 @@ final class MailRecipientResolver
         $withEmail = $this->contacts->recipientIds([]);
 
         return match ($mode) {
-            'selection' => array_values(array_unique(array_filter(
+            // Manuelle Auswahl kommt direkt aus dem Request, nicht über
+            // recipientIds() – Newsletter-Abmeldung hier extra ausschließen,
+            // damit sie auch beim gezielten Anhaken respektiert wird.
+            'selection' => $this->contacts->excludeOptedOut(array_values(array_unique(array_filter(
                 array_map('intval', (array) $request->input('contact_ids', [])),
                 static fn (int $n): bool => $n > 0
-            ))),
+            )))),
             'filter' => array_values(array_intersect(
                 $withEmail,
                 array_map('intval', (array) ($_SESSION['rundmail_filter_ids'] ?? []))

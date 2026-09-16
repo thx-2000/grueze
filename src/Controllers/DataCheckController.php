@@ -41,7 +41,8 @@ final class DataCheckController extends BaseController
 
         $contactId = (int) $request->input('id');
         $contact = $this->contacts->find($contactId);
-        if (!$contact || !empty($contact['archived_at']) || !empty($contact['deleted_at'])) {
+        if (!$contact || !empty($contact['archived_at']) || !empty($contact['deleted_at'])
+            || (!empty($contact['hidden_at']) && !$this->auth->isAdmin())) {
             flash('error', 'Kontakt nicht gefunden.');
             Redirect::to('/kontakte');
         }
@@ -209,6 +210,14 @@ final class DataCheckController extends BaseController
             'Land' => [(string) ($before['land'] ?? ''), (string) $after['land']],
             'E-Mail' => [$flat($before['emails'] ?? [], 'email'), $flat($after['emails'], 'email')],
             'Telefon' => [$flat($before['phones'] ?? [], 'phone'), $flat($after['phones'], 'phone')],
+            'Rundmail-Empfang' => [
+                empty($before['newsletter_opt_out_at']) ? 'aktiv' : 'abgemeldet',
+                !empty($after['newsletter_opt_out']) ? 'abgemeldet' : 'aktiv',
+            ],
+            'Sichtbarkeit der Kontaktdaten' => [
+                ((string) ($before['contact_visibility'] ?? 'stufe')) === 'orga' ? 'nur Orga-Team' : 'ganze Stufe',
+                ((string) ($after['contact_visibility'] ?? 'stufe')) === 'orga' ? 'nur Orga-Team' : 'ganze Stufe',
+            ],
         ];
 
         $changes = [];

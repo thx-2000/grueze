@@ -86,11 +86,12 @@
                 </div>
             <?php endif; ?>
 
-            <?php if ($canManage): ?>
-                <div class="card-actions">
+            <div class="card-actions">
+                <a class="ghost-button" href="<?= e(url('/contacts/vcard?id=' . $contact['id'])) ?>"><?= icon('contacts') ?><span>vCard</span></a>
+                <?php if ($canManage): ?>
                     <a class="ghost-button" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>"><?= icon('edit') ?><span>Bearbeiten</span></a>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </article>
     <?php endforeach; ?>
     <?php if ($contacts === []): ?>

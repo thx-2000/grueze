@@ -11,6 +11,14 @@ final class Auth
 {
     private const CONTACT_DETAIL_FIELDS = ['address', 'birthday', 'emails', 'phones', 'notes', 'login'];
 
+    /**
+     * Felder, die eine Person per Selbst-Service auf „nur Orga-Team" statt
+     * „ganze Stufe" einschränken kann (`contacts.contact_visibility`). Notizen
+     * und Login sind davon bewusst ausgenommen – die folgen weiter nur der
+     * globalen Rollen-Sichtbarkeit.
+     */
+    private const OWN_CHOICE_FIELDS = ['address', 'birthday', 'emails', 'phones'];
+
     /** Pro Request gecacht: [aktive User-ID => User-Array|null]. */
     private array $userCache = [];
 
@@ -195,15 +203,32 @@ final class Auth
             return true;
         }
 
+        $isOwn = $contact !== null
+            && isset($user['contact_id'], $contact['id'])
+            && (int) $user['contact_id'] === (int) $contact['id'];
+
         if ($this->roleAllowsContactField($user, $field)) {
+            // „Nur Orga-Team sichtbar" (Selbst-Service-Wahl der Person selbst)
+            // schränkt die globale Rollen-Sichtbarkeit für diesen einen
+            // Kontakt weiter ein – außer für die Person selbst.
+            if (!$isOwn && $this->contactRestrictedToOrga($contact, $field) && !$this->resolvePermission($user, 'contacts.manage')) {
+                return false;
+            }
+
             return true;
         }
 
         return $field !== 'notes'
             && $contact !== null
             && $this->settings->ownContactAlwaysVisible()
-            && isset($user['contact_id'], $contact['id'])
-            && (int) $user['contact_id'] === (int) $contact['id'];
+            && $isOwn;
+    }
+
+    private function contactRestrictedToOrga(?array $contact, string $field): bool
+    {
+        return $contact !== null
+            && in_array($field, self::OWN_CHOICE_FIELDS, true)
+            && (string) ($contact['contact_visibility'] ?? 'stufe') === 'orga';
     }
 
     private function roleAllowsContactField(array $user, string $field): bool

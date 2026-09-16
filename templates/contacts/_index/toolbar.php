@@ -124,8 +124,8 @@
     <?php endif; ?>
 
     <?php
-    $careCount = (int) ($duplicateCount ?? 0) + (int) ($retiredCount ?? 0);
-    $showCare = $canManage || can('contacts.delete');
+    $careCount = (int) ($duplicateCount ?? 0) + (int) ($retiredCount ?? 0) + (int) ($hiddenCount ?? 0);
+    $showCare = $canManage || can('contacts.delete') || is_admin();
     ?>
     <?php if ($canSendRegularMail || can('contacts.export') || $showCare): ?>
         <div class="addressbook-tools">
@@ -155,6 +155,9 @@
                         <?php endif; ?>
                         <?php if (can('contacts.delete')): ?>
                             <a href="<?= e(url('/kontakte/archiv')) ?>">Archiv &amp; Papierkorb<?= $retiredCount > 0 ? ' (' . (int) $retiredCount . ')' : '' ?></a>
+                        <?php endif; ?>
+                        <?php if (is_admin()): ?>
+                            <a href="<?= e(url('/kontakte/versteckt')) ?>">Versteckte Kontakte<?= ($hiddenCount ?? 0) > 0 ? ' (' . (int) $hiddenCount . ')' : '' ?></a>
                         <?php endif; ?>
                     </div>
                 </details>

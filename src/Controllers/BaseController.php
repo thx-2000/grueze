@@ -41,4 +41,17 @@ abstract class BaseController
             throw new RuntimeException('Für diese Aktion fehlt die Berechtigung.');
         }
     }
+
+    /**
+     * Wie requirePermission(), aber fest an die Rolle „admin" gebunden statt
+     * an die (umschaltbare) Rechte-Matrix – für Funktionen wie „Versteckte
+     * Kontakte", die nie an andere Rollen vergeben werden können sollen.
+     */
+    protected function requireAdmin(): void
+    {
+        $this->requireAuth();
+        if (!$this->auth->isAdmin()) {
+            throw new RuntimeException('Für diese Aktion fehlt die Berechtigung.');
+        }
+    }
 }

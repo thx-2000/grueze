@@ -109,6 +109,56 @@ final class ContactArchiveController extends BaseController
         Redirect::to('/kontakte/archiv');
     }
 
+    /**
+     * Kontakt admin-only verstecken: verschwindet danach aus Adressbuch,
+     * Suche, Mailings und Geburtstagen – auch für das Orga-Team. Daten und
+     * ein verknüpfter Login bleiben unangetastet.
+     */
+    public function hide(Request $request): void
+    {
+        $this->requireAdmin();
+        Csrf::validate($request->input('_csrf'));
+        $id = (int) $request->input('id');
+        $contact = $this->contacts->find($id);
+        if (!$contact) {
+            flash('error', 'Kontakt nicht gefunden.');
+            Redirect::to('/kontakte');
+        }
+
+        $this->contacts->hide($id, (int) $this->auth->user()['id']);
+        $name = trim($contact['vorname'] . ' ' . $contact['nachname']);
+        $this->logs->addAudit((int) $this->auth->user()['id'], $id, 'updated', 'Kontakt versteckt: ' . $name . '.');
+        flash('success', $name . ' ist jetzt versteckt – sichtbar nur noch für Admins unter „Versteckte Kontakte".');
+        Redirect::to('/kontakte');
+    }
+
+    public function unhide(Request $request): void
+    {
+        $this->requireAdmin();
+        Csrf::validate($request->input('_csrf'));
+        $id = (int) $request->input('id');
+        $contact = $this->contacts->find($id);
+        if (!$contact) {
+            flash('error', 'Kontakt nicht gefunden.');
+            Redirect::to('/kontakte/versteckt');
+        }
+
+        $this->contacts->unhide($id);
+        $name = trim($contact['vorname'] . ' ' . $contact['nachname']);
+        $this->logs->addAudit((int) $this->auth->user()['id'], $id, 'updated', 'Kontakt wieder eingeblendet: ' . $name . '.');
+        flash('success', $name . ' ist wieder normal im Adressbuch sichtbar.');
+        Redirect::to('/kontakte/versteckt');
+    }
+
+    /** Übersicht „Versteckte Kontakte" – nur für Admins. */
+    public function hiddenList(): void
+    {
+        $this->requireAdmin();
+        $this->render('contacts/hidden', [
+            'hidden' => $this->contacts->hiddenList(),
+        ]);
+    }
+
     /** Dubletten-Finder: Kontakte, die vermutlich doppelt angelegt wurden. */
     public function duplicates(): void
     {

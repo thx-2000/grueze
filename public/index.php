@@ -625,6 +625,9 @@ try {
     $router->post('/contacts/datencheck', [\App\Controllers\DataCheckController::class, 'createLink']);
     $router->post('/contacts/datencheck/widerrufen', [\App\Controllers\DataCheckController::class, 'revokeLink']);
     $router->get('/kontakte/dubletten', [\App\Controllers\ContactArchiveController::class, 'duplicates']);
+    $router->get('/kontakte/versteckt', [\App\Controllers\ContactArchiveController::class, 'hiddenList']);
+    $router->post('/contacts/verstecken', [\App\Controllers\ContactArchiveController::class, 'hide']);
+    $router->post('/contacts/einblenden', [\App\Controllers\ContactArchiveController::class, 'unhide']);
     $router->post('/contacts/zusammenfuehren', [\App\Controllers\ContactArchiveController::class, 'merge']);
     $router->post('/contacts/bulk-update', [ContactController::class, 'bulkUpdate']);
     $router->post('/contacts/gruppe-aus-auswahl', [ContactController::class, 'groupFromSelection']);

@@ -27,7 +27,7 @@
                 <?php if (isset($optionalColumns['emails'])): ?><th data-col="emails" scope="col">E-Mail</th><?php endif; ?>
                 <?php if (isset($optionalColumns['phones'])): ?><th data-col="phones" scope="col">Telefon</th><?php endif; ?>
                 <?php if (isset($optionalColumns['login'])): ?><th data-col="login" scope="col">Login / Rolle</th><?php endif; ?>
-                <?php if ($canManage): ?><th class="col-open" scope="col"><span class="visually-hidden">Öffnen</span></th><?php endif; ?>
+                <th class="col-open" scope="col"><span class="visually-hidden">Aktionen</span></th>
             </tr>
         </thead>
         <tbody>
@@ -121,15 +121,16 @@
                             <?php endif; ?>
                         </td>
                     <?php endif; ?>
-                    <?php if ($canManage): ?>
-                        <td class="col-open">
+                    <td class="col-open">
+                        <a class="row-open" href="<?= e(url('/contacts/vcard?id=' . $contact['id'])) ?>" aria-label="<?= e(trim($contact['vorname'] . ' ' . $contact['nachname']) . ' als vCard herunterladen') ?>" title="Als vCard herunterladen"><?= icon('contacts') ?></a>
+                        <?php if ($canManage): ?>
                             <a class="row-open" href="<?= e(url('/contacts/edit?id=' . $contact['id'])) ?>" aria-label="<?= e(trim($contact['vorname'] . ' ' . $contact['nachname']) . ' öffnen') ?>"><?= icon('chevron-right') ?></a>
-                        </td>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </td>
                 </tr>
             <?php endforeach; ?>
             <?php if ($contacts === []): ?>
-                <tr><td colspan="<?= count($optionalColumns) + ($canManage ? 5 : 4) ?>" class="table-empty">Keine Kontakte für diese Ansicht.</td></tr>
+                <tr><td colspan="<?= count($optionalColumns) + 5 ?>" class="table-empty">Keine Kontakte für diese Ansicht.</td></tr>
             <?php endif; ?>
         </tbody>
     </table>

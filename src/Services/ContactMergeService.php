@@ -74,7 +74,7 @@ final class ContactMergeService
         $nameRows = $this->pdo->query(
             "SELECT LOWER(TRIM(CONCAT(vorname, ' ', nachname))) AS k, GROUP_CONCAT(id) AS ids
              FROM contacts
-             WHERE archived_at IS NULL AND deleted_at IS NULL
+             WHERE archived_at IS NULL AND deleted_at IS NULL AND hidden_at IS NULL
                AND TRIM(CONCAT(vorname, nachname)) <> ''
              GROUP BY k HAVING COUNT(*) > 1"
         )->fetchAll();
@@ -91,7 +91,7 @@ final class ContactMergeService
             "SELECT LOWER(TRIM(ce.email)) AS k, GROUP_CONCAT(DISTINCT ce.contact_id) AS ids
              FROM contact_emails ce
              JOIN contacts c ON c.id = ce.contact_id
-             WHERE c.archived_at IS NULL AND c.deleted_at IS NULL
+             WHERE c.archived_at IS NULL AND c.deleted_at IS NULL AND c.hidden_at IS NULL
                AND TRIM(COALESCE(ce.email, '')) <> ''
              GROUP BY k HAVING COUNT(DISTINCT ce.contact_id) > 1"
         )->fetchAll();

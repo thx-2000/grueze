@@ -8,8 +8,13 @@ use PDO;
 
 final class ContactRepository
 {
-    /** „Lebende" Kontakte: weder archiviert noch im Papierkorb noch verstorben. */
-    private const LIVE = ' AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL';
+    /**
+     * „Lebende" Kontakte: weder archiviert noch im Papierkorb noch verstorben
+     * noch versteckt. Versteckte Kontakte tauchen dadurch für niemanden im
+     * normalen Adressbuch/Mailing auf – auch nicht für Admins, die verwalten
+     * sie über die eigene Übersicht „Versteckte Kontakte".
+     */
+    private const LIVE = ' AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL AND contacts.hidden_at IS NULL';
 
     /** Tage, die ein Kontakt im Papierkorb bleibt, bevor er endgültig gelöscht wird. */
     public const TRASH_DAYS = 30;
@@ -44,6 +49,10 @@ final class ContactRepository
                     ADD COLUMN IF NOT EXISTS beruf VARCHAR(160) NULL,
                     ADD COLUMN IF NOT EXISTS webseite VARCHAR(255) NULL,
                     ADD COLUMN IF NOT EXISTS geburtstag_jahr_unbekannt TINYINT(1) NOT NULL DEFAULT 0,
+                    ADD COLUMN IF NOT EXISTS newsletter_opt_out_at DATETIME NULL,
+                    ADD COLUMN IF NOT EXISTS hidden_at DATETIME NULL,
+                    ADD COLUMN IF NOT EXISTS hidden_by INT UNSIGNED NULL,
+                    ADD COLUMN IF NOT EXISTS contact_visibility ENUM(\'stufe\',\'orga\') NOT NULL DEFAULT \'stufe\',
                     CHANGE COLUMN IF EXISTS geschlecht anrede CHAR(1) NULL'
             );
         } catch (\Throwable) {
@@ -132,7 +141,9 @@ final class ContactRepository
 
     /**
      * Kontakt-IDs, die zum Filter passen UND mindestens eine Mailadresse haben.
-     * Für den Rundmail-Empfängerkreis.
+     * Für den Rundmail-Empfängerkreis. Schließt zusätzlich zu LIVE auch eine
+     * Newsletter-Abmeldung aus – anders als LIVE gilt das NUR fürs Mailing,
+     * der Kontakt bleibt im normalen Adressbuch weiter sichtbar.
      */
     public function recipientIds(array $filters = []): array
     {
@@ -141,6 +152,7 @@ final class ContactRepository
                 FROM contacts
                 LEFT JOIN categories ON categories.id = contacts.category_id
                 WHERE 1=1' . $clause['sql'] . '
+                AND contacts.newsletter_opt_out_at IS NULL
                 AND EXISTS (
                     SELECT 1 FROM contact_emails
                     WHERE contact_emails.contact_id = contacts.id
@@ -150,6 +162,29 @@ final class ContactRepository
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($clause['params']);
+
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    /**
+     * Gegebene IDs auf die vom Newsletter/Rundmail abgemeldeten reduzieren –
+     * für den Empfängerkreis „manuelle Auswahl", der ohne `recipientIds()`
+     * direkt aus dem Request kommt und die Abmeldung sonst umgehen würde.
+     *
+     * @param list<int> $ids
+     * @return list<int>
+     */
+    public function excludeOptedOut(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $this->pdo->prepare(
+            "SELECT id FROM contacts WHERE id IN ($placeholders) AND newsletter_opt_out_at IS NULL"
+        );
+        $stmt->execute($ids);
 
         return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
     }
@@ -245,7 +280,7 @@ final class ContactRepository
                  FROM contacts
                  LEFT JOIN categories ON categories.id = contacts.category_id
                  WHERE (' . implode(' OR ', $conds) . ")
-                   AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL
+                   AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL AND contacts.hidden_at IS NULL
                  ORDER BY contacts.nachname ASC, contacts.vorname ASC
                  LIMIT " . (int) $limit
             );
@@ -278,7 +313,7 @@ final class ContactRepository
                     WHERE cp.contact_id = contacts.id AND TRIM(COALESCE(cp.phone, "")) <> ""
                 ) THEN 1 ELSE 0 END) AS without_phone
              FROM contacts
-             WHERE contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL'
+             WHERE contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL AND contacts.hidden_at IS NULL'
         )->fetch();
 
         return [
@@ -298,6 +333,7 @@ final class ContactRepository
                  JOIN contact_emails ON contact_emails.contact_id = contacts.id
                  WHERE contact_emails.email IS NOT NULL AND contact_emails.email <> ""
                    AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL
+                   AND contacts.hidden_at IS NULL AND contacts.newsletter_opt_out_at IS NULL
                  ORDER BY contacts.vorname ASC, contacts.nachname ASC'
             )->fetchAll(\PDO::FETCH_COLUMN)
         );
@@ -320,7 +356,8 @@ final class ContactRepository
     }
 
     /**
-     * Kontakte mit hinterlegtem Geburtstag (für die Geburtstagsgrüße).
+     * Kontakte mit hinterlegtem Geburtstag (für die Geburtstagsgrüße – ein
+     * Mailing, daher zusätzlich ohne Newsletter-Abmeldung und ohne Versteckte).
      *
      * @return list<array{id:int,vorname:string,nachname:string,geburtstag:string,geburtstag_jahr_unbekannt:int,email:?string}>
      */
@@ -331,13 +368,15 @@ final class ContactRepository
                     (SELECT email FROM contact_emails WHERE contact_emails.contact_id = contacts.id ORDER BY contact_emails.id LIMIT 1) AS email
              FROM contacts
              WHERE contacts.geburtstag IS NOT NULL
-               AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL'
+               AND contacts.archived_at IS NULL AND contacts.deleted_at IS NULL AND contacts.deceased_at IS NULL
+               AND contacts.hidden_at IS NULL AND contacts.newsletter_opt_out_at IS NULL'
         )->fetchAll();
     }
 
     /**
      * Kontakte mit Geburtstag in den nächsten $days Tagen (heute eingeschlossen),
-     * für das Startseiten-Widget. Sortiert nach Nähe.
+     * für das Startseiten-Widget. Sortiert nach Nähe. Reine Anzeige (kein
+     * Mailing) – Newsletter-Abmeldung blendet hier bewusst nicht aus.
      *
      * @return list<array{id:int, vorname:string, nachname:string, geburtstag:string, geburtstag_jahr_unbekannt:bool, in_days:int, turning:?int}>
      */
@@ -347,7 +386,7 @@ final class ContactRepository
             'SELECT id, vorname, nachname, geburtstag, geburtstag_jahr_unbekannt, photo_path
              FROM contacts
              WHERE geburtstag IS NOT NULL
-               AND archived_at IS NULL AND deleted_at IS NULL AND deceased_at IS NULL'
+               AND archived_at IS NULL AND deleted_at IS NULL AND deceased_at IS NULL AND hidden_at IS NULL'
         )->fetchAll();
 
         $out = [];
@@ -392,6 +431,7 @@ final class ContactRepository
              FROM contacts c
              WHERE c.geburtstag IS NOT NULL
                AND c.archived_at IS NULL AND c.deleted_at IS NULL AND c.deceased_at IS NULL
+               AND c.hidden_at IS NULL AND c.newsletter_opt_out_at IS NULL
                AND DATE_FORMAT(c.geburtstag, '%m-%d') = DATE_FORMAT(CURDATE(), '%m-%d')"
         );
 
@@ -486,9 +526,10 @@ final class ContactRepository
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO contacts
-            (vorname, nachname, geburtsname, anrede, category_id, geburtstag, geburtstag_jahr_unbekannt, beruf, webseite, strasse, plz, ort, land, notizen, photo_path, created_by, updated_by)
+            (vorname, nachname, geburtsname, anrede, category_id, geburtstag, geburtstag_jahr_unbekannt, beruf, webseite, strasse, plz, ort, land, notizen, photo_path, newsletter_opt_out_at, contact_visibility, created_by, updated_by)
             VALUES
-            (:vorname, :nachname, :geburtsname, :anrede, :category_id, :geburtstag, :geburtstag_jahr_unbekannt, :beruf, :webseite, :strasse, :plz, :ort, :land, :notizen, :photo_path, :created_by, :updated_by)'
+            (:vorname, :nachname, :geburtsname, :anrede, :category_id, :geburtstag, :geburtstag_jahr_unbekannt, :beruf, :webseite, :strasse, :plz, :ort, :land, :notizen, :photo_path,
+             CASE WHEN :newsletter_opt_out = 1 THEN NOW() ELSE NULL END, :contact_visibility, :created_by, :updated_by)'
         );
         $stmt->execute([
             'vorname' => $data['vorname'],
@@ -506,6 +547,8 @@ final class ContactRepository
             'land' => $data['land'] ?: null,
             'notizen' => $data['notizen'] ?: null,
             'photo_path' => $data['photo_path'] ?: null,
+            'newsletter_opt_out' => !empty($data['newsletter_opt_out']) ? 1 : 0,
+            'contact_visibility' => ($data['contact_visibility'] ?? '') === 'orga' ? 'orga' : 'stufe',
             'created_by' => $userId,
             'updated_by' => $userId,
         ]);
@@ -537,6 +580,8 @@ final class ContactRepository
              land = :land,
              notizen = :notizen,
              photo_path = :photo_path,
+             newsletter_opt_out_at = CASE WHEN :newsletter_opt_out = 1 THEN COALESCE(newsletter_opt_out_at, NOW()) ELSE NULL END,
+             contact_visibility = :contact_visibility,
              updated_by = :updated_by
              WHERE id = :id'
         );
@@ -557,6 +602,8 @@ final class ContactRepository
             'land' => $data['land'] ?: null,
             'notizen' => $data['notizen'] ?: null,
             'photo_path' => $data['photo_path'] ?: null,
+            'newsletter_opt_out' => !empty($data['newsletter_opt_out']) ? 1 : 0,
+            'contact_visibility' => ($data['contact_visibility'] ?? '') === 'orga' ? 'orga' : 'stufe',
             'updated_by' => $userId,
         ]);
 
@@ -634,6 +681,56 @@ final class ContactRepository
     {
         $stmt = $this->pdo->prepare('DELETE FROM contacts WHERE id = :id');
         $stmt->execute(['id' => $id]);
+    }
+
+    /**
+     * Kontakt admin-only verstecken: verschwindet aus Adressbuch, Suche,
+     * Mailings und Geburtstagen (siehe LIVE) – unabhängig von Archiv/
+     * Papierkorb/Verstorben, ein Kontakt kann beides gleichzeitig sein.
+     * Login/Daten bleiben unangetastet.
+     */
+    public function hide(int $id, int $userId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE contacts SET hidden_at = NOW(), hidden_by = :uid WHERE id = :id'
+        );
+        $stmt->execute(['id' => $id, 'uid' => $userId]);
+    }
+
+    /** Kontakt wieder einblenden. */
+    public function unhide(int $id): void
+    {
+        $this->pdo->prepare('UPDATE contacts SET hidden_at = NULL, hidden_by = NULL WHERE id = :id')
+            ->execute(['id' => $id]);
+    }
+
+    /** Schlanke Zahl für den „Versteckte Kontakte"-Badge, ohne die volle Liste zu laden. */
+    public function hiddenCount(): int
+    {
+        return (int) $this->pdo->query('SELECT COUNT(*) FROM contacts WHERE hidden_at IS NOT NULL')->fetchColumn();
+    }
+
+    /**
+     * Versteckte Kontakte – nur für die Admin-Übersicht „Versteckte Kontakte".
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function hiddenList(): array
+    {
+        $rows = $this->pdo->query(
+            'SELECT contacts.*, categories.name AS category_name, u.name AS hidden_by_name
+             FROM contacts
+             LEFT JOIN categories ON categories.id = contacts.category_id
+             LEFT JOIN users u ON u.id = contacts.hidden_by
+             WHERE contacts.hidden_at IS NOT NULL
+             ORDER BY contacts.hidden_at DESC'
+        )->fetchAll();
+
+        foreach ($rows as &$row) {
+            $this->hydrateContact($row);
+        }
+
+        return $rows;
     }
 
     /**

@@ -64,6 +64,16 @@ function auth(): Auth
     return App\Core\Container::get(Auth::class);
 }
 
+/**
+ * Rolle „admin" – unabhängig von der (umschaltbaren) Rechte-Matrix. Für
+ * Funktionen wie „Versteckte Kontakte", die bewusst NIE über die normale
+ * Berechtigungsverwaltung an andere Rollen vergeben werden können sollen.
+ */
+function is_admin(): bool
+{
+    return auth()->isAdmin();
+}
+
 function can(string $permission): bool
 {
     return auth()->can($permission);
@@ -294,7 +304,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.69.0';
+    return '1.70.0';
 }
 
 /**

@@ -24,6 +24,9 @@ $field = static function (string $key, $fallback = '') use ($hasOld, $oldInput, 
 $birthday = $hasOld
     ? ['geburtstag' => (string) ($oldInput['geburtstag'] ?? ''), 'geburtstag_tag' => (string) ($oldInput['geburtstag_tag'] ?? ''), 'geburtstag_monat' => (string) ($oldInput['geburtstag_monat'] ?? '')]
     : \App\Support\ContactInput::birthdayFormValues($ownContact ?? []);
+$newsletterOptOut = $hasOld
+    ? ($oldInput['newsletter_opt_out'] ?? null) !== null
+    : !empty($ownContact['newsletter_opt_out_at']);
 
 $emails = $hasOld ? (array) ($oldInput['emails'] ?? []) : ($ownContact['emails'] ?? []);
 if ($emails === []) {
@@ -95,7 +98,20 @@ foreach ($phones as $i => $entry) {
                 <p class="field-hint full-width">Tag &amp; Monat nur ausfüllen, wenn das Geburtsjahr nicht bekannt ist – dann bei „Geburtstag" oben nichts eintragen.</p>
                 <label><span>Beruf/Tätigkeit</span><input type="text" name="beruf" value="<?= e($field('beruf')) ?>" maxlength="160"></label>
                 <label><span>Webseite</span><input type="text" name="webseite" value="<?= e($field('webseite')) ?>" inputmode="url" placeholder="https://…"></label>
+                <label>
+                    <span>Wer darf deine Kontaktdaten sehen?</span>
+                    <select name="contact_visibility">
+                        <option value="stufe" <?= $field('contact_visibility', 'stufe') === 'stufe' ? 'selected' : '' ?>>Die ganze Stufe (Standard)</option>
+                        <option value="orga" <?= $field('contact_visibility', 'stufe') === 'orga' ? 'selected' : '' ?>>Nur das Orga-Team</option>
+                    </select>
+                    <small class="field-hint">Gilt für Adresse, Geburtstag, Mail und Telefon.</small>
+                </label>
             </div>
+            <label class="inline-toggle">
+                <input type="checkbox" name="newsletter_opt_out" value="1" <?= $newsletterOptOut ? 'checked' : '' ?>>
+                <span>Keine Rundmails/automatischen Grüße erhalten</span>
+            </label>
+            <small class="field-hint">Du bleibst ganz normal im Adressbuch – bekommst aber keine Rundmail, Geburtstags- oder Weihnachtsgrüße mehr zugestellt.</small>
         </section>
 
         <section class="detail-card">

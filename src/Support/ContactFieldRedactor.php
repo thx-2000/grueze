@@ -20,7 +20,7 @@ final class ContactFieldRedactor
      */
     public static function apply(array &$contacts, int $ownContactId): void
     {
-        $show = [
+        $globallyVisible = [
             'address'  => can_view_contact_field('address'),
             'birthday' => can_view_contact_field('birthday'),
             'emails'   => can_view_contact_field('emails'),
@@ -28,7 +28,12 @@ final class ContactFieldRedactor
             'login'    => can_view_contact_field('login'),
             'notes'    => can_view_contact_field('notes'),
         ];
-        if (!in_array(false, $show, true)) {
+        // Früher Ausstieg nur, wenn die Rolle schon global alles sieht UND
+        // die Per-Kontakt-Einschränkung „nur Orga-Team" für sie ohnehin nie
+        // greift (siehe Auth::canViewContactField – die gilt nie für
+        // `contacts.manage`). Sonst muss jeder Kontakt einzeln geprüft
+        // werden, da diese Einschränkung pro Person gilt.
+        if (!in_array(false, $globallyVisible, true) && can('contacts.manage')) {
             return;
         }
 
@@ -36,6 +41,14 @@ final class ContactFieldRedactor
             if ((int) ($contact['id'] ?? 0) === $ownContactId && $ownContactId > 0) {
                 continue;
             }
+            $show = [
+                'address'  => can_view_contact_field('address', $contact),
+                'birthday' => can_view_contact_field('birthday', $contact),
+                'emails'   => can_view_contact_field('emails', $contact),
+                'phones'   => can_view_contact_field('phones', $contact),
+                'login'    => can_view_contact_field('login', $contact),
+                'notes'    => can_view_contact_field('notes', $contact),
+            ];
             if (!$show['emails']) {
                 foreach (($contact['emails'] ?? []) as $i => $_) {
                     $contact['emails'][$i] = ['email' => '', 'label' => ''];

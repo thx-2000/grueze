@@ -5,6 +5,67 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Rundmail-Abmeldung, versteckte Kontakte, Sichtbarkeits-Wahl, vCard für alle
+  (TH-Wunsch 2026-09-16):** erledigt v1.70.0. Vier zusammenhängende, aber
+  eigenständige Kontakt-Features in einer Migration
+  (`2026-10-11-kontakt-sichtbarkeit-newsletter.sql`, vier neue Spalten:
+  `newsletter_opt_out_at`, `hidden_at`, `hidden_by`, `contact_visibility`).
+  - **Rundmail-Abmeldung:** `newsletter_opt_out_at DATETIME NULL` – Kontakt
+    bleibt voll im Adressbuch, fällt aber aus `ContactRepository::recipientIds()`
+    (eigene Klausel, NICHT über `LIVE`/`filterClause()`, die bleiben fürs
+    normale Adressbuch unverändert), `mailingContactIds()`, `withBirthdays()`
+    und `birthdaysToday()` (der Cron-Autoversand über `GreetingScheduler`).
+    `upcomingBirthdays()` (Startseiten-Widget, reine Anzeige) bewusst
+    NICHT gefiltert. Neue Methode `ContactRepository::excludeOptedOut()` für
+    den Empfängerkreis „manuelle Auswahl" in `MailRecipientResolver::resolve()`,
+    der als einziger Modus ohne `recipientIds()` direkt aus dem Request kommt.
+    Checkbox in allen drei Formularen über `ContactInput::baseFields()`
+    (`newsletter_opt_out`); Zeitstempel bleibt über wiederholte Saves hinweg
+    erhalten (`COALESCE(newsletter_opt_out_at, NOW())` in der UPDATE-Query,
+    kein Extra-Read nötig). Status-Chip „Rundmail abbestellt" auf der
+    Kontaktseite, „Rundmail-Empfang" im Änderungsverlauf.
+  - **Versteckte Kontakte (admin-only):** `hidden_at`/`hidden_by`, eigenständig
+    neben Archiv/Papierkorb/Verstorben (kein gegenseitiges Zurücksetzen). In
+    `ContactRepository::LIVE` aufgenommen – verschwindet damit aus praktisch
+    allen Listen/Suchen/Mailings/Geburtstagen für ALLE, auch für Admins beim
+    normalen Adressbuch-Browsen; Admins verwalten über die neue eigene Seite
+    „Versteckte Kontakte" (`/kontakte/versteckt`, `ContactRepository::hiddenList()`/
+    `hiddenCount()`). Zugriffsschutz bewusst über eine neue `Auth::isAdmin()`-
+    Prüfung (`BaseController::requireAdmin()`, Helper `is_admin()`) statt über
+    die normale Rechte-Matrix, damit die Funktion nicht versehentlich per
+    Rollen-Berechtigung ans Orga-Team vergeben werden kann. Einzelzugriff für
+    Nicht-Admins zusätzlich in `ContactController::edit()/update()`,
+    `DataCheckController::createLink()` blockiert (Kontakt gilt als „nicht
+    gefunden"). Dubletten-Finder (`ContactMergeService`) schließt versteckte
+    Kontakte ebenfalls aus.
+  - **Sichtbarkeit „nur Orga-Team" vs. „ganze Stufe":** `contact_visibility`
+    ENUM, Selbst-Service-Wahl pro Person (auch vom Orga-Team editierbar) für
+    Adresse/Geburtstag/Mail/Telefon – schränkt die globale rollenbasierte
+    Sichtbarkeit (`security_visibility_*`) nur enger ein, erweitert sie nie.
+    Umgesetzt in `Auth::canViewContactField()` (neuer Parameter-Pfad, geprüft
+    nur wenn ein konkreter Kontakt übergeben wird UND die Rolle sonst schon
+    zugreifen dürfte UND es nicht der eigene Kontakt ist UND die Person KEIN
+    `contacts.manage` hat). `ContactFieldRedactor::apply()` musste dafür von
+    „$show einmal pro Aufruf" auf „$show pro Kontakt in der Schleife"
+    umgestellt werden (mit frühem Ausstieg nur für `contacts.manage`, da für
+    die gilt die Einschränkung nie). Getestet mit echten Test-Usern in drei
+    Rollen (admin/orga/stufenmitglied): Stufenmitglied sah bei „nur Orga-Team"
+    weder in der Liste noch in der heruntergeladenen vCard Mail/Adresse,
+    Orga/Admin unverändert alles.
+  - **vCard-Download für alle:** `ContactPortController::vcard()` einzelner
+    Kontakt (`?id=`) braucht nur noch `requireAuth()` statt
+    `contacts.export` – mit `ContactFieldRedactor::apply()` auf die eigene
+    Sicht der aufrufenden Person reduziert, bevor die Karte gebaut wird.
+    Sammel-Export (Auswahl/gefilterte Liste) bleibt an `contacts.export`
+    gebunden. Neuer vCard-Link in Tabellen- und Kartenansicht des
+    Adressbuchs (vorher nur auf der – ohnehin Orga-only – Kontaktseite).
+  - Getestet (Docker, curl mit Session-Cookies für admin/orga/stufenmitglied,
+    echte Formular-Submits über alle drei Kontaktformulare): Abmeldung/
+    Sichtbarkeit/Verstecken je einzeln gesetzt und wieder zurückgenommen,
+    SQL-Level-Check der Empfänger-Queries, Zugriffsschutz für Nicht-Admins
+    auf versteckte Kontakte, Zeitstempel-Erhalt über mehrere Saves. Testdaten
+    (drei Kontakte, zwei Test-User, `security_visibility_*`-Testkonfiguration)
+    entfernt, `.htaccess` zurückgesetzt.
 - **Geburtstag ohne bekanntes Jahr (TH-Wunsch 2026-09-16):** erledigt v1.69.0.
   TH-Beobachtung: bisher ließ sich nur ein volles Datum eintragen – bei
   Personen, deren Geburtsjahr niemand kennt, blieb das Feld leer. Neue Spalte

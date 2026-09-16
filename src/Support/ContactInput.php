@@ -119,6 +119,8 @@ final class ContactInput
             'plz' => trim((string) $request->input('plz')),
             'ort' => trim((string) $request->input('ort')),
             'land' => trim((string) $request->input('land', (string) config('defaults.country', 'Deutschland'))),
+            'newsletter_opt_out' => $request->input('newsletter_opt_out') !== null,
+            'contact_visibility' => (string) $request->input('contact_visibility') === 'orga' ? 'orga' : 'stufe',
         ];
     }
 

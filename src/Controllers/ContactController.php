@@ -81,6 +81,9 @@ final class ContactController extends BaseController
             'duplicateCount' => can('contacts.manage')
                 ? $this->merges->duplicateClusterCount()
                 : 0,
+            'hiddenCount' => $this->auth->isAdmin()
+                ? $this->contacts->hiddenCount()
+                : 0,
         ]);
     }
 
@@ -136,7 +139,7 @@ final class ContactController extends BaseController
     {
         $this->requirePermission('contacts.manage');
         $contact = $this->contacts->find((int) $request->input('id'));
-        if (!$contact) {
+        if (!$contact || (!empty($contact['hidden_at']) && !$this->auth->isAdmin())) {
             flash('error', 'Kontakt nicht gefunden.');
             Redirect::to('/kontakte');
         }
@@ -167,7 +170,7 @@ final class ContactController extends BaseController
         Csrf::validate($request->input('_csrf'));
         $id = (int) $request->input('id');
         $existing = $this->contacts->find($id);
-        if (!$existing) {
+        if (!$existing || (!empty($existing['hidden_at']) && !$this->auth->isAdmin())) {
             flash('error', 'Kontakt nicht gefunden.');
             Redirect::to('/kontakte');
         }
