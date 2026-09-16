@@ -10,7 +10,9 @@ $isMemberView = !$canManage && !$canMail;
 $board = $board ?? [];
 $myOpenVotes = $myOpenVotes ?? [];
 $leadGroups = $leadGroups ?? [];
+$unreadAnnouncements = $unreadAnnouncements ?? [];
 $birthdays = $birthdays ?? [];
+$announcementLinkIcon = ['extern' => 'globe', 'dokument' => 'file', 'abstimmung' => 'poll'];
 
 // Deutscher Wochentag + Datum ohne Intl-Abhängigkeit.
 $weekdays = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
@@ -48,6 +50,62 @@ $todayLong = $weekdays[(int) $now->format('w')] . ', ' . (int) $now->format('j')
         <a class="ghost-button" href="<?= e(url('/orga-team')) ?>"><?= icon('mail') ?><span>Orga-Team schreiben</span></a>
     <?php endif; ?>
 </div>
+
+<?php if ($unreadAnnouncements !== []): ?>
+    <section class="panel start-widget" aria-labelledby="startInboxTitle">
+        <div class="start-board-head">
+            <h2 id="startInboxTitle">Neue Hinweise</h2>
+            <p class="muted"><?= count($unreadAnnouncements) === 1 ? 'Ein neuer Hinweis vom Orga-Team.' : count($unreadAnnouncements) . ' neue Hinweise vom Orga-Team.' ?></p>
+        </div>
+        <div class="stack">
+            <?php foreach ($unreadAnnouncements as $a): ?>
+                <?php
+                $startsAt = trim((string) ($a['starts_at'] ?? ''));
+                $endsAt = trim((string) ($a['ends_at'] ?? ''));
+                $dateRange = '';
+                if ($startsAt !== '' && $endsAt !== '' && $endsAt !== $startsAt) {
+                    $dateRange = format_date($startsAt) . ' – ' . format_date($endsAt);
+                } elseif ($startsAt !== '') {
+                    $dateRange = format_date($startsAt);
+                }
+                ?>
+                <article class="detail-card">
+                    <h3><?= e((string) $a['title']) ?></h3>
+                    <?php if ($dateRange !== '' || trim((string) ($a['location'] ?? '')) !== ''): ?>
+                        <p class="muted">
+                            <?php if ($dateRange !== ''): ?><?= icon('calendar') ?> <?= e($dateRange) ?><?php endif; ?>
+                            <?php if (trim((string) ($a['location'] ?? '')) !== ''): ?> · <?= icon('location') ?> <?= e((string) $a['location']) ?><?php endif; ?>
+                        </p>
+                    <?php endif; ?>
+                    <?php if (trim((string) ($a['info'] ?? '')) !== ''): ?>
+                        <div class="gallery-description"><?= nl2br(e((string) $a['info'])) ?></div>
+                    <?php endif; ?>
+                    <?php if (($a['links'] ?? []) !== []): ?>
+                        <ul class="tight-list">
+                            <?php foreach ($a['links'] as $link): ?>
+                                <li><a href="<?= e((string) $link['url']) ?>" <?= $link['kind'] === 'extern' ? 'target="_blank" rel="noopener"' : '' ?>><?= icon($announcementLinkIcon[$link['kind']] ?? 'link') ?> <?= e((string) $link['label']) ?></a></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                    <div class="card-actions">
+                        <a class="ghost-button" href="<?= e(url('/termine/detail?id=' . (int) $a['id'])) ?>"><?= icon('chevron-right') ?><span>Mehr dazu</span></a>
+                        <form method="post" action="<?= e(url('/termine/gelesen')) ?>">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="id" value="<?= e((string) $a['id']) ?>">
+                            <button type="submit"><?= icon('check') ?><span>Als gelesen markieren</span></button>
+                        </form>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+        <?php if (count($unreadAnnouncements) > 1): ?>
+            <form method="post" action="<?= e(url('/termine/alle-gelesen')) ?>" class="start-board-foot">
+                <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                <button type="submit" class="linkish">Alle als gelesen markieren</button>
+            </form>
+        <?php endif; ?>
+    </section>
+<?php endif; ?>
 
 <?php if (!empty($showBoard)): ?>
     <section class="panel start-board" aria-labelledby="startBoardTitle">

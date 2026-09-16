@@ -64,6 +64,16 @@ final class AnnouncementRepository
                     KEY idx_announcement_links_announcement (announcement_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
             );
+            $this->pdo->exec(
+                'CREATE TABLE IF NOT EXISTS announcement_reads (
+                    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                    announcement_id INT UNSIGNED NOT NULL,
+                    contact_id INT UNSIGNED NOT NULL,
+                    read_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uniq_announcement_reads (announcement_id, contact_id),
+                    KEY idx_announcement_reads_contact (contact_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+            );
         } catch (\Throwable) {
             // Migration holt es nach.
         }
@@ -322,5 +332,68 @@ final class AnnouncementRepository
                 'position' => $position++,
             ]);
         }
+    }
+
+    // ------------------------------------------------------------ Gelesen
+
+    /**
+     * Aktuelle (nicht vergangene), für diese Person sichtbare UND noch nicht
+     * gelesene Ankündigungen – für die Startseite. Bewusst OHNE die
+     * „Verwaltung sieht immer alles"-Ausnahme aus isVisibleTo()/canView():
+     * hier geht es um „an mich gerichtet", nicht um Verwaltungs-Einblick.
+     *
+     * @param list<int> $groupIds
+     * @param list<int> $tagIds
+     * @return list<array<string,mixed>>
+     */
+    public function unreadFor(int $contactId, array $groupIds, array $tagIds): array
+    {
+        if ($contactId <= 0) {
+            return [];
+        }
+
+        $stmt = $this->pdo->prepare(
+            'SELECT a.* FROM announcements a
+             WHERE (a.starts_at IS NULL OR COALESCE(a.ends_at, a.starts_at) >= CURDATE())
+               AND NOT EXISTS (
+                   SELECT 1 FROM announcement_reads r
+                   WHERE r.announcement_id = a.id AND r.contact_id = :cid
+               )
+             ORDER BY a.created_at DESC'
+        );
+        $stmt->execute(['cid' => $contactId]);
+
+        $visible = array_values(array_filter(
+            $stmt->fetchAll(),
+            fn (array $a): bool => $this->isVisibleTo($a, $contactId, $groupIds, $tagIds)
+        ));
+        foreach ($visible as &$a) {
+            $a['links'] = $this->linksFor((int) $a['id']);
+        }
+        unset($a);
+
+        return $visible;
+    }
+
+    /** @return list<int> IDs aller Ankündigungen, die diese Person schon gelesen hat. */
+    public function readIdsFor(int $contactId): array
+    {
+        if ($contactId <= 0) {
+            return [];
+        }
+        $stmt = $this->pdo->prepare('SELECT announcement_id FROM announcement_reads WHERE contact_id = :cid');
+        $stmt->execute(['cid' => $contactId]);
+
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    public function markRead(int $announcementId, int $contactId): void
+    {
+        if ($contactId <= 0 || $announcementId <= 0) {
+            return;
+        }
+        $this->pdo->prepare(
+            'INSERT IGNORE INTO announcement_reads (announcement_id, contact_id) VALUES (:aid, :cid)'
+        )->execute(['aid' => $announcementId, 'cid' => $contactId]);
     }
 }

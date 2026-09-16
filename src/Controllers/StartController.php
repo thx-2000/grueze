@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Auth;
+use App\Repositories\AnnouncementRepository;
 use App\Repositories\ContactRepository;
 use App\Repositories\EventRepository;
 use App\Repositories\GroupRepository;
+use App\Repositories\TagRepository;
 
 /**
  * Startseite – rollenspezifisch:
@@ -24,6 +26,8 @@ final class StartController extends BaseController
         private ContactRepository $contacts,
         private EventRepository $events,
         private GroupRepository $groups,
+        private AnnouncementRepository $announcements,
+        private TagRepository $tags,
     ) {
         parent::__construct($auth);
     }
@@ -84,13 +88,19 @@ final class StartController extends BaseController
         }
 
         // Gruppenleitung: Gruppen, die ich leite (mit offenen Beitrittsanfragen).
-        $leadGroups = [];
+        // Dieselbe Gruppenliste liefert gleich auch die Gruppen-IDs für den
+        // Sichtbarkeits-Abgleich der Ankündigungen mit – keine Zweitabfrage.
+        $myGroups = $contactId > 0 ? $this->groups->forContact($contactId) : [];
+        $leadGroups = array_values(array_filter(
+            $myGroups,
+            static fn (array $g): bool => ($g['my_role'] ?? 'member') === 'lead'
+        ));
+
+        $unreadAnnouncements = [];
         if ($contactId > 0) {
-            foreach ($this->groups->forContact($contactId) as $g) {
-                if (($g['my_role'] ?? 'member') === 'lead') {
-                    $leadGroups[] = $g;
-                }
-            }
+            $groupIds = array_map(static fn (array $g): int => (int) $g['id'], $myGroups);
+            $tagIds = $this->tags->tagIdsForContact($contactId);
+            $unreadAnnouncements = $this->announcements->unreadFor($contactId, $groupIds, $tagIds);
         }
 
         $this->render('start/index', [
@@ -99,6 +109,7 @@ final class StartController extends BaseController
             'board' => $board,
             'myOpenVotes' => $myOpenVotes,
             'leadGroups' => $leadGroups,
+            'unreadAnnouncements' => $unreadAnnouncements,
             'birthdays' => can_view_contact_field('birthday') ? $this->contacts->upcomingBirthdays(7) : [],
         ]);
     }

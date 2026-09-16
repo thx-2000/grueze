@@ -5,6 +5,67 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Ungelesene Ankündigungen auf der Startseite (TH-Wunsch 2026-09-16):**
+  erledigt v1.71.0. TH fragte, ob es schon eine Möglichkeit gibt, Nachrichten
+  für die ganze Stufe/einzelne Mitglieder/Gruppen auf der „Login-Seite" (=
+  gemeint war die Startseite nach dem Anmelden) zu platzieren, mit
+  Gelesen/Ungelesen (ungelesen bleibt „aufgeklappt", gelesen wandert in einen
+  nachlesbaren Bereich) und Links im Inhalt.
+  Recherche ergab: das bestehende „Ankündigungen"-Feature (`/termine`,
+  `AnnouncementRepository`/`AnnouncementController`) hatte die Zielgruppen-
+  Auswahl (alle/Gruppe/Person/Tag, `announcement_audience`) und strukturierte
+  Links (`announcement_links`) schon fertig – es fehlte nur die Anzeige auf
+  der Startseite und jegliches Gelesen/Ungelesen. Per Rückfrage entschieden:
+  Weg A – bestehendes Feature erweitern statt ein zweites, eigenes
+  „Nachrichten"-Feature danebenzubauen (Zielgruppen-Logik wiederverwenden).
+  - Neue Tabelle `announcement_reads` (announcement_id, contact_id, read_at,
+    UNIQUE(announcement_id, contact_id)) – pro Person, welche Ankündigungen
+    sie bestätigt hat. Migration `2026-10-13-ankuendigungen-gelesen.sql`
+    (schema.sql nebenbei um die schon länger bestehenden, aber dort nie
+    nachgetragenen `announcements`/`announcement_audience`/`announcement_links`-
+    Tabellen ergänzt – die gab es nur in der Migration und im lazy
+    `ensureSchema()`, nie in der schema.sql-Referenz).
+  - `AnnouncementRepository::unreadFor(contactId, groupIds, tagIds)`: aktuelle
+    (nicht vergangene) UND für die Person sichtbare UND noch ungelesene
+    Ankündigungen. Bewusst OHNE die „Verwaltung sieht immer alles"-Ausnahme,
+    die `canView()`/`isVisibleTo()` sonst für Admin/Orga machen – hier geht
+    es um „an mich persönlich gerichtet", nicht um Verwaltungs-Einblick, sonst
+    müsste jede Orga-Person ständig fremde eingeschränkte Ankündigungen
+    wegklicken.
+  - `StartController` injiziert jetzt zusätzlich `AnnouncementRepository` +
+    `TagRepository`; die für „Deine Gruppen" ohnehin schon geladene
+    Gruppenliste liefert die Gruppen-IDs für den Sichtbarkeits-Abgleich gleich
+    mit (keine Zweitabfrage).
+  - Startseite: neuer Bereich „Neue Hinweise" ganz oben (vor „Steht an"),
+    jede ungelesene Ankündigung als eigene `.detail-card` voll aufgeklappt
+    (Titel, Datum/Ort falls gesetzt, Info-Text, Links-Liste), mit „Als
+    gelesen markieren"-Button pro Karte + „Alle als gelesen markieren" wenn
+    mehr als eine offen ist. Kein neues CSS nötig – bestehende `.panel`/
+    `.detail-card`/`.stack`-Klassen wiederverwendet.
+  - Neue Routen `POST /termine/gelesen` (einzeln, von Startseite oder
+    Detailseite aus – auf der Detailseite über ein `von_detail`-Feld, damit
+    man dorthin zurückkommt statt zur Startseite) und
+    `POST /termine/alle-gelesen` (alle aktuell sichtbaren ungelesenen auf
+    einmal). Beide nur `requireAuth()`, kein `announcements.manage` nötig –
+    das Bestätigen ist keine Verwaltungsaktion.
+  - Wer selbst eine Ankündigung veröffentlicht (`store()`), bekommt sie
+    automatisch als gelesen markiert – taucht bei einem selbst nicht als
+    ungelesen auf.
+  - Detailseite (`/termine/detail`) und Übersicht (`/termine`) zeigen den
+    Gelesen-Status ebenfalls: Detailseite mit eigenem „Als gelesen
+    markieren"-Button falls noch ungelesen, Übersicht mit „ungelesen"-Chip
+    pro Zeile (auch im Vergangen-Tab, falls nie geöffnet).
+  - Getestet (Docker, curl mit drei Test-Usern: Ersteller/admin, „alle"-
+    Zielgruppe, gezielt-eine-Person-Zielgruppe): Ersteller sieht eigene
+    Ankündigung nicht als ungelesen, „alle"-Ankündigung erscheint bei
+    anderen aufgeklappt auf der Startseite, personenbezogen eingeschränkte
+    Ankündigung erscheint NUR beim Ziel-Kontakt (nicht bei einem beliebigen
+    anderen Mitglied), einzelnes Gelesen-Markieren lässt sie aus der
+    Startseite verschwinden (bleibt unter „Termine" nachlesbar), „Alle als
+    gelesen"-Sammel-Aktion räumt die Startseite komplett leer,
+    Detailseiten-Button mit Rücksprung auf dieselbe Detailseite getestet.
+    Testdaten (drei Test-Ankündigungen, zwei Test-User) entfernt,
+    `.htaccess` zurückgesetzt.
 - **Standard der Sichtbarkeits-Wahl auf „nur Orga-Team" korrigiert
   (TH-Rückfrage 2026-09-16, direkt nach v1.70.0):** erledigt v1.70.1. TH hatte
   nachgefragt, ob der Standard „nur Orga-Team" sein sollte (richtig) oder

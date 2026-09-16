@@ -61,6 +61,7 @@ final class AnnouncementController extends BaseController
             'announcements' => $visible,
             'showPast' => $past,
             'canManage' => $canManage,
+            'readIds' => $this->announcements->readIdsFor($this->contactId()),
         ]);
     }
 
@@ -74,6 +75,7 @@ final class AnnouncementController extends BaseController
         }
 
         $canManage = $this->canManage();
+        $cid = $this->contactId();
         $this->render('announcements/show', [
             'announcement' => $announcement,
             'canManage' => $canManage,
@@ -82,7 +84,40 @@ final class AnnouncementController extends BaseController
                 : [],
             'audienceRows' => $canManage ? $this->announcements->audienceFor((int) $announcement['id']) : [],
             'pickerData' => $canManage ? $this->pickerData() : null,
+            'isRead' => $cid > 0 && in_array((int) $announcement['id'], $this->announcements->readIdsFor($cid), true),
         ]);
+    }
+
+    /** „Als gelesen markieren" – von der Startseite oder der Detailseite aus. */
+    public function markReadAction(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+
+        $id = (int) $request->input('id');
+        if ($this->contactId() > 0) {
+            $this->announcements->markRead($id, $this->contactId());
+        }
+
+        Redirect::to((string) $request->input('von_detail') === '1' ? '/termine/detail?id=' . $id : '/');
+    }
+
+    /** „Alle als gelesen markieren" auf der Startseite. */
+    public function markAllReadAction(Request $request): void
+    {
+        $this->requireAuth();
+        Csrf::validate($request->input('_csrf'));
+
+        $cid = $this->contactId();
+        if ($cid > 0) {
+            $groupIds = array_map(static fn (array $g): int => (int) $g['id'], $this->groups->forContact($cid));
+            $tagIds = $this->tags->tagIdsForContact($cid);
+            foreach ($this->announcements->unreadFor($cid, $groupIds, $tagIds) as $a) {
+                $this->announcements->markRead((int) $a['id'], $cid);
+            }
+        }
+
+        Redirect::to('/');
     }
 
     // ------------------------------------------------------------ Verwaltung
@@ -110,6 +145,11 @@ final class AnnouncementController extends BaseController
         $id = $this->announcements->create($data, $this->userId());
         $this->announcements->replaceAudience($id, $this->audienceRows($request));
         $this->announcements->replaceLinks($id, $this->linkRows($request));
+        // Die eigene, gerade veröffentlichte Ankündigung taucht bei einem
+        // selbst nicht als „ungelesen" auf der Startseite auf.
+        if ($this->contactId() > 0) {
+            $this->announcements->markRead($id, $this->contactId());
+        }
         $this->logs->addAudit((int) $this->userId(), null, 'created', 'Ankündigung angelegt: „' . $data['title'] . '".');
         flash('success', 'Ankündigung veröffentlicht.');
         Redirect::to('/termine/detail?id=' . $id);

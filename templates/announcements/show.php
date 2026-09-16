@@ -4,8 +4,10 @@
  * @var bool                     $canManage
  * @var list<string>             $audienceLabels
  * @var array<string,mixed>|null $pickerData
+ * @var bool                     $isRead
  */
 $a = $announcement;
+$isRead = $isRead ?? true;
 $today = (new DateTimeImmutable('now'))->format('Y-m-d');
 $startsAt = trim((string) ($a['starts_at'] ?? ''));
 $endsAt = trim((string) ($a['ends_at'] ?? ''));
@@ -31,6 +33,14 @@ $linkIcon = ['extern' => 'globe', 'dokument' => 'file', 'abstimmung' => 'poll'];
     </div>
     <?php if ($canManage && $audienceLabels !== []): ?>
         <p class="muted"><?= icon('eye') ?> Sichtbar für: <?= e(implode(', ', $audienceLabels)) ?> (du siehst es als Verwaltung immer).</p>
+    <?php endif; ?>
+    <?php if (!$isRead): ?>
+        <form method="post" action="<?= e(url('/termine/gelesen')) ?>">
+            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+            <input type="hidden" name="id" value="<?= e((string) $a['id']) ?>">
+            <input type="hidden" name="von_detail" value="1">
+            <button type="submit"><?= icon('check') ?><span>Als gelesen markieren</span></button>
+        </form>
     <?php endif; ?>
 </header>
 

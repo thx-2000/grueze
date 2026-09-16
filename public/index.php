@@ -183,7 +183,9 @@ try {
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
         Container::get(EventRepository::class),
-        Container::get(GroupRepository::class)
+        Container::get(GroupRepository::class),
+        Container::get(\App\Repositories\AnnouncementRepository::class),
+        Container::get(TagRepository::class)
     ));
 
     Container::factory(AuthController::class, static fn () => new AuthController(
@@ -713,6 +715,8 @@ try {
     $router->post('/termine/speichern', [\App\Controllers\AnnouncementController::class, 'update']);
     $router->post('/termine/loeschen', [\App\Controllers\AnnouncementController::class, 'delete']);
     $router->get('/termine/sichtbarkeit-vorschau', [\App\Controllers\AnnouncementController::class, 'audienceCount']);
+    $router->post('/termine/gelesen', [\App\Controllers\AnnouncementController::class, 'markReadAction']);
+    $router->post('/termine/alle-gelesen', [\App\Controllers\AnnouncementController::class, 'markAllReadAction']);
 
     $router->get('/galerien', [\App\Controllers\GalleryController::class, 'index']);
     $router->get('/galerien/neu', [\App\Controllers\GalleryController::class, 'createForm']);

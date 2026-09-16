@@ -3,7 +3,9 @@
  * @var list<array<string,mixed>> $announcements
  * @var bool $showPast
  * @var bool $canManage
+ * @var list<int> $readIds
  */
+$readIds = $readIds ?? [];
 ?>
 <header class="contacts-header">
     <div>
@@ -45,6 +47,7 @@
                     <a class="events-row-main" href="<?= e(url('/termine/detail?id=' . (int) $a['id'])) ?>">
                         <span class="events-row-title">
                             <?= e((string) $a['title']) ?>
+                            <?php if (!in_array((int) $a['id'], $readIds, true)): ?> <span class="status-chip is-warn">ungelesen</span><?php endif; ?>
                             <?php if ($canManage && $a['audience_mode'] === 'restricted'): ?> <span class="events-group-tag"><?= icon('eye') ?>eingeschränkt</span><?php endif; ?>
                         </span>
                         <span class="events-row-meta">

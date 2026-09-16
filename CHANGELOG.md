@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.71.0
+
+**Ungelesene Ankündigungen auf der Startseite.**
+
+- Ankündigungen (`/termine`), die für dich bestimmt sind (alle, deine Gruppe
+  oder persönlich) und die du noch nicht bestätigt hast, erscheinen jetzt
+  direkt auf der Startseite – aufgeklappt mit Text und Links, nicht nur als
+  Hinweis-Zeile.
+- „Als gelesen markieren" (einzeln oder alle auf einmal) lässt sie aus der
+  Startseite verschwinden – nachlesen kannst du sie danach jederzeit unter
+  „Termine".
+- Wer selbst eine Ankündigung veröffentlicht, sieht sie bei sich nicht als
+  ungelesen.
+
+Migration `2026-10-13-ankuendigungen-gelesen.sql`.
+
 ## 1.70.1
 
 **Korrektur: Sichtbarkeit der Kontaktdaten standardmäßig „nur Orga-Team".**
