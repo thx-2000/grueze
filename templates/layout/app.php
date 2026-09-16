@@ -25,6 +25,7 @@ $sectionTitle = trim((string) ($pageTitle ?? '')) !== ''
     : page_title($currentPath);
 $documentTitle = $sectionTitle !== '' ? $sectionTitle . ' · ' . $appName : $appName;
 $canonicalPath = rtrim($currentPath, '/') ?: '/';
+$fullCurrentUrl = (string) ($_SERVER['REQUEST_URI'] ?? $currentPath);
 $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
 ?>
 <!doctype html>
@@ -197,6 +198,22 @@ $metaDescription = trim((string) ($branding['branding_login_intro'] ?? ''));
                     <span id="signalSelectionStatus" class="topbar-hint" role="status" hidden></span>
                     <button type="submit" id="signalComposeSelection" form="contactSelectionForm" class="topbar-btn" hidden><?= icon('mail') ?><span>Mail an Auswahl</span></button>
                     <button type="button" id="signalClearSelection" class="topbar-btn" data-select="none" hidden><?= icon('reset') ?><span>Auswahl aufheben</span></button>
+                    <?php if (can('dashboard.pins') && $currentPath !== '/'): ?>
+                        <?php $pinId = dashboard_pin_id($fullCurrentUrl); ?>
+                        <form method="post" action="<?= e(url($pinId !== null ? '/start/entpinnen' : '/start/anpinnen')) ?>">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="back" value="<?= e($fullCurrentUrl) ?>">
+                            <?php if ($pinId !== null): ?>
+                                <input type="hidden" name="id" value="<?= e((string) $pinId) ?>">
+                            <?php else: ?>
+                                <input type="hidden" name="path" value="<?= e($fullCurrentUrl) ?>">
+                                <input type="hidden" name="label" value="<?= e($sectionTitle) ?>">
+                            <?php endif; ?>
+                            <button type="submit" class="topbar-icon<?= $pinId !== null ? ' is-active' : '' ?>" aria-pressed="<?= $pinId !== null ? 'true' : 'false' ?>" title="<?= $pinId !== null ? 'Von der Startseite lösen' : 'An die Startseite anpinnen' ?>">
+                                <?= icon('star') ?><span class="visually-hidden"><?= $pinId !== null ? 'Von der Startseite lösen' : 'An die Startseite anpinnen' ?></span>
+                            </button>
+                        </form>
+                    <?php endif; ?>
                     <button type="button" id="privacyGuardToggle" class="topbar-icon" aria-pressed="false" title="Kontaktdaten aus- oder einblenden – falls jemand mitliest">
                         <?= icon('eye-off') ?><span class="visually-hidden" data-privacy-guard-label>Blickschutz</span>
                     </button>

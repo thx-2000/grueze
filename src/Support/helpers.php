@@ -79,6 +79,26 @@ function can(string $permission): bool
     return auth()->can($permission);
 }
 
+/**
+ * ID der eigenen Startseiten-Kachel für diesen Pfad, falls schon angepinnt –
+ * fürs generische Anpinnen-Symbol im Layout (App\Repositories\DashboardPinRepository).
+ * Wie online_count() bewusst try/catch-geschützt: darf nie eine Seite stören.
+ */
+function dashboard_pin_id(string $path): ?int
+{
+    $user = auth()->user();
+    if (!$user) {
+        return null;
+    }
+
+    try {
+        return App\Core\Container::get(App\Repositories\DashboardPinRepository::class)
+            ->idFor((int) $user['id'], $path);
+    } catch (Throwable) {
+        return null;
+    }
+}
+
 /** True, wenn die aktuelle Person mindestens eine der Berechtigungen hat. */
 function can_any(string ...$permissions): bool
 {
@@ -304,7 +324,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.71.1';
+    return '1.72.0';
 }
 
 /**

@@ -67,11 +67,31 @@ $groups = [
         </div>
         <div class="hub-grid">
             <?php foreach ($visible as [$perm, $path, $iconName, $title, $desc]): ?>
-                <a class="hub-tile" href="<?= e(url($path)) ?>">
-                    <span class="hub-tile-icon"><?= icon($iconName) ?></span>
-                    <span class="hub-tile-title"><?= e($title) ?></span>
-                    <span class="hub-tile-desc"><?= e($desc) ?></span>
-                </a>
+                <div class="hub-tile-wrap">
+                    <a class="hub-tile" href="<?= e(url($path)) ?>">
+                        <span class="hub-tile-icon"><?= icon($iconName) ?></span>
+                        <span class="hub-tile-title"><?= e($title) ?></span>
+                        <span class="hub-tile-desc"><?= e($desc) ?></span>
+                    </a>
+                    <?php if (can('dashboard.pins')): ?>
+                        <?php $pinId = ($pinnedPaths ?? [])[$path] ?? null; ?>
+                        <form method="post" action="<?= e(url($pinId !== null ? '/start/entpinnen' : '/start/anpinnen')) ?>" class="hub-tile-pin">
+                            <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                            <input type="hidden" name="back" value="<?= e(url('/verwaltung')) ?>">
+                            <?php if ($pinId !== null): ?>
+                                <input type="hidden" name="id" value="<?= e((string) $pinId) ?>">
+                            <?php else: ?>
+                                <input type="hidden" name="path" value="<?= e($path) ?>">
+                                <input type="hidden" name="label" value="<?= e($title) ?>">
+                                <input type="hidden" name="icon" value="<?= e($iconName) ?>">
+                                <input type="hidden" name="description" value="<?= e($desc) ?>">
+                            <?php endif; ?>
+                            <button type="submit" class="hub-tile-pin-btn<?= $pinId !== null ? ' is-active' : '' ?>" aria-pressed="<?= $pinId !== null ? 'true' : 'false' ?>" title="<?= $pinId !== null ? 'Von der Startseite lösen' : 'An die Startseite anpinnen' ?>">
+                                <?= icon('star') ?><span class="visually-hidden"><?= $pinId !== null ? 'Von der Startseite lösen' : 'An die Startseite anpinnen' ?></span>
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </div>
             <?php endforeach; ?>
         </div>
     </section>

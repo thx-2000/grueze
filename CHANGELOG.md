@@ -3,6 +3,22 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.72.0
+
+**Eigene Kacheln auf der Startseite.**
+
+- Wer die Berechtigung dafür hat (standardmäßig nur Admin, über „Einstellungen
+  → Berechtigungen" auch für andere Rollen freischaltbar), kann jetzt
+  einzelne Seiten – z. B. aus den Einstellungen – über einen Stern als
+  Kachel an die Startseite anpinnen.
+  - Im Einstellungen-Hub hat jede Kachel einen eigenen Anpinnen-Knopf.
+  - Auf jeder anderen Seite geht es über einen Stern oben rechts.
+- Auf der Startseite erscheinen die angepinnten Kacheln in einem eigenen
+  Bereich, wahlweise als Kacheln oder als Liste (pro Gerät gemerkt) – die
+  Reihenfolge lässt sich per Ziehen ändern.
+
+Migration `2026-10-14-startseite-kacheln.sql`.
+
 ## 1.71.1
 
 **Fix: „webmanifest" als Seite bei Anmeldungen.**

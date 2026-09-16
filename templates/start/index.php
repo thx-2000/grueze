@@ -11,6 +11,7 @@ $board = $board ?? [];
 $myOpenVotes = $myOpenVotes ?? [];
 $leadGroups = $leadGroups ?? [];
 $unreadAnnouncements = $unreadAnnouncements ?? [];
+$pins = $pins ?? [];
 $birthdays = $birthdays ?? [];
 $announcementLinkIcon = ['extern' => 'globe', 'dokument' => 'file', 'abstimmung' => 'poll'];
 
@@ -50,6 +51,41 @@ $todayLong = $weekdays[(int) $now->format('w')] . ', ' . (int) $now->format('j')
         <a class="ghost-button" href="<?= e(url('/orga-team')) ?>"><?= icon('mail') ?><span>Orga-Team schreiben</span></a>
     <?php endif; ?>
 </div>
+
+<?php if ($pins !== []): ?>
+    <section class="panel start-widget" aria-labelledby="startPinsTitle">
+        <div class="start-board-head">
+            <h2 id="startPinsTitle">Meine Kacheln</h2>
+            <div class="view-toggle" role="group" aria-label="Ansicht umschalten">
+                <button type="button" class="view-toggle-button is-active" data-pins-view="tiles" aria-pressed="true">Kacheln</button>
+                <button type="button" class="view-toggle-button" data-pins-view="list" aria-pressed="false">Liste</button>
+            </div>
+        </div>
+        <p class="field-hint">Zum Umsortieren ziehen.</p>
+        <div class="pins-grid" data-pins-root data-reorder-url="<?= e(url('/start/kacheln-sortieren')) ?>">
+            <?php foreach ($pins as $pin): ?>
+                <article class="pins-tile" draggable="true" data-pin-item data-pin-id="<?= e((string) $pin['id']) ?>">
+                    <span class="pins-tile-handle" aria-hidden="true"><?= icon('drag') ?></span>
+                    <a class="pins-tile-link" href="<?= e(url((string) $pin['path'])) ?>">
+                        <span class="pins-tile-icon"><?= icon(trim((string) ($pin['icon'] ?? '')) !== '' ? (string) $pin['icon'] : 'star') ?></span>
+                        <span class="pins-tile-body">
+                            <span class="pins-tile-title"><?= e((string) $pin['label']) ?></span>
+                            <?php if (trim((string) ($pin['description'] ?? '')) !== ''): ?>
+                                <span class="pins-tile-desc"><?= e((string) $pin['description']) ?></span>
+                            <?php endif; ?>
+                        </span>
+                    </a>
+                    <form method="post" action="<?= e(url('/start/entpinnen')) ?>" class="pins-tile-remove">
+                        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+                        <input type="hidden" name="id" value="<?= e((string) $pin['id']) ?>">
+                        <input type="hidden" name="back" value="<?= e(url('/')) ?>">
+                        <button type="submit" aria-label="„<?= e((string) $pin['label']) ?>“ von der Startseite lösen"><?= icon('close') ?></button>
+                    </form>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+<?php endif; ?>
 
 <?php if ($unreadAnnouncements !== []): ?>
     <section class="panel start-widget" aria-labelledby="startInboxTitle">

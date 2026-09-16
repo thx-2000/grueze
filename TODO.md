@@ -5,6 +5,72 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Eigene Kacheln auf der Startseite (TH-Wunsch 2026-09-16):** erledigt
+  v1.72.0. TH wünschte sich (als Admin, mit Blick auf spätere Freischaltung
+  für Orga/Stufenmitglieder und andere GRUEZE-Instanzen) selbst wählbare
+  Kacheln/Links auf der Startseite, z. B. aus den Einstellungen. Plan vorher
+  abgestimmt (zwei `AskUserQuestion`-Runden: generisches Anpinnen statt
+  kuratierter Liste; Kacheln UND Liste mit Umsortieren).
+  - Neue Tabelle `dashboard_pins` (user_id, path, label, icon, description,
+    position) – pro Zugang, nicht pro Kontakt. Migration
+    `2026-10-14-startseite-kacheln.sql`.
+  - Neue Berechtigung `dashboard.pins` (Standard: nur Admin, da
+    `Auth::resolvePermission()` Admin ohnehin immer durchwinkt – aber über
+    „Einstellungen → Berechtigungen" später ganz normal für Orga/
+    Stufenmitglieder zuschaltbar, ohne dass nochmal Code angefasst werden
+    muss). Bewusst KEINE `is_admin()`-Hartkodierung wie bei „Versteckte
+    Kontakte" – dort ging es um Datenschutz (nie an andere Rollen vergebbar),
+    hier ist es reine Bequemlichkeit, die der Kunde selbst steuern soll.
+  - Zwei Anpinn-Quellen: (1) Einstellungen-Hub (`templates/admin/hub.php`) –
+    jede der schon vorhandenen Kacheln (Icon/Titel/Beschreibung aus dem
+    bestehenden `$groups`-Array) bekommt einen eigenen Stern-Button; (2)
+    generisch auf jeder anderen Seite ein Stern im `.topbar-tools`-Bereich
+    (`templates/layout/app.php`, neben dem Blickschutz-Knopf) – übernimmt
+    automatisch den serverseitig schon berechneten `$sectionTitle` (dieselbe
+    Variable, die auch im `<title>`-Tag landet – oft schon spezifisch, z. B.
+    ein Kontaktname, nicht nur der generische Seitentitel).
+  - `DashboardPinRepository::pin()/unpin()/reorder()/idFor()/forUser()` –
+    `reorder()` exakt nach dem Muster von `GalleryMediaRepository::reorder()`
+    (Schleife über geordnete IDs, `UPDATE ... SET position = :p WHERE id = :id
+    AND user_id = :uid` – scoped, damit niemand fremde Kacheln durch Raten
+    von IDs umsortieren kann).
+  - Neuer `DashboardPinController` mit drei Routen: `POST /start/anpinnen`,
+    `POST /start/entpinnen` (beide klassische Formular-POSTs mit `back`-
+    Redirect-Feld – ungefährlich, da `Redirect::to()`/`url()` jeden Pfad
+    zwingend an die eigene Basis-URL hängt, kein Open-Redirect möglich),
+    `POST /start/kacheln-sortieren` (JSON-Antwort per `fetch()`, exakt wie
+    `GalleryController::mediaReorder()`).
+  - Startseite: neuer Bereich „Meine Kacheln" mit Kacheln/Liste-Umschalter
+    (`.view-toggle`, wie beim Adressbuch Tabelle/Karten – aber eigener,
+    unabhängiger JS-Block mit eigenem localStorage-Schlüssel
+    `grueze_pins_view_mode`, nicht der Adressbuch-Code direkt wiederverwendet,
+    um den dortigen, produktiv laufenden Toggle nicht anzufassen) und
+    Drag-Sortierung (JS-Block in `app.js`, strukturell 1:1 nach dem
+    Galerie-Drag-Muster aus `gallery.js` – `dragstart`/`dragover`/`dragend`,
+    danach `fetch()` mit der neuen Reihenfolge).
+  - Kein neues Icon nötig (`star` gab es schon) – Kachel ohne eigenes Icon
+    (generisch angepinnte Seiten) fällt auf `star` zurück.
+  - **Stolperstein beim Bauen:** `AdminController`s Container-Factory in
+    `public/index.php` wurde beim Hinzufügen des neuen Konstruktor-Parameters
+    (`DashboardPinRepository`) zunächst übersehen → 500er
+    („Too few arguments"). Erinnerung: bei jeder neuen Controller-Abhängigkeit
+    IMMER direkt nach der zugehörigen `Container::factory(...)`-Stelle in
+    `public/index.php` suchen und mitziehen, nicht nur den Konstruktor selbst
+    ändern.
+  - Getestet (Docker, curl mit Session-Cookie): Hub-Kachel anpinnen (Icon/
+    Titel/Beschreibung korrekt übernommen, Stern zeigt danach „aktiv" +
+    Lösen-Aktion), generischer Pin auf `/kontakte` (Label korrekt aus
+    `$sectionTitle`, Kachel auf der Startseite zeigt Fallback-Icon `star` ohne
+    Beschreibung), Umsortieren per direktem POST an den Sortier-Endpunkt
+    (Positionen korrekt vertauscht), Lösen entfernt die Kachel, neue
+    Berechtigung erscheint korrekt in „Einstellungen → Berechtigungen" mit
+    Checkboxen für Orga/Stufenmitglied/Betrachter. Browser-Pane hatte in
+    dieser Session wiederholt Probleme mit dem lokalen Login-Redirect
+    (HSTS-artiges Verhalten für „localhost", auch mit 127.0.0.1- und
+    Fresh-Tab-Workarounds nicht zuverlässig behebbar) – Kacheln/Liste-
+    Umschalter und Drag-and-drop deshalb nur strukturell (Markup/Event-
+    Bindung, exakte Kopie zweier bereits produktiv laufender Muster) statt
+    visuell im Browser geprüft. Testdaten entfernt, `.htaccess` zurückgesetzt.
 - **Fix: „webmanifest" als Seite bei Anmeldungen (TH-Beobachtung 2026-09-16):**
   erledigt v1.71.1. TH bemerkte, dass bei „Verwaltung → Anmeldungen" in der
   Spalte „Seite" öfter „webmanifest" auftauchte. Ursache: `<link

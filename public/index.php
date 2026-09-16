@@ -166,7 +166,8 @@ try {
         Container::get(Auth::class),
         Container::get(MigrationService::class),
         Container::get(UpdateService::class),
-        Container::get(\App\Services\ReleaseCheckService::class)
+        Container::get(\App\Services\ReleaseCheckService::class),
+        Container::get(\App\Repositories\DashboardPinRepository::class)
     ));
     Container::factory(BackupController::class, static fn () => new BackupController(
         Container::get(Auth::class),
@@ -179,13 +180,19 @@ try {
         Container::get(\App\Repositories\DocumentRepository::class),
         Container::get(\App\Services\DocumentStorageService::class)
     ));
+    Container::factory(\App\Repositories\DashboardPinRepository::class, static fn () => new \App\Repositories\DashboardPinRepository(Container::get(PDO::class)));
     Container::factory(StartController::class, static fn () => new StartController(
         Container::get(Auth::class),
         Container::get(ContactRepository::class),
         Container::get(EventRepository::class),
         Container::get(GroupRepository::class),
         Container::get(\App\Repositories\AnnouncementRepository::class),
-        Container::get(TagRepository::class)
+        Container::get(TagRepository::class),
+        Container::get(\App\Repositories\DashboardPinRepository::class)
+    ));
+    Container::factory(\App\Controllers\DashboardPinController::class, static fn () => new \App\Controllers\DashboardPinController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\DashboardPinRepository::class)
     ));
 
     Container::factory(AuthController::class, static fn () => new AuthController(
@@ -586,6 +593,9 @@ try {
 
     $router = new Router();
     $router->get('/', [StartController::class, 'index']);
+    $router->post('/start/anpinnen', [\App\Controllers\DashboardPinController::class, 'pin']);
+    $router->post('/start/entpinnen', [\App\Controllers\DashboardPinController::class, 'unpin']);
+    $router->post('/start/kacheln-sortieren', [\App\Controllers\DashboardPinController::class, 'reorder']);
     $router->get('/manifest.webmanifest', [\App\Controllers\PwaController::class, 'manifest']);
     $router->get('/app-icon.svg', [\App\Controllers\PwaController::class, 'icon']);
     $router->get('/kontakte', [ContactController::class, 'index']);

@@ -207,6 +207,7 @@ final class SettingRepository
             'roster.manage'        => ['orga'],
             'orga.contact_target'  => ['orga'],
             'settings.manage'      => ['orga'],
+            'dashboard.pins'       => [],
         ];
     }
 

@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Repositories\AnnouncementRepository;
 use App\Repositories\ContactRepository;
+use App\Repositories\DashboardPinRepository;
 use App\Repositories\EventRepository;
 use App\Repositories\GroupRepository;
 use App\Repositories\TagRepository;
@@ -28,6 +29,7 @@ final class StartController extends BaseController
         private GroupRepository $groups,
         private AnnouncementRepository $announcements,
         private TagRepository $tags,
+        private DashboardPinRepository $pins,
     ) {
         parent::__construct($auth);
     }
@@ -110,6 +112,7 @@ final class StartController extends BaseController
             'myOpenVotes' => $myOpenVotes,
             'leadGroups' => $leadGroups,
             'unreadAnnouncements' => $unreadAnnouncements,
+            'pins' => can('dashboard.pins') ? $this->pins->forUser((int) $this->auth->user()['id']) : [],
             'birthdays' => can_view_contact_field('birthday') ? $this->contacts->upcomingBirthdays(7) : [],
         ]);
     }

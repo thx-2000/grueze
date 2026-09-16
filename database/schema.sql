@@ -597,6 +597,24 @@ CREATE TABLE IF NOT EXISTS announcement_reads (
     CONSTRAINT fk_announcement_reads_contact FOREIGN KEY (contact_id) REFERENCES contacts(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Persönlich angepinnte Kacheln auf der Startseite (pro Zugang, nicht pro
+-- Kontakt). `path` ist die volle Ziel-URL (mit Query-String, falls die Seite
+-- einen braucht), `icon`/`description` kommen bei Kacheln aus dem
+-- Einstellungen-Hub mit, sonst leer.
+CREATE TABLE IF NOT EXISTS dashboard_pins (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    path VARCHAR(255) NOT NULL,
+    label VARCHAR(190) NOT NULL,
+    icon VARCHAR(40) NULL,
+    description VARCHAR(255) NULL,
+    position INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_dashboard_pins (user_id, path),
+    KEY idx_dashboard_pins_user (user_id, position),
+    CONSTRAINT fk_dashboard_pins_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- „Weitere Personen": eine zusätzliche Personenliste außerhalb des
 -- Adressbuchs (bei dieser Instanz als „Lehrkräfte" beschriftet, siehe
 -- config('branding.roster_label')). Mit eigenen Kontakt-/Lebensdaten und

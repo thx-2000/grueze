@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Csrf;
 use App\Core\Request;
+use App\Repositories\DashboardPinRepository;
 use App\Services\MigrationService;
 use App\Services\ReleaseCheckService;
 use App\Services\UpdateService;
@@ -18,6 +19,7 @@ final class AdminController extends BaseController
         private MigrationService $migrations,
         private UpdateService $updates,
         private ReleaseCheckService $releases,
+        private DashboardPinRepository $pins,
     ) {
         parent::__construct($auth);
     }
@@ -33,7 +35,14 @@ final class AdminController extends BaseController
             $this->releases->refresh();
         }
 
-        $this->render('admin/hub', []);
+        $pinnedPaths = [];
+        if (can('dashboard.pins')) {
+            foreach ($this->pins->forUser((int) $this->auth->user()['id']) as $pin) {
+                $pinnedPaths[(string) $pin['path']] = (int) $pin['id'];
+            }
+        }
+
+        $this->render('admin/hub', ['pinnedPaths' => $pinnedPaths]);
     }
 
     public function update(): void

@@ -2304,6 +2304,134 @@ code {
     }
 }
 
+/* ------------------------------------------------ Startseite: eigene Kacheln */
+
+.pins-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.9rem;
+}
+
+.pins-grid.is-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.pins-tile {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem 2.5rem 1rem 0.6rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.pins-grid.is-list .pins-tile {
+    align-items: center;
+    padding: 0.5rem 2.5rem 0.5rem 0.5rem;
+}
+
+.pins-tile.is-dragging {
+    opacity: 0.4;
+}
+
+.pins-tile-handle {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    padding-top: 0.15rem;
+    color: var(--color-muted);
+    cursor: grab;
+}
+
+.pins-grid.is-list .pins-tile-handle {
+    padding-top: 0;
+}
+
+.pins-tile-handle .icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.pins-tile-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--color-text);
+}
+
+.pins-grid.is-list .pins-tile-link {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.pins-tile-icon .icon {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.pins-tile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.pins-tile-title {
+    font-weight: 700;
+}
+
+.pins-tile-desc {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    line-height: 1.32;
+}
+
+.pins-grid.is-list .pins-tile-desc {
+    display: none;
+}
+
+.pins-tile-remove {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+.pins-grid.is-list .pins-tile-remove {
+    top: 50%;
+    right: 0.6rem;
+    transform: translateY(-50%);
+}
+
+.pins-tile-remove button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-muted);
+}
+
+.pins-tile-remove button:hover {
+    background: var(--danger-veil);
+    color: var(--color-danger);
+}
+
+.pins-tile-remove .icon {
+    width: 0.95rem;
+    height: 0.95rem;
+}
+
 /* ------------------------------------------------------- Verwaltungs-Hub */
 
 .hub-notice {
@@ -2368,6 +2496,49 @@ code {
     color: var(--color-muted);
     font-size: 0.88rem;
     line-height: 1.35;
+}
+
+.hub-tile-wrap {
+    position: relative;
+}
+
+.hub-tile-wrap .hub-tile {
+    height: 100%;
+}
+
+.hub-tile-pin {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+}
+
+.hub-tile-pin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-muted);
+}
+
+.hub-tile-pin-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.hub-tile-pin-btn.is-active {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    border-color: var(--color-accent);
+}
+
+.hub-tile-pin-btn .icon {
+    width: 1rem;
+    height: 1rem;
 }
 
 .hub-foot {

@@ -1229,3 +1229,69 @@ if (photoZoom) {
         if (event.key === 'Escape' && !photoZoom.hidden) closePhotoZoom();
     });
 }
+
+// ---------------------------------------------- Startseite: eigene Kacheln
+const pinsRoot = document.querySelector('[data-pins-root]');
+if (pinsRoot) {
+    const pinsViewStorageKey = 'grueze_pins_view_mode';
+    const applyPinsView = (view, persist = true) => {
+        const normalized = view === 'list' ? 'list' : 'tiles';
+        pinsRoot.classList.toggle('is-list', normalized === 'list');
+        document.querySelectorAll('[data-pins-view]').forEach((button) => {
+            const isActive = button.dataset.pinsView === normalized;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+        if (persist) {
+            try {
+                window.localStorage.setItem(pinsViewStorageKey, normalized);
+            } catch (error) {
+                // Ohne Storage bleibt die Wahl nur für diesen Aufruf gültig.
+            }
+        }
+    };
+    document.querySelectorAll('[data-pins-view]').forEach((button) => {
+        button.addEventListener('click', () => applyPinsView(button.dataset.pinsView));
+    });
+    try {
+        const savedPinsView = window.localStorage.getItem(pinsViewStorageKey);
+        if (savedPinsView) applyPinsView(savedPinsView, false);
+    } catch (error) {
+        // Standardansicht (Kacheln) bleibt aktiv.
+    }
+
+    // -------------------------------------------------- Drag-Sortierung
+    let dragPin = null;
+    pinsRoot.addEventListener('dragstart', (e) => {
+        dragPin = e.target.closest('[data-pin-item]');
+        if (dragPin) dragPin.classList.add('is-dragging');
+    });
+    pinsRoot.addEventListener('dragend', () => {
+        if (dragPin) dragPin.classList.remove('is-dragging');
+        dragPin = null;
+        persistPinsOrder();
+    });
+    pinsRoot.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const over = e.target.closest('[data-pin-item]');
+        if (!over || over === dragPin || !dragPin) return;
+        const rect = over.getBoundingClientRect();
+        const after = (e.clientY - rect.top) / rect.height > 0.5;
+        pinsRoot.insertBefore(dragPin, after ? over.nextSibling : over);
+    });
+
+    async function persistPinsOrder() {
+        const ids = Array.prototype.map.call(
+            pinsRoot.querySelectorAll('[data-pin-item]'),
+            (n) => n.getAttribute('data-pin-id')
+        );
+        const body = new FormData();
+        body.append('_csrf', window.APP.csrfToken);
+        ids.forEach((id) => body.append('order[]', id));
+        try {
+            await fetch(pinsRoot.dataset.reorderUrl, { method: 'POST', headers: { 'X-Requested-With': 'fetch' }, body });
+        } catch (error) {
+            // Reihenfolge greift dann erst beim nächsten erfolgreichen Ziehen – kein Blocker.
+        }
+    }
+}

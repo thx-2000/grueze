@@ -343,6 +343,7 @@ final class SettingsController extends BaseController
                     'users.manage'    => 'Zugänge und Admin-Einstellungen verwalten',
                     'audit.view'      => 'Audit-Log einsehen',
                     'settings.manage' => 'Mail-Fuß und Versanddaten bearbeiten',
+                    'dashboard.pins'  => 'Eigene Kacheln auf der Startseite anpinnen und sortieren',
                 ],
             ],
         ]);
