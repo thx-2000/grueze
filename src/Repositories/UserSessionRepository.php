@@ -66,7 +66,10 @@ final class UserSessionRepository
      * Sitzung anlegen bzw. auffrischen. Gibt `true` zurück, wenn diese Sitzung
      * aus der Ferne beendet wurde – die aufrufende Stelle soll dann abmelden.
      * `$path` ist die zuletzt aufgerufene Seite (ohne Query-String), für die
-     * „Gerade online"-Übersicht in der Verwaltung.
+     * „Gerade online"-Übersicht in der Verwaltung. Leer/weggelassen (z. B. bei
+     * Hintergrund-Requests wie dem PWA-Manifest, die der Browser von sich aus
+     * nachlädt, ohne dass die Person tatsächlich dorthin navigiert ist) lässt
+     * den zuletzt bekannten Pfad unangetastet, statt ihn zu überschreiben.
      */
     public function touch(string $sessionId, int $userId, string $ip, string $userAgent, string $path = ''): bool
     {
@@ -84,7 +87,7 @@ final class UserSessionRepository
                 last_seen_at = NOW(),
                 ip_address = VALUES(ip_address),
                 user_agent = VALUES(user_agent),
-                last_path = VALUES(last_path),
+                last_path = COALESCE(VALUES(last_path), last_path),
                 ended_at = NULL'
         );
         $stmt->execute([

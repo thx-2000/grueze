@@ -490,12 +490,17 @@ try {
     // Sitzung aus der Ferne beendet, hier abmelden und zur Anmeldung schicken.
     if (!empty($_SESSION['user_id'])) {
         try {
+            // Der Browser lädt Manifest/App-Icon von sich aus nach (PWA-
+            // Unterstützung) – das ist keine echte Seitenansicht und soll den
+            // zuletzt aufgerufenen Pfad nicht überschreiben.
+            $currentPath = (new Request())->path();
+            $backgroundPaths = ['/manifest.webmanifest', '/app-icon.svg'];
             $revoked = Container::get(\App\Repositories\UserSessionRepository::class)->touch(
                 session_id(),
                 (int) $_SESSION['user_id'],
                 (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
                 (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''),
-                (new Request())->path()
+                in_array($currentPath, $backgroundPaths, true) ? '' : $currentPath
             );
             if ($revoked) {
                 $_SESSION = [];

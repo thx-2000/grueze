@@ -5,6 +5,25 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Fix: „webmanifest" als Seite bei Anmeldungen (TH-Beobachtung 2026-09-16):**
+  erledigt v1.71.1. TH bemerkte, dass bei „Verwaltung → Anmeldungen" in der
+  Spalte „Seite" öfter „webmanifest" auftauchte. Ursache: `<link
+  rel="manifest">` im `<head>` lässt den Browser bei praktisch jedem
+  Seitenaufruf automatisch `/manifest.webmanifest` (und `/app-icon.svg`)
+  nachladen – beides sind dynamische Routen (`PwaController`), keine
+  statischen Dateien, laufen also durchs volle Routing inkl. dem
+  Sitzungs-Tracking in `public/index.php`, das bisher jeden Request
+  ungefiltert als „zuletzt aufgerufene Seite" übernahm.
+  - `UserSessionRepository::touch()`: `last_path = VALUES(last_path)` →
+    `last_path = COALESCE(VALUES(last_path), last_path)` – ein leerer Pfad
+    überschreibt den zuletzt bekannten jetzt nicht mehr, statt ihn zu leeren.
+  - `public/index.php`-Bootstrap: `/manifest.webmanifest` und `/app-icon.svg`
+    geben jetzt bewusst einen leeren Pfad an `touch()` statt des echten,
+    damit der zuletzt wirklich besuchten Seite nichts überschreibt.
+  - Getestet (Docker): echter Seitenaufruf setzt `last_path` korrekt,
+    anschließender Abruf von Manifest/Icon lässt ihn unverändert, ein
+    weiterer echter Seitenaufruf danach überschreibt wieder korrekt.
+  - Keine Migration, kein neuer Datenbankstand.
 - **Ungelesene Ankündigungen auf der Startseite (TH-Wunsch 2026-09-16):**
   erledigt v1.71.0. TH fragte, ob es schon eine Möglichkeit gibt, Nachrichten
   für die ganze Stufe/einzelne Mitglieder/Gruppen auf der „Login-Seite" (=

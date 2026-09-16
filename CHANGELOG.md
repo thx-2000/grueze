@@ -3,6 +3,17 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.71.1
+
+**Fix: „webmanifest" als Seite bei Anmeldungen.**
+
+- Der Browser lädt bei jedem Seitenaufruf automatisch das PWA-Manifest und
+  das App-Icon im Hintergrund nach – das wurde bisher fälschlich als
+  „zuletzt aufgerufene Seite" bei Anmeldungen/„Gerade online" gewertet.
+  Jetzt bleibt dort die zuletzt echte besuchte Seite stehen.
+
+Keine Migration.
+
 ## 1.71.0
 
 **Ungelesene Ankündigungen auf der Startseite.**
