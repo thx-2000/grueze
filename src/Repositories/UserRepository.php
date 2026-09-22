@@ -214,6 +214,71 @@ final class UserRepository
     {
         $stmt = $this->pdo->prepare('UPDATE users SET last_login_at = NOW() WHERE id = :id');
         $stmt->execute(['id' => $id]);
+        $this->queueLoginNotifications($id);
+    }
+
+    /**
+     * Trägt „bei Login benachrichtigen"-Abos (alle / dieser Kontakt / dessen
+     * Gruppen) in `notification_queue` ein. Läuft absichtlich hier statt in
+     * einem separaten Service – `touchLogin()` ist der einzige Ort, durch den
+     * jeder echte Login (Passwort, Passkey, Selbst-Registrierung) läuft,
+     * „Als Benutzer anmelden" (Impersonation) dagegen nicht.
+     */
+    private function queueLoginNotifications(int $userId): void
+    {
+        try {
+            $stmt = $this->pdo->prepare('SELECT name, contact_id FROM users WHERE id = :id');
+            $stmt->execute(['id' => $userId]);
+            $user = $stmt->fetch();
+            if ($user === false) {
+                return;
+            }
+
+            $contactId = $user['contact_id'] !== null ? (int) $user['contact_id'] : null;
+            $groupIds = [];
+            if ($contactId !== null) {
+                $groupStmt = $this->pdo->prepare('SELECT group_id FROM contact_group_members WHERE contact_id = :cid');
+                $groupStmt->execute(['cid' => $contactId]);
+                $groupIds = array_map('intval', $groupStmt->fetchAll(PDO::FETCH_COLUMN));
+            }
+
+            $this->queueForMatchingSubscriptions(
+                'login',
+                $contactId,
+                $groupIds,
+                trim((string) $user['name']) . ' hat sich eingeloggt.'
+            );
+        } catch (\Throwable) {
+            // Benachrichtigungstabellen fehlen noch – Migration holt es nach.
+        }
+    }
+
+    /** @param list<int> $groupIds */
+    private function queueForMatchingSubscriptions(string $eventType, ?int $contactId, array $groupIds, string $summary): void
+    {
+        $conditions = ["ns.scope = 'all'"];
+        $params = ['event_type' => $eventType, 'summary' => mb_substr($summary, 0, 500)];
+
+        if ($contactId !== null) {
+            $conditions[] = "(ns.scope = 'contact' AND ns.target_id = :contact_id)";
+            $params['contact_id'] = $contactId;
+        }
+        if ($groupIds !== []) {
+            $placeholders = [];
+            foreach (array_values($groupIds) as $i => $groupId) {
+                $key = 'group_id_' . $i;
+                $placeholders[] = ':' . $key;
+                $params[$key] = $groupId;
+            }
+            $conditions[] = "(ns.scope = 'group' AND ns.target_id IN (" . implode(',', $placeholders) . '))';
+        }
+
+        $sql = 'INSERT INTO notification_queue (subscription_id, occurred_at, summary)
+                SELECT ns.id, NOW(), :summary
+                FROM notification_subscriptions ns
+                WHERE ns.event_type = :event_type AND (' . implode(' OR ', $conditions) . ')';
+
+        $this->pdo->prepare($sql)->execute($params);
     }
 
     public function setActive(int $id, bool $isActive): void
