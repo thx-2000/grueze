@@ -3,6 +3,21 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.73.0
+
+**Änderungsprotokoll: genauer und ehrlicher.**
+
+- Die Spalte „Kontakt" zeigte bisher fälschlich „Gelöschter Kontakt" bei
+  jeder Aktion ohne Kontaktbezug (z. B. bei „Weitere Personen", Dokumenten,
+  Ankündigungen) – jetzt korrekt ein neutrales „–".
+- Änderungen bei „Weitere Personen"-Einträgen zeigen jetzt wie bei Kontakten,
+  welche Felder sich geändert haben, statt nur „Eintrag geändert: Name".
+- Das Änderungsprotokoll zeigt jetzt bei allen Aktionen mit erfasstem
+  Feld-Verlauf direkt die alten und neuen Werte, nicht nur die Kurz-
+  zusammenfassung – vorher war das nur auf der einzelnen Kontaktseite zu sehen.
+
+Keine Migration.
+
 ## 1.72.1
 
 **Fix: 404 nach dem Anpinnen/Lösen einer Kachel.**

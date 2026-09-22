@@ -11,6 +11,7 @@ use App\Repositories\MemorialRepository;
 use App\Repositories\RosterRepository;
 use App\Services\UploadService;
 use App\Support\Redirect;
+use App\Support\RosterDiff;
 
 /**
  * „Weitere Personen" (Instanz-Label z. B. „Lehrkräfte", siehe roster_label()):
@@ -124,7 +125,11 @@ final class RosterController extends BaseController
 
         $this->roster->update($id, $data);
         $this->syncMemorial($id);
-        $this->logs->addAudit((int) $this->userId(), null, 'updated', roster_label() . '-Eintrag geändert: „' . $data['name'] . '".');
+        $changes = RosterDiff::describe($existing, $data);
+        $summary = $changes === []
+            ? roster_label() . '-Eintrag „' . $data['name'] . '" gespeichert, keine Feldänderung.'
+            : roster_label() . '-Eintrag „' . $data['name'] . '" geändert: ' . implode(', ', array_keys($changes)) . '.';
+        $this->logs->addAudit((int) $this->userId(), null, 'updated', $summary, $changes);
         flash('success', 'Eintrag gespeichert.');
         Redirect::to('/weitere-personen/bearbeiten?id=' . $id);
     }
