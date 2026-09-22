@@ -139,12 +139,20 @@ final class PasskeyController extends BaseController
             $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
             $this->passkeys->updateUsage((int) $verification['passkey_id'], (int) $verification['sign_count'], $ip);
             $this->logs->addLoginAttempt((string) ($storedCredential['user_email'] ?? ''), $ip, true);
-            $this->logs->addAudit(
-                (int) $verification['user_id'],
-                null,
-                'updated',
-                'Passkey-Anmeldung erfolgreich.'
-            );
+            try {
+                // Der Login selbst steht schon fest (`loginUsingId()` oben) – ein
+                // fehlender ENUM-Wert 'login' vor der Migration (Deploy-Fenster
+                // vor „Verwaltung → Aktualisieren") darf die Anmeldung nicht
+                // scheitern lassen, nur weil das Protokollieren fehlschlägt.
+                $this->logs->addAudit(
+                    (int) $verification['user_id'],
+                    null,
+                    'login',
+                    'Passkey-Anmeldung erfolgreich.'
+                );
+            } catch (\Throwable) {
+                // Wird nachgeholt, sobald die Migration eingespielt ist.
+            }
 
             $this->json([
                 'ok' => true,
