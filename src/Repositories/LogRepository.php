@@ -52,7 +52,12 @@ final class LogRepository
             ]);
         }
 
-        if ($action !== 'impersonation_started' && $action !== 'impersonation_stopped') {
+        // 'login' (z. B. Passkey-Anmeldung) und die Impersonation-Marker sind
+        // keine Datenänderungen, sondern reine Sicherheits-Protokolleinträge –
+        // ein Login löst bereits über `UserRepository::touchLogin()` seine
+        // eigene Login-Benachrichtigung aus; würde er hier zusätzlich als
+        // „Änderung" gewertet, käme doppelte Mail für dasselbe Ereignis.
+        if (!in_array($action, ['impersonation_started', 'impersonation_stopped', 'login'], true)) {
             $this->queueChangeNotifications($contactId, $details);
         }
     }

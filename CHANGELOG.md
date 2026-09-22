@@ -3,6 +3,19 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.74.1
+
+**Fix: doppelte Mail bei Passkey-Login.**
+
+- Eine Passkey-Anmeldung löste zwei Benachrichtigungen aus, obwohl es nur
+  ein Ereignis war: die korrekte Login-Mail und zusätzlich fälschlich eine
+  Änderungs-Mail – weil die Passkey-Anmeldung intern auch einen
+  Protokolleintrag als „Änderung" anlegt. Eigener Protokoll-Typ „Anmeldung"
+  dafür, der keine Änderungs-Benachrichtigung mehr auslöst. Passwort-Login
+  war nicht betroffen.
+
+Neue Migration (ENUM-Erweiterung `audit_log.action`).
+
 ## 1.74.0
 
 **Admin-Benachrichtigungen per Mail.**

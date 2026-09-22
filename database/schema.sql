@@ -168,7 +168,7 @@ CREATE TABLE audit_log (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
     contact_id INT UNSIGNED NULL,
-    action ENUM('created', 'updated', 'deleted', 'impersonation_started', 'impersonation_stopped') NOT NULL,
+    action ENUM('created', 'updated', 'deleted', 'impersonation_started', 'impersonation_stopped', 'login') NOT NULL,
     details TEXT NOT NULL,
     changes LONGTEXT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

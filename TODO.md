@@ -5,6 +5,51 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Fix: doppelte Mail bei Passkey-Login (TH-Beobachtung 2026-09-22):**
+  erledigt v1.74.1. TH testete v1.74.0 live mit einer Passkey-Anmeldung und
+  bekam zwei Mails statt einer – „eine Login-Mail und eine Änderungsmail
+  (in der eine Passkey-Anmeldung stand)".
+  - **Ursache:** `PasskeyController::finishAuthenticate()` (bzw. die
+    Login-Verify-Methode) ruft nach `Auth::loginUsingId()` zusätzlich
+    `LogRepository::addAudit(..., 'updated', 'Passkey-Anmeldung
+    erfolgreich.')` auf – rein zur Sichtbarkeit im Änderungsprotokoll,
+    keine echte Datenänderung. Mein neuer Änderungs-Hook in `addAudit()`
+    (v1.74.0) behandelte aber JEDEN Aufruf mit `action='updated'` als
+    „Änderung" und löste dafür zusätzlich eine Änderungs-Mail aus – parallel
+    zur bereits korrekten Login-Mail aus `UserRepository::touchLogin()`.
+    Passwort-Login war nicht betroffen, weil `AuthController::login()` gar
+    kein `addAudit()` aufruft.
+  - **Fix:** `audit_log.action`-ENUM um `'login'` erweitert (Migration
+    `2026-09-22-audit-log-login-aktion.sql`, analog zu den
+    `impersonation_*`-Werten aus v1.7.1). `PasskeyController` nutzt jetzt
+    `action='login'` statt `'updated'`; `LogRepository::addAudit()`
+    schließt `'login'` (neben den beiden Impersonation-Markern) von der
+    Änderungs-Benachrichtigung aus. `templates/logs/audit.php` bekam ein
+    Label „Anmeldung" dafür.
+  - **Zusätzliche Härtung (aus der v1.7.1-Lehre „Migration allein reicht
+    nicht" – damals brach genau dasselbe ENUM-Problem einmal echten Code):**
+    der `addAudit('login', …)`-Aufruf in `PasskeyController` steht jetzt in
+    einem eigenen `try/catch`. Vor der Migration ist `'login'` als
+    ENUM-Wert ungültig; ohne das try/catch hätte ein Passkey-Login im
+    Deploy-Fenster VOR „Verwaltung → Aktualisieren" mit einem
+    PDOException-500 fehlgeschlagen (per Test lokal reproduziert: der
+    Insert wirft `SQLSTATE[01000] … Data truncated for column 'action'`).
+    Jetzt schlägt in diesem Fenster nur das Protokollieren fehl, der Login
+    selbst bleibt unberührt – wird nachgeholt, sobald die Migration läuft.
+  - Getestet (Docker, curl + direkte PHP-Aufrufe): (1) vor der Migration
+    wirft `addAudit('login',…)` wie erwartet eine PDOException – bestätigt,
+    dass das try/catch im Controller nötig UND wirksam ist; (2) nach der
+    Migration erzeugt ein simulierter Passkey-Login (`touchLogin()` +
+    `addAudit(...,'login',...)`) genau EINEN Warteschlangen-Eintrag (das
+    Login-Abo), das parallel aktive „Änderung/Alle"-Abo blieb korrekt leer;
+    (3) Änderungsprotokoll zeigt den Eintrag mit Label „Anmeldung".
+    Testdaten entfernt.
+  - `system_version()` = `1.74.1`. Migration: ENUM-Erweiterung
+    `audit_log.action`. Deploy steht noch aus – **wichtig: TH muss nach dem
+    Deploy zeitnah „Verwaltung → Aktualisieren" aufrufen**, sonst fehlt bis
+    dahin der Protokolleintrag für Passkey-Logins (Login selbst funktioniert
+    dank Härtung trotzdem).
+
 - **Admin-Benachrichtigungen per Mail (TH-Wunsch 2026-09-22):** erledigt
   v1.74.0. TH wollte als Admin per Mail informiert werden können, wenn sich
   jemand einloggt oder Daten geändert werden – konfigurierbar nach Ziel

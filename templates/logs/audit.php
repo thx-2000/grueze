@@ -5,6 +5,7 @@ $actionLabel = static fn (string $a): string => match ($a) {
     'deleted' => 'gelöscht',
     'impersonation_started' => 'Sitzung als Person gestartet',
     'impersonation_stopped' => 'Sitzung als Person beendet',
+    'login' => 'Anmeldung',
     default => $a,
 };
 ?>
