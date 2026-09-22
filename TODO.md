@@ -5,6 +5,61 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Änderungsprotokoll: „Gelöschter Kontakt" korrigiert + Feld-Diff für
+  „Weitere Personen" (TH-Beobachtung 2026-09-22):** erledigt v1.73.0. TH
+  fragte, warum im Änderungsprotokoll unter „Kontakt" immer „Gelöschter
+  Kontakt" steht, und ob bei Änderungen auch stehen könnte, WAS geändert
+  wurde (Beispiel: „Lehrkräfte-Eintrag geändert: Harald Abraham" statt
+  Details).
+  - **Ursache „Gelöschter Kontakt":** `LogRepository::auditEntries()` macht
+    ein `LEFT JOIN contacts ON contacts.id = audit_log.contact_id`; das
+    Template zeigte bei jedem NULL-Ergebnis pauschal „Gelöschter Kontakt" –
+    das trifft aber auf JEDE Aktion ohne Kontaktbezug zu (Weitere Personen,
+    Dokumente, Galerien, Ankündigungen: `RosterController` etc. übergeben
+    bewusst `contact_id = null` an `addAudit()`, weil `roster_people` einen
+    eigenen ID-Raum hat und ein FK auf `contacts` falsche Personen verlinken
+    würde). Zusätzlicher Fund beim Debuggen: `audit_log.contact_id` hat
+    `ON DELETE SET NULL` als FK – bei einer echten Kontakt-Hartlöschung wird
+    das Feld ebenfalls genullt. „echt gelöschter Kontakt" und „nie einer"
+    sind in den Daten also gar nicht mehr unterscheidbar; „–" ist daher die
+    ehrlichere Standardanzeige, „Gelöschter Kontakt" bleibt nur als seltener
+    Verteidigungsfall für einen (praktisch kaum vorkommenden) verwaisten,
+    nicht genullten Verweis.
+  - Neue `src/Support/RosterDiff.php` (analog `ContactDiff`): vergleicht
+    Name/Rolle/Fächer/E-Mail/Handy/Geburtsdatum/Todesdatum/Todesjahr/
+    Verstorben-unbekannt/Adresse/Notiz alt→neu. `RosterController::update()`
+    nutzt das jetzt genau wie `ContactController::update()` (Summary „Weitere
+    Personen-Eintrag „Name" geändert: Feld1, Feld2." + volles `changes`-Array
+    an `addAudit()`).
+  - `LogRepository::auditEntries()` dekodiert `changes` jetzt genau wie
+    `contactAuditTrail()` (war vorher nur dort passiert). Das globale
+    Änderungsprotokoll (`templates/logs/audit.php`) rendert bei vorhandenem
+    `changes` zusätzlich die Feld-für-Feld-Liste alt→neu (wiederverwendet
+    `.history-changes`/`.history-field`/`.history-from`/`.history-to` – exakt
+    dieselben CSS-Klassen wie im „Änderungsverlauf" auf der Kontaktseite,
+    keine neue CSS nötig). **Nebeneffekt:** dadurch zeigen jetzt auch alle
+    BESTEHENDEN Kontakt-Änderungen (Geburtstag, Rundmail-Abmeldung,
+    Sichtbarkeit, Beruf, …) die vollen alt→neu-Werte direkt im globalen
+    Protokoll, nicht nur auf der einzelnen Kontaktseite.
+  - **Docker-Kollision beim Testen entdeckt:** Port 8095 (dieses Projekt) und
+    das Datenportal-Projekt (`project_sbk_portal`) belegen beide denselben
+    lokalen Port – Docker Desktop startet offenbar `restart: unless-stopped`-
+    Container anderer Projekte beim Daemon-Neustart automatisch mit, wodurch
+    `grueze_app` den Port nicht mehr bekommt und ohne Netzwerkanbindung hängen
+    bleibt. Für diesen Testlauf einmalig `docker-compose.yml` lokal auf Port
+    8195 umgestellt, getestet, danach zurückgesetzt (`git checkout`) – **kein
+    Repo-Fix**, nur ein lokaler Workaround für diese Session. Bei künftigen
+    lokalen Tests an diesem Projekt: falls Port 8095 wieder belegt ist, selbes
+    Vorgehen (temporär anderen Port in docker-compose.yml, nie dauerhaft
+    committen).
+  - Getestet (Docker, curl mit Session-Cookie): Weitere-Personen-Eintrag
+    angelegt und bearbeitet (Fächer/E-Mail/Handy geändert) → Protokoll zeigt
+    „Weitere Personen-Eintrag „Harald Abraham" geändert: Fächer, E-Mail,
+    Handy." plus die volle Alt→Neu-Liste; „Kontakt"-Spalte zeigt bei diesem
+    Eintrag korrekt „–" statt „Gelöschter Kontakt". Kontrollprobe mit einem
+    echten, weiterhin existierenden Kontakt (Anna Bergmann, Beruf geändert):
+    „Kontakt"-Spalte zeigt korrekt den Namen. Testdaten entfernt.
+  Keine Migration.
 - **Fix: 404 nach Anpinnen/Lösen einer Kachel (TH-Beobachtung 2026-09-16):**
   erledigt v1.72.1. TH testete v1.72.0 im echten Browser: Anpinnen/Lösen
   landete auf einer 404-Seite, die Aktion selbst war aber korrekt

@@ -57,7 +57,7 @@ final class LogRepository
 
     public function auditEntries(): array
     {
-        return $this->pdo->query(
+        $rows = $this->pdo->query(
             'SELECT audit_log.*, users.name AS user_name, contacts.vorname, contacts.nachname
              FROM audit_log
              JOIN users ON users.id = audit_log.user_id
@@ -65,6 +65,15 @@ final class LogRepository
              ORDER BY audit_log.created_at DESC
              LIMIT 200'
         )->fetchAll();
+
+        foreach ($rows as $index => $row) {
+            $decoded = !empty($row['changes'])
+                ? json_decode((string) $row['changes'], true)
+                : [];
+            $rows[$index]['changes'] = is_array($decoded) ? $decoded : [];
+        }
+
+        return $rows;
     }
 
     /**
