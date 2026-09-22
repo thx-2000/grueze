@@ -3,6 +3,28 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.74.0
+
+**Admin-Benachrichtigungen per Mail.**
+
+- Neue Seite „Meine Benachrichtigungen" (Verwaltung, fest für Admins) –
+  einrichtbar, wer per Mail informiert werden will, wenn sich jemand
+  einloggt oder Daten geändert werden.
+  - Ziel wählbar: alle, eine einzelne Person oder eine ganze Gruppe.
+  - Eigener Zeitrahmen je Abo: Sofort, alle 5/10 Minuten, stündlich, alle
+    6 Stunden, täglich, wöchentlich, monatlich. „Sofort" heißt real: beim
+    nächsten Cron-Lauf (`/intern/cron`), typischerweise mit rund einer
+    Minute Verzögerung.
+  - Aufgelaufene Ereignisse werden pro Abo gesammelt und als eine
+    Sammelmail verschickt, statt einzeln zu spammen.
+- Technisch hängt die Erfassung an den ohnehin schon zentralen Stellen: an
+  jedem echten Login (`UserRepository::touchLogin()`, nicht bei „Als
+  Benutzer anmelden") und an jeder protokollierten Änderung
+  (`LogRepository::addAudit()`) – kein einzelner Controller musste dafür
+  angefasst werden.
+
+Neue Migration: `notification_subscriptions`, `notification_queue`.
+
 ## 1.73.0
 
 **Änderungsprotokoll: genauer und ehrlicher.**

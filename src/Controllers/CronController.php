@@ -8,6 +8,7 @@ use App\Core\Request;
 use App\Repositories\ContactRepository;
 use App\Services\EventScheduler;
 use App\Services\GreetingScheduler;
+use App\Services\NotificationDigestScheduler;
 
 /**
  * Einstiegspunkt für zeitgesteuerte Aufgaben (Abstimmungs-Automatik).
@@ -25,6 +26,7 @@ final class CronController
         private EventScheduler $scheduler,
         private GreetingScheduler $greetings,
         private ContactRepository $contacts,
+        private NotificationDigestScheduler $notifications,
     ) {
     }
 
@@ -50,6 +52,9 @@ final class CronController
                 $stats['greet_' . $key] = $value;
             }
             $stats['contacts_purged'] = $this->contacts->pruneTrashedContacts();
+            $notifyStats = $this->notifications->run();
+            $stats['notify_sent'] = $notifyStats['sent'];
+            $stats['notify_errors'] = $notifyStats['errors'];
             echo "ok\n";
             foreach ($stats as $key => $value) {
                 echo $key . '=' . (int) $value . "\n";

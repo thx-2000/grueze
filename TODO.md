@@ -5,6 +5,70 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Admin-Benachrichtigungen per Mail (TH-Wunsch 2026-09-22):** erledigt
+  v1.74.0. TH wollte als Admin per Mail informiert werden können, wenn sich
+  jemand einloggt oder Daten geändert werden – konfigurierbar nach Ziel
+  (alle / eine Person / eine Gruppe) und mit mehreren Zeitrahmen-Stufen
+  (Sofort bis monatlich), ohne dass die Konfiguration unübersichtlich wird.
+  - **Datenmodell:** zwei neue Tabellen. `notification_subscriptions` (wer
+    will was wie oft wissen: `event_type` login/change, `scope`
+    all/contact/group, `target_id`, `frequency`, `last_sent_at`) und
+    `notification_queue` (aufgelaufene, noch nicht verschickte Ereignisse je
+    Abo, mit fertig formulierter `summary`-Zeile – bleibt auch lesbar, wenn
+    der Kontakt später gelöscht wird, gleiche Lehre wie beim
+    „Gelöschter Kontakt"-Fix in v1.73.0).
+  - **Erfassung bewusst ohne neuen Service, sondern direkt an den zentralen
+    Stellen:** `UserRepository::touchLogin()` (läuft bei jedem echten
+    Login – Passwort, Passkey, Selbst-Registrierung – aber NICHT bei „Als
+    Benutzer anmelden", da das nicht über `touchLogin()` läuft) und
+    `LogRepository::addAudit()` (läuft bei jeder protokollierten Änderung,
+    egal ob Kontakt, Weitere Personen, Galerie, Dokumente – kein einzelner
+    Controller musste angefasst werden). Beide bleiben dabei reine
+    PDO-Repositories ohne Service-Abhängigkeit (Konvention in diesem Projekt:
+    Repositories hängen nur an `PDO`, nie an anderen Repos/Services) – das
+    Matching (alle / genau dieser Kontakt / dessen Gruppen über
+    `contact_group_members`) läuft deshalb als kleine, bewusst zweimal
+    geschriebene private Methode in beiden Repositories statt als
+    gemeinsame Abstraktion.
+  - **Versand:** neuer `NotificationDigestScheduler`, eingehängt in
+    `/intern/cron` neben den bestehenden Schedulern. Prüft je Abo Fälligkeit
+    (Minuten-Schwelle je `frequency` gegen `last_sent_at`), verschickt bei
+    Fälligkeit eine Sammelmail mit allen wartenden Zeilen, leert danach die
+    Queue. Bei Mail-Fehler bleibt die Queue unangetastet (Retry beim
+    nächsten Lauf). **„Sofort" ist ehrlich benannt als „beim nächsten
+    Cron-Lauf"** – TH ruft den KAS-Cronjob künftig minütlich auf (bisher
+    alle 15 Min., siehe `/hilfe/cron`), damit „Sofort" auch wirklich zeitnah
+    ist.
+  - **Oberfläche:** neue Seite „Meine Benachrichtigungen"
+    (`/verwaltung/benachrichtigungen`, Hub-Kachel unter „Protokolle &
+    Verlauf"), fest an `is_admin()` gebunden statt an die Rechte-Matrix
+    (Vorbild: „Versteckte Kontakte") – bewusst NICHT als vergebbare
+    Berechtigung, weil es um Einsicht in Logins/Änderungen der gesamten
+    Instanz geht. Eine Tabelle mit allen bestehenden Abos (Ziel + Zeitrahmen
+    änderbar, entfernbar) plus ein Formular zum Hinzufügen (ein
+    Auswahlfeld für „Alle" / Person / Gruppe in einem `<select>` mit
+    Optgroups statt separater Auswahl-Logik).
+  - **Getestet** (Docker auf Port 8195, gleicher Port-8095-Workaround wie in
+    v1.73.0 dokumentiert): Login-Hook (eigener Login → Queue-Eintrag „Test
+    Admin hat sich eingeloggt."), Änderungs-Hook (`addAudit()` → Queue-
+    Eintrag mit Zusammenfassung), Gruppen-Matching (Änderung an Gruppen-
+    Mitglied löst Gruppen-Abo aus, Änderung an Nicht-Mitglied NICHT),
+    Digest-Versand (`NotificationDigestScheduler::run()` erkennt fällige
+    Abos korrekt, `mail()` schlägt im Dev-Container mangels `sendmail`
+    erwartungsgemäß fehl, Queue bleibt dabei unangetastet für den nächsten
+    Versuch), Frequenz ändern, Abo entfernen (dabei einen Bug gefunden und
+    behoben: `unsubscribe()` löschte ursprünglich nur die Abo-Zeile und
+    verließ sich auf die FK-Kaskade aus `schema.sql` – die lazy
+    `ensureSchema()`-Variante ohne echte Migration legt die Tabellen aber
+    ohne Fremdschlüssel an, wodurch Queue-Zeilen verwaist zurückblieben;
+    jetzt löscht `unsubscribe()` die Queue-Zeilen explizit mit).
+  - **Offen:** TH richtet den KAS-Cronjob selbst auf „minütlich" ein
+    (Anleitung + Schlüssel wurden im Chat mitgegeben, Schlüssel per SSH vom
+    Server gelesen: `config/config.php` → `cron_key`). Danach einmal
+    `/verwaltung/benachrichtigungen` besuchen (legt die Tabellen live per
+    `ensureSchema()` an, falls die Migration nicht vorher über „Verwaltung →
+    Aktualisieren" gelaufen ist) und ein erstes Abo testen.
+
 - **Änderungsprotokoll: „Gelöschter Kontakt" korrigiert + Feld-Diff für
   „Weitere Personen" (TH-Beobachtung 2026-09-22):** erledigt v1.73.0. TH
   fragte, warum im Änderungsprotokoll unter „Kontakt" immer „Gelöschter

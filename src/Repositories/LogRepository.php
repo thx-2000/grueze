@@ -40,19 +40,72 @@ final class LogRepository
                 'details' => $details,
                 'changes' => $changes === [] ? null : json_encode($changes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             ]);
-
-            return;
+        } else {
+            $stmt = $this->pdo->prepare(
+                'INSERT INTO audit_log (user_id, contact_id, action, details) VALUES (:user_id, :contact_id, :action, :details)'
+            );
+            $stmt->execute([
+                'user_id' => $userId,
+                'contact_id' => $contactId,
+                'action' => $action,
+                'details' => $details,
+            ]);
         }
 
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO audit_log (user_id, contact_id, action, details) VALUES (:user_id, :contact_id, :action, :details)'
-        );
-        $stmt->execute([
-            'user_id' => $userId,
-            'contact_id' => $contactId,
-            'action' => $action,
-            'details' => $details,
-        ]);
+        if ($action !== 'impersonation_started' && $action !== 'impersonation_stopped') {
+            $this->queueChangeNotifications($contactId, $details);
+        }
+    }
+
+    /**
+     * Trägt „bei Änderungen benachrichtigen"-Abos (alle / dieser Kontakt /
+     * dessen Gruppen) in `notification_queue` ein. Läuft hier statt in einem
+     * separaten Service, weil `addAudit()` der einzige Ort ist, durch den
+     * jede protokollierte Änderung ohnehin schon läuft – egal ob Kontakt,
+     * Weitere Personen, Galerie oder Dokumente.
+     */
+    private function queueChangeNotifications(?int $contactId, string $summary): void
+    {
+        try {
+            $groupIds = [];
+            if ($contactId !== null) {
+                $groupStmt = $this->pdo->prepare('SELECT group_id FROM contact_group_members WHERE contact_id = :cid');
+                $groupStmt->execute(['cid' => $contactId]);
+                $groupIds = array_map('intval', $groupStmt->fetchAll(PDO::FETCH_COLUMN));
+            }
+
+            $this->queueForMatchingSubscriptions('change', $contactId, $groupIds, $summary);
+        } catch (\Throwable) {
+            // Benachrichtigungstabellen fehlen noch – Migration holt es nach.
+        }
+    }
+
+    /** @param list<int> $groupIds */
+    private function queueForMatchingSubscriptions(string $eventType, ?int $contactId, array $groupIds, string $summary): void
+    {
+        $conditions = ["ns.scope = 'all'"];
+        $params = ['event_type' => $eventType, 'summary' => mb_substr($summary, 0, 500)];
+
+        if ($contactId !== null) {
+            $conditions[] = "(ns.scope = 'contact' AND ns.target_id = :contact_id)";
+            $params['contact_id'] = $contactId;
+        }
+        if ($groupIds !== []) {
+            $placeholders = [];
+            foreach (array_values($groupIds) as $i => $groupId) {
+                $key = 'group_id_' . $i;
+                $placeholders[] = ':' . $key;
+                $params[$key] = $groupId;
+            }
+            $conditions[] = "(ns.scope = 'group' AND ns.target_id IN (" . implode(',', $placeholders) . '))';
+        }
+
+        $sql = 'INSERT INTO notification_queue (subscription_id, occurred_at, summary)
+                SELECT ns.id, NOW(), :summary
+                FROM notification_subscriptions ns
+                WHERE ns.event_type = :event_type AND (' . implode(' OR ', $conditions) . ')';
+
+        $this->pdo->prepare($sql)->execute($params);
     }
 
     public function auditEntries(): array

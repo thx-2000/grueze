@@ -28,6 +28,7 @@ $groups = [
         ['audit.view', '/logs/audit', 'history', 'Änderungsprotokoll', 'Wer hat wann welchen Kontakt geändert.'],
         ['mail.view_log', '/logs/mail', 'mail', 'Versandprotokoll', 'Welche Mails wurden verschickt, was schlug fehl.'],
         ['users.manage', '/verwaltung/anmeldungen', 'login', 'Anmeldungen', 'Wer ist gerade online und wer hat sich wann angemeldet.'],
+        ['__admin__', '/verwaltung/benachrichtigungen', 'mail', 'Meine Benachrichtigungen', 'Per Mail informiert werden, wenn sich jemand einloggt oder Daten geändert werden.'],
     ],
     'System' => [
         ['users.manage', '/admin/aktualisieren', 'upload', 'Aktualisieren', 'Version prüfen, neue Dateien einspielen und die Datenbank auf den neuen Stand bringen.'],
@@ -56,7 +57,7 @@ $groups = [
 
 <?php foreach ($groups as $groupTitle => $tiles): ?>
     <?php
-    $visible = array_values(array_filter($tiles, static fn (array $t): bool => can($t[0])));
+    $visible = array_values(array_filter($tiles, static fn (array $t): bool => $t[0] === '__admin__' ? is_admin() : can($t[0])));
     if ($visible === []) {
         continue;
     }

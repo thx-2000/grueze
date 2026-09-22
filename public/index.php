@@ -363,10 +363,23 @@ try {
         Container::get(MailService::class),
         Container::get(LogRepository::class)
     ));
+    Container::factory(\App\Repositories\NotificationRepository::class, static fn () => new \App\Repositories\NotificationRepository(Container::get(PDO::class)));
+    Container::factory(\App\Services\NotificationDigestScheduler::class, static fn () => new \App\Services\NotificationDigestScheduler(
+        Container::get(\App\Repositories\NotificationRepository::class),
+        Container::get(SettingRepository::class),
+        Container::get(MailService::class)
+    ));
+    Container::factory(\App\Controllers\NotificationController::class, static fn () => new \App\Controllers\NotificationController(
+        Container::get(Auth::class),
+        Container::get(\App\Repositories\NotificationRepository::class),
+        Container::get(ContactRepository::class),
+        Container::get(GroupRepository::class)
+    ));
     Container::factory(CronController::class, static fn () => new CronController(
         Container::get(EventScheduler::class),
         Container::get(GreetingScheduler::class),
-        Container::get(ContactRepository::class)
+        Container::get(ContactRepository::class),
+        Container::get(\App\Services\NotificationDigestScheduler::class)
     ));
     Container::factory(GroupRepository::class, static fn () => new GroupRepository(Container::get(PDO::class)));
     Container::factory(GroupMailService::class, static fn () => new GroupMailService(
@@ -852,6 +865,10 @@ try {
     $router->get('/logs/mail', [LogController::class, 'mail']);
     $router->get('/verwaltung/anmeldungen', [\App\Controllers\SessionController::class, 'index']);
     $router->post('/verwaltung/anmeldungen/beenden', [\App\Controllers\SessionController::class, 'revoke']);
+    $router->get('/verwaltung/benachrichtigungen', [\App\Controllers\NotificationController::class, 'index']);
+    $router->post('/verwaltung/benachrichtigungen/abonnieren', [\App\Controllers\NotificationController::class, 'subscribe']);
+    $router->post('/verwaltung/benachrichtigungen/rhythmus', [\App\Controllers\NotificationController::class, 'updateFrequency']);
+    $router->post('/verwaltung/benachrichtigungen/entfernen', [\App\Controllers\NotificationController::class, 'unsubscribe']);
     $router->get('/settings/branding', [SettingsController::class, 'branding']);
     $router->post('/settings/branding', [SettingsController::class, 'updateBranding']);
     $router->get('/settings/themes', [\App\Controllers\ThemeController::class, 'index']);
