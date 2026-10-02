@@ -324,7 +324,7 @@ function theme_favicon(): string
 
 function system_version(): string
 {
-    return '1.74.1';
+    return '1.75.0';
 }
 
 /**
@@ -610,6 +610,19 @@ function scheduler_stale(): bool
     }
 
     return $last === 0 || (time() - $last) > 172800;
+}
+
+/** Anzahl fehlender Dateien laut letzter Dateiprüfung (0 vor der ersten Prüfung). */
+function storage_check_missing(): int
+{
+    try {
+        $raw = (string) App\Core\Container::get(App\Repositories\SettingRepository::class)->get('storage_check_result', '');
+    } catch (Throwable) {
+        return 0;
+    }
+    $result = $raw !== '' ? json_decode($raw, true) : null;
+
+    return is_array($result) ? (int) ($result['missing_count'] ?? 0) : 0;
 }
 
 /** Ob der „Gruppen"-Menüpunkt für die aktuelle Person angezeigt werden soll. */

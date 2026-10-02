@@ -55,6 +55,19 @@ $groups = [
     </div>
 <?php endif; ?>
 
+<?php $missingFiles = can('users.manage') ? storage_check_missing() : 0; ?>
+<?php if ($missingFiles > 0): ?>
+    <div class="hub-notice" role="status">
+        <span><?= icon('archive') ?></span>
+        <div>
+            <strong><?= $missingFiles === 1 ? '1 Datei fehlt' : e((string) $missingFiles) . ' Dateien fehlen' ?> auf dem Server.</strong>
+            Die Einträge sind noch da, aber zugehörige Bilder oder Dokumente nicht –
+            am besten zeitnah aus einer Sicherung des Webspace zurückholen.
+            <a href="<?= e(url('/admin/backup')) ?>">Details und erneute Prüfung</a>.
+        </div>
+    </div>
+<?php endif; ?>
+
 <?php foreach ($groups as $groupTitle => $tiles): ?>
     <?php
     $visible = array_values(array_filter($tiles, static fn (array $t): bool => $t[0] === '__admin__' ? is_admin() : can($t[0])));

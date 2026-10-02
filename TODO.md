@@ -5,6 +5,68 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
 
 ## Neu
 
+- **Dateiprüfung + abgesichertes Deployment (Anlass: Datenverlust vom
+  2026-09-22, entdeckt 2026-10-02):** erledigt v1.75.0 (Stufe 1).
+  - **Anlass:** Zwei Deploys am 2026-09-22 liefen per Hand-rsync mit
+    `--delete`, aber ohne `--exclude-from=.rsyncignore`. Dadurch wurden auf
+    dem Server alle Nutzerdateien gelöscht (`public/assets/uploads/`,
+    `storage/media/`, `storage/documents/`, `storage/backups/`) und durch
+    lokale Testdateien ersetzt; die Datenbank blieb unberührt. Bemerkt erst
+    zehn Tage später, als ein Profilbild nicht mehr angezeigt wurde.
+    Wiederhergestellt aus der Webspace-Sicherung des Hosters (Stand vor dem
+    Schaden); ein danach hochgeladenes Foto war nicht mehr zu retten. Warum
+    überhaupt von Hand: `scripts/deploy.sh` konnte keinen eigenen
+    SSH-Schlüssel nutzen und scheiterte ohne ssh-agent. Die eigentliche Lücke
+    war die Erkennung – Sicherungen gab es, aber niemand merkte den Schaden.
+  - **Dateiprüfung:** neues `StorageReferenceRepository` sammelt alle
+    Dateiverweise (Profilbilder bei Kontakten/Weitere Personen/Gedenkseiten,
+    Logo, Galerie-Medien inkl. Vorschau/Webversion, Dokumente inkl.
+    Vorschau); Medien/Dokumente ohne existierende Galerie bzw. Ordner zählen
+    nicht (verwaiste Zeilen dort, wo `ensureSchema()` die Tabellen ohne
+    Fremdschlüssel angelegt hat – sonst Fehlalarm nach endgültigem Löschen).
+    `StorageCheckService` prüft per `realpath`/`is_file` über die
+    vorhandenen Speicher-Dienste (`UploadService::publicFileExists()`,
+    `MediaService`/`DocumentStorageService::absolutePath()`), zählt gemeinsam
+    genutzte Dateien einmal und speichert das Ergebnis in `app_settings`
+    (`storage_check_last_run`, `storage_check_result`).
+  - **Alarm:** Mail direkt an alle aktiven Admins (bewusst nicht über die
+    Benachrichtigungs-Abos – ein Alarm darf nicht vom Abonnieren abhängen).
+    Gemerkt wird die Menge bereits gemeldeter Dateien
+    (`storage_check_alerted`, kurze Hashes); Mail nur bei neu fehlenden
+    Dateien, nicht bei gleicher oder besserer Lage; wieder aufgetauchte
+    Dateien werden vergessen. Ohne eine einzige erfolgreiche Mail bleibt der
+    Befund neu (nächster Versuch beim nächsten Lauf).
+  - **Takt/Oberfläche:** im Cron höchstens stündlich (`files_checked`,
+    `files_missing`, `files_alerts_sent` in der Cron-Ausgabe, eigener
+    try/catch); Knopf „Jetzt prüfen" auf `/admin/backup` (POST
+    `/admin/backup/dateipruefung`) ohne Takt; Statusbereich mit Liste (bis 25
+    Einträge) dort; Warnhinweis im Einstellungen-Hub über
+    `storage_check_missing()`.
+  - **Deploy-Skript:** Probelauf (`--dry-run --itemize-changes`) vor jedem
+    echten Lauf; Abbruch, wenn eine Löschung unter `public/assets/uploads/`,
+    `storage/media/`, `storage/documents/`, `storage/backups/`,
+    `storage/app.key` oder `config/config.php` läge; alle übrigen Löschungen
+    werden vollständig aufgelistet. `SSH_KEY` in `scripts/deploy.env`
+    (optional), `--dry-run`/`-n` für reine Vorschau, Abbruch ohne
+    `.rsyncignore`. `.claude/` in `.rsyncignore` aufgenommen.
+  - **Getestet** (Docker, Port-Workaround 8195; Fake-`sendmail` nur im
+    Test-Container, um den Mailweg echt zu prüfen): erster Befund → eine
+    Mail; gleicher Befund → keine; neu fehlende Datei → Mail mit „davon neu";
+    teilweise Reparatur → keine Mail; vollständige Reparatur → Hinweis weg,
+    Merkliste leer; erneuter Schaden → Mail; Cron fällig vs. gedrosselt;
+    verwaister Dokument-Eintrag wird nicht gezählt; Grammatik für 0/1/viele.
+    Deploy-Skript gegen ein lokales Ziel: kaputte Ausschlussliste → Abbruch
+    ohne Übertragung; Probelauf → nur Anzeige; echter Lauf → nur die
+    legitime Löschung, Nutzerdaten bleiben.
+  - **Nebenbei bereinigt:** In älteren `TODO.md`-Einträgen standen eine
+    Instanz-Domain, ein Personenname aus einem Beispiel und Hoster-Begriffe –
+    neutralisiert (das Repo ist öffentlich).
+  - **Offen – Stufe 2:** Nutzerdaten-Ordner (Uploads, Galerie-Medien,
+    Dokumente, Sicherungen) in einen konfigurierbaren Datenordner außerhalb
+    des Deploy-Ziels verlegen (Standard: bisherige Orte, damit andere
+    Instanzen unverändert laufen); Profilbilder dann über eine Route mit
+    Login-Prüfung ausliefern statt frei abrufbar unter `assets/uploads/`.
+
 - **Fix: doppelte Mail bei Passkey-Login (TH-Beobachtung 2026-09-22):**
   erledigt v1.74.1. TH testete v1.74.0 live mit einer Passkey-Anmeldung und
   bekam zwei Mails statt einer – „eine Login-Mail und eine Änderungsmail
@@ -81,7 +143,7 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
     Fälligkeit eine Sammelmail mit allen wartenden Zeilen, leert danach die
     Queue. Bei Mail-Fehler bleibt die Queue unangetastet (Retry beim
     nächsten Lauf). **„Sofort" ist ehrlich benannt als „beim nächsten
-    Cron-Lauf"** – TH ruft den KAS-Cronjob künftig minütlich auf (bisher
+    Cron-Lauf"** – TH ruft den Cronjob beim Hoster künftig minütlich auf (bisher
     alle 15 Min., siehe `/hilfe/cron`), damit „Sofort" auch wirklich zeitnah
     ist.
   - **Oberfläche:** neue Seite „Meine Benachrichtigungen"
@@ -107,7 +169,7 @@ Wird nach jeder abgeschlossenen Arbeitseinheit aktualisiert.
     `ensureSchema()`-Variante ohne echte Migration legt die Tabellen aber
     ohne Fremdschlüssel an, wodurch Queue-Zeilen verwaist zurückblieben;
     jetzt löscht `unsubscribe()` die Queue-Zeilen explizit mit).
-  - **Offen:** TH richtet den KAS-Cronjob selbst auf „minütlich" ein
+  - **Offen:** TH richtet den Cronjob beim Hoster selbst auf „minütlich" ein
     (Anleitung + Schlüssel wurden im Chat mitgegeben, Schlüssel per SSH vom
     Server gelesen: `config/config.php` → `cron_key`). Danach einmal
     `/verwaltung/benachrichtigungen` besuchen (legt die Tabellen live per

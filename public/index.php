@@ -178,6 +178,17 @@ try {
         Container::get(LogRepository::class),
         Container::get(\App\Repositories\DocumentFolderRepository::class),
         Container::get(\App\Repositories\DocumentRepository::class),
+        Container::get(\App\Services\DocumentStorageService::class),
+        Container::get(\App\Services\StorageCheckService::class)
+    ));
+    Container::factory(\App\Repositories\StorageReferenceRepository::class, static fn () => new \App\Repositories\StorageReferenceRepository(Container::get(PDO::class)));
+    Container::factory(\App\Services\StorageCheckService::class, static fn () => new \App\Services\StorageCheckService(
+        Container::get(\App\Repositories\StorageReferenceRepository::class),
+        Container::get(SettingRepository::class),
+        Container::get(UserRepository::class),
+        Container::get(MailService::class),
+        Container::get(UploadService::class),
+        Container::get(\App\Services\MediaService::class),
         Container::get(\App\Services\DocumentStorageService::class)
     ));
     Container::factory(\App\Repositories\DashboardPinRepository::class, static fn () => new \App\Repositories\DashboardPinRepository(Container::get(PDO::class)));
@@ -379,7 +390,8 @@ try {
         Container::get(EventScheduler::class),
         Container::get(GreetingScheduler::class),
         Container::get(ContactRepository::class),
-        Container::get(\App\Services\NotificationDigestScheduler::class)
+        Container::get(\App\Services\NotificationDigestScheduler::class),
+        Container::get(\App\Services\StorageCheckService::class)
     ));
     Container::factory(GroupRepository::class, static fn () => new GroupRepository(Container::get(PDO::class)));
     Container::factory(GroupMailService::class, static fn () => new GroupMailService(
@@ -853,6 +865,7 @@ try {
     $router->get('/admin/backup', [BackupController::class, 'index']);
     $router->post('/admin/backup/export', [BackupController::class, 'export']);
     $router->post('/admin/backup/restore', [BackupController::class, 'restore']);
+    $router->post('/admin/backup/dateipruefung', [BackupController::class, 'checkFiles']);
     $router->get('/admin/backup/medien', [BackupController::class, 'mediaExport']);
     $router->post('/admin/backup/medien', [BackupController::class, 'mediaImport']);
     $router->get('/admin/backup/dokumente', [BackupController::class, 'documentsExport']);

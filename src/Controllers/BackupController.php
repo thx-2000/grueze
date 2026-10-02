@@ -15,6 +15,7 @@ use App\Repositories\LogRepository;
 use App\Services\BackupService;
 use App\Services\DocumentStorageService;
 use App\Services\MediaService;
+use App\Services\StorageCheckService;
 use App\Support\GalleryZip;
 use App\Support\Redirect;
 use App\Support\StreamZip;
@@ -38,6 +39,7 @@ final class BackupController extends BaseController
         private DocumentFolderRepository $documentFolders,
         private DocumentRepository $documentsRepo,
         private DocumentStorageService $documentStorage,
+        private StorageCheckService $storageCheck,
     ) {
         parent::__construct($auth);
     }
@@ -56,7 +58,30 @@ final class BackupController extends BaseController
             'documentBytes' => $this->documentsRepo->totalBytes(),
             'documentBackupMax' => (int) config('media.backup_max_bytes', 2147483648),
             'documentFolderCount' => count($this->documentFolders->topLevel()),
+            'storageCheck' => $this->storageCheck->lastResult(),
+            'storageAreaLabels' => StorageCheckService::areaLabels(),
         ]);
+    }
+
+    /** „Jetzt prüfen" auf der Datensicherungs-Seite – ohne den stündlichen Takt des Crons. */
+    public function checkFiles(Request $request): void
+    {
+        $this->requirePermission('users.manage');
+        Csrf::validate($request->input('_csrf'));
+
+        $result = $this->storageCheck->runNow();
+        if ($result['missing'] === 0) {
+            flash('success', match ($result['checked']) {
+                0 => 'Dateiprüfung: Es gibt noch keine Dateien zu prüfen.',
+                1 => 'Dateiprüfung: Die eine Datei ist vorhanden.',
+                default => 'Dateiprüfung: Alle ' . $result['checked'] . ' Dateien vorhanden.',
+            });
+        } else {
+            flash('error', 'Dateiprüfung: ' . $result['missing'] . ' von ' . $result['checked'] . ' Dateien '
+                . ($result['missing'] === 1 ? 'fehlt.' : 'fehlen.'));
+        }
+
+        Redirect::to('/admin/backup');
     }
 
     public function export(Request $request): void

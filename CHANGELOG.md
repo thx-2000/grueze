@@ -3,6 +3,28 @@
 Kurzüberblick je Version. Nach einem Datei-Upload bringt
 **Verwaltung → Aktualisieren** die Datenbank auf den passenden Stand.
 
+## 1.75.0
+
+**Dateiprüfung und abgesichertes Deployment.**
+
+- Neue Dateiprüfung: Stündlich über den Cronjob – und per Knopf auf der
+  Datensicherungs-Seite – wird geprüft, ob alle Profilbilder, das Logo, die
+  Galerie-Medien und die Dokumente noch auf dem Server liegen, auf die die
+  Datenbank verweist.
+  - Fehlen Dateien, bekommen alle Admins eine Alarm-Mail. Gemeldet wird nur,
+    wenn Dateien neu fehlen; bleibt die Lage gleich oder bessert sie sich,
+    kommt keine weitere Mail.
+  - Solange etwas fehlt, erscheint ein Warnhinweis in den Einstellungen;
+    Details und die Liste der fehlenden Dateien stehen auf der
+    Datensicherungs-Seite.
+- `scripts/deploy.sh` macht vor jedem Abgleich einen Probelauf und bricht ab,
+  wenn dabei Nutzerdaten (Uploads, Galerie-Medien, Dokumente, Sicherungen,
+  Schlüssel, Konfiguration) auf dem Server gelöscht würden. Neu: optionaler
+  SSH-Schlüssel über `SSH_KEY` in `scripts/deploy.env` und `--dry-run` für
+  eine reine Vorschau. `.claude/` wird nicht mehr mit übertragen.
+
+Keine Migration.
+
 ## 1.74.1
 
 **Fix: doppelte Mail bei Passkey-Login.**

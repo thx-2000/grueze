@@ -8,6 +8,18 @@ use RuntimeException;
 
 final class UploadService
 {
+    /** Existiert eine gespeicherte Bilddatei (Pfad wie in der DB, relativ zu `public/`)? */
+    public function publicFileExists(string $relative): bool
+    {
+        $base = realpath(dirname(__DIR__, 2) . '/public');
+        if ($base === false || trim($relative) === '') {
+            return false;
+        }
+        $real = realpath($base . '/' . ltrim($relative, '/'));
+
+        return $real !== false && str_starts_with($real, $base . '/') && is_file($real);
+    }
+
     public function storePhoto(?array $file, ?string $existingPath = null): ?string
     {
         if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {

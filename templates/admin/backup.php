@@ -24,6 +24,57 @@ $tableLabels = [
     <p class="muted">Vollständiges Backup aller Daten als ZIP herunterladen oder aus einem Backup wiederherstellen. Gedacht für Sicherung, Serverumzug und Systemwechsel.</p>
 </header>
 
+<section class="panel stack">
+    <div class="panel-head">
+        <div>
+            <h3>Dateiprüfung</h3>
+            <p class="muted">Prüft, ob alle Profilbilder, Galerie-Medien und Dokumente noch auf dem Server liegen, auf die die Datenbank verweist. Läuft stündlich über den Cronjob; fehlt etwas, bekommen alle Admins einmalig eine Mail.</p>
+        </div>
+    </div>
+    <?php if ($storageCheck === null): ?>
+        <p class="muted">Noch nicht geprüft.</p>
+    <?php elseif ((int) ($storageCheck['missing_count'] ?? 0) === 0): ?>
+        <?php
+        $checkedCount = (int) $storageCheck['checked'];
+        $okText = match ($checkedCount) {
+            0 => 'Noch keine Dateien zu prüfen',
+            1 => 'Die eine Datei ist vorhanden',
+            default => 'Alle ' . $checkedCount . ' Dateien vorhanden',
+        };
+        ?>
+        <p class="completeness-clear"><?= icon('check') ?><span><?= e($okText) ?> – zuletzt geprüft <?= e(format_datetime((string) $storageCheck['checked_at'])) ?>.</span></p>
+    <?php else: ?>
+        <?php
+        $missingCount = (int) $storageCheck['missing_count'];
+        $sample = (array) ($storageCheck['sample'] ?? []);
+        ?>
+        <div class="hub-notice" role="status">
+            <span><?= icon('archive') ?></span>
+            <div>
+                <strong><?= e((string) $missingCount) ?> von <?= e((string) $storageCheck['checked']) ?> Dateien <?= $missingCount === 1 ? 'fehlt' : 'fehlen' ?></strong>
+                (geprüft <?= e(format_datetime((string) $storageCheck['checked_at'])) ?>).
+                <?php foreach ($storageAreaLabels as $area => $label): ?>
+                    <?php if ((int) ($storageCheck['by_area'][$area] ?? 0) > 0): ?>
+                        <?= e($label) ?>: <?= e((string) $storageCheck['by_area'][$area]) ?>.
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <ul>
+            <?php foreach ($sample as $item): ?>
+                <li><?= e((string) $item['label']) ?> <span class="muted">(<?= e((string) $item['path']) ?>)</span></li>
+            <?php endforeach; ?>
+            <?php if ($missingCount > count($sample)): ?>
+                <li class="muted">… und <?= e((string) ($missingCount - count($sample))) ?> weitere</li>
+            <?php endif; ?>
+        </ul>
+    <?php endif; ?>
+    <form method="post" action="<?= e(url('/admin/backup/dateipruefung')) ?>" class="form-actions">
+        <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+        <button type="submit" class="ghost-button">Jetzt prüfen</button>
+    </form>
+</section>
+
 <section class="panel">
     <div class="panel-head">
         <div>

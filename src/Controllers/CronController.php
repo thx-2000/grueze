@@ -9,6 +9,7 @@ use App\Repositories\ContactRepository;
 use App\Services\EventScheduler;
 use App\Services\GreetingScheduler;
 use App\Services\NotificationDigestScheduler;
+use App\Services\StorageCheckService;
 
 /**
  * Einstiegspunkt für zeitgesteuerte Aufgaben (Abstimmungs-Automatik).
@@ -27,6 +28,7 @@ final class CronController
         private GreetingScheduler $greetings,
         private ContactRepository $contacts,
         private NotificationDigestScheduler $notifications,
+        private StorageCheckService $storageCheck,
     ) {
     }
 
@@ -55,6 +57,16 @@ final class CronController
             $notifyStats = $this->notifications->run();
             $stats['notify_sent'] = $notifyStats['sent'];
             $stats['notify_errors'] = $notifyStats['errors'];
+            try {
+                $fileCheck = $this->storageCheck->runScheduled();
+                if ($fileCheck['ran']) {
+                    $stats['files_checked'] = $fileCheck['checked'];
+                    $stats['files_missing'] = $fileCheck['missing'];
+                    $stats['files_alerts_sent'] = $fileCheck['alerted'];
+                }
+            } catch (\Throwable) {
+                $stats['files_check_error'] = 1;
+            }
             echo "ok\n";
             foreach ($stats as $key => $value) {
                 echo $key . '=' . (int) $value . "\n";
